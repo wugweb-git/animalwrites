@@ -533,7 +533,8 @@ Owner questions (added):
 5. Which new presets first: `kits-portfolio`, `kits-card`, `kits-infographic`; and are `kits-case-study`, `kits-event`, `kits-person`, `kits-testimonial` wanted?
 6. Tabs: answered 18 Nov, **yes**, allowed (see section 16).
 7. Card minimum width: answered 18 Nov, **17rem** (the Kits token). The aw-core override is removed in this PR.
-8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
+8. `aw_campaign_link` and `aw_media_group`: answered 18 Nov, **rename to `kits_campaign_link` and `kits_media_group`**. They stay
+   taxonomies (the right native tool for both); the rename is a data migration in its own PR (see the owner answers).
 9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
 10. Sponsored blocks: confirm they stay dormant until the monetisation plan (section 21).
 11. Card minimum width: answered, 17rem (see 7).
@@ -584,8 +585,8 @@ Native column names the core part each row relies on.
 | Private records `aw_report`, `aw_volunteer` | Kits Core private-record presets | `register_post_type()` (`public` false) |
 | Private record `aw_message` | MailWeb | — |
 | Meta keys (`meta.php`) | **Native**, declared by each preset | `register_post_meta()` with `show_in_rest`, `sanitize_callback`, `auth_callback` |
-| Taxonomy `aw_campaign_link` | Kits Core (`kits-campaign`) | `register_taxonomy()` |
-| Taxonomy `aw_media_group` | Kits Core | `register_taxonomy()` on attachments, Media Library |
+| Taxonomy `aw_campaign_link` → `kits_campaign_link` (owner, 18 Nov) | Kits Core (`kits-campaign`) | `register_taxonomy()` |
+| Taxonomy `aw_media_group` → `kits_media_group` (owner, 18 Nov) | Kits Core | `register_taxonomy()` on attachments, Media Library |
 | Hub list filters (`AW_LIST_FILTERS`, `systems.php`) | Kits Core `kits/collection-filter`; values in Site settings | core `category` / `post_tag`, `query_loop_block_query_vars` |
 | Hub pages (`hubs.php`) | **Native** Query Loop in page content + Kits Core filter | core Query Loop block |
 | `aw_i()` / `aw_date()` | Kits Core (`kits_icon`, `kits_date`), done here | `date_i18n()` / `get_option( 'date_format' )` |
@@ -725,3 +726,16 @@ they are supporters' own records, always kept, and their ownership goes to Kits 
 
 Until every row above has moved, the box stays unticked. When animal-writes-core is deleted, its `uninstall.php` goes
 with it, so no option is deleted.
+
+**Taxonomy rename (owner, 18 Nov 2026): "rename aw to kits".** `aw_campaign_link` becomes `kits_campaign_link`, and
+`aw_media_group` becomes `kits_media_group`. Both stay taxonomies. The post-meta and tag alternatives are dropped: a
+taxonomy is what WordPress gives for "many items share one label". It brings counts, admin filters and a REST route,
+and it is queried with `tax_query`. A tag would mix campaigns with topic tags and give them public tag pages; post meta
+would need a slow meta query on every campaign page. This is a stored-name change (section 6), so it gets its own PR:
+- **Data:** one `UPDATE {prefix}term_taxonomy SET taxonomy = 'kits_…' WHERE taxonomy = 'aw_…'` per taxonomy, run by a
+  WP-CLI command with a dry run, a count before and after, a backup of the rows, and an undo (the reverse update).
+  Term IDs, slugs and assignments do not change.
+- **Code:** every caller switches in the same PR: 42 mentions of `aw_campaign_link` in 14 files (aw-core, RankWeb,
+  SourceWeb, tools), and 15 of `aw_media_group` in 4 files (aw-core, SourceWeb). `rest_base` stays `media-groups`.
+- **Order:** deploy the code that registers both names for one release, then run the migration, then drop the old name.
+  That way no request ever sees a missing taxonomy.
