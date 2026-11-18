@@ -1,31 +1,39 @@
 <?php
 /**
- * Kits → Edit screens (owner, 1 Nov 2026): every box on every edit screen, the keys it stores and where each
- * key is used on the site. Read-only: nothing here writes an option, meta or post.
+ * Kits → Help → Developer: edit screens (moved from Animal Writes Core's edit-screens.php, 18 Nov 2026; owner, 1 Nov
+ * 2026): every box on every edit screen, the keys it stores and where each key is used on the site. Read-only: nothing
+ * here writes an option, meta or post.
  *
- * The map lives in data/edit-screen-map.json (boxes by id, keys by stored name) and is read by aw_edit_screen_map();
- * other plugins add entries with the aw_edit_screen_boxes and aw_edit_screen_map filters. The boxes themselves are
+ * The map is the site's JSON file (boxes by id, keys by stored name; the tenant names it with the
+ * kits_edit_screen_map_file filter) and is read by kits_edit_screen_map(); other plugins add entries with the
+ * kits_edit_screen_boxes and kits_edit_screen_map filters (the older aw_edit_screen_boxes and aw_edit_screen_map
+ * filters still run, after them). The boxes themselves are
  * read live: for each post type the screen is set up on an in-memory post (ID 0, never saved), add_meta_boxes runs,
  * $wp_meta_boxes is read and put back. No box callback is rendered. SCF field groups come from acf_get_field_groups().
  * Term screens: the callbacks on each taxonomy's form hooks. A box or field the map does not know shows "Not mapped yet".
- * Also here: the boxes that start collapsed on post edit screens (aw_edit_screen_collapsed_boxes(), core filter only).
+ * Also here: the boxes that start collapsed on post edit screens (kits_edit_screen_collapsed_boxes(), core filter only).
  *
- * Screen: Kits → Edit screens (manage_options). WP-CLI: wp aw-edit-screens [--type=<type>] [--format=table|json].
- * How to add an entry: docs/edit-screens.md.
+ * Screen: Kits → Help → Developer: edit screens (manage_options). WP-CLI: wp aw-edit-screens [--type=<type>]
+ * [--format=table|json]. How to add an entry: docs/edit-screens.md.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** The site's map file: a JSON path from the kits_edit_screen_map_file filter; '' when the site has none. */
+function kits_edit_screen_map_file(): string {
+	return (string) apply_filters( 'kits_edit_screen_map_file', '' );
+}
+
 /** The map file as decoded JSON: about, kinds, boxes, keys. */
-function aw_edit_screen_map_data(): array {
+function kits_edit_screen_map_data(): array {
 	static $data = null;
 	if ( null === $data ) {
-		$file = AW_CORE_DIR . 'data/edit-screen-map.json';
-		$raw  = is_readable( $file ) ? (string) file_get_contents( $file ) : '';
+		$file = kits_edit_screen_map_file();
+		$raw  = '' !== $file && is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file in the site's plugin folder.
 		$data = json_decode( $raw, true );
 		$data = is_array( $data ) ? $data : array();
 	}
@@ -36,10 +44,12 @@ function aw_edit_screen_map_data(): array {
  * Every known box: id => title, source (WordPress / plugin name / Animal Writes core), file, screen (post|term|admin),
  * types (empty: any type), runtime (live, scf, fallback, edit-screen-only, always, map-only), notes, match (term screens), page (admin pages).
  */
-function aw_edit_screen_boxes(): array {
-	$data = aw_edit_screen_map_data();
-	$out  = array();
-	foreach ( (array) apply_filters( 'aw_edit_screen_boxes', (array) ( $data['boxes'] ?? array() ) ) as $id => $b ) {
+function kits_edit_screen_boxes(): array {
+	$data  = kits_edit_screen_map_data();
+	$out   = array();
+	$boxes = (array) apply_filters( 'kits_edit_screen_boxes', (array) ( $data['boxes'] ?? array() ) );
+	$boxes = (array) apply_filters( 'aw_edit_screen_boxes', $boxes ); // older name, still read
+	foreach ( $boxes as $id => $b ) {
 		if ( is_array( $b ) ) {
 			$out[ (string) $id ] = $b + array( 'title' => (string) $id, 'source' => '', 'file' => '', 'screen' => 'post', 'types' => array(), 'runtime' => 'live' );
 		}
@@ -51,9 +61,9 @@ function aw_edit_screen_boxes(): array {
  * Every stored key: name => store (post_meta, term_meta, taxonomy, post_field, option), label, type, types (empty:
  * any type), boxes (list of id, title, source), uses (list of kind, where, file), notes (list).
  */
-function aw_edit_screen_map(): array {
-	$data  = aw_edit_screen_map_data();
-	$boxes = aw_edit_screen_boxes();
+function kits_edit_screen_map(): array {
+	$data  = kits_edit_screen_map_data();
+	$boxes = kits_edit_screen_boxes();
 	$keys  = array();
 	foreach ( (array) ( $data['keys'] ?? array() ) as $name => $k ) {
 		$list = array();
@@ -70,8 +80,10 @@ function aw_edit_screen_map(): array {
 		$k['notes']    = (array) ( $k['notes'] ?? array() );
 		$keys[ $name ] = $k;
 	}
-	$out = array();
-	foreach ( (array) apply_filters( 'aw_edit_screen_map', $keys ) as $name => $k ) {
+	$out  = array();
+	$keys = (array) apply_filters( 'kits_edit_screen_map', $keys );
+	$keys = (array) apply_filters( 'aw_edit_screen_map', $keys ); // older name, still read
+	foreach ( $keys as $name => $k ) {
 		if ( ! is_array( $k ) ) {
 			continue;
 		}
@@ -82,24 +94,24 @@ function aw_edit_screen_map(): array {
 				$list[] = is_array( $b ) ? $b + array( 'title' => $id, 'source' => '' ) : array( 'id' => $id, 'title' => (string) ( $boxes[ $id ]['title'] ?? $id ), 'source' => (string) ( $boxes[ $id ]['source'] ?? '' ) );
 			}
 		}
-		$k['boxes']           = $list;
-		$k['type']            = (string) ( $k['type'] ?? '' );
-		$k['types']           = (array) ( $k['types'] ?? array() );
-		$k['uses']            = array_values( array_filter( (array) ( $k['uses'] ?? array() ), 'is_array' ) );
-		$k['notes']           = array_map( 'strval', (array) ( $k['notes'] ?? array() ) );
+		$k['boxes']            = $list;
+		$k['type']             = (string) ( $k['type'] ?? '' );
+		$k['types']            = (array) ( $k['types'] ?? array() );
+		$k['uses']             = array_values( array_filter( (array) ( $k['uses'] ?? array() ), 'is_array' ) );
+		$k['notes']            = array_map( 'strval', (array) ( $k['notes'] ?? array() ) );
 		$out[ (string) $name ] = $k;
 	}
 	return $out;
 }
 
 /** Post types that have an edit screen (block-editor internals and SCF's own types left out). */
-function aw_edit_screen_post_types(): array {
+function kits_edit_screen_post_types(): array {
 	$skip = array( 'wp_block', 'wp_navigation', 'wp_template', 'wp_template_part', 'wp_global_styles', 'wp_font_family', 'wp_font_face', 'acf-field-group', 'acf-taxonomy', 'acf-post-type', 'acf-ui-options-page' );
 	return array_values( array_diff( array_keys( get_post_types( array( 'show_ui' => true ) ) ), $skip ) );
 }
 
 /** Taxonomies that have a term screen. */
-function aw_edit_screen_taxonomies(): array {
+function kits_edit_screen_taxonomies(): array {
 	return array_values( array_keys( get_taxonomies( array( 'show_ui' => true ) ) ) );
 }
 
@@ -108,7 +120,7 @@ function aw_edit_screen_taxonomies(): array {
  *
  * @param mixed $cb Callback.
  */
-function aw_edit_screen_callback( $cb ): string {
+function kits_edit_screen_callback( $cb ): string {
 	try {
 		if ( is_string( $cb ) && function_exists( $cb ) ) {
 			$r    = new ReflectionFunction( $cb );
@@ -132,9 +144,9 @@ function aw_edit_screen_callback( $cb ): string {
 /**
  * Source label from a callback location: WordPress, Animal Writes (plugin folder) or the plugin's folder name.
  *
- * @param string $where aw_edit_screen_callback() result.
+ * @param string $where kits_edit_screen_callback() result.
  */
-function aw_edit_screen_source_from( string $where ): string {
+function kits_edit_screen_source_from( string $where ): string {
 	if ( '' === $where ) {
 		return 'Unknown';
 	}
@@ -152,7 +164,7 @@ function aw_edit_screen_source_from( string $where ): string {
  * The boxes each post type registers, read live: type => [ id => title, context, priority, callback, compat ].
  * In-memory post (ID 0), nothing saved, no callback rendered; $wp_meta_boxes, $post and the screen are put back.
  */
-function aw_edit_screen_live_boxes(): array {
+function kits_edit_screen_live_boxes(): array {
 	static $out = null;
 	if ( null !== $out ) {
 		return $out;
@@ -165,7 +177,7 @@ function aw_edit_screen_live_boxes(): array {
 	$keep_post   = $post;
 	$keep_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 	try {
-		aw_edit_screen_read_boxes( $out );
+		kits_edit_screen_read_boxes( $out );
 	} finally {
 		$wp_meta_boxes = $keep_boxes; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
 		$post          = $keep_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
@@ -185,9 +197,9 @@ function aw_edit_screen_live_boxes(): array {
  *
  * @param array $out Filled: type => boxes.
  */
-function aw_edit_screen_read_boxes( array &$out ): void {
+function kits_edit_screen_read_boxes( array &$out ): void {
 	global $wp_meta_boxes, $post;
-	foreach ( aw_edit_screen_post_types() as $type ) {
+	foreach ( kits_edit_screen_post_types() as $type ) {
 		$wp_meta_boxes = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back below.
 		$dummy         = new WP_Post(
 			(object) array(
@@ -203,7 +215,7 @@ function aw_edit_screen_read_boxes( array &$out ): void {
 				'filter'         => 'raw',
 			)
 		);
-		$post = $dummy; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back below.
+		$post          = $dummy; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back below.
 		set_current_screen( $type );
 		if ( function_exists( 'register_and_do_post_meta_boxes' ) ) {
 			register_and_do_post_meta_boxes( $dummy ); // core boxes + add_meta_boxes + add_meta_boxes_{type} + do_meta_boxes
@@ -222,7 +234,7 @@ function aw_edit_screen_read_boxes( array &$out ): void {
 						'title'    => wp_strip_all_tags( (string) $b['title'] ),
 						'context'  => (string) $ctx,
 						'priority' => (string) $prio,
-						'callback' => aw_edit_screen_callback( $b['callback'] ),
+						'callback' => kits_edit_screen_callback( $b['callback'] ),
 						'compat'   => ! empty( $b['args']['__back_compat_meta_box'] ),
 					);
 				}
@@ -232,7 +244,7 @@ function aw_edit_screen_read_boxes( array &$out ): void {
 }
 
 /** SCF field groups when SCF is active: acf-{key} => title, types, hide (box ids), fields (name => type). */
-function aw_edit_screen_scf_groups(): array {
+function kits_edit_screen_scf_groups(): array {
 	if ( ! function_exists( 'acf_get_field_groups' ) || ! function_exists( 'acf_get_fields' ) ) {
 		return array();
 	}
@@ -249,7 +261,7 @@ function aw_edit_screen_scf_groups(): array {
 		'discussion'      => 'commentstatusdiv',
 		'format'          => 'formatdiv',
 	);
-	$out = array();
+	$out      = array();
 	foreach ( (array) acf_get_field_groups() as $g ) {
 		if ( empty( $g['key'] ) || empty( $g['active'] ) ) {
 			continue;
@@ -285,10 +297,10 @@ function aw_edit_screen_scf_groups(): array {
 }
 
 /** The callbacks on each taxonomy's form hooks: tax => list of hook, priority, callback. */
-function aw_edit_screen_live_terms(): array {
+function kits_edit_screen_live_terms(): array {
 	global $wp_filter;
 	$out = array();
-	foreach ( aw_edit_screen_taxonomies() as $tax ) {
+	foreach ( kits_edit_screen_taxonomies() as $tax ) {
 		$out[ $tax ] = array();
 		foreach ( array( 'add_form_fields', 'edit_form_fields', 'edit_form', 'term_edit_form_top', 'add_form' ) as $suffix ) {
 			$hook = $tax . '_' . $suffix;
@@ -300,7 +312,7 @@ function aw_edit_screen_live_terms(): array {
 					$out[ $tax ][] = array(
 						'hook'     => $suffix,
 						'priority' => (int) $prio,
-						'callback' => aw_edit_screen_callback( $c['function'] ),
+						'callback' => kits_edit_screen_callback( $c['function'] ),
 					);
 				}
 			}
@@ -316,7 +328,7 @@ function aw_edit_screen_live_terms(): array {
  * @param array  $h     Live hook (hook, priority, callback).
  * @param string $tax   Taxonomy.
  */
-function aw_edit_screen_term_match( array $match, array $h, string $tax ): bool {
+function kits_edit_screen_term_match( array $match, array $h, string $tax ): bool {
 	if ( ! empty( $match['taxonomies'] ) && ! in_array( $tax, (array) $match['taxonomies'], true ) ) {
 		return false;
 	}
@@ -340,9 +352,9 @@ function aw_edit_screen_term_match( array $match, array $h, string $tax ): bool 
  *
  * @param string $box_id Box id.
  * @param string $type   Post type or taxonomy.
- * @param array  $map    aw_edit_screen_map().
+ * @param array  $map    kits_edit_screen_map().
  */
-function aw_edit_screen_box_keys( string $box_id, string $type, array $map ): array {
+function kits_edit_screen_box_keys( string $box_id, string $type, array $map ): array {
 	$out = array();
 	foreach ( $map as $name => $k ) {
 		if ( ! in_array( $box_id, wp_list_pluck( $k['boxes'], 'id' ), true ) ) {
@@ -360,20 +372,20 @@ function aw_edit_screen_box_keys( string $box_id, string $type, array $map ): ar
  * Every row: one per box per post type, taxonomy or admin page. Each row: screen (post|term|admin), type, id, title, source, file,
  * shows_on, mapped (bool), fields (key => type), uses (key => list of kind, where, file), notes (list).
  */
-function aw_edit_screen_rows(): array {
+function kits_edit_screen_rows(): array {
 	static $rows = null;
 	if ( null !== $rows ) {
 		return $rows;
 	}
 	$rows  = array();
-	$boxes = aw_edit_screen_boxes();
-	$map   = aw_edit_screen_map();
-	$live  = aw_edit_screen_live_boxes();
-	$scf   = aw_edit_screen_scf_groups();
+	$boxes = kits_edit_screen_boxes();
+	$map   = kits_edit_screen_map();
+	$live  = kits_edit_screen_live_boxes();
+	$scf   = kits_edit_screen_scf_groups();
 	$add   = function ( string $screen, string $type, string $id, array $info, array $extra_fields, array $notes ) use ( &$rows, $boxes, $map ) {
 		$known  = isset( $boxes[ $id ] );
 		$b      = $known ? $boxes[ $id ] : array();
-		$keys   = $known ? aw_edit_screen_box_keys( $id, $type, $map ) : array();
+		$keys   = $known ? kits_edit_screen_box_keys( $id, $type, $map ) : array();
 		$fields = array();
 		$uses   = array();
 		foreach ( $keys as $name => $k ) {
@@ -402,7 +414,7 @@ function aw_edit_screen_rows(): array {
 			'type'     => $type,
 			'id'       => $id,
 			'title'    => $known ? (string) $b['title'] : (string) ( $info['title'] ?? $id ),
-			'source'   => $known ? (string) $b['source'] : aw_edit_screen_source_from( (string) ( $info['callback'] ?? '' ) ),
+			'source'   => $known ? (string) $b['source'] : kits_edit_screen_source_from( (string) ( $info['callback'] ?? '' ) ),
 			'file'     => $known ? (string) $b['file'] : (string) ( $info['callback'] ?? '' ),
 			'shows_on' => (string) ( $info['shows_on'] ?? '' ),
 			'mapped'   => $known,
@@ -453,13 +465,13 @@ function aw_edit_screen_rows(): array {
 		}
 	}
 
-	foreach ( aw_edit_screen_live_terms() as $tax => $hooks ) {
+	foreach ( kits_edit_screen_live_terms() as $tax => $hooks ) {
 		$seen = array();
 		$add( 'term', $tax, 'term-core', array( 'shows_on' => 'add and edit forms' ), array(), array() );
 		foreach ( $hooks as $h ) {
 			$hit = '';
 			foreach ( $boxes as $id => $b ) {
-				if ( 'term' === ( $b['screen'] ?? '' ) && ! empty( $b['match'] ) && aw_edit_screen_term_match( (array) $b['match'], $h, $tax ) ) {
+				if ( 'term' === ( $b['screen'] ?? '' ) && ! empty( $b['match'] ) && kits_edit_screen_term_match( (array) $b['match'], $h, $tax ) ) {
 					$hit = $id;
 					break;
 				}
@@ -539,11 +551,11 @@ function aw_edit_screen_rows(): array {
  * @param string $type   Post type, taxonomy or admin page id.
  * @param string $screen post, term or admin.
  */
-function aw_edit_screen_type_label( string $type, string $screen ): string {
+function kits_edit_screen_type_label( string $type, string $screen ): string {
 	if ( 'admin' !== $screen ) {
 		return $type;
 	}
-	foreach ( aw_edit_screen_boxes() as $b ) {
+	foreach ( kits_edit_screen_boxes() as $b ) {
 		if ( 'admin' === ( $b['screen'] ?? '' ) && in_array( $type, (array) $b['types'], true ) && ! empty( $b['page'] ) ) {
 			return (string) $b['page'];
 		}
@@ -556,8 +568,8 @@ function aw_edit_screen_type_label( string $type, string $screen ): string {
  *
  * @param string $type Post type or taxonomy.
  */
-function aw_edit_screen_rows_for( string $type = '' ): array {
-	return array_values( array_filter( aw_edit_screen_rows(), fn( $r ) => '' === $type || $r['type'] === $type ) );
+function kits_edit_screen_rows_for( string $type = '' ): array {
+	return array_values( array_filter( kits_edit_screen_rows(), fn( $r ) => '' === $type || $r['type'] === $type ) );
 }
 
 /**
@@ -565,7 +577,7 @@ function aw_edit_screen_rows_for( string $type = '' ): array {
  *
  * @param array $rows Rows.
  */
-function aw_edit_screen_unmapped( array $rows ): int {
+function kits_edit_screen_unmapped( array $rows ): int {
 	$n = 0;
 	foreach ( $rows as $r ) {
 		$n += $r['mapped'] ? 0 : 1;
@@ -581,7 +593,7 @@ function aw_edit_screen_unmapped( array $rows ): int {
  * Only core's postbox_classes_{screen_id}_{box_id} filter is used, and only until the user opens or closes a box on
  * that screen (core then saves closedpostboxes_{screen}, which wins). The user can still open, drag and hide them.
  */
-function aw_edit_screen_collapsed_boxes(): array {
+function kits_edit_screen_collapsed_boxes(): array {
 	return array( 'litespeed_meta_boxes', 'wpil_link-articles', 'rank_math_metabox_link_suggestions', 'postcustom', 'slugdiv', 'aw_linked_from' );
 }
 
@@ -590,7 +602,7 @@ function aw_edit_screen_collapsed_boxes(): array {
  *
  * @param mixed $classes Classes from postbox_classes().
  */
-function aw_edit_screen_box_closed( $classes ): array {
+function kits_edit_screen_box_closed( $classes ): array {
 	$classes = is_array( $classes ) ? $classes : array();
 	if ( ! in_array( 'closed', $classes, true ) ) {
 		$classes[] = 'closed';
@@ -601,16 +613,16 @@ function aw_edit_screen_box_closed( $classes ): array {
 add_action(
 	'current_screen',
 	function ( $screen ) {
-		if ( ! is_admin() || ! $screen instanceof WP_Screen || 'post' !== $screen->base || ! in_array( $screen->post_type, aw_edit_screen_post_types(), true ) ) {
+		if ( ! is_admin() || ! $screen instanceof WP_Screen || 'post' !== $screen->base || ! in_array( $screen->post_type, kits_edit_screen_post_types(), true ) ) {
 			return;
 		}
 		if ( false !== get_user_option( 'closedpostboxes_' . $screen->id ) ) {
 			return; // the user has opened or closed a box on this screen: their own choice wins
 		}
-		foreach ( aw_edit_screen_collapsed_boxes() as $box ) {
+		foreach ( kits_edit_screen_collapsed_boxes() as $box ) {
 			$hook = 'postbox_classes_' . $screen->id . '_' . $box;
-			if ( false === has_filter( $hook, 'aw_edit_screen_box_closed' ) ) {
-				add_filter( $hook, 'aw_edit_screen_box_closed' );
+			if ( false === has_filter( $hook, 'kits_edit_screen_box_closed' ) ) {
+				add_filter( $hook, 'kits_edit_screen_box_closed' );
 			}
 		}
 	}
@@ -622,10 +634,10 @@ add_action(
  *
  * @param array $r Row.
  */
-function aw_edit_screen_row_about( array $r ): array {
+function kits_edit_screen_row_about( array $r ): array {
 	static $boxes = null;
 	if ( null === $boxes ) {
-		$boxes = aw_edit_screen_boxes();
+		$boxes = kits_edit_screen_boxes();
 	}
 	$b       = $r['mapped'] ? (array) ( $boxes[ $r['id'] ] ?? array() ) : array();
 	$plugin  = trim( (string) ( $b['plugin'] ?? '' ) );
@@ -641,14 +653,14 @@ function aw_edit_screen_row_about( array $r ): array {
  *
  * @param array $r Row.
  */
-function aw_edit_screen_is_core( array $r ): bool {
+function kits_edit_screen_is_core( array $r ): bool {
 	return $r['mapped'] && 'WordPress' === $r['source'];
 }
 
 /**
  * Box ids shown as one row across all their types: group => ids.
  */
-function aw_edit_screen_merged_boxes(): array {
+function kits_edit_screen_merged_boxes(): array {
 	return array( 'faq' => array( 'aw-faq', 'term-faq' ) );
 }
 
@@ -658,9 +670,9 @@ function aw_edit_screen_merged_boxes(): array {
  *
  * @param array $rows Rows.
  */
-function aw_edit_screen_display_rows( array $rows ): array {
+function kits_edit_screen_display_rows( array $rows ): array {
 	$merge = array();
-	foreach ( aw_edit_screen_merged_boxes() as $group => $ids ) {
+	foreach ( kits_edit_screen_merged_boxes() as $group => $ids ) {
 		foreach ( $ids as $id ) {
 			$merge[ $id ] = $group;
 		}
@@ -669,21 +681,21 @@ function aw_edit_screen_display_rows( array $rows ): array {
 	$out     = array();
 	$at      = array(); // group => index in $out
 	foreach ( $rows as $r ) {
-		$r += aw_edit_screen_row_about( $r );
-		if ( aw_edit_screen_is_core( $r ) ) {
+		$r += kits_edit_screen_row_about( $r );
+		if ( kits_edit_screen_is_core( $r ) ) {
 			$general[] = $r;
 			continue;
 		}
 		$group = $r['mapped'] && isset( $merge[ $r['id'] ] ) ? $merge[ $r['id'] ] : '';
 		if ( '' === $group ) {
-			$out[] = $r + array( 'label' => aw_edit_screen_type_label( $r['type'], $r['screen'] ), 'types' => array( $r['type'] ) );
+			$out[] = $r + array( 'label' => kits_edit_screen_type_label( $r['type'], $r['screen'] ), 'types' => array( $r['type'] ) );
 			continue;
 		}
 		if ( ! isset( $at[ $group ] ) ) {
 			$at[ $group ] = count( $out );
 			$out[]        = $r + array( 'label' => '', 'types' => array(), 'ids' => array() );
 		}
-		$out[ $at[ $group ] ] = aw_edit_screen_join_row( $out[ $at[ $group ] ], $r );
+		$out[ $at[ $group ] ] = kits_edit_screen_join_row( $out[ $at[ $group ] ], $r );
 	}
 	foreach ( $at as $i ) {
 		$out[ $i ]['label'] = implode( ', ', $out[ $i ]['types'] );
@@ -710,12 +722,12 @@ function aw_edit_screen_display_rows( array $rows ): array {
 		);
 		foreach ( $general as $r ) {
 			if ( ! in_array( $r['id'], $row['ids'], true ) ) {
-				$row['titles'][] = $r['title'] . ( 'term' === $r['screen'] ? ' (term screens)' : ( 'admin' === $r['screen'] ? ' — ' . aw_edit_screen_type_label( $r['type'], 'admin' ) : '' ) );
+				$row['titles'][] = $r['title'] . ( 'term' === $r['screen'] ? ' (term screens)' : ( 'admin' === $r['screen'] ? ' — ' . kits_edit_screen_type_label( $r['type'], 'admin' ) : '' ) );
 			}
 			foreach ( $r['notes'] as $n ) { // every type's notes, not only the first type's
 				$row['notes'][] = $r['title'] . ( '' !== (string) $r['type'] ? ' (' . $r['type'] . ')' : '' ) . ': ' . $n;
 			}
-			$row = aw_edit_screen_join_row( $row, $r, false );
+			$row = kits_edit_screen_join_row( $row, $r, false );
 		}
 		$row['title'] = implode( ', ', $row['titles'] );
 		$row['id']    = implode( ', ', $row['ids'] );
@@ -731,7 +743,7 @@ function aw_edit_screen_display_rows( array $rows ): array {
  * @param array $r     Row.
  * @param bool  $notes Also join the notes.
  */
-function aw_edit_screen_join_row( array $into, array $r, bool $notes = true ): array {
+function kits_edit_screen_join_row( array $into, array $r, bool $notes = true ): array {
 	if ( ! in_array( $r['type'], $into['types'], true ) ) {
 		$into['types'][] = $r['type'];
 	}
@@ -754,9 +766,9 @@ function aw_edit_screen_join_row( array $into, array $r, bool $notes = true ): a
  *
  * @param array $rows Rows.
  */
-function aw_edit_screen_twice( array $rows ): array {
-	$boxes = aw_edit_screen_boxes();
-	$map   = aw_edit_screen_map();
+function kits_edit_screen_twice( array $rows ): array {
+	$boxes = kits_edit_screen_boxes();
+	$map   = kits_edit_screen_map();
 	$by    = array();
 	foreach ( $rows as $r ) {
 		if ( 'postcustom' === $r['id'] || ( $r['mapped'] && ! empty( $boxes[ $r['id'] ]['readonly'] ) ) ) {
@@ -783,31 +795,27 @@ function aw_edit_screen_twice( array $rows ): array {
 	return $out;
 }
 
-// Its own screen without Kits; with Kits it is a section of Kits → Help → Developer (admin-home.php).
+// A section of Kits → Help → Developer (site-screens.php): the boxes are read before the page prints anything.
 add_action(
 	'admin_menu',
 	function () {
-		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
-			$hook = add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' );
-		} else {
-			$hook = get_plugin_page_hookname( 'kits-help', KITS_MENU );
-		}
+		$hook = get_plugin_page_hookname( 'kits-help', KITS_MENU );
 		if ( $hook ) {
 			add_action(
 				'load-' . $hook,
 				function () {
 					if ( current_user_can( 'manage_options' ) ) {
-						aw_edit_screen_rows(); // read the boxes before the page prints anything
+						kits_edit_screen_rows(); // read the boxes before the page prints anything
 					}
 				}
 			);
 		}
 	},
-	aw_core_menu_priority( 'aw-edit-screens' ) // order: aw_core_screens() (admin-home.php)
+	kits_site_menu_priority( 'aw-edit-screens' ) // order: kits_site_screens() (site-screens.php)
 );
 
 /** The note on rows that are listed from the map, not read live (page and command). */
-function aw_edit_screen_map_only_note(): string {
+function kits_edit_screen_map_only_note(): string {
 	return 'Sidebar panels that plugins add with JavaScript in the block editor, Dashboard widgets and the panels, boxes and tables on admin pages (SourceWeb, RankWeb and Search Insights, Animal Writes, MailWeb, Kits Core) are listed from the map, not read live.';
 }
 
@@ -815,7 +823,7 @@ function aw_edit_screen_map_only_note(): string {
  * Plugins mapped as ours on the Mapping tab; every other plugin's boxes are on "Third-party boxes". AW Sourcing,
  * AW SEO Plus and Mailweb are treated like third-party plugins there (owner, 1 Nov 2026).
  */
-function aw_edit_screen_own_plugins(): array {
+function kits_edit_screen_own_plugins(): array {
 	return array( 'Animal Writes core', 'Kits Core', 'DirectoryWeb' );
 }
 
@@ -825,17 +833,17 @@ function aw_edit_screen_own_plugins(): array {
  * @param string $type   Post type, taxonomy or admin page id.
  * @param string $screen post, term or admin.
  */
-function aw_edit_screen_module_label( string $type, string $screen ): string {
+function kits_edit_screen_module_label( string $type, string $screen ): string {
 	$obj = 'term' === $screen ? get_taxonomy( $type ) : ( 'post' === $screen ? get_post_type_object( $type ) : null );
-	return $obj ? (string) $obj->labels->name : aw_edit_screen_type_label( $type, $screen );
+	return $obj ? (string) $obj->labels->name : kits_edit_screen_type_label( $type, $screen );
 }
 
 /**
  * Display rows joined into one row per box across its types (admin rows stay one per page). The General row is left out.
  *
- * @param array $display aw_edit_screen_display_rows().
+ * @param array $display kits_edit_screen_display_rows().
  */
-function aw_edit_screen_rows_by_box( array $display ): array {
+function kits_edit_screen_rows_by_box( array $display ): array {
 	$out = array();
 	foreach ( $display as $r ) {
 		if ( 'general' === $r['screen'] ) {
@@ -868,8 +876,8 @@ function aw_edit_screen_rows_by_box( array $display ): array {
  * @param array $r     Display row.
  * @param bool  $notes Also list the notes inside "Fields and uses".
  */
-function aw_edit_screen_box_cell( array $r, bool $notes ): string {
-	return '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>' . aw_edit_screen_fields_details( $r, $notes );
+function kits_edit_screen_box_cell( array $r, bool $notes ): string {
+	return '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>' . kits_edit_screen_fields_details( $r, $notes );
 }
 
 /**
@@ -878,7 +886,7 @@ function aw_edit_screen_box_cell( array $r, bool $notes ): string {
  * @param array $r     Display row.
  * @param bool  $notes Also list the notes.
  */
-function aw_edit_screen_fields_details( array $r, bool $notes ): string {
+function kits_edit_screen_fields_details( array $r, bool $notes ): string {
 	$notes = $notes ? $r['notes'] : array();
 	if ( ! $r['fields'] && ! $notes ) {
 		return '';
@@ -896,7 +904,7 @@ function aw_edit_screen_fields_details( array $r, bool $notes ): string {
 		$html .= '</tbody></table>';
 	}
 	if ( $notes ) {
-		$html .= aw_edit_screen_notes_list( $notes );
+		$html .= kits_edit_screen_notes_list( $notes );
 	}
 	return $html . '</details>';
 }
@@ -906,36 +914,36 @@ function aw_edit_screen_fields_details( array $r, bool $notes ): string {
  *
  * @param array $notes Notes.
  */
-function aw_edit_screen_notes_list( array $notes ): string {
+function kits_edit_screen_notes_list( array $notes ): string {
 	return $notes ? '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $notes ) ) . '</li></ul>' : '—';
 }
 
 /**
- * Prints a core list table (aw_core_simple_table()). Cells arrive as escaped HTML. No sorting or pages: the page also
+ * Prints a core list table (kits_simple_table()). Cells arrive as escaped HTML. No sorting or pages: the page also
  * sits in a section of Kits → Help (an address with #developer/edit-screens), where a sort link would leave the section.
  *
  * @param string $name Table name (CSS class and id prefix).
  * @param array  $cols Column => label.
  * @param array  $rows Rows of column => HTML.
  */
-function aw_edit_screens_grid( string $name, array $cols, array $rows ): void {
-	aw_core_simple_table( $name, array_map( 'esc_html', $cols ), $rows, array( 'empty' => 'None.' ) );
+function kits_edit_screens_grid( string $name, array $cols, array $rows ): void {
+	kits_simple_table( $name, array_map( 'esc_html', $cols ), $rows, array( 'empty' => 'None.' ) );
 }
 
 /** Kits → Help → Developer → Edit screens (its own screen without Kits). */
-function aw_edit_screens_page(): void {
+function kits_edit_screens_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	aw_edit_screens_render( aw_edit_screen_rows() );
+	kits_edit_screens_render( kits_edit_screen_rows() );
 }
 
 /**
  * The page: the summary and the checks, then the tabs Mapping, Schema and Third-party boxes. Read-only.
  *
- * @param array $all aw_edit_screen_rows().
+ * @param array $all kits_edit_screen_rows().
  */
-function aw_edit_screens_render( array $all ): void {
+function kits_edit_screens_render( array $all ): void {
 	$tabs = array(
 		'mapping'     => 'Mapping',
 		'schema'      => 'Schema',
@@ -943,25 +951,25 @@ function aw_edit_screens_render( array $all ): void {
 	);
 	$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab.
 	$tab  = isset( $tabs[ $tab ] ) ? $tab : 'mapping';
-	$base = AW_CORE_MENU === aw_core_menu_parent() ? admin_url( 'admin.php?page=aw-edit-screens' ) : admin_url( 'admin.php?page=kits-help' ) . '#developer/edit-screens';
+	$base = admin_url( 'admin.php?page=kits-help' ) . '#developer/edit-screens';
 
 	$screens = array(); // post type or taxonomy => post|term, in screen order
 	$ids     = array();
 	$admin   = 0;
 	foreach ( $all as $r ) {
 		if ( 'admin' === $r['screen'] ) {
-			$admin += in_array( aw_edit_screen_row_about( $r )['plugin'], aw_edit_screen_own_plugins(), true ) ? 1 : 0; // ours only, as in Admin pages under Mapping
+			$admin += in_array( kits_edit_screen_row_about( $r )['plugin'], kits_edit_screen_own_plugins(), true ) ? 1 : 0; // ours only, as in Admin pages under Mapping
 			continue;
 		}
 		$screens[ $r['type'] ] = $r['screen'];
 		$ids[ $r['id'] ]       = true;
 	}
-	$unmapped = aw_edit_screen_unmapped( $all );
-	$twice    = aw_edit_screen_twice( $all );
+	$unmapped = kits_edit_screen_unmapped( $all );
+	$twice    = kits_edit_screen_twice( $all );
 
 	echo '<div class="wrap"><h1>Edit screens</h1>';
-	aw_core_screen_nav( 'aw-edit-screens' );
-	echo '<p>Reference for developers: every box on each edit screen, the keys it stores and where each key is used. Boxes are read from the plugins as they run now; what each key does comes from the map in <code>animal-writes-core/data/edit-screen-map.json</code> (see <code>docs/edit-screens.md</code>). Read-only.</p>';
+	kits_site_screen_nav( 'aw-edit-screens' );
+	echo '<p>Reference for developers: every box on each edit screen, the keys it stores and where each key is used. Boxes are read from the plugins as they run now; what each key does comes from the map in <code>' . esc_html( '' !== kits_edit_screen_map_file() ? basename( dirname( kits_edit_screen_map_file(), 2 ) ) . '/' . basename( dirname( kits_edit_screen_map_file() ) ) . '/' . basename( kits_edit_screen_map_file() ) : 'none' ) . '</code> (see <code>docs/edit-screens.md</code>). Read-only.</p>';
 	$n_box = count( $ids );
 	$n_scr = count( $screens );
 	$text  = esc_html( sprintf( '%d %s on %d %s, %d %s on admin pages.', $n_box, 1 === $n_box ? 'box' : 'boxes', $n_scr, 1 === $n_scr ? 'edit screen' : 'edit screens', $admin, 1 === $admin ? 'widget' : 'widgets' ) );
@@ -969,10 +977,10 @@ function aw_edit_screens_render( array $all ): void {
 	$text .= ' ' . ( $twice ? '<a href="#aw-es-twice">' . esc_html( sprintf( 1 === count( $twice ) ? '%d field is edited in two places.' : '%d fields are edited in two places.', count( $twice ) ) ) . '</a>' : 'No field is edited in two places.' );
 	wp_admin_notice( $text, array( 'type' => $unmapped || $twice ? 'warning' : 'success', 'additional_classes' => array( 'inline' ) ) );
 	if ( $unmapped ) {
-		aw_edit_screens_unmapped_section( $all, $screens );
+		kits_edit_screens_unmapped_section( $all, $screens );
 	}
 	if ( $twice ) {
-		aw_edit_screens_twice_section( $all );
+		kits_edit_screens_twice_section( $all );
 	}
 
 	echo '<nav class="nav-tab-wrapper">';
@@ -981,18 +989,18 @@ function aw_edit_screens_render( array $all ): void {
 		echo '<a href="' . esc_url( add_query_arg( 'tab', $t, $base ) ) . '" class="nav-tab' . ( $on ? ' nav-tab-active' : '' ) . '"' . ( $on ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a>';
 	}
 	echo '</nav>';
-	echo '<p class="description">' . esc_html( aw_edit_screen_map_only_note() ) . '</p>';
+	echo '<p class="description">' . esc_html( kits_edit_screen_map_only_note() ) . '</p>';
 
-	$display = aw_edit_screen_display_rows( $all );
+	$display = kits_edit_screen_display_rows( $all );
 	$label   = function ( string $type ) use ( $screens ): string {
-		return aw_edit_screen_module_label( $type, $screens[ $type ] ?? 'post' );
+		return kits_edit_screen_module_label( $type, $screens[ $type ] ?? 'post' );
 	};
 	if ( 'schema' === $tab ) {
-		aw_edit_screens_schema_tab( $all, $label );
+		kits_edit_screens_schema_tab( $all, $label );
 	} elseif ( 'third-party' === $tab ) {
-		aw_edit_screens_third_party_tab( $display, $label );
+		kits_edit_screens_third_party_tab( $display, $label );
 	} else {
-		aw_edit_screens_mapping_tab( $display, $screens, $label );
+		kits_edit_screens_mapping_tab( $display, $screens, $label );
 	}
 	echo '</div>';
 }
@@ -1004,11 +1012,11 @@ function aw_edit_screens_render( array $all ): void {
  * @param array    $screens Post type or taxonomy => post|term, in order.
  * @param callable $label   Module label.
  */
-function aw_edit_screens_mapping_tab( array $display, array $screens, callable $label ): void {
-	$own   = aw_edit_screen_own_plugins();
-	$fold  = aw_edit_screen_collapsed_boxes();
+function kits_edit_screens_mapping_tab( array $display, array $screens, callable $label ): void {
+	$own   = kits_edit_screen_own_plugins();
+	$fold  = kits_edit_screen_collapsed_boxes();
 	$boxes = array();
-	foreach ( aw_edit_screen_rows_by_box( $display ) as $r ) {
+	foreach ( kits_edit_screen_rows_by_box( $display ) as $r ) {
 		if ( 'admin' !== $r['screen'] && in_array( $r['plugin'], $own, true ) ) {
 			if ( in_array( $r['id'], $fold, true ) ) {
 				array_unshift( $r['notes'], 'Collapsed by default.' );
@@ -1029,7 +1037,7 @@ function aw_edit_screens_mapping_tab( array $display, array $screens, callable $
 				echo '<label><input type="checkbox" disabled checked> ' . esc_html( $label( (string) $t ) ) . ' <code>' . esc_html( (string) $t ) . '</code></label><br>';
 			}
 		}
-		echo '</fieldset>' . aw_edit_screen_fields_details( $r, true ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+		echo '</fieldset>' . kits_edit_screen_fields_details( $r, true ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
 	}
 	echo '</tbody></table>';
 
@@ -1038,14 +1046,14 @@ function aw_edit_screens_mapping_tab( array $display, array $screens, callable $
 		if ( 'admin' === $r['screen'] && in_array( $r['plugin'], $own, true ) ) {
 			$widgets[] = array(
 				'page'    => esc_html( $r['label'] ),
-				'widget'  => aw_edit_screen_box_cell( $r, true ),
+				'widget'  => kits_edit_screen_box_cell( $r, true ),
 				'plugin'  => esc_html( $r['plugin'] ),
 				'purpose' => esc_html( $r['purpose'] ),
 			);
 		}
 	}
 	echo '<details><summary>' . esc_html( sprintf( 1 === count( $widgets ) ? 'Admin pages: %d widget' : 'Admin pages: %d widgets', count( $widgets ) ) ) . '</summary>';
-	aw_edit_screens_grid(
+	kits_edit_screens_grid(
 		'es-widgets',
 		array(
 			'page'    => 'Page',
@@ -1064,9 +1072,9 @@ function aw_edit_screens_mapping_tab( array $display, array $screens, callable $
  * @param array    $all   Rows.
  * @param callable $label Module label.
  */
-function aw_edit_screens_schema_tab( array $all, callable $label ): void {
+function kits_edit_screens_schema_tab( array $all, callable $label ): void {
 	$cells = array();
-	foreach ( aw_edit_screen_map() as $k => $e ) {
+	foreach ( kits_edit_screen_map() as $k => $e ) {
 		$uses = array_values( array_filter( $e['uses'], fn( $u ) => 'schema' === ( $u['kind'] ?? '' ) ) );
 		if ( ! $uses ) {
 			continue;
@@ -1077,8 +1085,8 @@ function aw_edit_screens_schema_tab( array $all, callable $label ): void {
 				$types[ $r['type'] ] = true;
 			}
 		}
-		$types = $types ? array_keys( $types ) : $e['types'];
-		$files = array_values( array_unique( array_filter( array_map( fn( $u ) => (string) ( $u['file'] ?? '' ), $uses ) ) ) );
+		$types   = $types ? array_keys( $types ) : $e['types'];
+		$files   = array_values( array_unique( array_filter( array_map( fn( $u ) => (string) ( $u['file'] ?? '' ), $uses ) ) ) );
 		$label_k = trim( (string) ( $e['label'] ?? '' ) );
 		$cells[] = array(
 			'field'  => ( '' !== $label_k ? esc_html( $label_k ) . '<br>' : '' ) . '<code>' . esc_html( (string) $k ) . '</code>',
@@ -1088,7 +1096,7 @@ function aw_edit_screens_schema_tab( array $all, callable $label ): void {
 			'file'   => $files ? '<code>' . implode( '</code><br><code>', array_map( 'esc_html', $files ) ) . '</code>' : '—',
 		);
 	}
-	aw_edit_screens_grid(
+	kits_edit_screens_grid(
 		'es-schema',
 		array(
 			'field'  => 'Field',
@@ -1107,10 +1115,10 @@ function aw_edit_screens_schema_tab( array $all, callable $label ): void {
  * @param array    $display Display rows.
  * @param callable $label   Module label.
  */
-function aw_edit_screens_third_party_tab( array $display, callable $label ): void {
-	$own   = aw_edit_screen_own_plugins();
-	$fold  = aw_edit_screen_collapsed_boxes();
-	$known = aw_edit_screen_boxes();
+function kits_edit_screens_third_party_tab( array $display, callable $label ): void {
+	$own   = kits_edit_screen_own_plugins();
+	$fold  = kits_edit_screen_collapsed_boxes();
+	$known = kits_edit_screen_boxes();
 	$cells = array();
 	foreach ( $display as $r ) {
 		if ( 'general' !== $r['screen'] ) {
@@ -1123,28 +1131,28 @@ function aw_edit_screens_third_party_tab( array $display, callable $label ): voi
 			}
 		}
 		$cells[] = array(
-			'box'     => '<strong>WordPress (all types)</strong><br>' . esc_html( $r['title'] ) . aw_edit_screen_fields_details( $r, false ),
+			'box'     => '<strong>WordPress (all types)</strong><br>' . esc_html( $r['title'] ) . kits_edit_screen_fields_details( $r, false ),
 			'plugin'  => esc_html( $r['plugin'] ),
 			'purpose' => esc_html( $r['purpose'] ),
 			'mods'    => esc_html( $r['shows_on'] ),
-			'notes'   => aw_edit_screen_notes_list( array_merge( $notes, $r['notes'] ) ),
+			'notes'   => kits_edit_screen_notes_list( array_merge( $notes, $r['notes'] ) ),
 		);
 	}
-	foreach ( aw_edit_screen_rows_by_box( $display ) as $r ) {
+	foreach ( kits_edit_screen_rows_by_box( $display ) as $r ) {
 		if ( in_array( $r['plugin'], $own, true ) ) {
 			continue;
 		}
-		$notes = in_array( $r['id'], $fold, true ) ? array_merge( array( 'Collapsed by default.' ), $r['notes'] ) : $r['notes'];
-		$mods  = 'admin' === $r['screen'] ? array( $r['label'] ) : array_map( fn( $t ) => $label( (string) $t ), $r['types'] );
+		$notes   = in_array( $r['id'], $fold, true ) ? array_merge( array( 'Collapsed by default.' ), $r['notes'] ) : $r['notes'];
+		$mods    = 'admin' === $r['screen'] ? array( $r['label'] ) : array_map( fn( $t ) => $label( (string) $t ), $r['types'] );
 		$cells[] = array(
-			'box'     => aw_edit_screen_box_cell( $r, false ),
+			'box'     => kits_edit_screen_box_cell( $r, false ),
 			'plugin'  => esc_html( $r['plugin'] ),
 			'purpose' => esc_html( $r['purpose'] ),
 			'mods'    => esc_html( implode( ', ', $mods ) ),
-			'notes'   => aw_edit_screen_notes_list( $notes ),
+			'notes'   => kits_edit_screen_notes_list( $notes ),
 		);
 	}
-	aw_edit_screens_grid(
+	kits_edit_screens_grid(
 		'es-third-party',
 		array(
 			'box'     => 'Box',
@@ -1163,10 +1171,10 @@ function aw_edit_screens_third_party_tab( array $display, callable $label ): voi
  * @param array $all     Rows.
  * @param array $screens Post type or taxonomy => post|term.
  */
-function aw_edit_screens_unmapped_section( array $all, array $screens ): void {
+function kits_edit_screens_unmapped_section( array $all, array $screens ): void {
 	$cells = array();
 	foreach ( $all as $r ) {
-		$type = esc_html( aw_edit_screen_module_label( $r['type'], $screens[ $r['type'] ] ?? $r['screen'] ) );
+		$type = esc_html( kits_edit_screen_module_label( $r['type'], $screens[ $r['type'] ] ?? $r['screen'] ) );
 		$box  = '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>';
 		if ( ! $r['mapped'] ) {
 			$cells[] = array( 'type' => $type, 'box' => $box, 'field' => '—' );
@@ -1178,7 +1186,7 @@ function aw_edit_screens_unmapped_section( array $all, array $screens ): void {
 		}
 	}
 	echo '<h2 id="aw-es-unmapped">Not mapped yet</h2>';
-	aw_edit_screens_grid( 'es-unmapped', array( 'type' => 'Type', 'box' => 'Box', 'field' => 'Field' ), $cells );
+	kits_edit_screens_grid( 'es-unmapped', array( 'type' => 'Type', 'box' => 'Box', 'field' => 'Field' ), $cells );
 }
 
 /**
@@ -1186,8 +1194,8 @@ function aw_edit_screens_unmapped_section( array $all, array $screens ): void {
  *
  * @param array $rows Rows.
  */
-function aw_edit_screens_twice_section( array $rows ): void {
-	$twice = aw_edit_screen_twice( $rows );
+function kits_edit_screens_twice_section( array $rows ): void {
+	$twice = kits_edit_screen_twice( $rows );
 	echo '<h2 id="aw-es-twice">Edited in two places</h2>';
 	if ( ! $twice ) {
 		echo '<p>None.</p>';
@@ -1201,7 +1209,7 @@ function aw_edit_screens_twice_section( array $rows ): void {
 			'boxes' => esc_html( implode( ', ', $t['boxes'] ) ),
 		);
 	}
-	aw_edit_screens_grid( 'es-twice', array( 'type' => 'Type', 'key' => 'Key', 'boxes' => 'Boxes' ), $cells );
+	kits_edit_screens_grid( 'es-twice', array( 'type' => 'Type', 'key' => 'Key', 'boxes' => 'Boxes' ), $cells );
 }
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -1227,13 +1235,13 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				wp_set_current_user( (int) $admins[0] ); // boxes that check a capability; in memory only
 			}
 			$type = sanitize_key( (string) ( $assoc['type'] ?? '' ) );
-			$rows = aw_edit_screen_rows_for( $type );
+			$rows = kits_edit_screen_rows_for( $type );
 			if ( 'json' === ( $assoc['format'] ?? 'table' ) ) {
 				WP_CLI::line( (string) wp_json_encode( $rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
 				return;
 			}
 			$out = array();
-			foreach ( aw_edit_screen_display_rows( $rows ) as $r ) {
+			foreach ( kits_edit_screen_display_rows( $rows ) as $r ) {
 				$kinds = array();
 				foreach ( $r['uses'] as $list ) {
 					foreach ( $list as $u ) {
@@ -1259,15 +1267,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			if ( ! is_admin() ) {
 				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Appearance → Kits → Edit screens.' );
 			}
-			WP_CLI::log( aw_edit_screen_map_only_note() );
-			$twice = aw_edit_screen_twice( $rows );
+			WP_CLI::log( kits_edit_screen_map_only_note() );
+			$twice = kits_edit_screen_twice( $rows );
 			WP_CLI::log( 'Edited in two places:' );
 			if ( $twice ) {
 				WP_CLI\Utils\format_items( 'table', array_map( fn( $t ) => array( 'type' => $t['type'], 'key' => $t['key'], 'boxes' => implode( ', ', $t['boxes'] ) ), $twice ), array( 'type', 'key', 'boxes' ) );
 			} else {
 				WP_CLI::log( 'None.' );
 			}
-			WP_CLI::log( sprintf( '%d rows, %d not mapped yet, %d edited in two places.', count( $rows ), aw_edit_screen_unmapped( $rows ), count( $twice ) ) );
+			WP_CLI::log( sprintf( '%d rows, %d not mapped yet, %d edited in two places.', count( $rows ), kits_edit_screen_unmapped( $rows ), count( $twice ) ) );
 		}
 	);
 }

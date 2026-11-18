@@ -1,13 +1,14 @@
 <?php
 /**
- * Admin menu tidy (owner, 25 Oct 2026, from the admin screenshots): links that nobody here uses come out of the menus
+ * Admin menu tidy (moved from Animal Writes Core's admin-tidy.php, 18 Nov 2026; owner, 25 Oct 2026, from the admin
+ * screenshots): links that nobody here uses come out of the menus
  * and the admin bar, so what is left is what the team works with. Only the links go: every screen still opens at its
  * address, nothing is uninstalled and no plugin's own code is changed.
  *
  * Items are matched by their visible label under their menu (the plugins build their menus at run time, so labels are
  * steadier than internal slugs). Hidden:
  * - Tools: Available Tools (WordPress's old converters), Server-Timing (a Performance Lab developer tool), Scheduled
- *   Actions (FluentCRM's job queue; Kits → Site: Animal Writes shows scheduled-task health).
+ *   Actions (FluentCRM's job queue; Kits → Home shows scheduled-task health).
  * - Settings: Discussion (comments are off site-wide), Connectors (unused AI/MCP connectors).
  * - Upsells and paid features (owner: no paid plans): any submenu link to another site in these menus (sales and
  *   pricing pages, 12 Nov 2026), Rank Math's Unlock PRO, AI Visibility, Content AI, AI Link Genius,
@@ -17,7 +18,9 @@
  * - SCF (Secure Custom Fields' field-group editor: set up once; the fields themselves stay on every edit screen).
  * - Admin bar: Rank Math SEO and UpdraftPlus shortcuts.
  *
- * @package animal-writes-core
+ * The lists are filterable: kits_admin_hide (menu label => submenu labels), kits_admin_hide_top, kits_admin_bar_hide.
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Menu label => submenu labels to hide (a label matches when the item's text starts with it). */
-const AW_ADMIN_HIDE = array(
+const KITS_ADMIN_HIDE = array(
 	'Tools'         => array( 'Available Tools', 'Server-Timing', 'Scheduled Actions' ),
 	'Settings'      => array( 'Discussion', 'Connectors' ),
 	'Rank Math SEO' => array( 'Unlock PRO', 'AI Visibility', 'Content AI', 'AI Link Genius', 'Help & Support' ),
@@ -35,19 +38,28 @@ const AW_ADMIN_HIDE = array(
 );
 
 /** Top-level menus to hide, by label. */
-const AW_ADMIN_HIDE_TOP = array( 'SCF' );
+const KITS_ADMIN_HIDE_TOP = array( 'SCF' );
 
 /** Admin bar shortcuts to hide, by label. */
-const AW_ADMIN_BAR_HIDE = array( 'Rank Math SEO', 'UpdraftPlus' );
+const KITS_ADMIN_BAR_HIDE = array( 'Rank Math SEO', 'UpdraftPlus' );
 
-/** A menu item's plain label: no count bubbles, badges or icons. */
-function aw_admin_label( $title ) {
+/**
+ * A menu item's plain label: no count bubbles, badges or icons.
+ *
+ * @param string $title Menu title HTML.
+ */
+function kits_admin_label( $title ) {
 	return trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( preg_replace( '#<span[^>]*class="[^"]*(count|awaiting|update-plugins|badge)[^"]*"[^>]*>.*?</span>#s', '', (string) $title ) ) ) );
 }
 
-/** Whether a label starts with one of the given labels. */
-function aw_admin_label_in( $label, $list ) {
-	foreach ( $list as $l ) {
+/**
+ * Whether a label starts with one of the given labels.
+ *
+ * @param string   $label Plain label.
+ * @param string[] $list  Labels.
+ */
+function kits_admin_label_in( $label, $list ) {
+	foreach ( (array) $list as $l ) {
 		if ( 0 === stripos( $label, $l ) ) {
 			return true;
 		}
@@ -59,22 +71,24 @@ add_action(
 	'admin_menu',
 	function () {
 		global $menu, $submenu;
+		$hide_top = (array) apply_filters( 'kits_admin_hide_top', KITS_ADMIN_HIDE_TOP );
+		$hide_sub = (array) apply_filters( 'kits_admin_hide', KITS_ADMIN_HIDE );
 		foreach ( (array) $menu as $i => $m ) {
-			$label = aw_admin_label( $m[0] ?? '' );
+			$label = kits_admin_label( $m[0] ?? '' );
 			$slug  = (string) ( $m[2] ?? '' );
 			if ( '' === $label ) {
 				continue;
 			}
-			if ( aw_admin_label_in( $label, AW_ADMIN_HIDE_TOP ) && strlen( $label ) <= 4 ) { // "SCF" only, not "Scheduled…"
+			if ( kits_admin_label_in( $label, $hide_top ) && strlen( $label ) <= 4 ) { // "SCF" only, not "Scheduled…"
 				unset( $menu[ $i ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 				continue;
 			}
-			$hide = AW_ADMIN_HIDE[ $label ] ?? null;
+			$hide = $hide_sub[ $label ] ?? null;
 			if ( ! $hide || empty( $submenu[ $slug ] ) ) {
 				continue;
 			}
 			foreach ( $submenu[ $slug ] as $j => $item ) {
-				$sub = aw_admin_label( $item[0] ?? '' );
+				$sub = kits_admin_label( $item[0] ?? '' );
 				// "Forms" under FluentCRM must not catch "Fluent Forms"-style labels elsewhere: exact match for one-word labels.
 				$match = false;
 				foreach ( $hide as $h ) {
@@ -97,8 +111,9 @@ add_action(
 add_action(
 	'admin_bar_menu',
 	function ( $bar ) {
+		$hide = (array) apply_filters( 'kits_admin_bar_hide', KITS_ADMIN_BAR_HIDE );
 		foreach ( (array) $bar->get_nodes() as $node ) {
-			if ( empty( $node->parent ) && aw_admin_label_in( aw_admin_label( $node->title ), AW_ADMIN_BAR_HIDE ) ) {
+			if ( empty( $node->parent ) && kits_admin_label_in( kits_admin_label( $node->title ), $hide ) ) {
 				$bar->remove_node( $node->id );
 			}
 		}

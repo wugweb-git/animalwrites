@@ -53,7 +53,7 @@ foreach ( $six as $slug => $t ) {
 }
 kits_t( ! isset( $six['animal-writes'] ), 'no Animal Writes tab' );
 
-// Old addresses (§E1): Kits Core's own plus what Animal Writes adds (admin-home.php), as the filter merges them.
+// Old addresses (§E1): Kits Core's own plus what the admin layer adds (admin-layer/site-screens.php), as the filter merges them.
 $map = array_merge(
 	kits_menu_redirects_core(),
 	array(
