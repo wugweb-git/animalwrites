@@ -741,7 +741,7 @@
     "alt": "as the hub cards",
     "schema": "none"
    },
-   "source": "plugins/animal-writes-core/includes/related.php ([aw_related] in the single templates)"
+   "source": "themes/kits-by-wugweb/assets/site/content/related.php ([aw_related] in the single templates)"
   },
   {
    "name": "Category index",

@@ -69,7 +69,7 @@ function aw_hub_blocks() {
 add_action(
 	'init',
 	function () {
-		wp_register_script( 'aw-hub-blocks', plugins_url( 'assets/js/hub-blocks.js', AW_CORE_DIR . 'animal-writes-core.php' ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-server-side-render' ), AW_CORE_VERSION . '-2', true );
+		wp_register_script( 'aw-hub-blocks', kits_site_uri( 'js/hub-blocks.js' ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-server-side-render' ), (string) filemtime( kits_site_path( 'js/hub-blocks.js' ) ), true );
 		$list = array();
 		foreach ( aw_hub_blocks() as $name => $b ) {
 			register_block_type(
@@ -422,7 +422,7 @@ add_action(
 	function () {
 		$id = is_admin() ? absint( $_GET['post'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( $id && 'page-hub' === get_page_template_slug( $id ) ) {
-			wp_register_style( 'aw-hub-editor', false, array(), AW_CORE_VERSION );
+			wp_register_style( 'aw-hub-editor', false, array(), '1' );
 			wp_enqueue_style( 'aw-hub-editor' );
 			wp_add_inline_style( 'aw-hub-editor', '.editor-visual-editor__post-title-wrapper{display:none}' );
 		}
