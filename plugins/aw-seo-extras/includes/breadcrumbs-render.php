@@ -14,7 +14,10 @@
  * Category:          Home › Categories › Category
  * Page:              Home › (parent) › Page
  *
- * The aw_breadcrumbs* functions are the earlier names, kept for the bands that call them.
+ * The trail is placed by the Breadcrumbs block (rankweb/breadcrumbs, blocks/breadcrumbs/block.json) in the item
+ * templates, by a head band through rankweb_breadcrumbs_claim(), or else before the page's H1 or its own category chips
+ * (the two block filters at the end, for pages whose template has neither). The aw_breadcrumbs* functions are the
+ * earlier names, kept for any caller outside this plugin.
  *
  * @package aw-seo-extras
  */
@@ -114,6 +117,33 @@ function rankweb_breadcrumbs_claim() {
 function rankweb_breadcrumbs_prepend( $html ) {
 	return rankweb_breadcrumbs_claim() . $html;
 }
+
+/**
+ * The Breadcrumbs block's output (rankweb/breadcrumbs, and Animal Writes Core's earlier animal-writes/breadcrumb): the
+ * trail, once per page. In the editor preview (a REST request) it is this page's own trail from its parent pages, since
+ * Rank Math builds its trail only on the front end.
+ *
+ * @return string
+ */
+function rankweb_breadcrumbs_block() {
+	global $post;
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $post ) {
+		$trail = '<li class="kit-crumbs-home"><a href="' . esc_url( home_url( '/' ) ) . '" aria-label="Home"><span class="kit-ico kit-ico--home" aria-hidden="true"></span></a></li>';
+		foreach ( array_reverse( get_post_ancestors( $post ) ) as $a ) {
+			$trail .= '<li><a href="' . esc_url( get_permalink( $a ) ) . '">' . esc_html( get_the_title( $a ) ) . '</a></li>';
+		}
+		return '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol>' . $trail . '<li><span aria-current="page">' . esc_html( get_the_title( $post ) ) . '</span></li></ol></nav>';
+	}
+	return rankweb_breadcrumbs_claim();
+}
+
+// The Breadcrumbs block (blocks/breadcrumbs/block.json). Registered wherever this file loads, like the trail itself.
+add_action(
+	'init',
+	function () {
+		register_block_type_from_metadata( dirname( __DIR__ ) . '/blocks/breadcrumbs' );
+	}
+);
 
 /* ---------- The earlier names (Animal Writes Core's bands call aw_breadcrumbs_claim) ---------- */
 

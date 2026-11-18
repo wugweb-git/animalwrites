@@ -95,16 +95,9 @@ add_action(
 
 /* ---------- Band ---------- */
 
+/** The trail: RankWeb's Breadcrumbs block (rankweb/breadcrumbs) is the block now; this earlier name stays for saved templates. */
 function aw_block_breadcrumb() {
-	global $post;
-	if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $post ) { // editor preview: the trail of this page
-		$trail = '<li class="kit-crumbs-home"><a href="' . esc_url( home_url( '/' ) ) . '" aria-label="Home"><span class="kit-ico kit-ico--home" aria-hidden="true"></span></a></li>';
-		foreach ( array_reverse( get_post_ancestors( $post ) ) as $a ) {
-			$trail .= '<li><a href="' . esc_url( get_permalink( $a ) ) . '">' . esc_html( get_the_title( $a ) ) . '</a></li>';
-		}
-		return '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol>' . $trail . '<li><span aria-current="page">' . esc_html( get_the_title( $post ) ) . '</span></li></ol></nav>';
-	}
-	return function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
+	return function_exists( 'rankweb_breadcrumbs_block' ) ? rankweb_breadcrumbs_block() : '';
 }
 
 function aw_block_hub_count( $a ) {

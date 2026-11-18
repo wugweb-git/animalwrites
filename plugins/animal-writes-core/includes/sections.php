@@ -162,7 +162,7 @@ function aw_section_head_archive() {
 			$count  = 0;
 		}
 		// The band holds the breadcrumb, the heading and the page's search or filters (Directory search bar; list filters).
-		$crumbs  = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
+		$crumbs  = function_exists( 'rankweb_breadcrumbs_claim' ) ? rankweb_breadcrumbs_claim() : '';
 		$filters = '';
 		if ( ( 'aw_listing' === $type && ! $term_page ) && function_exists( 'aw_directory_filter' ) ) {
 			$filters = aw_directory_filter();
@@ -206,9 +206,9 @@ function aw_block_section_head( $a ) {
 	}
 	$thanks = is_page( 'thank-you' ) && function_exists( 'aw_thanks_head' ) ? aw_thanks_head() : null;
 	if ( $thanks ) { // the success heading as the H1, its line as the description (form-blocks.php)
-		return aw_head_band( array( 'crumbs' => function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '', 'title' => $thanks['title'], 'title_class' => 'wp-block-post-title', 'desc' => $thanks['text'] ) );
+		return aw_head_band( array( 'crumbs' => function_exists( 'rankweb_breadcrumbs_claim' ) ? rankweb_breadcrumbs_claim() : '', 'title' => $thanks['title'], 'title_class' => 'wp-block-post-title', 'desc' => $thanks['text'] ) );
 	}
-	$crumbs = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
+	$crumbs = function_exists( 'rankweb_breadcrumbs_claim' ) ? rankweb_breadcrumbs_claim() : '';
 	$type = (string) ( $a['postType'] ?? '' );
 	$hub  = '' !== $type;
 	$filt = '';
