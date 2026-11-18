@@ -1,6 +1,6 @@
 # FAQ system
 
-Owner-approved spec, 20 Oct 2026; FAQ on every page, 31 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php` (the feature, generic), `faq-overview.php` (AW SEO Plus → FAQ), `plugins/animal-writes-core/includes/faq-data.php` (the site's automatic questions and rules, through filters); schema: `plugins/aw-seo-extras/includes/schema.php`; accordion style and script: Kits `kit.css` / `kit.js` (`kit-faq`).
+Owner-approved spec, 20 Oct 2026; FAQ on every page, 31 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php` (the feature, generic), `faq-overview.php` (AW SEO Plus → FAQ), `plugins/aw-seo-extras/includes/faq-data.php` (the site's automatic questions and rules, through filters; loaded with the FAQ module; moved from Animal Writes Core on 18 Nov 2026), `plugins/animal-writes-core/includes/faq-data.php` (the Library item fields the questions read); schema: `plugins/aw-seo-extras/includes/schema.php`; accordion style and script: Kits `kit.css` / `kit.js` (`kit-faq`).
 
 ## Rules
 
