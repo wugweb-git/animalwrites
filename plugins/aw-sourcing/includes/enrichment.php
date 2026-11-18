@@ -798,17 +798,43 @@ function aw_enrich_approve( $id ) {
 	return true;
 }
 
-/** Reject a pending row. */
+/**
+ * Reject a row: a person says no to this value for this listing and field, for good. A waiting row is turned down. An
+ * applied row (auto-applied or approved) is undone first, so the value before it comes back; an undone row already has
+ * its old value back. The row becomes 'rejected', and a later check never proposes or applies the same value for the
+ * same listing and field again (aw_enrich_rest_results()). An applied "Reported closed" row is not rejected (it follows
+ * Google on every check; Undo it instead), and an applied row that a newer applied value already replaced is only
+ * marked rejected, so the newer value stays.
+ *
+ * @param int $id Row ID.
+ * @return bool False when the row is missing, already settled another way, or could not be undone.
+ */
 function aw_enrich_reject( $id ) {
 	$r = aw_enrich_row( $id );
-	if ( ! $r || 'pending' !== $r['status'] ) {
+	if ( ! $r || ! in_array( $r['status'], array( 'pending', 'auto-applied', 'approved', 'undone' ), true ) ) {
 		return false;
 	}
-	if ( 'closed' === $r['field'] ) {
+	$was = (string) $r['status'];
+	if ( 'closed' === $r['field'] && 'pending' !== $was ) {
+		return false; // "Reported closed" follows Google on every check, not the rows: Undo it instead.
+	}
+	if ( in_array( $was, array( 'auto-applied', 'approved' ), true ) ) {
+		global $wpdb;
+		// A newer applied value for the same field has already replaced this one: undoing this row would put back what
+		// was there before it, over the newer value. Then the row is only marked rejected.
+		$newer = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND id > %d AND status IN ('auto-applied','approved') LIMIT 1", aw_enrich_table(), (int) $r['listing_id'], $r['field'], (int) $id ) ); // phpcs:ignore WordPress.DB
+		if ( ! $newer && ! aw_enrich_undo( $id ) ) {
+			return false;
+		}
+	}
+	if ( 'pending' === $was && 'closed' === $r['field'] ) {
 		delete_post_meta( (int) $r['listing_id'], 'aw_reported_closed' );
 		aw_enrich_flag( (int) $r['listing_id'], 'reported_closed', false );
 	}
-	aw_enrich_set_status( $id, 'rejected' );
+	// A row that had been applied keeps its note after a marker; the marker also keeps it clear of the "Could not be
+	// applied" notes that the recheck does not count as a no.
+	$note = 'pending' === $was ? null : trim( 'Rejected after it was applied. ' . (string) $r['note'] );
+	aw_enrich_set_status( $id, 'rejected', $note );
 	return true;
 }
 
@@ -1263,7 +1289,8 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			continue;
 		}
 		global $wpdb;
-		// Already waiting, or a person said no. A failed write is not a no (status 'failed'; rows from before 25 Oct 2026
+		// Already waiting, or a person said no (Reject, also on a value that had been applied or undone: see
+		// aw_enrich_reject()). A failed write is not a no (status 'failed'; rows from before 25 Oct 2026
 		// were 'rejected' with a "Could not be applied" / "could not be copied" note), so that value may come back.
 		$same = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND value = %s AND ( status = 'pending' OR ( status = 'rejected' AND note NOT LIKE %s AND note NOT LIKE %s ) ) LIMIT 1", aw_enrich_table(), $lid, $field, wp_json_encode( $value ), $wpdb->esc_like( 'Could not be applied' ) . '%', '%' . $wpdb->esc_like( 'could not be copied' ) . '%' ) ); // phpcs:ignore WordPress.DB
 		if ( $same ) {
