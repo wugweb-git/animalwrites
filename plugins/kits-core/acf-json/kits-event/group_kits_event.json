@@ -1,0 +1,91 @@
+{
+    "key": "group_kits_event",
+    "title": "Events",
+    "fields": [
+        {
+            "key": "field_kits_event_start",
+            "label": "Start",
+            "name": "kits_event_start",
+            "aria-label": "",
+            "type": "date_time_picker",
+            "instructions": "The day and, if it has one, the time it starts (site time).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "d-m-y H:i",
+            "return_format": "Y-m-d H:i",
+            "first_day": 1
+        },
+        {
+            "key": "field_kits_event_end",
+            "label": "End",
+            "name": "kits_event_end",
+            "aria-label": "",
+            "type": "date_time_picker",
+            "instructions": "Optional: when it ends (site time).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "d-m-y H:i",
+            "return_format": "Y-m-d H:i",
+            "first_day": 1
+        },
+        {
+            "key": "field_kits_event_place",
+            "label": "Place",
+            "name": "kits_event_place",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_event_online_url",
+            "label": "Online address",
+            "name": "kits_event_online_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "kits_event"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Kits Core preset kits-event: its fields (registered with register_post_meta(); this group is only the editing layer).",
+    "show_in_rest": 0,
+    "modified": 1795478400
+}

@@ -1,0 +1,85 @@
+{
+    "key": "group_kits_portfolio",
+    "title": "Portfolio",
+    "fields": [
+        {
+            "key": "field_kits_portfolio_client",
+            "label": "Client",
+            "name": "kits_portfolio_client",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_portfolio_year",
+            "label": "Year",
+            "name": "kits_portfolio_year",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_portfolio_role",
+            "label": "Role",
+            "name": "kits_portfolio_role",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_portfolio_link",
+            "label": "Link",
+            "name": "kits_portfolio_link",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "kits_portfolio"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Kits Core preset kits-portfolio: its fields (registered with register_post_meta(); this group is only the editing layer).",
+    "show_in_rest": 0,
+    "modified": 1795478400
+}

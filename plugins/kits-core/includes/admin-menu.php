@@ -29,10 +29,10 @@ require_once __DIR__ . '/admin-fold-model.php'; // kits_fold_tabs() for kits_adm
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
-		add_submenu_page( KITS_MENU, 'Settings', 'Settings', 'manage_options', 'kits-settings', 'kits_settings_page' );
-		add_submenu_page( KITS_MENU, 'Tools', 'Tools', 'edit_theme_options', 'kits-tools', 'kits_transfer_page' );
-		add_submenu_page( KITS_MENU, 'Help', 'Help', KITS_CAP, 'kits-help', 'kits_help_page' );
+		add_submenu_page( KITS_MENU, __( 'Theme Options', 'kits-core' ), __( 'Theme Options', 'kits-core' ), 'manage_options', 'kits-options', 'kits_options_page' );
+		add_submenu_page( KITS_MENU, __( 'Settings', 'kits-core' ), __( 'Settings', 'kits-core' ), 'manage_options', 'kits-settings', 'kits_settings_page' );
+		add_submenu_page( KITS_MENU, __( 'Tools', 'kits-core' ), __( 'Tools', 'kits-core' ), 'manage_options', 'kits-tools', 'kits_transfer_page' );
+		add_submenu_page( KITS_MENU, __( 'Help', 'kits-core' ), __( 'Help', 'kits-core' ), KITS_CAP, 'kits-help', 'kits_help_page' );
 	},
 	9 // After Home (admin-home.php, 8).
 );
@@ -171,22 +171,22 @@ function kits_screen_sections( string $screen ): array {
 		// The theme's own dashboard (12 Nov 2026): where each part of the theme is edited. Versions are Tools → Site
 		// Health; setup is done once (owner, 11 Nov 2026: no copies of what WordPress does).
 		$own = array(
-			'theme' => array( 'Edit the theme', 'kits_home_theme', 'edit_theme_options', 10 ),
+			'theme' => array( __( 'Edit the theme', 'kits-core' ), 'kits_home_theme', 'edit_theme_options', 10 ),
 		);
 	} elseif ( 'kits-settings' === $screen ) {
 		$filter = 'kits_settings_sections';
 		$own    = array(
-			'performance'   => array( 'Performance', fn() => kits_core_settings_form( 'Speed', 'utility-performance', 'performance' ), 'manage_options', 10 ),
-			'compatibility' => array( 'Compatibility', fn() => kits_core_settings_form( 'Older content', '', 'compatibility' ), 'manage_options', 20 ),
-			'preview'       => array( 'Preview access', fn() => kits_admin_embed( 'kits_preview_page' ), 'manage_options', 30 ),
-			'analytics'     => array( 'Analytics', 'kits_settings_analytics', 'manage_options', 35 ),
+			'performance'   => array( __( 'Performance', 'kits-core' ), fn() => kits_core_settings_form( 'Speed', 'utility-performance', 'performance' ), 'manage_options', 10 ),
+			'compatibility' => array( __( 'Compatibility', 'kits-core' ), fn() => kits_core_settings_form( 'Older content', '', 'compatibility' ), 'manage_options', 20 ),
+			'preview'       => array( __( 'Preview access', 'kits-core' ), fn() => kits_admin_embed( 'kits_preview_page' ), 'manage_options', 30 ),
+			'analytics'     => array( __( 'Analytics', 'kits-core' ), 'kits_settings_analytics', 'manage_options', 35 ),
 		);
 	} elseif ( 'kits-help' === $screen ) {
 		$filter = 'kits_help_sections';
 		$own    = array(
-			'docs'            => array( 'Docs', 'kits_overview_tables', 'manage_options', 10 ),
-			'design-system'   => array( 'Design system', fn() => kits_admin_embed( 'kits_system_page' ), 'manage_options', 20 ),
-			'developer/extra' => array( 'Developer: extra settings', 'kits_help_extra', 'manage_options', 40 ),
+			'docs'            => array( __( 'Docs', 'kits-core' ), 'kits_overview_tables', 'manage_options', 10 ),
+			'design-system'   => array( __( 'Design system', 'kits-core' ), fn() => kits_admin_embed( 'kits_system_page' ), 'manage_options', 20 ),
+			'developer/extra' => array( __( 'Developer: extra settings', 'kits-core' ), 'kits_help_extra', 'manage_options', 40 ),
 		);
 	}
 	$list = array();

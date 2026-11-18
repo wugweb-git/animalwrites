@@ -1,0 +1,105 @@
+{
+    "key": "group_kits_testimonial",
+    "title": "Testimonials",
+    "fields": [
+        {
+            "key": "field_kits_testimonial_quote",
+            "label": "Quote",
+            "name": "kits_testimonial_quote",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 4,
+            "new_lines": ""
+        },
+        {
+            "key": "field_kits_testimonial_name",
+            "label": "Name",
+            "name": "kits_testimonial_name",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_testimonial_role",
+            "label": "Role",
+            "name": "kits_testimonial_role",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_testimonial_item",
+            "label": "What it is about (product, service or event; for search engines)",
+            "name": "kits_testimonial_item",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_testimonial_consent",
+            "label": "Consent date",
+            "name": "kits_testimonial_consent",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "The day this person agreed to be quoted. Nothing of the testimonial shows on the site until it is set. Not public.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "d-m-y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "kits_testimonial"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Kits Core preset kits-testimonial: its fields (registered with register_post_meta(); this group is only the editing layer).",
+    "show_in_rest": 0,
+    "modified": 1795478400
+}

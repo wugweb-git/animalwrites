@@ -183,7 +183,7 @@ add_filter(
 			return $tag;
 		}
 		$j = JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES;
-		return '<script>(function(s){var d=0,a=function(){if(d)return;d=1;var l=document.createElement("link");l.rel="stylesheet";l.id=' . wp_json_encode( $handle . '-css', $j ) . ';l.href=' . wp_json_encode( html_entity_decode( $m[2] ), $j ) . ';s&&s.parentNode?s.after(l):document.head.appendChild(l)};"complete"===document.readyState?a():(addEventListener("load",a),addEventListener("scroll",a,{once:!0,passive:!0}))})(document.currentScript)</script><noscript>' . trim( $tag ) . "</noscript>\n";
+		return wp_get_inline_script_tag( '(function(s){var d=0,a=function(){if(d)return;d=1;var l=document.createElement("link");l.rel="stylesheet";l.id=' . wp_json_encode( $handle . '-css', $j ) . ';l.href=' . wp_json_encode( html_entity_decode( $m[2] ), $j ) . ';s&&s.parentNode?s.after(l):document.head.appendChild(l)};"complete"===document.readyState?a():(addEventListener("load",a),addEventListener("scroll",a,{once:!0,passive:!0}))})(document.currentScript)' ) . '<noscript>' . trim( $tag ) . "</noscript>\n";
 	},
 	10,
 	2

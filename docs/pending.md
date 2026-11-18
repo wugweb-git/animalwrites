@@ -42,14 +42,15 @@ Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Ki
   - Rename the `kit-*` handles (prefix of 4+ letters).
   - The 6 PHP card patterns → pattern files.
   - Theme PHP into `inc/`; Kits Core files by purpose (content, display, forms, seo, frontend, admin, ops).
-- **Kits Core, still open:**
-  - SCF field groups (Local JSON) for the 7 content types.
-  - Rename the second "Content types" (Theme Options → "Display per type").
-  - The Speed switches shown twice (keep Settings → Performance).
-  - Inline scripts/styles through `wp_print_inline_script_tag` / `wp_add_inline_style`.
-  - Uninstall flag `show_in_rest`.
-  - Tools capability mismatch (`edit_theme_options` vs `manage_options`).
-  - Untranslated admin menu strings.
+- **Kits Core audit items: built 18 Nov 2026, in review, not merged or shipped** (branch `claude/kits-core-audit-items`, PR into `wordpress-dev`):
+  - SCF field groups (Local JSON) for the 7 content types, `acf-json/{preset}/`, given to SCF only while the preset is on; checked by `tests/presets-scf-tests.php`. The event and testimonial date fields need the presets-fixes date parser (branch `kits-presets-fixes`) merged first.
+  - Theme Options' per-type section renamed "Display per type".
+  - Speed switches only in Settings → Performance (stale Theme Options entry removed).
+  - Inline scripts/styles through `wp_print_inline_script_tag` / `wp_get_inline_script_tag` / `wp_add_inline_style` (includes the consent, GTM and Clarity tags: same code, same hooks).
+  - Uninstall flag out of `/wp/v2/settings` (`show_in_rest` false).
+  - Tools needs `manage_options` (menu, import, `kits/v1/settings`).
+  - Menu and section titles translatable. Still plain: the Content types section strings in `presets.php` (left for the presets-fixes branch).
+- **Admin layer moved from Animal Writes Core into Kits Core: built 18 Nov 2026, in review, not merged or shipped** (branch `claude/kits-admin-layer`, PR #154): admin-ia, admin-tidy, admin-home, edit-screens, edit-fields and site-options now in `plugins/kits-core/includes/admin-layer/`, the Animal Writes values in `animal-writes-core/includes/admin-config.php`; same menus, screens and capabilities. The Help "Commands" table reads WP-CLI's own registry (cached when any `wp` command runs) instead of a hand-kept list.
 - **Content types:** keep the presets in code (the Uncode way); one-off site types in SCF's Post Types screen; no CPT UI or Pods.
 - **Presets: fix before switching any on (#144 review):**
   - testimonials before consent leak through sitemaps, `X-WP-Total` and REST single items (slug, link, image);
