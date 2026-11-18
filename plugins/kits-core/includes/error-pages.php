@@ -54,7 +54,7 @@ function kits_error_pages_here(): bool {
  */
 function kits_error_pages_sync() {
 	if ( ! kits_error_pages_here() ) {
-		return array(); // not this site's: nothing to install
+		return array(); // Not this site's: nothing to install.
 	}
 	$status = array();
 	foreach ( KITS_ERROR_PAGE_FILES as $name ) {

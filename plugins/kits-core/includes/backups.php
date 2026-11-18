@@ -60,7 +60,7 @@ add_action(
 			return;
 		}
 		if ( ! $booked ) {
-			$at = strtotime( 'tomorrow 03:30 Asia/Kolkata' ); // a quiet hour
+			$at = strtotime( 'tomorrow 03:30 Asia/Kolkata' ); // A quiet hour.
 			wp_schedule_event( $at ? $at : time() + HOUR_IN_SECONDS, 'daily', 'aw_daily_backup' );
 		}
 	}
@@ -136,7 +136,7 @@ function kits_daily_backup_form(): void {
  */
 function kits_daily_backup_run() {
 	if ( ! kits_daily_backup_on() ) {
-		return array( 'error' => 'off' ); // switched off after the event was booked
+		return array( 'error' => 'off' ); // Switched off after the event was booked.
 	}
 	if ( function_exists( 'set_time_limit' ) ) {
 		set_time_limit( 600 );
@@ -193,7 +193,7 @@ function kits_daily_backup_run() {
 	// Keep 14 days of automatic backups (hand-made backups are never touched).
 	$removed = array();
 	$old_files = glob( $dir . '/auto-*' );
-	foreach ( is_array( $old_files ) ? $old_files : array() as $f ) { // glob() gives false on failure
+	foreach ( is_array( $old_files ) ? $old_files : array() as $f ) { // glob() gives false on failure.
 		if ( filemtime( $f ) < time() - KITS_BACKUP_KEEP_DAYS * DAY_IN_SECONDS ) {
 			wp_delete_file( $f );
 			$removed[] = basename( $f );
@@ -242,7 +242,7 @@ add_action(
 				'permission_callback' => fn() => current_user_can( 'edit_others_posts' ) && did_action( 'application_password_did_authenticate' ),
 				'callback'            => function ( WP_REST_Request $req ) {
 					$files = (array) glob( kits_daily_backup_dir() . '/auto-' . $req['kind'] . '-*.gz' );
-					rsort( $files ); // newest date first
+					rsort( $files ); // Newest date first.
 					$f = $files[0] ?? '';
 					if ( ! $f || ! is_readable( $f ) ) {
 						return new WP_Error( 'aw_no_backup', 'No backup yet.', array( 'status' => 404 ) );
