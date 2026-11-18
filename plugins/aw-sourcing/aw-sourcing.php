@@ -68,6 +68,7 @@ require_once AW_SOURCING_DIR . 'includes/sourceweb-caps.php'; // SourceWeb's own
 require_once AW_SOURCING_DIR . 'includes/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/sources-config.php'; // the sourcing lists, option aw_sources (moved from Kits Core, 18 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/attribution.php'; // [aw_source_row], publisher icons and the favicon run, news slugs (moved from Kits Core, 18 Nov 2026)
+require_once AW_SOURCING_DIR . 'includes/issuers.php'; // the Library issuer label: aw_issuers(), aw_item_issuer(), aw_set_issuer() (moved from Animal Writes Core, 19 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/summary-rules.php'; // the summary rules (option aw_summary_rules); moved from Core 12 Nov 2026
 require_once AW_SOURCING_DIR . 'includes/help-tab.php';
 require_once AW_SOURCING_DIR . 'includes/plugin-info.php';

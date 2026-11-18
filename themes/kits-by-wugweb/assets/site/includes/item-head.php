@@ -20,7 +20,7 @@
  * Rows print nothing when they have nothing. The blocks are registered with the others (hub-blocks.php), so the Site
  * Editor shows and arranges them. docs/item-template.md describes each one.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,24 +43,6 @@ function aw_primary_category( $id ) {
 		return $t;
 	}
 	return aw_first_term( $id, 'category' );
-}
-
-/**
- * A summary up to its last full sentence (owner, 20 Oct 2026): a tail cut off mid-sentence ("…of Kerala's Th") is
- * dropped, never cut mid-word. Only the first paragraph is checked (Library summaries carry a note on a line of their
- * own). Text without any full sentence is returned as it is.
- *
- * @param string $text Summary.
- * @return string
- */
-function aw_whole_sentences( $text ) {
-	$lines = explode( "\n", trim( (string) $text ) );
-	$first = trim( $lines[0] );
-	if ( '' !== $first && ! preg_match( '/[.!?…]["\'”’)\]]*$/u', $first ) && preg_match_all( '/[.!?…]["\'”’)\]]*(?=\s|$)/u', $first, $m, PREG_OFFSET_CAPTURE ) ) {
-		$last     = end( $m[0] );
-		$lines[0] = substr( $first, 0, $last[1] + strlen( $last[0] ) );
-	}
-	return implode( "\n", $lines );
 }
 
 /** Whether $id is the page's own item (not a card in a list). */
@@ -152,7 +134,7 @@ function aw_block_item_meta( $a, $id ) {
 		$dated = 'aw_legal' === get_post_type( $id ) ? (string) get_post_meta( $id, 'aw_legal_dated', true ) : '';
 		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $dated ) ) {
 			/* translators: %s: date. */
-			$row .= '<span class="aw-item-dated">' . sprintf( esc_html__( 'Dated %s', 'animal-writes-core' ), esc_html( wp_date( 'j M Y', strtotime( $dated . ' 12:00:00' ) ) ) ) . '</span>';
+			$row .= '<span class="aw-item-dated">' . sprintf( esc_html__( 'Dated %s', 'kits-by-wugweb' ), esc_html( wp_date( 'j M Y', strtotime( $dated . ' 12:00:00' ) ) ) ) . '</span>';
 		}
 		// One date (owner, 20 Oct 2026): News, Library and research the original's publication date, Opportunities the
 		// day posted (their deadline follows), guides the day published. Never "Updated"; dateModified stays in the schema.
@@ -185,9 +167,9 @@ function aw_block_item_meta( $a, $id ) {
 			$on   = (string) get_post_meta( $id, 'aw_verified_on', true );
 			aw_use_component_style( 'aw-single' ); // aw-item-verified
 			$row .= get_post_meta( $id, 'aw_needs_reverify', true )
-				? '<span class="kit-tag kit-tag--warning">' . esc_html__( 'Needs re-check', 'animal-writes-core' ) . '</span>'
+				? '<span class="kit-tag kit-tag--warning">' . esc_html__( 'Needs re-check', 'kits-by-wugweb' ) . '</span>'
 				/* translators: %s: date. */
-				: '<span class="kit-tag kit-tag--success aw-item-verified"><span class="kit-ico kit-ico--check" aria-hidden="true"></span>' . ( $on ? sprintf( esc_html__( 'Claimed on %s', 'animal-writes-core' ), esc_html( wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) : esc_html__( 'Claimed', 'animal-writes-core' ) ) . '</span>';
+				: '<span class="kit-tag kit-tag--success aw-item-verified"><span class="kit-ico kit-ico--check" aria-hidden="true"></span>' . ( $on ? sprintf( esc_html__( 'Claimed on %s', 'kits-by-wugweb' ), esc_html( wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) : esc_html__( 'Claimed', 'kits-by-wugweb' ) ) . '</span>';
 		}
 	} else {
 		$cats = get_the_terms( $id, 'category' );
@@ -307,23 +289,23 @@ function aw_block_item_sources( $a, $id ) {
 	}
 	aw_use_component_style( 'aw-single' ); // aw-sources
 	$kind   = aw_item_kind( $id );
-	$links  = '<p class="aw-sources-links"><a href="' . esc_url( home_url( '/editorial-policy/' ) ) . '">' . esc_html__( 'Editorial policy', 'animal-writes-core' ) . '</a><a href="' . esc_url( aw_report_url( $id ) ) . '">' . esc_html__( 'Report a mistake', 'animal-writes-core' ) . '</a></p>';
+	$links  = '<p class="aw-sources-links"><a href="' . esc_url( home_url( '/editorial-policy/' ) ) . '">' . esc_html__( 'Editorial policy', 'kits-by-wugweb' ) . '</a><a href="' . esc_url( aw_report_url( $id ) ) . '">' . esc_html__( 'Report a mistake', 'kits-by-wugweb' ) . '</a></p>';
 	$hid    = 'aw-sources-' . $id;
 	if ( 'listing' === $kind ) { // the listing's data sources with their "as on" dates, and when it was last updated
 		$list = function_exists( 'aw_listing_sources_html' ) ? aw_listing_sources_html( $id ) : '';
 		$last = function_exists( 'aw_listing_last_updated' ) ? aw_listing_last_updated( $id ) : '';
-		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>'
+		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'kits-by-wugweb' ) . '</h2>'
 			. ( '' !== $list ? '<div class="aw-sources-list">' . $list . '</div>' : '' )
-			. ( '' !== $last ? '<p class="aw-sources-updated">' . esc_html__( 'Last updated:', 'animal-writes-core' ) . ' ' . kits_date( $last ) . '</p>' : '' )
+			. ( '' !== $last ? '<p class="aw-sources-updated">' . esc_html__( 'Last updated:', 'kits-by-wugweb' ) . ' ' . kits_date( $last ) . '</p>' : '' )
 			. $links . '</section>';
 	}
 	$url    = (string) get_post_meta( $id, 'aw_source_url', true );
 	$credit = '';
 	$note   = '';
-	$read   = $url ? '<a class="aw-sources-read" href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . esc_html__( 'Read the original', 'animal-writes-core' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'animal-writes-core' ) . '</span></a>' : '';
+	$read   = $url ? '<a class="aw-sources-read" href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . esc_html__( 'Read the original', 'kits-by-wugweb' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a>' : '';
 	$logo   = get_site_icon_url( 64 );
 	$ours   = '<span class="aw-sources-by">' . ( $logo ? '<img class="aw-sources-logo" src="' . esc_url( $logo ) . '" alt="" width="20" height="20" loading="lazy">' : '' );
-	$sumnote = '<span>' . esc_html__( 'Summary written by Animal Writes. Read the original before relying on it.', 'animal-writes-core' ) . '</span>';
+	$sumnote = '<span>' . esc_html__( 'Summary written by Animal Writes. Read the original before relying on it.', 'kits-by-wugweb' ) . '</span>';
 	switch ( $kind ) {
 		case 'news':
 		case 'library':
@@ -331,12 +313,12 @@ function aw_block_item_sources( $a, $id ) {
 			$iss    = 'library' === $kind && function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 			if ( $iss && function_exists( 'aw_publisher_of' ) && aw_publisher_of( $id )[0] !== $iss->name ) {
 				/* translators: %s: body that issued the document. */
-				$note .= '<span>' . esc_html( sprintf( __( 'Issued by %s.', 'animal-writes-core' ), $iss->name ) ) . '</span>';
+				$note .= '<span>' . esc_html( sprintf( __( 'Issued by %s.', 'kits-by-wugweb' ), $iss->name ) ) . '</span>';
 			}
 			$note .= $sumnote;
 			break;
 		case 'own-document':
-			$credit = $ours . esc_html__( 'Created by Animal Writes', 'animal-writes-core' ) . '</span>';
+			$credit = $ours . esc_html__( 'Created by Animal Writes', 'kits-by-wugweb' ) . '</span>';
 			$read   = '';
 			break;
 		case 'research': // "Study: <study title> by <authors> in <journal> · Read the original ↗" (owner, 20 Oct 2026)
@@ -346,13 +328,13 @@ function aw_block_item_sources( $a, $id ) {
 			$study   = '' !== $paper ? '<cite class="aw-sources-study-title">' . esc_html( $paper ) . '</cite>' : '';
 			if ( '' !== $authors ) {
 				/* translators: %s: authors. */
-				$study .= ( '' !== $study ? ' ' : '' ) . sprintf( esc_html__( 'by %s', 'animal-writes-core' ), esc_html( $authors ) );
+				$study .= ( '' !== $study ? ' ' : '' ) . sprintf( esc_html__( 'by %s', 'kits-by-wugweb' ), esc_html( $authors ) );
 			}
 			if ( '' !== $journal ) {
 				/* translators: %s: journal. */
-				$study .= ( '' !== $study ? ' ' : '' ) . sprintf( esc_html__( 'in %s', 'animal-writes-core' ), '<cite>' . esc_html( $journal ) . '</cite>' );
+				$study .= ( '' !== $study ? ' ' : '' ) . sprintf( esc_html__( 'in %s', 'kits-by-wugweb' ), '<cite>' . esc_html( $journal ) . '</cite>' );
 			}
-			$study  = '' !== $study ? esc_html__( 'Study:', 'animal-writes-core' ) . ' ' . $study : '';
+			$study  = '' !== $study ? esc_html__( 'Study:', 'kits-by-wugweb' ) . ' ' . $study : '';
 			$credit = '' !== $study . $read ? '<span class="aw-sources-study">' . $study . ( '' !== $study && '' !== $read ? ' <span aria-hidden="true">·</span> ' : '' ) . $read . '</span>' : '';
 			$read   = ''; // in the study line
 			$note   = $sumnote;
@@ -361,12 +343,12 @@ function aw_block_item_sources( $a, $id ) {
 			$by = (string) get_post_meta( $id, 'aw_source_name', true );
 			if ( $url && '' !== $by ) { // a Resource taken from another body (WHO fact sheet): their credit and link, not ours
 				/* translators: %s: organisation that published the original. */
-				$credit = '<span class="aw-sources-study">' . sprintf( esc_html__( 'Source: %s', 'animal-writes-core' ), esc_html( $by ) ) . ' <span aria-hidden="true">·</span> ' . $read . '</span>';
+				$credit = '<span class="aw-sources-study">' . sprintf( esc_html__( 'Source: %s', 'kits-by-wugweb' ), esc_html( $by ) ) . ' <span aria-hidden="true">·</span> ' . $read . '</span>';
 				$read   = '';
 				$note   = $sumnote;
 				break;
 			}
-			$credit = $ours . esc_html__( 'By Animal Writes', 'animal-writes-core' ) . '</span>';
+			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
 			$read   = '';
 			break;
 		case 'opportunity':
@@ -376,7 +358,7 @@ function aw_block_item_sources( $a, $id ) {
 			break;
 	}
 	$refs = 'guide' === $kind ? (string) aw_item_state( 'refs' ) : '';
-	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>';
+	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'kits-by-wugweb' ) . '</h2>';
 	$out .= '' !== $credit ? '<div class="aw-sources-credit">' . $credit . '</div>' : '';
 	$out .= '' !== $read . $note ? '<p class="aw-sources-note">' . $read . $note . '</p>' : '';
 	$out .= '' !== $refs ? '<div class="aw-sources-refs">' . do_blocks( $refs ) . '</div>' : '';
@@ -438,31 +420,31 @@ function aw_item_more_groups( $id ) {
 	$cat = aw_primary_category( $id );
 	$in  = $cat ? array( 'category__in' => array( (int) $cat->term_id ) ) : array();
 	/* translators: %s: category. */
-	$more   = $cat ? sprintf( __( 'More in %s', 'animal-writes-core' ), $cat->name ) : '';
+	$more   = $cat ? sprintf( __( 'More in %s', 'kits-by-wugweb' ), $cat->name ) : '';
 	$groups = array();
 	switch ( get_post_type( $id ) ) {
 		case 'aw_news':
-			$groups[] = array( $more ?: __( 'More news', 'animal-writes-core' ), aw_related_pick( $id, 'aw_news', 3, array(), $in ) );
-			$groups[] = array( __( 'From the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, aw_related_set( $id, 'aw_rel_legal' ) ) );
-			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), aw_item_guides( $id ) ); // only guides linked by hand (aw_rel_guide)
+			$groups[] = array( $more ?: __( 'More news', 'kits-by-wugweb' ), aw_related_pick( $id, 'aw_news', 3, array(), $in ) );
+			$groups[] = array( __( 'From the Library', 'kits-by-wugweb' ), aw_related_pick( $id, 'aw_legal', 3, aw_related_set( $id, 'aw_rel_legal' ) ) );
+			$groups[] = array( __( 'Guides on this', 'kits-by-wugweb' ), aw_item_guides( $id ) ); // only guides linked by hand (aw_rel_guide)
 			break;
 		case 'aw_legal':
-			$groups[] = array( $more ?: __( 'More from the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, array(), $in ) );
-			$groups[] = array( __( 'News about this', 'animal-writes-core' ), aw_related_pick( $id, 'aw_news', 3, aw_related_back( $id, 'aw_rel_legal', 'aw_news' ) ) );
+			$groups[] = array( $more ?: __( 'More from the Library', 'kits-by-wugweb' ), aw_related_pick( $id, 'aw_legal', 3, array(), $in ) );
+			$groups[] = array( __( 'News about this', 'kits-by-wugweb' ), aw_related_pick( $id, 'aw_news', 3, aw_related_back( $id, 'aw_rel_legal', 'aw_news' ) ) );
 			$named    = function_exists( 'aw_law_guides_naming' ) ? aw_law_guides_naming( $id ) : array(); // an Act or Rule: guides that name it, after the hand-linked ones (law-links.php)
-			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), array_slice( array_values( array_unique( array_merge( aw_related_back( $id, 'aw_rel_resource', 'post' ), $named ) ) ), 0, 3 ) ); // guides linked by hand (e.g. the World Animal Day notice → its guide, 22 Oct 2026)
+			$groups[] = array( __( 'Guides on this', 'kits-by-wugweb' ), array_slice( array_values( array_unique( array_merge( aw_related_back( $id, 'aw_rel_resource', 'post' ), $named ) ) ), 0, 3 ) ); // guides linked by hand (e.g. the World Animal Day notice → its guide, 22 Oct 2026)
 			break;
 		case 'post':
 			$t        = aw_item_type_terms( $id );
-			$plural   = $t ? ( 'research' === $t[0]->slug ? __( 'More research', 'animal-writes-core' ) : sprintf( /* translators: %s: Resource type. */ __( 'More %s', 'animal-writes-core' ), mb_strtolower( $t[0]->name ) . 's' ) ) : __( 'More resources', 'animal-writes-core' );
+			$plural   = $t ? ( 'research' === $t[0]->slug ? __( 'More research', 'kits-by-wugweb' ) : sprintf( /* translators: %s: Resource type. */ __( 'More %s', 'kits-by-wugweb' ), mb_strtolower( $t[0]->name ) . 's' ) ) : __( 'More resources', 'kits-by-wugweb' );
 			$groups[] = array( $plural, aw_related_pick( $id, 'post', 3, array(), $t ? array( 'tag__in' => array( (int) $t[0]->term_id ) ) : array() ) );
 			$named    = function_exists( 'aw_law_named_in' ) ? aw_law_named_in( $id ) : array(); // the Acts and Rules the guide names, after the hand-linked ones (law-links.php)
-			$groups[] = array( __( 'From the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, array_merge( aw_related_set( $id, 'aw_rel_resource' ), $named ) ) );
-			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), aw_item_guides( $id ) ); // only guides linked by hand (aw_rel_guide)
+			$groups[] = array( __( 'From the Library', 'kits-by-wugweb' ), aw_related_pick( $id, 'aw_legal', 3, array_merge( aw_related_set( $id, 'aw_rel_resource' ), $named ) ) );
+			$groups[] = array( __( 'Guides on this', 'kits-by-wugweb' ), aw_item_guides( $id ) ); // only guides linked by hand (aw_rel_guide)
 			break;
 		case 'aw_opportunity':
 			$open     = function_exists( 'aw_open_opportunities_meta_query' ) ? array( 'meta_query' => aw_open_opportunities_meta_query() ) : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
-			$groups[] = array( __( 'More opportunities', 'animal-writes-core' ), aw_related_pick( $id, 'aw_opportunity', 3, array(), $open ) );
+			$groups[] = array( __( 'More opportunities', 'kits-by-wugweb' ), aw_related_pick( $id, 'aw_opportunity', 3, array(), $open ) );
 			break;
 		case 'aw_listing': // its district first, filled from the state up to 6 (same type in the nearest districts first)
 			$p = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
@@ -470,7 +452,7 @@ function aw_item_more_groups( $id ) {
 				$local = aw_related_pick( $id, 'aw_listing', 6, array(), array( 'orderby' => 'title', 'order' => 'ASC', 'posts_per_page' => 300 ), true );
 				$fill  = 'district' === $p->kind && count( $local ) < 6 ? aw_related_state_fill( $id, $p, 6 - count( $local ), $local ) : array();
 				/* translators: %s: district or state. */
-				$groups[] = array( sprintf( __( 'More organisations in %s', 'animal-writes-core' ), $p->name ), array_merge( $local, $fill ) );
+				$groups[] = array( sprintf( __( 'More organisations in %s', 'kits-by-wugweb' ), $p->name ), array_merge( $local, $fill ) );
 			}
 			break;
 	}
@@ -497,7 +479,7 @@ function aw_item_card_media( $pid ) {
 function aw_item_more_card( $pid ) {
 	aw_use_component_style( 'aw-single' ); // aw-more-card
 	$type = aw_item_type_terms( $pid );
-	$name = $type ? $type[0]->name : ( 'aw_news' === get_post_type( $pid ) ? __( 'News', 'animal-writes-core' ) : '' );
+	$name = $type ? $type[0]->name : ( 'aw_news' === get_post_type( $pid ) ? __( 'News', 'kits-by-wugweb' ) : '' );
 	if ( 'aw_listing' === get_post_type( $pid ) ) { // an organisation: its logo whole in the 4:3 box (or its initials), type and place
 		$logo  = get_the_post_thumbnail( $pid, 'medium', array( 'alt' => '', 'loading' => 'lazy' ) );
 		$words = array_values( array_filter( preg_split( '/\s+/', preg_replace( '/[^\p{L}\s]/u', '', get_the_title( $pid ) ) ) ) );
@@ -581,7 +563,7 @@ add_filter(
 		foreach ( $list as list( $level, $id, $text ) ) {
 			$items .= '<li' . ( 'H3' === $level ? ' class="is-sub"' : '' ) . '><a href="#' . esc_attr( $id ) . '">' . esc_html( $text ) . '</a></li>';
 		}
-		return '<details class="kit-toc aw-doc-toc"><summary>' . esc_html__( 'Contents', 'animal-writes-core' ) . '</summary><ol>' . $items . '</ol></details>' . $p->get_updated_html();
+		return '<details class="kit-toc aw-doc-toc"><summary>' . esc_html__( 'Contents', 'kits-by-wugweb' ) . '</summary><ol>' . $items . '</ol></details>' . $p->get_updated_html();
 	},
 	5
 );

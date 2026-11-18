@@ -20,9 +20,9 @@ TOKEN_FILES = [
     theme_file("assets/css/tokens.css"),  # the Kits site folder (assets/site)
 ]
 REGISTRIES = sorted(set((ROOT / "themes").glob("*/kits-registry.json")) | {theme_file("kits-registry.json")})
-CAMPAIGN_CSS = ROOT / "plugins/animal-writes-core/assets/css/campaign.css"
+CAMPAIGN_CSS = ROOT / "themes/kits-by-wugweb/assets/site/campaign/css/campaign.css"
 # Campaign palettes kept outside campaign.css (the tokens file, and campaign-record.php's styles): read as if they were in it.
-CAMPAIGN_CSS_MORE = [ROOT / "plugins/animal-writes-core/assets/css/aw-camp-tokens.css", ROOT / "plugins/animal-writes-core/assets/css/campaign-record.css"]
+CAMPAIGN_CSS_MORE = [ROOT / "themes/kits-by-wugweb/assets/site/campaign/css/aw-camp-tokens.css", ROOT / "themes/kits-by-wugweb/assets/site/campaign/css/campaign-record.css"]
 
 TEXT, NON_TEXT = 4.5, 3.0
 # Campaign pairs, from how campaign.css uses the palette: (foreground, background, minimum, where).

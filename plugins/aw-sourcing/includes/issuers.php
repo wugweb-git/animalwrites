@@ -6,7 +6,7 @@
  * backup of its links is in uploads/aw-private/issuers-backup-2026-10-08.json. Old /source/{slug}/ URLs 301 to the
  * Library (places.php).
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

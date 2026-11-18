@@ -54,7 +54,6 @@ require_once AW_CORE_DIR . 'includes/content-types.php';
 require_once AW_CORE_DIR . 'includes/category-moves.php';
 require_once AW_CORE_DIR . 'includes/tags.php';
 require_once AW_CORE_DIR . 'includes/taxonomy-rename.php'; // aw_campaign_link / aw_media_group → kits_ names, renamed only by a click on Tools → Taxonomy rename (owner, 18 Nov 2026)
-require_once AW_CORE_DIR . 'includes/campaign-links.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/scf.php';
 // DirectoryWeb (the Directory: listings, places, claims, map, Find help, and its admin). Loaded from the sibling plugin
@@ -74,7 +73,6 @@ if ( ! defined( 'DIRECTORYWEB_LOADED' ) ) {
 		);
 	}
 }
-require_once AW_CORE_DIR . 'includes/issuers.php';
 require_once AW_CORE_DIR . 'includes/summary-display.php'; // an item's own page shows its whole summary (the rules are SourceWeb's)
 require_once AW_CORE_DIR . 'includes/news-article.php'; // News article: read-more fold and the ad-slot hook
 require_once AW_CORE_DIR . 'includes/bindings.php';
@@ -82,17 +80,11 @@ require_once AW_CORE_DIR . 'includes/also-reported.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
 require_once AW_CORE_DIR . 'includes/media-compat.php'; // old aw_ names of the media functions that moved to Kits Core, RankWeb and SourceWeb (18 Nov 2026)
-require_once AW_CORE_DIR . 'includes/campaigns.php';
-require_once AW_CORE_DIR . 'includes/campaign-tools.php';
-require_once AW_CORE_DIR . 'includes/campaign-short.php'; // /lab, /diwali...: a campaign's short link, 301 to its page
-require_once AW_CORE_DIR . 'includes/campaign-letters.php';
-require_once AW_CORE_DIR . 'includes/campaign-record.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/term-page.php';
 require_once AW_CORE_DIR . 'includes/faq-data.php'; // the Library item fields (the FAQ questions are RankWeb's faq-data.php since 18 Nov 2026)
-require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
@@ -100,20 +92,15 @@ require_once AW_CORE_DIR . 'includes/retention.php';
 require_once AW_CORE_DIR . 'includes/model.php';
 require_once AW_CORE_DIR . 'includes/helpers-public.php'; // [aw_helpers] on the Volunteer page: approved helpers (owner, 13 Nov 2026)
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php'; // fallback: RankWeb's breadcrumb renderer when RankWeb is not active
-require_once AW_CORE_DIR . 'includes/item-head.php';
 require_once AW_CORE_DIR . 'includes/research-citation.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/not-found.php';
-require_once AW_CORE_DIR . 'includes/press.php';
-require_once AW_CORE_DIR . 'includes/social-posts.php'; // Social posts (aw_social, under News): off by default, Kits → Modules (owner, 2 Nov 2026)
 require_once AW_CORE_DIR . 'includes/uninstall-setting.php'; // Kits → Modules → Animal Writes Core data (the rest of Modules is Kits Core's)
 require_once AW_CORE_DIR . 'includes/block-states.php';
 require_once AW_CORE_DIR . 'includes/related.php';
 require_once AW_CORE_DIR . 'includes/law-links.php';
-require_once AW_CORE_DIR . 'includes/home.php'; // Home: sections in the theme template, hero, FAQ section
 require_once AW_CORE_DIR . 'includes/near-opps.php';
 require_once AW_CORE_DIR . 'includes/entity-links.php';
-require_once AW_CORE_DIR . 'includes/team-dates.php';
 require_once AW_CORE_DIR . 'includes/dashboard-activity.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
 require_once AW_CORE_DIR . 'includes/error-count.php';

@@ -6,7 +6,7 @@ documents), Resources (`post`: research and guides) and Opportunities (`aw_oppor
 Directory listings (`aw_listing`, `single-aw_listing.html`) use the shared blocks too; see `listing-template.md`.
 Campaigns keep their own template (`campaign-page`).
 
-Code: `plugins/animal-writes-core/includes/item-head.php`. The blocks are registered with the other `animal-writes/*`
+Code: `themes/kits-by-wugweb/assets/site/includes/item-head.php`. The blocks are registered with the other `animal-writes/*`
 blocks (`hub-blocks.php`), so the Site Editor lists them (category Widgets, titles "Item: …") and they can be moved
 like any block. In the editor each one shows a short placeholder saying what it prints.
 

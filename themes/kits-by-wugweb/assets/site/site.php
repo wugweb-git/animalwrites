@@ -14,6 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// This site's campaign pages, Home sections and item heads (moved from Animal Writes Core, 19 Nov 2026; function, block,
+// shortcode, post-type and option names unchanged). The campaign engines (links, short links, letters, press, social
+// posts) are Kits Core's; the campaign stylesheets and scripts are in campaign/.
+foreach ( array( 'campaigns', 'campaign-tools', 'campaign-record', 'item-head', 'home' ) as $kits_site_file ) {
+	require_once __DIR__ . '/includes/' . $kits_site_file . '.php';
+}
+unset( $kits_site_file );
+
 /**
  * Component stylesheets (css/aw-*.css in this folder): each loads only on the pages that print its component, joined
  * into one file per page by Kits (kits_component_styles, Kits functions.php). handle => [

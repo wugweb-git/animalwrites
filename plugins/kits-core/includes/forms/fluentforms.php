@@ -550,7 +550,7 @@ function kits_ff_ticked( $data, $name ) {
 /** An upload for this form (its token), as a file in the private folder, or ''. */
 function kits_ff_logo_file( $token ) {
 	$token = (string) $token;
-	return preg_match( '/^[a-f0-9]{32}$/', $token ) && is_file( aw_private_dir() . '/tmp-' . $token . '.png' ) ? 'tmp-' . $token . '.png' : '';
+	return preg_match( '/^[a-f0-9]{32}$/', $token ) && is_file( kits_private_dir() . '/tmp-' . $token . '.png' ) ? 'tmp-' . $token . '.png' : '';
 }
 
 /** An upload moved from its temporary name to its own, or ''. */
@@ -560,7 +560,7 @@ function kits_ff_keep_upload( $token ) {
 		return '';
 	}
 	$final = wp_generate_password( 20, false ) . '.png';
-	return rename( aw_private_dir() . '/' . $file, aw_private_dir() . '/' . $final ) ? $final : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- a rename inside our own private folder; WP_Filesystem::move() may need FTP credentials here.
+	return rename( kits_private_dir() . '/' . $file, kits_private_dir() . '/' . $final ) ? $final : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- a rename inside our own private folder; WP_Filesystem::move() may need FTP credentials here.
 }
 
 /** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (AW-12, AW-C-3 …). */
@@ -681,7 +681,7 @@ add_action(
 	'admin_post_aw_ff_file',
 	function () {
 		$file = basename( sanitize_file_name( wp_unslash( $_GET['f'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- administrators only, read only
-		$path = aw_private_dir() . '/' . $file;
+		$path = kits_private_dir() . '/' . $file;
 		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! preg_match( '/^[A-Za-z0-9]{20}\.png$/', $file ) || ! is_file( $path ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
@@ -717,7 +717,7 @@ function kits_ff_upload() {
 	if ( ! aw_claim_logo_ok( $logo ) ) {
 		wp_send_json_error( 'Use a PNG, JPG or WebP under 2 MB.' );
 	}
-	foreach ( (array) glob( aw_private_dir() . '/tmp-*.png' ) as $old ) { // uploads never sent with a claim go after a day
+	foreach ( (array) glob( kits_private_dir() . '/tmp-*.png' ) as $old ) { // uploads never sent with a claim go after a day
 		if ( $old && filemtime( $old ) < time() - DAY_IN_SECONDS ) {
 			wp_delete_file( $old );
 		}

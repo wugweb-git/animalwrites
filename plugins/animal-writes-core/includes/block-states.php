@@ -181,7 +181,9 @@ add_action(
 			return;
 		}
 		foreach ( array( 'aw-camp-tokens' => 'aw-camp-tokens.css', 'aw-campaign' => 'campaign.css', 'aw-campaign-record' => 'campaign-record.css' ) as $handle => $file ) {
-			wp_enqueue_style( $handle, plugins_url( 'assets/css/' . $file, AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/' . $file ) );
+			if ( function_exists( 'kits_site_uri' ) && is_readable( kits_site_path( 'campaign/css/' . $file ) ) ) { // the campaign styles are the theme's site layer's since the aw-core retirement
+				wp_enqueue_style( $handle, kits_site_uri( 'campaign/css/' . $file ), array(), (string) filemtime( kits_site_path( 'campaign/css/' . $file ) ) );
+			}
 		}
 	},
 	40

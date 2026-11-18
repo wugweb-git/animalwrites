@@ -38,7 +38,7 @@
  * (Post); aw-camp-pre only before it opens. aw-camp-if-count shows once the count reaches the threshold;
  * aw-camp-if-filled hides a section that has nothing in it (e.g. no partners); aw-camp-if-items hides a list section with no items.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -574,7 +574,7 @@ add_shortcode(
 			$note = $a['after_label'];
 		} else {
 			/* translators: %d: the number of days left before the campaign closes. */
-			$note = $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : __( 'Last day today', 'animal-writes-core' );
+			$note = $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'kits-by-wugweb' ), $d ) : __( 'Last day today', 'kits-by-wugweb' );
 		}
 		$days = '0' === (string) $a['days'] ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $note ) . '</span>';
 		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a>' . $days . '</div>';
@@ -649,7 +649,7 @@ add_action(
 	'wp_enqueue_scripts',
 	function () {
 		if ( is_singular( 'aw_campaign' ) || is_front_page() ) {
-			wp_enqueue_style( 'aw-share', plugins_url( 'assets/css/aw-share.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-share.css' ) );
+			wp_enqueue_style( 'aw-share', kits_site_uri( 'campaign/css/aw-share.css' ), array(), (string) filemtime( kits_site_path( 'campaign/css/aw-share.css' ) ) );
 		}
 	},
 	20
@@ -661,11 +661,11 @@ add_action(
 		$band = is_front_page() && function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign(); // the home hero is the campaign's, open or closed (home.php)
 		$page = is_singular( 'aw_campaign' ) && $id && get_post_meta( $id, 'aw_campaign_close', true );
 		$sc   = ! is_front_page() && is_singular() && has_shortcode( (string) get_post_field( 'post_content', get_queried_object_id() ), 'aw_campaign_band' ); // a band in a page's own content
-		$v    = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
-		$url  = fn( $f ) => plugins_url( 'assets/css/' . $f, AW_CORE_DIR . 'animal-writes-core.php' );
+		$v    = fn( $f ) => (string) filemtime( kits_site_path( 'campaign/' . $f ) );
+		$url  = fn( $f ) => kits_site_uri( 'campaign/css/' . $f );
 		if ( $sc ) { // the band's own files, after the page's stylesheet
-			wp_enqueue_style( 'aw-camp-band', $url( 'aw-camp-band.css' ), array_merge( array( 'aw-camp-tokens' ), $page ? array( 'aw-campaign' ) : array() ), $v( 'assets/css/aw-camp-band.css' ) );
-			wp_register_style( 'aw-camp-tokens', $url( 'aw-camp-tokens.css' ), array(), $v( 'assets/css/aw-camp-tokens.css' ) );
+			wp_enqueue_style( 'aw-camp-band', $url( 'aw-camp-band.css' ), array_merge( array( 'aw-camp-tokens' ), $page ? array( 'aw-campaign' ) : array() ), $v( 'css/aw-camp-band.css' ) );
+			wp_register_style( 'aw-camp-tokens', $url( 'aw-camp-tokens.css' ), array(), $v( 'css/aw-camp-tokens.css' ) );
 		}
 		if ( ! $page && ! $band ) {
 			return;
@@ -677,20 +677,20 @@ add_action(
 			// Home with a campaign hero: the tokens and the band's rules only, inline in campaign.css's place, so nothing
 			// blocks the first paint and the cascade order stays the same, before Kits and aw.css (owner, 22 Oct 2026).
 			foreach ( array( 'aw-camp-tokens' => array(), 'aw-camp-band' => array( 'aw-camp-tokens' ) ) as $h => $deps ) {
-				wp_register_style( $h, false, $deps, $v( 'assets/css/' . $h . '.css' ) );
+				wp_register_style( $h, false, $deps, $v( 'css/' . $h . '.css' ) );
 				wp_enqueue_style( $h );
-				$rules = (string) file_get_contents( AW_CORE_DIR . 'assets/css/' . $h . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+				$rules = (string) file_get_contents( kits_site_path( 'campaign/css/' . $h ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 				wp_add_inline_style( $h, trim( (string) preg_replace( '/\s*\n\s*/', "\n", (string) preg_replace( '#/\*.*?\*/#s', '', $rules ) ) ) ); // without the comments and indents (the files hold no strings or url()s)
 			}
 		} else {
 			$deps = array();
 			if ( ! $lab ) { // the campaign tokens, just before campaign.css (the Lab page's frozen copy carries its own)
-				wp_register_style( 'aw-camp-tokens', $url( 'aw-camp-tokens.css' ), array(), $v( 'assets/css/aw-camp-tokens.css' ) );
+				wp_register_style( 'aw-camp-tokens', $url( 'aw-camp-tokens.css' ), array(), $v( 'css/aw-camp-tokens.css' ) );
 				$deps = array( 'aw-camp-tokens' );
 			}
-			wp_enqueue_style( 'aw-campaign', $url( $css ), $deps, $v( 'assets/css/' . $css ) );
+			wp_enqueue_style( 'aw-campaign', $url( $css ), $deps, $v( 'css/' . $css ) );
 		}
-		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/' . $js, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/' . $js ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		wp_enqueue_script( 'aw-campaign', kits_site_uri( 'campaign/js/' . $js ), array(), $v( 'js/' . $js ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		if ( is_singular( 'aw_campaign' ) && function_exists( 'kits_share_payload' ) ) { // the letter tool's share row (campaign.js): the page's one share payload, as the share bar's
 			$p = kits_share_payload( (string) get_permalink( $id ), html_entity_decode( get_the_title( $id ), ENT_QUOTES ), (string) get_post_field( 'post_name', $id ), array( 'post_id' => $id ) );
 			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => $p['url'], 'short' => $p['url'], 'title' => $p['title'], 'text' => $p['text'], 'hashtags' => implode( ',', $p['hashtags'] ), 'hash' => $p['hash'], 'image' => $p['image'], 'slug' => get_post_field( 'post_name', $id ), 'close' => kits_date( get_post_meta( $id, 'aw_campaign_close', true ) ), 'closed' => aw_camp_close_ts( $id ) && time() >= aw_camp_close_ts( $id ) ) ) . ';', 'before' );
@@ -954,13 +954,13 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 		return aw_side_default_card();
 	}
 	if ( ! $c || ( is_singular( 'aw_campaign' ) && get_queried_object_id() === $c ) ) {
-		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Current campaign (shows while a campaign is open)', 'animal-writes-core' ) . '</p>' : '';
+		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Current campaign (shows while a campaign is open)', 'kits-by-wugweb' ) . '</p>' : '';
 	}
 	aw_use_component_style( 'aw-single' ); // aw-side-camp
 	// The card in the campaign's own colours: its aw-camp--{name} tokens (aw-camp-tokens.css), read from the page's wrapper.
 	$theme = preg_match( '/\baw-camp--([a-z0-9-]+)/', (string) get_post_field( 'post_content', $c ), $tm ) ? sanitize_html_class( $tm[1] ) : '';
 	if ( '' !== $theme ) {
-		wp_enqueue_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-tokens.css' ) );
+		wp_enqueue_style( 'aw-camp-tokens', kits_site_uri( 'campaign/css/aw-camp-tokens.css' ), array(), (string) filemtime( kits_site_path( 'campaign/css/aw-camp-tokens.css' ) ) );
 	}
 	$url   = get_permalink( $c );
 	$days  = aw_camp_days_left( $c );
@@ -971,14 +971,14 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	$title = trim( (string) get_post_meta( $c, 'aw_campaign_card_title', true ) );
 	$title = '' !== $title ? $title : get_the_title( $c );
 	/* translators: %d: days. */
-	$left = $days ? sprintf( _n( '%d day left', '%d days left', $days, 'animal-writes-core' ), $days ) : ''; // the day count only, no "Last day" status (owner, 2 Nov 2026)
+	$left = $days ? sprintf( _n( '%d day left', '%d days left', $days, 'kits-by-wugweb' ), $days ) : ''; // the day count only, no "Last day" status (owner, 2 Nov 2026)
 	if ( $wait ) {
-		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span><span class="aw-side-camp-chip">' . esc_html__( 'Decision awaited', 'animal-writes-core' ) . '</span>';
-		$btns = '<div class="aw-side-camp-btns"><a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url . '#context' ) . '">' . esc_html__( 'What happens next', 'animal-writes-core' ) . '</a>'
-			. '<a class="kit-btn kit-btn--secondary aw-side-camp-btn" href="' . esc_url( $url . '#newsletter' ) . '">' . esc_html__( 'Get the decision first', 'animal-writes-core' ) . '</a></div>';
+		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'kits-by-wugweb' ) . '</span><span class="aw-side-camp-chip">' . esc_html__( 'Decision awaited', 'kits-by-wugweb' ) . '</span>';
+		$btns = '<div class="aw-side-camp-btns"><a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url . '#context' ) . '">' . esc_html__( 'What happens next', 'kits-by-wugweb' ) . '</a>'
+			. '<a class="kit-btn kit-btn--secondary aw-side-camp-btn" href="' . esc_url( $url . '#newsletter' ) . '">' . esc_html__( 'Get the decision first', 'kits-by-wugweb' ) . '</a></div>';
 	} else {
-		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . kits_icon( 'clock' ) . esc_html( $left ) . '</span>' : '' );
-		$btns = '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'animal-writes-core' ) . '</a>';
+		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'kits-by-wugweb' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . kits_icon( 'clock' ) . esc_html( $left ) . '</span>' : '' );
+		$btns = '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'kits-by-wugweb' ) . '</a>';
 	}
 	$class = 'kit-card aw-side-camp' . ( '' !== $theme ? ' aw-camp aw-camp--' . $theme : '' ) . ( $wait ? ' aw-side-camp--wait' : '' );
 	return '<section class="' . esc_attr( $class ) . '" aria-labelledby="' . esc_attr( $hid ) . '">'
@@ -995,14 +995,14 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
  */
 function aw_side_default_card() {
 	aw_use_component_style( 'aw-single' );
-	wp_enqueue_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-tokens.css' ) );
+	wp_enqueue_style( 'aw-camp-tokens', kits_site_uri( 'campaign/css/aw-camp-tokens.css' ), array(), (string) filemtime( kits_site_path( 'campaign/css/aw-camp-tokens.css' ) ) );
 	$img = wp_get_attachment_image( 8747, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy' ) );
 	$url = home_url( '/help/' );
 	return '<section class="kit-card aw-side-camp aw-camp aw-side-camp--default" aria-labelledby="aw-side-camp-default">'
 		. ( $img ? '<div class="aw-side-camp-media">' . $img . '</div>' : '' )
-		. '<div class="aw-side-camp-body"><h2 class="aw-side-camp-title" id="aw-side-camp-default"><a href="' . esc_url( $url ) . '">' . esc_html__( 'Help for India’s animals, in one place.', 'animal-writes-core' ) . '</a></h2>'
-		. '<p class="aw-side-camp-line">' . esc_html__( 'Helplines, vets and rescue groups near you, and the law in plain words.', 'animal-writes-core' ) . '</p>'
-		. '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '">' . esc_html__( 'Find help', 'animal-writes-core' ) . '</a></div></section>';
+		. '<div class="aw-side-camp-body"><h2 class="aw-side-camp-title" id="aw-side-camp-default"><a href="' . esc_url( $url ) . '">' . esc_html__( 'Help for India’s animals, in one place.', 'kits-by-wugweb' ) . '</a></h2>'
+		. '<p class="aw-side-camp-line">' . esc_html__( 'Helplines, vets and rescue groups near you, and the law in plain words.', 'kits-by-wugweb' ) . '</p>'
+		. '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '">' . esc_html__( 'Find help', 'kits-by-wugweb' ) . '</a></div></section>';
 }
 
 /*
@@ -1397,7 +1397,7 @@ function aw_page_share_kit() {
 		$home ? 'home' : (string) get_post_field( 'post_name', $id ),
 		array(
 			'follow' => aw_follow_accounts(),
-			'button' => __( 'Share this page', 'animal-writes-core' ),
+			'button' => __( 'Share this page', 'kits-by-wugweb' ),
 			'order'  => true,
 		)
 	);

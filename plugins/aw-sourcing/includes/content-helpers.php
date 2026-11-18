@@ -124,3 +124,21 @@ function sourceweb_cron_span( $s ): string {
 	$m = (int) round( $s / 60 );
 	return $m >= 60 ? sprintf( '%d h %02d min', intdiv( $m, 60 ), $m % 60 ) : $m . ' min';
 }
+
+/**
+ * A summary up to its last full sentence (owner, 20 Oct 2026): a tail cut off mid-sentence ("…of Kerala's Th") is
+ * dropped, never cut mid-word. Only the first paragraph is checked (Library summaries carry a note on a line of their
+ * own). Text without any full sentence is returned as it is.
+ *
+ * @param string $text Summary.
+ * @return string
+ */
+function sourceweb_whole_sentences( $text ) {
+	$lines = explode( "\n", trim( (string) $text ) );
+	$first = trim( $lines[0] );
+	if ( '' !== $first && ! preg_match( '/[.!?…]["\'”’)\]]*$/u', $first ) && preg_match_all( '/[.!?…]["\'”’)\]]*(?=\s|$)/u', $first, $m, PREG_OFFSET_CAPTURE ) ) {
+		$last     = end( $m[0] );
+		$lines[0] = substr( $first, 0, $last[1] + strlen( $last[0] ) );
+	}
+	return implode( "\n", $lines );
+}

@@ -57,6 +57,7 @@ require_once PLANWEB_DIR . 'includes/site-schedule.php';
 require_once PLANWEB_DIR . 'includes/feed-model.php';
 require_once PLANWEB_DIR . 'includes/feed.php';
 require_once PLANWEB_DIR . 'includes/migrate.php';
+require_once PLANWEB_DIR . 'includes/team-dates.php'; // the team's Dates calendar and aw_team_dates(), the fallback while PlanWeb is off (moved from Animal Writes Core, 19 Nov 2026)
 require_once PLANWEB_DIR . 'includes/planweb-ui.php';
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once PLANWEB_DIR . 'includes/class-planweb-cli.php';

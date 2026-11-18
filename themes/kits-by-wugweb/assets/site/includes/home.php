@@ -3,7 +3,7 @@
  * Home page. Its sections and their order live in the theme template (templates/front-page.html), each a pattern; the
  * front page's own content is not shown. Its FAQ box still holds the home page's questions (item-faq block, last).
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

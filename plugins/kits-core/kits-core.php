@@ -47,6 +47,7 @@ require_once KITS_CORE_DIR . 'includes/plugin-info.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';
+require_once KITS_CORE_DIR . 'includes/private-dir.php'; // kits_private_dir(): the private upload folder for claim logos (moved from Animal Writes Core's campaigns.php)
 // The site's forms on Fluent Forms: the custom fields, checks and look, the form and thank-you pages, Report a mistake,
 // the volunteer form, the Campaign form with the raw copy of every send, and the Dashboard box (moved from Animal Writes
 // Core, 18 Nov 2026). compat.php keeps the old function names working.
@@ -110,6 +111,13 @@ require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
 require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert (moved from Animal Writes Core, 18 Nov 2026)
 require_once KITS_CORE_DIR . 'includes/error-pages.php'; // the branded 500 and 503 drop-ins copied from dropins/ into wp-content (moved from Animal Writes Core, 18 Nov 2026)
+// Campaign, press and social engines (moved from Animal Writes Core, 19 Nov 2026; names and data unchanged): the campaign
+// link taxonomy, the short links (/lab, /diwali), the letter tool's statistics, press coverage, social posts and the
+// sponsored blocks. The campaign pages and Home themselves are the theme's site layer (assets/site/includes/).
+foreach ( array( 'campaign-links', 'campaign-short', 'campaign-letters', 'press', 'social-posts', 'sponsored-blocks' ) as $kits_engine_file ) {
+	require_once KITS_CORE_DIR . 'includes/' . $kits_engine_file . '.php';
+}
+unset( $kits_engine_file );
 
 // Switched off: its scheduled jobs come off too (they are booked again on the next request after it is switched back on).
 register_deactivation_hook(

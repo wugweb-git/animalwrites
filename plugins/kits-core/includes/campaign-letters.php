@@ -18,7 +18,7 @@
  * - WP Admin → Campaigns → Letter report: totals, by city, by ground, by route, by device and by day, with a CSV export
  *   of the anonymous rows.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -294,7 +294,7 @@ function aw_cl_report_page() {
 	}
 	echo '</select> ' . get_submit_button( 'Show', 'secondary', '', false ) . ' <a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_cl_csv&campaign=' . $cid ), 'aw_cl_csv' ) ) . '">Export CSV</a></form>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_submit_button() is core's escaped button
 	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d", $cid ) ); // phpcs:ignore
-	echo '<h2>' . esc_html( sprintf( /* translators: %s: number of letters. */ _n( '%s letter sent', '%s letters sent', $total, 'animal-writes-core' ), number_format_i18n( $total ) ) ) . '</h2>';
+	echo '<h2>' . esc_html( sprintf( /* translators: %s: number of letters. */ _n( '%s letter sent', '%s letters sent', $total, 'kits-core' ), number_format_i18n( $total ) ) ) . '</h2>';
 	$table = function ( $title, $rows, $head ) {
 		echo '<h2>' . esc_html( $title ) . '</h2>';
 		$cells = array();
