@@ -59,13 +59,13 @@ function aw_listing_fields() {
 }
 
 /**
- * Whether SCF (or ACF) is active, without Animal Writes Core: Kits Core's check when it has one, else SCF's own
- * function. Same answer as Core's aw_scf_active() on this site.
+ * Whether SCF (or ACF) is active: Kits Core's check when it has one, else Animal Writes Core's, else SCF's own
+ * function. All three give the same answer on this site, whichever plugin update lands first.
  *
  * @return bool
  */
 function directoryweb_scf_active(): bool {
-	return function_exists( 'kits_scf_active' ) ? (bool) kits_scf_active() : function_exists( 'acf_add_local_field_group' );
+	return function_exists( 'kits_scf_active' ) ? (bool) kits_scf_active() : ( function_exists( 'aw_scf_active' ) ? (bool) aw_scf_active() : function_exists( 'acf_add_local_field_group' ) );
 }
 
 // With SCF active the listing field groups (acf-json/group_aw_listing*.json: Contact and seven more) edit these same keys; this box
