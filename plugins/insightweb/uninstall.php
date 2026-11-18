@@ -31,9 +31,9 @@
  * The service keys (option insightweb_keys) are deleted but never written to the backup file: they are secrets, pasted
  * again (or set in wp-config.php) after a reinstall, as Kits Core does with its ALTCHA key.
  *
- * Never deleted: the keyword tables {prefix}aw_si_keywords and {prefix}aw_si_kw_map (Kits Core's, they hold the
- * owner's Sourcing, Press and Tracked keywords), posts, users, Site Kit's and Rank Math's data, and any other plugin's
- * options.
+ * Never deleted: the keyword tables {prefix}aw_si_keywords and {prefix}aw_si_kw_map (InsightWeb's since 18 Nov 2026 and
+ * shared with SourceWeb: they hold the owner's Sourcing, Press and Tracked keywords) and their option aw_kw_db,
+ * posts, users, Site Kit's and Rank Math's data, and any other plugin's options.
  *
  * @package insightweb
  */

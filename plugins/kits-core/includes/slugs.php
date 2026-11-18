@@ -21,9 +21,13 @@ add_action(
 		}
 		$base = sanitize_title( $post->post_title );
 		$base = '' !== $base ? $base : $post->post_type . '-' . $post->ID;
-		if ( function_exists( 'kits_clean_news_slug' ) && function_exists( 'kits_sourced_types' ) && in_array( $post->post_type, kits_sourced_types(), true ) ) {
-			$base = kits_clean_news_slug( $base, $post->ID );
-		}
+		/**
+		 * The slug's base for an item published without one. SourceWeb drops a trailing publisher from news slugs.
+		 *
+		 * @param string  $base The title as a slug.
+		 * @param WP_Post $post The item.
+		 */
+		$base = (string) apply_filters( 'kits_publish_slug_base', $base, $post );
 		$slug = wp_unique_post_slug( $base, $post->ID, 'publish', $post->post_type, (int) $post->post_parent );
 		global $wpdb;
 		$wpdb->update( $wpdb->posts, array( 'post_name' => $slug ), array( 'ID' => $post->ID ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery

@@ -62,11 +62,8 @@ require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
 require_once KITS_CORE_DIR . 'includes/preview.php';
-require_once KITS_CORE_DIR . 'includes/sourcing.php';
-require_once KITS_CORE_DIR . 'includes/sources-config.php'; // the sourcing lists (option aw_sources)
-require_once KITS_CORE_DIR . 'includes/keyword-table.php'; // the keyword table SourceWeb, InsightWeb and RankWeb share (with keyword-model.php)
-require_once KITS_CORE_DIR . 'includes/attribution.php';
-require_once KITS_CORE_DIR . 'includes/compat-sourcing.php'; // aw_ -> kits_ back-compat shims for the sourcing/attribution helpers the tenant and siblings still call
+// The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
+// InsightWeb's (moved out on 18 Nov 2026 with the same names, option, tables, shortcode and scheduled event).
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
@@ -88,7 +85,6 @@ require_once KITS_CORE_DIR . 'includes/fonts.php';
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		wp_unschedule_hook( 'aw_fetch_favicons' );
-		wp_unschedule_hook( 'kits_spot_map_daily' );
+		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
 	}
 );

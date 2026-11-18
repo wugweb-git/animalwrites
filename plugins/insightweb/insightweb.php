@@ -3,8 +3,9 @@
  * InsightWeb
  *
  * Search Insights, moved out of RankWeb on 11 Nov 2026 with no other change: the same screen, names, tables, options,
- * scheduled jobs and routes (docs/insightweb-plan.md). It needs Kits Core, Animal Writes Core and Rank Math, checked in
- * includes/bootstrap.php (not with a Requires Plugins header: on live Kits Core is loaded by Animal Writes Core).
+ * scheduled jobs and routes (docs/insightweb-plan.md). It needs Kits Core and Rank Math, checked in
+ * includes/bootstrap.php (not with a Requires Plugins header: on live Kits Core is loaded by Animal Writes Core). It also
+ * owns the keyword table SourceWeb shares (includes/keywords.php, moved from Kits Core on 18 Nov 2026), loaded first.
  *
  * @package           insightweb
  * @author            Wugweb
@@ -36,6 +37,7 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) { // already set by the bootstrap on the re
 	define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );
 }
 
+require_once INSIGHTWEB_DIR . 'includes/keywords.php'; // the keyword table SourceWeb shares (moved from Kits Core, 18 Nov 2026); needs no other plugin
 require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php'; // InsightWeb's own capability, manage_insightweb (granted from manage_options).
 require_once INSIGHTWEB_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen.
 require_once INSIGHTWEB_DIR . 'includes/kits-hub.php'; // a row in Kits System Status, when Kits Core is loaded.

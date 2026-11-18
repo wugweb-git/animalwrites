@@ -18,10 +18,10 @@
  * Never deleted, even when ticked:
  * - Posts, pages, synced patterns, Styles (wp_global_styles), terms, users, attachments and any post meta (the
  *   _kits_* Page Options of each page stay).
- * - Shared data Kits Core keeps for the other plugins: the keyword tables ({prefix}aw_si_keywords and
- *   {prefix}aw_si_kw_map) and their version option aw_kw_db, the sourcing lists aw_sources, aw_publishers and
- *   aw_relevance, the aw_fetch_favicons event, and the aw_form_* / aw_rl_* form transients (shared with Animal Writes
- *   Core; they expire within the hour).
+ * - The aw_form_* / aw_rl_* form transients (shared with Animal Writes Core; they expire within the hour).
+ * - The keyword tables ({prefix}aw_si_keywords, {prefix}aw_si_kw_map) and aw_kw_db, the sourcing lists aw_sources,
+ *   aw_publishers and aw_relevance, and the aw_fetch_favicons event: InsightWeb's and SourceWeb's since 18 Nov 2026
+ *   (Kits Core no longer installs, reads or books them).
  * - Anything belonging to another plugin or to WordPress itself.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/kits-core-uninstall-<YYYYmmdd-His>.jsonl.gz
@@ -78,6 +78,5 @@ foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 
 delete_site_transient( 'kits_update_release' );
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
-wp_unschedule_hook( 'aw_fetch_favicons' ); // the hourly favicon run (attribution.php)
 
 delete_option( 'kits_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.

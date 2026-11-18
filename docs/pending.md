@@ -32,7 +32,7 @@ Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Ki
   - Listed only: 4 posts and patterns name `aw_campaign_link`, and 1 user screen setting names `aw_media_group`.
 - **Before aw-core is deleted (highest risk to live):**
   - Startup checks and unguarded calls: on branch `claude/awcore-plugins-standalone` (PR into `wordpress-dev`, not merged or shipped). DirectoryWeb needs Kits Core, SourceWeb needs Kits Core and DirectoryWeb (`Requires Plugins` headers); every call from DirectoryWeb, SourceWeb, RankWeb and InsightWeb into aw-core is moved or guarded. What still needs aw-core to work (content types, the `j M Y` date filter, claims, issuers, cron health): `docs/awcore-retirement.md` §3.
-  - Sourcing and keyword code in Kits Core moves to SourceWeb/InsightWeb: `wp_aw_si_*` tables, `aw_kw_*`, `aw_sources`, `[aw_source_row]`, `aw_fetch_favicons`.
+  - Sourcing and keyword code out of Kits Core (18 Nov; branch `claude/kits-sourcing-out`, PR into `wordpress-dev` stacked on the one above, not merged or shipped): the keyword table (`wp_aw_si_*`, `aw_kw_*`, `aw_si_*`) is InsightWeb's; `aw_sources`, `[aw_source_row]`, attribution and the `aw_fetch_favicons` run are SourceWeb's. Same names, no data moved. SourceWeb now also needs InsightWeb (`docs/awcore-retirement.md` §4).
 - **Bigger moves (theme ↔ plugin boundary):**
   - `kit.js` analytics, forms, share and ALTCHA → Kits Core.
   - The theme's joined-CSS/caching code (`functions.php` about 750 lines) → Kits Core Performance.

@@ -29,7 +29,7 @@ function aw_si_install(): void {
 	$r  = aw_si_table( 'rising' );
 	$l  = aw_si_table( 'links' );
 	$sc = aw_si_table( 'scores' );
-	// The keyword table itself is Animal Writes Core's (aw_kw_install(), owner's decision 3, 25 Oct 2026).
+	// The keyword table itself: aw_kw_install() in keyword-table.php (owner's decision 3, 25 Oct 2026; InsightWeb's from 18 Nov).
 	aw_kw_install();
 	// Which page owns which keyword. path_key = md5 of the object or path, so one page holds one row per keyword and role.
 	dbDelta(
@@ -120,7 +120,7 @@ function aw_si_install(): void {
 	);
 	// InsightWeb's own keyword score store (plan §7b): the daily recompute writes a score (0-100) and its parts, the
 	// recommended-use keys, the focus-keyphrase health and the canonical owner, keyed by keyword id. The Keywords tab
-	// joins it for sorting and filtering. Kept in InsightWeb's own table so Kits Core's shared keyword table is unchanged.
+	// joins it for sorting and filtering. Kept in InsightWeb's own table so the shared keyword table is unchanged.
 	dbDelta(
 		"CREATE TABLE {$sc} (
 		kw_id bigint(20) unsigned NOT NULL,

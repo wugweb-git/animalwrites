@@ -5,11 +5,11 @@
  * (bar wp_strip_all_tags, which the WordPress-free test runner provides), so plugins/aw-sourcing/tests/run.php tests
  * them without WordPress (owner rule: no local WordPress or MySQL).
  *
- * The table itself (wp_aw_si_keywords, the same name as before) and its map table live in keyword-table.php, here in
- * Animal Writes Core, so sourcing never depends on aw-seo-extras (owner's decision 3). Search Insights (aw-seo-extras)
- * reads and writes the same records for its own roles.
+ * The table itself (wp_aw_si_keywords, the same name as before) and its map table live in keyword-table.php. Both
+ * moved from Kits Core to InsightWeb on 18 Nov 2026 with the same names and results; SourceWeb reads and writes the
+ * same records for its sourcing roles. Loaded once by keywords.php.
  *
- * @package kits-core
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

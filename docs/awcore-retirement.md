@@ -111,6 +111,38 @@ These no longer crash without aw-core, but stop working:
 8. Callers outside these four plugins (`tools/`, MailWeb, PlanWeb) are listed in `docs/aw-core-callers.md` and are
    not part of this change.
 
+## 4. Sourcing and keyword code out of Kits Core (18 Nov 2026)
+
+Owner, 18 Nov 2026: "The sourcing code still in Kits Core - fix it". Kits Core no longer holds sourcing or keyword
+code. Same function, option, table, meta key and shortcode names; no data moved, no migration.
+
+| Was in Kits Core | Now | Notes |
+|---|---|---|
+| `keyword-table.php`, `keyword-model.php` (`aw_si_table()`, `aw_kw_*`, `aw_si_norm()`…, role constants, dbDelta of `wp_aw_si_keywords` / `wp_aw_si_kw_map`, option `aw_kw_db`) | InsightWeb `includes/keyword-table.php`, `keyword-model.php`, loaded once by `includes/keywords.php` (`INSIGHTWEB_KEYWORDS_LOADED`) | Loaded by insightweb.php first, by the bootstrap before its Kits Core / Rank Math check, and by SourceWeb. Needs no other plugin. |
+| `sources-config.php` (`kits_sources_config()`), `data/sources-seed.json` | SourceWeb `includes/sources-config.php` (`sourceweb_sources_config()`, alias `aw_sources_config()`), `data/sources-seed.json` | Option `aw_sources` unchanged. DirectoryWeb reads the listing tags from it, or from the option itself when SourceWeb is off. |
+| `attribution.php` (`kits_source_row_html()` and the other `kits_*`, `[aw_source_row]`, the news-date filter, the slug filter, the favicon run) | SourceWeb `includes/attribution.php` (`sourceweb_*`; the `aw_*` aliases stay) | Dual read of `kits_source_*` / workers-written `aw_source_*` meta unchanged. |
+| `sourcing.php` (`kits_sourced_types()`, `kits_host()`, `kits_publishers()`, `KITS_*` constants) | removed: SourceWeb's `sourcing-basics.php` already defines `kits_sourced_types()`, `aw_host()`, `aw_publishers()` and the `AW_*` constants | Nothing called the `kits_` names or constants outside these files. |
+| `compat-sourcing.php` (the `aw_*` aliases) | removed: the aliases are at the end of SourceWeb's `attribution.php` and `sources-config.php` | `aw_host()` and `aw_publishers()` are SourceWeb's own. |
+| `slugs.php` calling `kits_clean_news_slug()` | filter `kits_publish_slug_base`, which SourceWeb hooks | Same slug as before. |
+
+**The favicon run.** `aw_fetch_favicons` keeps its name (booked on live). SourceWeb books it on `init` and takes it off
+when it is deactivated. InsightWeb's referrer icons listen on it and now book it too, so they keep working without
+SourceWeb (after SourceWeb's deactivation InsightWeb books it again on the next request). Kits Core's deactivation hook
+and `uninstall.php` no longer touch it. Animal Writes Core's own deactivation list (`cron.php`) still names it; that
+is harmless and goes with aw-core.
+
+**SourceWeb now needs InsightWeb** (`Requires Plugins: kits-core, directoryweb, insightweb`), for the keyword table
+(about 200 calls). It loads an active InsightWeb early, as it does Kits Core and DirectoryWeb. While Animal Writes Core
+is active, which loads InsightWeb's Search Insights whether or not InsightWeb is active, SourceWeb loads the keyword
+table from Core's sibling `insightweb` folder, so nothing changes in that set-up either. SourceWeb's host helpers load
+before its check, so Animal Writes Core's `aw_host()` / `aw_publishers()` calls never meet a missing function. Live has
+InsightWeb active (18 Nov 2026).
+
+**What needs SourceWeb now.** `[aw_source_row]`, the source rows and publisher icons on news cards and item pages,
+relative dates on news cards and publisher-free news slugs need SourceWeb loaded (live: active, and Animal Writes Core
+loads it too). Animal Writes Core's calls to these are behind `function_exists`, except `[aw_source_row]` in
+`item-head.php`, which prints as text if SourceWeb is not loaded.
+
 ## How it was checked
 
 - An inventory script listed every call from the four plugins to a prefixed function defined only in another plugin,
