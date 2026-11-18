@@ -47,5 +47,5 @@ function aw_unverified_mark( $lid, $value ) {
 		return '';
 	}
 	$why = 'Unverified: this listing has another value for it. The organisation can confirm it by claiming the listing.';
-	return ' <span class="aw-unverified" title="' . esc_attr( $why ) . '">' . kits_icon( 'alert' ) . '<span class="screen-reader-text">' . esc_html( $why ) . '</span></span>';
+	return ' <span class="aw-unverified" title="' . esc_attr( $why ) . '">' . aw_i( 'alert' ) . '<span class="screen-reader-text">' . esc_html( $why ) . '</span></span>';
 }
