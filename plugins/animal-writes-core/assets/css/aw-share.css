@@ -19,7 +19,7 @@
 
 /* Branding */
 .aw-camp { --aw-share-col: 1120px; }
-.aw-camp--sc-stray-dogs { --camp-share-pic: url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg"); --camp-share-rgb: 58 23 48; --camp-share-pos: 60% 40%; --camp-share-pos-sm: 80% 50%; --aw-share-btn: var(--kit-color-accent); --aw-share-btn-ink: #3a1730; } /* the site yellow on plum (owner, 1 Nov 2026), 9.4:1 */
+.aw-camp--sc-stray-dogs { --camp-share-pic: url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-share.jpg"); --camp-share-rgb: 58 23 48; --camp-share-pos: 60% 40%; --camp-share-pos-sm: 80% 50%; --aw-share-btn: var(--kit-color-accent); --aw-share-btn-ink: #3a1730; } /* the site yellow on plum (owner, 1 Nov 2026), 9.4:1 */
 .aw-camp--lab-rules { --camp-share-pic: url("/wp-content/uploads/2026/10/lab-rules-2026-illustration.avif"); --camp-share-rgb: 107 15 34; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 85% 50%; --aw-share-btn: #a3122f; --aw-share-btn-ink: #ffffff; --aw-share-btn-edge: #ffffff; } /* crimson, white text 7.8:1; crimson on its own dark wash is 1.6:1, so a white edge */
 .aw-camp--diwali { --camp-share-pic: url("/wp-content/uploads/2026/11/diwali-share-woman-giving-water-to-street-dog.jpg"); --camp-share-rgb: 27 22 54; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 78% 50%; --aw-share-btn: #ffb547; --aw-share-btn-ink: #1b1636; } /* marigold on night sky, 9.8:1 */
 .aw-camp--community-dogs { --camp-share-pic: url("/wp-content/uploads/2026/10/animal-writes-1-hero-1024x1536.jpg"); --camp-share-rgb: 22 19 14; --camp-share-pos: 50% 72%; --camp-share-pos-sm: 40% 72%; --aw-share-btn: #ffa500; --aw-share-btn-ink: #16130e; } /* the campaign orange, 9.4:1 */

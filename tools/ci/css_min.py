@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""aw*.css → aw*.min.css (the component files aw-*.css in plugins/animal-writes-core/theme/assets/css), and
+"""aw*.css → aw*.min.css (the Animal Writes component files aw-*.css in themes/kits-by-wugweb/assets/site/css), and
 the Kits kit.css, kit-primitives.css, kit-tokens.css → .min.css: comments and whitespace out, nothing else.
 
 The site serves the .min.css files; the sources stay the readable files in git (the editors load the sources).
@@ -21,7 +21,7 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-AW_CSS = ROOT / "plugins/animal-writes-core/theme/assets/css"
+AW_CSS = ROOT / "themes/kits-by-wugweb/assets/site/css"
 KITS_CSS = ROOT / "themes/kits-by-wugweb/assets/css"
 
 

@@ -4,9 +4,9 @@
  * that Kits by Wugweb runs alone, and where to change it in wp-admin. Read-only: nothing here writes an option,
  * meta or post. Added to Kits → Help by this plugin, so Kits Core itself stays free of Animal Writes parts.
  *
- * Two core list tables: the child theme's functions (functions.php and theme.json), each with its file here or in
- * Kits Core and whether it runs on this site; and the files this plugin carries (theme/templates, theme/parts,
- * theme/patterns), read from the folder, each with a link to its Site Editor screen.
+ * Two core list tables: the child theme's functions (functions.php and theme.json), each with its file in the Kits
+ * theme's site folder (assets/site/) or in Kits Core and whether it runs on this site; and the site folder's
+ * templates, parts and patterns, read from the folder, each with a link to its Site Editor screen.
  *
  * @package animal-writes-core
  */
@@ -44,18 +44,18 @@ function aw_theme_parts_state( bool $on, string $off = 'Off: the active theme is
 function aw_theme_parts_function_rows(): array {
 	$parts = aw_core_theme_parts_on();
 	$fonts = function_exists( 'kits_inter_hooks_on' ) && kits_inter_hooks_on();
-	$here  = 'Animal Writes Core';
+	$here  = 'Kits theme, site folder';
 	$kits  = 'Kits Core';
 	$repo  = 'In the repository only (file editing is off in wp-admin)';
 	$perf  = aw_theme_parts_link( 'Appearance → Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' );
 	$core  = aw_theme_parts_link( 'Appearance → Kits → Settings', 'admin.php?page=kits-settings' );
 	$items = array(
-		array( 'Site styles and script', 'Loads tokens.css and aw.js over the Kits styles on every page. The site-wide rules are in the Kits theme (kits.css); the rules only Animal Writes uses are in the Animal Writes style variation, saved in the global styles.', $here, 'includes/theme-parts-assets.php', $repo, $parts ),
-		array( 'Editor uses the site styles', 'The block editor and the classic editor show content with tokens.css and the component files.', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
-		array( 'Animal Writes pattern category', 'The "Animal Writes" group in the block inserter.', $here, 'includes/theme-parts-assets.php', aw_theme_parts_link( 'Appearance → Editor → Patterns', 'site-editor.php?path=/patterns' ), $parts ),
-		array( 'Home hero photo preload', 'The home page starts loading its hero photograph at once (not when a campaign hero shows).', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
-		array( 'tokens.css inline', 'The five brand values are printed in the page instead of a separate file.', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
-		array( 'Brand settings (theme.json)', 'Colours, fonts, spacing and the custom templates, merged over the Kits theme.json as a child theme\'s would be.', $here, 'theme/theme.json, includes/theme-parts-assets.php', aw_theme_parts_link( 'Appearance → Editor → Styles', 'site-editor.php?path=/wp_global_styles' ), $parts ),
+		array( 'Site styles and script', 'Loads tokens.css and aw.js over the Kits styles on every page. The site-wide rules are in the Kits theme (kits.css); the rules only Animal Writes uses are in the Animal Writes style variation, saved in the global styles.', $here, 'assets/site/site.php', $repo, $parts ),
+		array( 'Editor uses the site styles', 'The block editor and the classic editor show content with tokens.css and the component files.', $here, 'assets/site/site.php', 'Automatic', $parts ),
+		array( 'Animal Writes pattern category', 'The "Animal Writes" group in the block inserter.', $here, 'assets/site/site.php', aw_theme_parts_link( 'Appearance → Editor → Patterns', 'site-editor.php?path=/patterns' ), $parts ),
+		array( 'Home hero photo preload', 'The home page starts loading its hero photograph at once (not when a campaign hero shows).', $here, 'assets/site/site.php', 'Automatic', $parts ),
+		array( 'tokens.css inline', 'The five brand values are printed in the page instead of a separate file.', $here, 'assets/site/site.php', 'Automatic', $parts ),
+		array( 'Brand settings (theme.json)', 'Colours, fonts, spacing and the custom templates, merged over the Kits theme.json as a child theme\'s would be.', $here, 'assets/site/theme.json, inc/site-layer.php', aw_theme_parts_link( 'Appearance → Editor → Styles', 'site-editor.php?path=/wp_global_styles' ), $parts ),
 		array( 'Inter preload and Inter Fallback', 'Wide screens preload Inter; until it arrives, text shows in Arial sized to Inter, so lines do not jump.', $kits, 'includes/fonts.php', $perf . ' → Font preload', $fonts ),
 		array( 'One copy of Inter', 'Leaves out the Font Library\'s duplicate Inter files.', $kits, 'includes/fonts.php', $core . ' → One copy of Inter', $fonts ),
 	);
@@ -73,10 +73,10 @@ function aw_theme_parts_function_rows(): array {
 }
 
 /**
- * Titles of the custom templates in this plugin's theme.json, by name.
+ * Titles of the custom templates in the site folder's theme.json, by name.
  */
 function aw_theme_parts_template_titles(): array {
-	$file = AW_THEME_PARTS_DIR . 'theme.json';
+	$file = function_exists( 'kits_site_path' ) ? kits_site_path( 'theme.json' ) : '';
 	$data = is_readable( $file ) ? wp_json_file_decode( $file, array( 'associative' => true ) ) : null;
 	$out  = array();
 	foreach ( (array) ( $data['customTemplates'] ?? array() ) as $t ) {
@@ -113,7 +113,7 @@ function aw_theme_parts_template_name( string $slug, bool $template ): string {
 	return $words;
 }
 
-/** Rows for the files this plugin carries: file, kind, change it in, status. */
+/** Rows for the files in the theme's site folder: file, kind, change it in, status. */
 function aw_theme_parts_file_rows(): array {
 	$parts  = aw_core_theme_parts_on();
 	$theme  = get_stylesheet();
@@ -125,7 +125,7 @@ function aw_theme_parts_file_rows(): array {
 		'patterns'  => array( 'Pattern', '*.php', '' ),
 	);
 	foreach ( $kinds as $dir => $k ) {
-		$files = glob( AW_THEME_PARTS_DIR . $dir . '/' . $k[1] );
+		$files = function_exists( 'kits_site_path' ) ? glob( kits_site_path( $dir . '/' . $k[1] ) ) : array();
 		foreach ( is_array( $files ) ? $files : array() as $f ) {
 			$slug = basename( $f, ( '.html' === substr( $k[1], 1 ) ) ? '.html' : '.php' );
 			if ( '' !== $k[2] ) {
@@ -137,7 +137,7 @@ function aw_theme_parts_file_rows(): array {
 				$link = aw_theme_parts_link( 'Appearance → Editor → Patterns', 'site-editor.php?path=/patterns' );
 			}
 			$rows[] = array(
-				'item'   => '<strong>' . esc_html( $name ) . '</strong><br><code>theme/' . esc_html( $dir . '/' . basename( $f ) ) . '</code>',
+				'item'   => '<strong>' . esc_html( $name ) . '</strong><br><code>assets/site/' . esc_html( $dir . '/' . basename( $f ) ) . '</code>',
 				'kind'   => esc_html( $k[0] ),
 				'change' => $link,
 				'state'  => aw_theme_parts_state( $parts ),
@@ -152,14 +152,14 @@ function aw_theme_parts_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'animal-writes-core' ), 403 );
 	}
-	$intro = 'What the Animal Writes child theme held, where each part lives now that Kits by Wugweb runs on its own, and where to change it. Animal Writes Core serves these parts whenever Kits by Wugweb is the active theme.';
+	$intro = 'What the Animal Writes child theme held, where each part lives now that Kits by Wugweb runs on its own, and where to change it. The Kits theme serves these parts from its site folder (assets/site/), which the distributed theme leaves out.';
 	if ( function_exists( 'kits_admin_head' ) ) {
 		kits_admin_head( 'kits-help', 'Theme parts', $intro ); // Opens .wrap (inside Help: a plain box).
 	} else {
 		echo '<div class="wrap"><h1>' . esc_html( 'Theme parts' ) . '</h1><p>' . esc_html( $intro ) . '</p>';
 	}
 	if ( ! aw_core_theme_parts_on() ) {
-		wp_admin_notice( esc_html( 'The active theme is not Kits by Wugweb alone, so Animal Writes Core does not serve these parts.' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html( 'The active theme is not Kits by Wugweb alone, so the theme does not serve these parts.' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	echo '<h2>' . esc_html( 'Functions' ) . '</h2>';
 	aw_core_simple_table(
@@ -183,7 +183,7 @@ function aw_theme_parts_screen() {
 			'state'  => 'On this site',
 		),
 		aw_theme_parts_file_rows(),
-		array( 'empty' => 'No files found in theme/.' )
+		array( 'empty' => 'No files found in assets/site/.' )
 	);
 	echo '</div>';
 }

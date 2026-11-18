@@ -4,6 +4,7 @@
 
 	<!-- Scan the theme's PHP only. Block-theme markup (templates/parts *.html), JSON and CSS/JS are out of PHPCS scope. -->
 	<file>functions.php</file>
+	<file>inc</file>
 	<file>patterns</file>
 	<file>tools</file>
 
