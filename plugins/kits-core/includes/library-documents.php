@@ -27,12 +27,12 @@ add_filter(
 		}
 		$fid     = (int) get_post_meta( $post_id, 'aw_file_id', true );
 		$pdf     = $fid ? wp_get_attachment_url( $fid ) : '';
-		if ( ! $pdf ) {
+		$file    = $fid ? (string) get_attached_file( $fid ) : '';
+		if ( ! $pdf || '' === $file || ! file_exists( $file ) ) { // no copy, or its file is gone from uploads (SourceWeb refetches it): no broken viewer
 			return $content . kits_doc_preview_html( $post_id );
 		}
 		$title  = get_the_title( $post_id );
-		$source = (string) get_post_meta( $post_id, 'aw_source_url', true );
-		$size   = size_format( (int) filesize( get_attached_file( $fid ) ), 1 );
+		$size   = size_format( (int) filesize( $file ), 1 );
 		$number = trim( (string) get_post_meta( $post_id, 'aw_legal_number', true ) );
 		$kinds  = function_exists( 'aw_legal_kinds' ) ? wp_list_pluck( aw_legal_kinds( $post_id ), 'slug' ) : array();
 		$head   = '';
@@ -45,8 +45,7 @@ add_filter(
 			esc_url( $pdf ),
 			esc_attr( $title ),
 			esc_html__( 'Your browser cannot show this PDF here. Use the download link below.', 'kits-core' ),
-			esc_html( $size ),
-			esc_url( $source )
+			esc_html( $size )
 		);
 		return $content . $viewer;
 	},

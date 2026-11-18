@@ -87,8 +87,17 @@ add_filter(
 			return $args;
 		}
 		$bundle = trailingslashit( get_temp_dir() ) . 'aw-ca-bundle-egazette.pem';
-		if ( ! file_exists( $bundle ) ) {
-			file_put_contents( $bundle, file_get_contents( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ) . "\n" . file_get_contents( AW_SOURCING_DIR . 'assets/certs/lets-encrypt-yr2-root-yr.pem' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		if ( ! file_exists( $bundle ) || filesize( $bundle ) < 1024 ) { // a bundle left empty or cut short by an earlier failed write is made again
+			$core  = file_get_contents( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			$extra = file_get_contents( AW_SOURCING_DIR . 'assets/certs/lets-encrypt-yr2-root-yr.pem' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			if ( ! $core || ! $extra ) {
+				return $args;
+			}
+			$pem = $core . "\n" . $extra;
+			if ( strlen( $pem ) !== file_put_contents( $bundle, $pem ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
+				wp_delete_file( $bundle );
+				return $args;
+			}
 		}
 		$args['sslcertificates'] = $bundle;
 		return $args;

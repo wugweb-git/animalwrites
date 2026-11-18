@@ -162,8 +162,8 @@ add_action(
 /** Kits → Home → Thumbnails: pictures used by more than one item (moved off Animal Writes Core's Check site, 18 Nov 2026). */
 function kits_thumbs_site_check() {
 	$d = kits_thumb_duplicates();
-	// In a Kits → Home card its title is the card's; the Check site screen (without Kits) needs its own heading.
-	echo ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ? '' : '<h2>Thumbnails</h2>' ) . '<p>' . ( $d ? esc_html( count( $d ) . ' picture(s) used by more than one item: ' . implode( '; ', array_map( fn( $ids ) => '#' . implode( ', #', $ids ), $d ) ) ) : 'No picture is used twice.' ) . '</p>';
+	// A Kits → Home card: its title is the card's, so no heading here.
+	echo '<p>' . ( $d ? esc_html( count( $d ) . ' picture(s) used by more than one item: ' . implode( '; ', array_map( fn( $ids ) => '#' . implode( ', #', $ids ), $d ) ) ) : 'No picture is used twice.' ) . '</p>';
 }
 add_filter(
 	'kits_home_sections',

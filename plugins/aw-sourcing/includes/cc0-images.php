@@ -970,7 +970,7 @@ function sourceweb_cc0_counts() {
 /** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. Registered here, not by Animal Writes Core, since 18 Nov 2026. */
 function sourceweb_cc0_site_check() {
 	$c = sourceweb_cc0_counts();
-	echo '<h2>Pictures on News, Library and research items</h2><table class="form-table" role="presentation"><tbody>';
+	echo '<p>On News, Library and research items:</p><table class="form-table" role="presentation"><tbody>';
 	foreach (
 		array(
 			'Items (published, without a document page)'          => $c['total'] ?? 0,
