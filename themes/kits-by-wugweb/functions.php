@@ -9,6 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// A site's own templates, parts, patterns and files (assets/site/, never in the distributed theme): loaded first, where
+// a child theme's functions.php would load, so the site's hooks come before the theme's own.
+require_once get_template_directory() . '/inc/site-layer.php';
+
 /**
  * The theme's one database option, kits_by_wugweb: an array of the theme's own state (the pattern files' signature,
  * the joined CSS files' hashes and versions, the page kinds' component lists and the release sweep). WordPress.org's
