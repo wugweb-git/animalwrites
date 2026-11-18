@@ -82,7 +82,7 @@ function directoryweb_count_listings(): array {
 		),
 		'types'  => array(),
 	);
-	$slugs = function_exists( 'aw_listing_type_slugs' ) ? array_values( array_filter( array_map( 'strval', aw_listing_type_slugs() ) ) ) : array();
+	$slugs = array_values( array_filter( array_map( 'strval', directoryweb_listing_type_slugs() ) ) );
 	if ( $slugs ) {
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- hourly count in the background
 			$wpdb->prepare(
@@ -379,7 +379,7 @@ function directoryweb_claim_light_rows_read(): array {
 			$out[]  = array(
 				'id'      => 'ff-' . (int) $r['id'],
 				'entry'   => (int) $r['id'],
-				'ref'     => (int) $r['serial_number'] ? 'AW-C-' . (int) $r['serial_number'] : '', // as aw_ff_ref( 'claim', id )
+				'ref'     => (int) $r['serial_number'] ? 'AW-C-' . (int) $r['serial_number'] : '', // as kits_ff_ref( 'claim', id )
 				'old'     => false,
 				'status'  => directoryweb_claim_status( $review ),
 				'sent'    => (string) $r['created_at'],

@@ -60,7 +60,7 @@ Live had no saved menu or part choices, so the front end does not change. Sectio
 | Kits Theme Options | Kits → Theme Options | Appearance → Kits → Theme Options tab | `kits-options` | administrators (`manage_options`) |
 | Kits Settings | Kits → Settings | Appearance → Kits → Settings tab | `kits-settings` | administrators (`manage_options`) |
 | Kits Plugins (removed 11 Nov 2026) | Kits → Plugins | WordPress's Plugins screen (302) | `kits-plugins` | administrators (`manage_options`) |
-| Kits Tools | Kits → Tools | Appearance → Kits → Tools tab | `kits-tools` | administrators (`edit_theme_options`) |
+| Kits Tools | Kits → Tools | Appearance → Kits → Tools tab | `kits-tools` | administrators (`manage_options`) |
 | Kits Help | Kits → Help | Appearance → Kits → Help tab | `kits-help` | administrators (`manage_options`) |
 | Keys, Modules | linked from Kits → Settings | linked from Appearance → Kits → Settings | `aw-keys`, `aw-modules` | administrators (`manage_options`) |
 | Dates | linked from Kits → Home | linked from Appearance → Kits → Home; with PlanWeb on it opens PlanWeb | `aw-dates` | editors and administrators (`edit_others_posts`) |
@@ -85,7 +85,7 @@ Live had no saved menu or part choices, so the front end does not change. Sectio
 | 1 | Home | `kits` | `manage_options` | Welcome, Site: Animal Writes (status part), Check site (page check, backup, joined files) |
 | 2 | Theme Options | `kits-options` | `edit_theme_options` | Theme Options, Fonts, Contact links, the contrast tab of Design system |
 | 3 | Settings | `kits-settings` | `manage_options` | Core Settings, Preview |
-| 4 | Tools | `kits-tools` | `edit_theme_options` | Import / Export |
+| 4 | Tools | `kits-tools` | `manage_options` | Import / Export |
 | 5 | Help | `kits-help` | `manage_options` | Docs, Design system, Edit screens, Theme parts, Site: Animal Writes notes |
 
 No "Animal Writes" tab and no separate tenant menu. Animal Writes adds rows and sections into these five through filters (see E3).

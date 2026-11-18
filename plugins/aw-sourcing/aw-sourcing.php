@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SourceWeb
- * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
+ * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Kits Core, DirectoryWeb and InsightWeb (the keyword table). Animal Writes Core loads it from this folder while Core is active; it can also be activated on its own.
  * Version: 0.1.0
  * Requires at least: 6.5
  * Requires PHP: 8.0
@@ -11,6 +11,7 @@
  * Update URI: https://wugweb.com/plugins/aw-sourcing/
  * Text Domain: aw-sourcing
  * Domain Path: /languages
+ * Requires Plugins: kits-core, directoryweb, insightweb
  *
  * Moved out of Animal Writes Core and Kits Core on 24 Oct 2026 with no change in behaviour: the same option keys,
  * REST routes, cron hooks, admin pages and actions. Core keeps the content types and templates.
@@ -27,14 +28,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'AW_SOURCING_LOADED' ) ) {
 	return;
 }
-// SourceWeb fills Animal Writes Core's content types (News, Library, Directory listings: content-types.php) with its
-// place, tag and listing helpers, so it needs Core; Core also loads Kits Core, which holds the shared keyword table and
-// sourcing lists (keyword-table.php, sources-config.php). Without Core, load nothing and say so.
-if ( ! defined( 'AW_CORE_DIR' ) ) {
+// SourceWeb needs Kits Core (the admin shell and site parts), DirectoryWeb (the listings and places it fills) and
+// InsightWeb (the keyword table, includes/keywords.php there). Plugins load in name order, so active ones load after
+// this file: load them now, once, as Animal Writes Core does (each stops a second load). Animal Writes Core loads Kits
+// Core and DirectoryWeb before this file, so while Core is active those lines change nothing.
+foreach ( array( 'KITS_CORE_LOADED' => 'kits-core/kits-core.php', 'DIRECTORYWEB_LOADED' => 'directoryweb/directoryweb.php', 'INSIGHTWEB_FILE' => 'insightweb/insightweb.php' ) as $sourceweb_const => $sourceweb_main ) {
+	if ( ! defined( $sourceweb_const ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/' . $sourceweb_main )
+		&& ( in_array( $sourceweb_main, (array) get_option( 'active_plugins', array() ), true )
+			|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )[ $sourceweb_main ] ) ) ) ) {
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $sourceweb_main ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
+		require_once WP_PLUGIN_DIR . '/' . $sourceweb_main;
+	}
+}
+unset( $sourceweb_const, $sourceweb_main );
+// Animal Writes Core loads InsightWeb's Search Insights whether or not InsightWeb is active (owner, 11 Nov 2026), so
+// while Core is active the keyword table comes from that folder too, as it did from Kits Core before 18 Nov 2026.
+if ( ! defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) && defined( 'AW_CORE_DIR' ) && is_readable( dirname( AW_CORE_DIR ) . '/insightweb/includes/keywords.php' ) ) {
+	require_once dirname( AW_CORE_DIR ) . '/insightweb/includes/keywords.php';
+}
+// The host and publisher helpers first, before the check: Animal Writes Core calls aw_host() and aw_publishers().
+require_once __DIR__ . '/includes/sourcing-basics.php';
+// Without them, load nothing and say so.
+if ( ! defined( 'KITS_CORE_LOADED' ) || ! defined( 'DIRECTORYWEB_LOADED' ) || ! defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
-			wp_admin_notice( 'SourceWeb needs Animal Writes Core. Sourcing is off until Core is active.', array( 'type' => 'error' ) );
+			if ( current_user_can( 'activate_plugins' ) ) {
+				wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core, DirectoryWeb and InsightWeb. Sourcing is off until all three are active.', 'aw-sourcing' ), array( 'type' => 'error' ) );
+			}
 		}
 	);
 	return;
@@ -44,7 +65,9 @@ define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once AW_SOURCING_DIR . 'includes/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
-require_once AW_SOURCING_DIR . 'includes/sourcing-basics.php'; // own capability, option names and host helpers (also in Kits Core)
+require_once AW_SOURCING_DIR . 'includes/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
+require_once AW_SOURCING_DIR . 'includes/sources-config.php'; // the sourcing lists, option aw_sources (moved from Kits Core, 18 Nov 2026)
+require_once AW_SOURCING_DIR . 'includes/attribution.php'; // [aw_source_row], publisher icons and the favicon run, news slugs (moved from Kits Core, 18 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/summary-rules.php'; // the summary rules (option aw_summary_rules); moved from Core 12 Nov 2026
 require_once AW_SOURCING_DIR . 'includes/help-tab.php';
 require_once AW_SOURCING_DIR . 'includes/plugin-info.php';

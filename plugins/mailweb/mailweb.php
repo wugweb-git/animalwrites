@@ -51,6 +51,9 @@ add_action(
 	}
 );
 
+// Website forms in the Inbox, the old webhook address and the API token from AW_HOSTINGER_MAIL_TOKEN (first: the token
+// constant is set before anything reads it).
+require_once MAILWEB_DIR . 'includes/website-forms.php';
 require_once MAILWEB_DIR . 'includes/mailweb-caps.php'; // MailWeb's own capability, MAILWEB_CAP = manage_mailweb (granted from edit_others_posts).
 require_once MAILWEB_DIR . 'includes/admin-table.php';
 require_once MAILWEB_DIR . 'includes/help-tab.php';
@@ -68,6 +71,9 @@ require_once MAILWEB_DIR . 'includes/utm.php'; // the site's own links in its em
 require_once MAILWEB_DIR . 'includes/inbox.php';
 require_once MAILWEB_DIR . 'includes/settings-tab.php';
 require_once MAILWEB_DIR . 'includes/crm-sync.php';
+require_once MAILWEB_DIR . 'includes/fluentcrm.php'; // the site's FluentCRM: Newsletter list, tags, notes, volunteer fields, update link, UTM tags.
+require_once MAILWEB_DIR . 'includes/newsletter.php'; // [aw_newsletter] (Fluent Forms) and the old list's confirm and unsubscribe links.
+require_once MAILWEB_DIR . 'includes/fluentcrm-compat.php'; // the old aw_ names of the three files above.
 require_once MAILWEB_DIR . 'includes/overview.php';
 require_once MAILWEB_DIR . 'includes/home.php';
 require_once MAILWEB_DIR . 'includes/mailweb-ui.php'; // the screens on the Kits shell.

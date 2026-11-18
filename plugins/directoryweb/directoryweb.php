@@ -10,7 +10,7 @@
  * @wordpress-plugin
  * Plugin Name:       DirectoryWeb
  * Plugin URI:        https://wugweb.com/plugins/directoryweb/
- * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Needs Animal Writes Core.
+ * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Needs Kits Core.
  * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
@@ -21,6 +21,7 @@
  * Update URI:        https://wugweb.com/plugins/directoryweb/
  * Text Domain:       directoryweb
  * Domain Path:       /languages
+ * Requires Plugins:  kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -33,14 +34,22 @@ if ( defined( 'DIRECTORYWEB_LOADED' ) ) {
 	return; // Loaded already (active on its own and also loaded by Animal Writes Core).
 }
 
-// The Directory is built on Animal Writes Core's content types, meta and helpers. On its own, without Core, it says so
-// and does nothing else (Core loads this file after its own files, so the constant is there then).
-if ( ! defined( 'AW_CORE_VERSION' ) ) {
+// DirectoryWeb needs Kits Core (its admin shell, list table, icons and dates). Plugins load in name order, so an active
+// Kits Core loads after this file: load it now, once, as Animal Writes Core does (kits-core.php stops a second load).
+// Animal Writes Core loads Kits Core before this file, so while Core is active this changes nothing.
+if ( ! defined( 'KITS_CORE_LOADED' ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/kits-core/kits-core.php' )
+	&& ( in_array( 'kits-core/kits-core.php', (array) get_option( 'active_plugins', array() ), true )
+		|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )['kits-core/kits-core.php'] ) ) ) ) {
+	wp_register_plugin_realpath( WP_PLUGIN_DIR . '/kits-core/kits-core.php' ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
+	require_once WP_PLUGIN_DIR . '/kits-core/kits-core.php';
+}
+// Without Kits Core, say so and do nothing else.
+if ( ! defined( 'KITS_CORE_LOADED' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
 			if ( current_user_can( 'activate_plugins' ) ) {
-				echo '<div class="notice notice-warning"><p>' . esc_html__( 'DirectoryWeb needs Animal Writes Core. Activate Animal Writes Core and DirectoryWeb will start.', 'directoryweb' ) . '</p></div>';
+				echo '<div class="notice notice-warning"><p>' . esc_html__( 'DirectoryWeb needs Kits Core. Activate Kits Core and DirectoryWeb will start.', 'directoryweb' ) . '</p></div>';
 			}
 		}
 	);
@@ -56,6 +65,7 @@ define( 'DIRECTORYWEB_URL', plugin_dir_url( __FILE__ ) );
 // Kept in the order Animal Writes Core loaded these files in, so hooks added at the same priority keep their order.
 $directoryweb_includes = array(
 	'listing-meta', // the listing's meta, phones, hours and never-publish list (from Core's meta.php, 18 Nov 2026)
+	'listing-terms', // a listing's types and services, and tel: links (from Core's tags.php and bindings.php, 18 Nov 2026)
 	'data-sources', // where a listing's details come from (from Core, 18 Nov 2026)
 	'directoryweb-help-tab',
 	'places',
@@ -65,6 +75,7 @@ $directoryweb_includes = array(
 	'geocode',
 	'directory-map',
 	'claims',
+	'claim-page',
 	'claims-review',
 	'directoryweb-shape',
 	'directoryweb-dashboard',

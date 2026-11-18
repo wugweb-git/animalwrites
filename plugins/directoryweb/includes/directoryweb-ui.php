@@ -278,7 +278,7 @@ add_filter(
 
 /** The option that maps form keys to Fluent Forms IDs. */
 function directoryweb_forms_option(): string {
-	return defined( 'AW_FF_OPTION' ) ? AW_FF_OPTION : 'aw_ff_forms';
+	return defined( 'KITS_FF_OPTION' ) ? KITS_FF_OPTION : 'aw_ff_forms';
 }
 
 /** Dashboard page callback. */

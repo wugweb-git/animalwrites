@@ -487,7 +487,7 @@ function kits_transfer_back( array $result ): void {
 add_action(
 	'admin_post_kits_transfer_import',
 	function () {
-		if ( ! current_user_can( 'edit_theme_options' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html( 'You cannot import settings.' ), 403 );
 		}
 		check_admin_referer( 'kits_transfer_import' );
@@ -717,7 +717,7 @@ function kits_options_box( string $title, callable $rows, string $intro = '' ): 
 }
 
 /**
- * Whether kits_options_box() prints its heading. Theme Options → Content types turns it off while it prints a box under
+ * Whether kits_options_box() prints its heading. Theme Options → Display per type turns it off while it prints a box under
  * a heading that already names it.
  *
  * @param bool|null $set Set the flag.
@@ -828,11 +828,12 @@ function kits_options_sections(): array {
 			'Visual'   => array(
 				'visual-cards' => 'Cards',
 			),
+			// The Speed switches and font preload are on Kits → Settings → Performance only (an older
+			// &section=utility-performance address goes there, admin-app.php).
 			'Utility'  => array(
-				'utility-share'       => 'Share bar',
-				'utility-socials'     => 'Socials',
-				'utility-performance' => 'Performance',
-				'utility-extra'       => 'Extra',
+				'utility-share'   => 'Share bar',
+				'utility-socials' => 'Socials',
+				'utility-extra'   => 'Extra',
 			),
 		)
 	);
@@ -1012,7 +1013,7 @@ add_action(
 				'type'              => 'boolean',
 				'default'           => false,
 				'sanitize_callback' => 'rest_sanitize_boolean',
-				'show_in_rest'      => true,
+				'show_in_rest'      => false, // Not in /wp/v2/settings: only this screen's form turns it on.
 			)
 		);
 	}
@@ -1029,7 +1030,7 @@ add_filter(
 	function ( $sections ) {
 		$sections              = (array) $sections;
 		$sections['uninstall'] = array(
-			'title'  => 'Uninstall',
+			'title'  => __( 'Uninstall', 'kits-core' ),
 			'render' => 'kits_uninstall_form',
 			'cap'    => 'manage_options',
 			'order'  => 90,

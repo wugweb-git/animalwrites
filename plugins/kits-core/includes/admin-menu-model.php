@@ -22,11 +22,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function kits_menu_six( string $home = 'kits' ): array {
 	return array(
-		$home           => array( 'Home', 'admin.php?page=' . $home, 'manage_kits' ),
-		'kits-options'  => array( 'Theme Options', 'admin.php?page=kits-options', 'manage_options' ),
-		'kits-settings' => array( 'Settings', 'admin.php?page=kits-settings', 'manage_options' ),
-		'kits-tools'    => array( 'Tools', 'admin.php?page=kits-tools', 'edit_theme_options' ),
-		'kits-help'     => array( 'Help', 'admin.php?page=kits-help', 'manage_kits' ),
+		$home           => array( __( 'Home', 'kits-core' ), 'admin.php?page=' . $home, 'manage_kits' ),
+		'kits-options'  => array( __( 'Theme Options', 'kits-core' ), 'admin.php?page=kits-options', 'manage_options' ),
+		'kits-settings' => array( __( 'Settings', 'kits-core' ), 'admin.php?page=kits-settings', 'manage_options' ),
+		'kits-tools'    => array( __( 'Tools', 'kits-core' ), 'admin.php?page=kits-tools', 'manage_options' ),
+		'kits-help'     => array( __( 'Help', 'kits-core' ), 'admin.php?page=kits-help', 'manage_kits' ),
 	);
 }
 

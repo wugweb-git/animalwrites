@@ -173,7 +173,7 @@ function aw_review_reason( $id ) {
 	}
 	// 4. Legal Watch: a legal or government source.
 	if ( 'aw_legal' === $type ) {
-		$legal = (bool) aw_item_issuer( $id );
+		$legal = function_exists( 'aw_item_issuer' ) && aw_item_issuer( $id ); // issuers.php (Core)
 		foreach ( AW_LEGAL_HOSTS as $h ) {
 			$legal = $legal || $host === $h || str_ends_with( (string) $host, '.' . $h );
 		}

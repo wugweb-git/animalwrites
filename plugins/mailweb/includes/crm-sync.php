@@ -66,7 +66,7 @@ function mailweb_crm_contact_for( $email, $name ) {
 
 /**
  * A FluentCRM contact by email: found, or made as "transactional" (no list, no marketing) with the name split into
- * first and last. The one copy of this step; Animal Writes Core's aw_crm_contact_for() calls it when MailWeb is active.
+ * first and last. The one copy of this step; the site forms' mailweb_fcrm_contact_for() (fluentcrm.php) calls it.
  *
  * @param string $email  Address.
  * @param string $name   Display name ('' or an address: no name).

@@ -63,7 +63,7 @@ const AW_CLAIM_L = array(
 
 /** The claim form's Fluent Forms ID (0 when it is not set up). */
 function aw_claim_ff_id() {
-	return function_exists( 'aw_ff_id' ) ? (int) aw_ff_id( 'claim' ) : 0;
+	return function_exists( 'kits_ff_id' ) ? (int) kits_ff_id( 'claim' ) : 0;
 }
 
 /** A listing's opening hours as one line, as the form shows them ("Mon 09:00–18:00, Sun closed"). */
@@ -77,7 +77,7 @@ function aw_claim_hours_text( $lid ) {
 
 /** The listing's service tags (slugs) from the claim form's list, sorted. */
 function aw_claim_service_slugs( $lid ) {
-	$slugs = array_values( array_intersect( (array) wp_get_object_terms( $lid, 'post_tag', array( 'fields' => 'slugs' ) ), array_keys( AW_SERVICES ) ) );
+	$slugs = array_values( array_intersect( (array) wp_get_object_terms( $lid, 'post_tag', array( 'fields' => 'slugs' ) ), array_keys( DIRECTORYWEB_SERVICES ) ) );
 	sort( $slugs );
 	return $slugs;
 }
@@ -107,7 +107,7 @@ function aw_claim_now( $lid, $key, $public = true ) {
 	}
 	switch ( $def[1] ) {
 		case 'phones':
-			return implode( "\n", array_map( fn( $r ) => aw_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), directoryweb_listing_phones( $lid ) ) );
+			return implode( "\n", array_map( fn( $r ) => kits_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), directoryweb_listing_phones( $lid ) ) );
 		case 'hours':
 			return aw_claim_hours_text( $lid );
 		case 'services':
@@ -125,10 +125,10 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 	add_filter(
 		'fluentform/rendering_field_data_' . $aw_claim_el,
 		function ( $data, $form ) {
-			if ( ! aw_claim_ff_id() || (int) $form->id !== aw_claim_ff_id() ) {
+			if ( ! aw_claim_ff_id() || (int) $form->id !== aw_claim_ff_id() || ! function_exists( 'aw_ff_phone10' ) ) { // the Fluent Forms helpers are Animal Writes Core's
 				return $data;
 			}
-			$listing = function_exists( 'aw_form_page_listing' ) ? aw_form_page_listing() : null;
+			$listing = function_exists( 'directoryweb_form_page_listing' ) ? directoryweb_form_page_listing() : null;
 			$name    = $listing ? wp_strip_all_tags( get_the_title( $listing ) ) : 'this organisation';
 			// "{Listing}" in a label or an option (role, consent) names the listing.
 			if ( isset( $data['settings']['label'] ) ) {
@@ -146,7 +146,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 				$row = directoryweb_listing_phones( $lid )[ (int) $m[1] - 1 ] ?? null;
 				if ( $row ) {
 					$part                        = $m[2] ?? '';
-					$ten                         = aw_ff_phone10( $row['number'] ); // the 10 digits after the +91 in front of the box
+					$ten                         = kits_ff_phone10( $row['number'] ); // the 10 digits after the +91 in front of the box
 					$data['attributes']['value'] = '_wa' === $part ? ( $row['whatsapp'] ? array( '1' ) : array() ) : ( '_label' === $part ? $row['label'] : ( '' !== $ten ? $ten : $row['number'] ) );
 				}
 				return $data;
@@ -157,9 +157,9 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 			}
 			if ( isset( AW_CLAIM_L[ $field ] ) ) {
 				$now = aw_claim_now( $lid, $field, true );
-				if ( isset( AW_FF_SOCIAL[ $field ] ) && '' !== aw_ff_social_user( $field, $now ) ) {
-					$now = aw_ff_social_user( $field, $now ); // the username after the link shown in front of the box
-				} elseif ( in_array( $field, AW_FF_DATES, true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $now ) ) {
+				if ( isset( KITS_FF_SOCIAL[ $field ] ) && '' !== kits_ff_social_user( $field, $now ) ) {
+					$now = kits_ff_social_user( $field, $now ); // the username after the link shown in front of the box
+				} elseif ( in_array( $field, KITS_FF_DATES, true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $now ) ) {
 					$now = wp_date( 'j M Y', strtotime( $now . ' 12:00:00' ) ); // the site's date format
 				}
 				$data['attributes']['value'] = $now;
@@ -182,6 +182,9 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
  */
 function aw_claim_entry( $entry_id ) {
 	global $wpdb;
+	if ( ! aw_claim_ff_id() || ! function_exists( 'aw_ff_phone_store' ) ) {
+		return null; // no claim form, or Animal Writes Core's Fluent Forms helpers are not loaded
+	}
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT id, form_id, serial_number, response, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND form_id = %d", $entry_id, aw_claim_ff_id() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $row ) {
 		return null;
@@ -199,7 +202,7 @@ function aw_claim_entry( $entry_id ) {
 			}
 		}
 		if ( '' !== $s( 'aw_services' ) ) {
-			$sv = array_intersect( explode( ',', $s( 'aw_services' ) ), array_keys( AW_SERVICES ) );
+			$sv = array_intersect( explode( ',', $s( 'aw_services' ) ), array_keys( DIRECTORYWEB_SERVICES ) );
 			sort( $sv );
 			$propose['l_services'] = implode( ',', $sv );
 		}
@@ -216,20 +219,20 @@ function aw_claim_entry( $entry_id ) {
 			if ( 'phones' === $key ) {
 				$lines = array();
 				for ( $i = 1; $i <= 3; $i++ ) {
-					$num = aw_ff_phone_store( $s( "l_phone{$i}" ) );
+					$num = kits_ff_phone_store( $s( "l_phone{$i}" ) );
 					if ( '' !== $num ) {
 						$lab     = $s( "l_phone{$i}_label" );
-						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( function_exists( 'aw_ff_ticked' ) && aw_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
+						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( function_exists( 'kits_ff_ticked' ) && kits_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
 					}
 				}
 				foreach ( array_slice( $lid ? directoryweb_listing_phones( $lid ) : array(), 3 ) as $r ) { // numbers past the form's three stay as they are
-					$lines[] = aw_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
+					$lines[] = kits_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
 				}
 				$propose['phones'] = implode( "\n", $lines );
 				continue;
 			}
 			if ( 'l_services' === $key ) {
-				$sv = array_intersect( (array) ( $d['l_services'] ?? array() ), array_keys( AW_SERVICES ) );
+				$sv = array_intersect( (array) ( $d['l_services'] ?? array() ), array_keys( DIRECTORYWEB_SERVICES ) );
 				sort( $sv );
 				$propose[ $key ] = implode( ',', $sv );
 				continue;
@@ -244,7 +247,7 @@ function aw_claim_entry( $entry_id ) {
 	$meta = class_exists( '\FluentForm\App\Helpers\Helper' ) ? \FluentForm\App\Helpers\Helper::getSubmissionMeta( (int) $row['id'], 'aw_claim_review', '' ) : '';
 	return array(
 		'id'      => (int) $row['id'],
-		'ref'     => function_exists( 'aw_ff_ref' ) ? aw_ff_ref( 'claim', (int) $row['id'] ) : '',
+		'ref'     => function_exists( 'kits_ff_ref' ) ? kits_ff_ref( 'claim', (int) $row['id'] ) : '',
 		'sent'    => (string) $row['created_at'],
 		'listing' => $lid,
 		'name'    => $s( 'name' ),
@@ -276,9 +279,9 @@ function aw_claim_changes( $c ) {
 	$out = array();
 	foreach ( $c['propose'] as $key => $new ) {
 		$now   = aw_claim_now( $c['listing'], $key, false );
-		if ( isset( AW_FF_SOCIAL[ $key ] ) && '' !== aw_ff_social_user( $key, $now ) && '' !== aw_ff_social_user( $key, $new ) ) {
-			$now = aw_ff_social_user( $key, $now ); // the link and its username are the same thing
-			$new = aw_ff_social_user( $key, $new );
+		if ( isset( KITS_FF_SOCIAL[ $key ] ) && '' !== kits_ff_social_user( $key, $now ) && '' !== kits_ff_social_user( $key, $new ) ) {
+			$now = kits_ff_social_user( $key, $now ); // the link and its username are the same thing
+			$new = kits_ff_social_user( $key, $new );
 		}
 		$loose = 'l_email' === $key || 0 === strpos( AW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', AW_CLAIM_L[ $key ][1] );
 		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
@@ -454,7 +457,7 @@ function aw_claim_review_screen( $entry_id ) {
 			'new'   => implode( ' ', array_map( fn( $f ) => '<img src="' . esc_url( $file( $f ) ) . '" alt="" width="80" height="80" style="object-fit:cover">', $c['photos'] ) ),
 		);
 	}
-	aw_core_simple_table( 'aw-claim-changes', array( 'cb' => '<span class="screen-reader-text">Approve</span>', 'field' => 'Field', 'now' => 'Now', 'new' => 'Proposed' ), $rows, array( 'primary' => 'field', 'empty' => 'Nothing differs from the listing.' ) );
+	kits_simple_table( 'aw-claim-changes', array( 'cb' => '<span class="screen-reader-text">Approve</span>', 'field' => 'Field', 'now' => 'Now', 'new' => 'Proposed' ), $rows, array( 'primary' => 'field', 'empty' => 'Nothing differs from the listing.' ) );
 	if ( $pending ) {
 		echo '<p class="description">Approve writes the ticked fields to the listing (source "Claimed by organisation", today) and marks it claimed. Each field can be undone in Plugins → SourceWeb → Enrichment review.</p>';
 		echo '<p>';
@@ -495,9 +498,9 @@ function aw_claim_clean( $meta_key, $v ) {
 			if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) {
 				return (string) esc_url_raw( preg_match( '#^https?://#i', $v ) ? $v : 'https://' . $v ); // a link the username box cannot hold (a YouTube channel, a LinkedIn /in/ profile)
 			}
-			$field = (string) array_search( $meta_key, array_map( fn( $d ) => $d[0], AW_FF_SOCIAL ), true );
-			$user  = '' !== $field ? aw_ff_social_user( $field, $v ) : '';
-			return '' !== $user ? sprintf( AW_FF_SOCIAL[ $field ][1], rawurlencode( $user ) ) : '';
+			$field = (string) array_search( $meta_key, array_map( fn( $d ) => $d[0], KITS_FF_SOCIAL ), true );
+			$user  = '' !== $field ? kits_ff_social_user( $field, $v ) : '';
+			return '' !== $user ? sprintf( KITS_FF_SOCIAL[ $field ][1], rawurlencode( $user ) ) : '';
 		case 'aw_founded':
 			return preg_match( '/^(18|19|20)\d{2}$/', $v ) ? $v : '';
 		case 'aw_reg_date':
@@ -512,6 +515,9 @@ function aw_claim_clean( $meta_key, $v ) {
 
 /** A private upload (claim logo or photo) into the media library for the listing; attachment ID or 0. */
 function aw_claim_sideload( $file, $lid, $title ) {
+	if ( ! function_exists( 'aw_private_dir' ) ) {
+		return 0; // the private folder is Animal Writes Core's: no file to bring in
+	}
 	$path = aw_private_dir() . '/' . $file;
 	if ( ! preg_match( '/^[A-Za-z0-9]{20}\.png$/', (string) $file ) || ! is_file( $path ) ) {
 		return 0;
@@ -600,7 +606,7 @@ function aw_claim_apply_field( $c, $key ) {
 			return true;
 		case 'services':
 			$log( 'services', array_filter( explode( ',', $new ) ) );
-			aw_set_item_tags( $lid, array_filter( explode( ',', $new ) ), aw_service_slugs() );
+			directoryweb_set_item_tags( $lid, array_filter( explode( ',', $new ) ), directoryweb_service_slugs() );
 			update_post_meta( $lid, 'aw_services_source', 'organisation' );
 			update_post_meta( $lid, 'aw_services_on', wp_date( 'Y-m-d' ) );
 			return true;

@@ -1,0 +1,75 @@
+{
+    "key": "group_kits_person",
+    "title": "People",
+    "fields": [
+        {
+            "key": "field_kits_person_role",
+            "label": "Role",
+            "name": "kits_person_role",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_kits_person_photo",
+            "label": "Photo",
+            "name": "kits_person_photo",
+            "aria-label": "",
+            "type": "image",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "library": "all",
+            "preview_size": "medium"
+        },
+        {
+            "key": "field_kits_person_links",
+            "label": "Public profile links",
+            "name": "kits_person_links",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "One address per line.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 3,
+            "new_lines": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "kits_person"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Kits Core preset kits-person: its fields (registered with register_post_meta(); this group is only the editing layer).",
+    "show_in_rest": 0,
+    "modified": 1795478400
+}

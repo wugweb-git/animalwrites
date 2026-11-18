@@ -1,8 +1,9 @@
 <?php
 /**
  * SourceWeb's own basics: the capability, the publisher and relevance option names, host and publisher helpers and
- * the sourced post types. Kits Core has the same definitions for its own screens; whichever loads first defines
- * them and the other skips, so SourceWeb works with or without Kits Core.
+ * the sourced post types. Kits Core had the same definitions until 18 Nov 2026 (now only here); each stays behind
+ * function_exists / defined, so an older copy loaded first is harmless. Loaded by aw-sourcing.php before its
+ * dependency check, because Animal Writes Core calls aw_host() and aw_publishers().
  *
  * @package aw-sourcing
  */

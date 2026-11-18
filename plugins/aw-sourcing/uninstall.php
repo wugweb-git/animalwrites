@@ -30,8 +30,10 @@
  * - Posts (News items, review queue items, listings), terms, users, attachments (the source icons stay in the media
  *   library) and any post meta.
  * - The AI model rows and keys (aw_ai_models, aw_ai_keys): keys are removed only by hand.
- * - Data shared with Kits Core and the other plugins: aw_sources, aw_publishers, aw_relevance, the keyword tables
- *   ({prefix}aw_si_keywords, {prefix}aw_si_kw_map) and aw_kw_db; Animal Writes Core's aw_social_on and aw_social_show
+ * - Data other plugins read: the sourcing lists aw_sources and the publishers aw_publishers (SourceWeb's since
+ *   18 Nov 2026; Animal Writes Core, DirectoryWeb and InsightWeb read them), aw_relevance, the keyword tables
+ *   ({prefix}aw_si_keywords, {prefix}aw_si_kw_map) and aw_kw_db (InsightWeb's), and the hourly aw_fetch_favicons event
+ *   (taken off when SourceWeb is deactivated; InsightWeb books it too); Animal Writes Core's aw_social_on and aw_social_show
  *   (SourceWeb's Settings also saves them); the aw_research_citation event (its work is Animal Writes Core's).
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/aw-sourcing-uninstall-<YYYYmmdd-His>.jsonl.gz

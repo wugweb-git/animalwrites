@@ -440,7 +440,7 @@ function directoryweb_rest_claims( WP_REST_Request $request ) {
 	if ( $ids ) {
 		_prime_post_caches( $ids, true, true );
 	}
-	$types = function_exists( 'aw_listing_type_slugs' ) ? aw_listing_type_slugs() : array();
+	$types = directoryweb_listing_type_slugs();
 	foreach ( $light as &$r ) {
 		$lid                = 'aw_listing' === get_post_type( $r['listing'] ) ? (int) $r['listing'] : 0;
 		$r['listing']       = $lid;
@@ -894,7 +894,7 @@ function directoryweb_settings_payload(): array {
 	);
 
 	$types = array();
-	foreach ( function_exists( 'aw_listing_type_slugs' ) ? aw_listing_type_slugs() : array() as $slug ) {
+	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		$types[] = function_exists( 'aw_listing_type_name' ) && '' !== aw_listing_type_name( $slug ) ? aw_listing_type_name( $slug ) : $slug;
 	}
 	$roles  = defined( 'AW_CLAIM_ROLES' ) ? array_values( array_filter( AW_CLAIM_ROLES, fn( $k ) => '' !== $k, ARRAY_FILTER_USE_KEY ) ) : array();
@@ -997,7 +997,7 @@ function directoryweb_rest_save_claim_form( WP_REST_Request $request ) {
 	if ( $id && ! isset( directoryweb_ff_forms()[ $id ] ) ) {
 		return new WP_Error( 'rest_invalid_param', __( 'No such form.', 'directoryweb' ), array( 'status' => 400 ) );
 	}
-	$opt   = defined( 'AW_FF_OPTION' ) ? AW_FF_OPTION : 'aw_ff_forms';
+	$opt   = defined( 'KITS_FF_OPTION' ) ? KITS_FF_OPTION : 'aw_ff_forms';
 	$ids   = directoryweb_claim_form_change( (array) get_option( $opt, array() ), $id );
 	$saved = null !== $ids;
 	if ( $saved ) {

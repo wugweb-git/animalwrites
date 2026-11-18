@@ -58,7 +58,7 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 				$alt = trim( (string) get_post_meta( (int) ( $img['id'] ?? 0 ), '_wp_attachment_image_alt', true ) ); // the picture's own alt text
 				if ( '' === $alt ) {
 					$obj = get_queried_object();
-					$alt = $obj instanceof WP_Post ? aw_seo_plain( $obj->post_title ) : ( $obj instanceof WP_Term ? aw_seo_plain( $obj->name ) : get_bloginfo( 'name' ) );
+					$alt = $obj instanceof WP_Post ? rankweb_plain_text( $obj->post_title ) : ( $obj instanceof WP_Term ? rankweb_plain_text( $obj->name ) : get_bloginfo( 'name' ) );
 				}
 				$image->add_image( array_filter( array( 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'], 'type' => (string) ( $img['type'] ?? get_post_mime_type( (int) ( $img['id'] ?? 0 ) ) ), 'alt' => $alt ) ) );
 			}
@@ -92,7 +92,7 @@ add_filter( 'rank_math/opengraph/facebook/og_locale', fn( $l ) => 'en_IN' );
 /** A term's share picture alt text: "<focus keyphrase> in India – Animal Writes" (owner, 20 Oct 2026), else its name. */
 function aw_term_share_alt( $term ) {
 	$kw = trim( explode( ',', (string) get_term_meta( $term->term_id, 'rank_math_focus_keyword', true ) )[0] );
-	return ( '' !== $kw ? $kw : aw_seo_plain( $term->name ) ) . ' in India – Animal Writes';
+	return ( '' !== $kw ? $kw : rankweb_plain_text( $term->name ) ) . ' in India – Animal Writes';
 }
 
 /**
