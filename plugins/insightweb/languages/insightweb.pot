@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T11:55:15+00:00\n"
+"POT-Creation-Date: 2026-11-18T12:12:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: insightweb\n"
@@ -107,58 +107,50 @@ msgstr ""
 msgid "Search Insights is off: its data was deleted. Settings → Run the daily update starts it again."
 msgstr ""
 
-#: includes/insightweb-keys.php:34
+#: includes/insightweb-keys.php:37
 msgid "Clarity Data Export token"
 msgstr ""
 
-#: includes/insightweb-keys.php:34
+#: includes/insightweb-keys.php:37
 msgid "Clarity → Settings → Data Export → Generate new API token."
 msgstr ""
 
-#: includes/insightweb-keys.php:35
+#: includes/insightweb-keys.php:38
 msgid "Bing Webmaster API key"
 msgstr ""
 
-#: includes/insightweb-keys.php:35
+#: includes/insightweb-keys.php:38
 msgid "Bing Webmaster Tools → Settings (gear) → API access. Not an IndexNow key."
 msgstr ""
 
-#: includes/insightweb-keys.php:36
+#: includes/insightweb-keys.php:39
 msgid "PageSpeed Insights API key (Google, optional)"
 msgstr ""
 
-#: includes/insightweb-keys.php:36
+#: includes/insightweb-keys.php:39
 msgid "Google Cloud → APIs → PageSpeed Insights API → Credentials. Only needed if Site Kit's PageSpeed can't be used."
 msgstr ""
 
 #. translators: %d: 1 or 2.
-#: includes/insightweb-keys.php:40
+#: includes/insightweb-keys.php:43
 #, php-format
 msgid "Google Alerts feed %d (RSS address)"
 msgstr ""
 
 #. translators: %d: 1 or 2.
-#: includes/insightweb-keys.php:40
+#: includes/insightweb-keys.php:43
 msgid "google.com/alerts → create an alert → Show options → Deliver to: RSS feed → copy the feed address (https://www.google.com/alerts/feeds/…)."
 msgstr ""
 
-#: includes/insightweb-keys.php:104
-msgid "set in wp-config.php (that one is used)"
+#: includes/insightweb-keys.php:115
+msgid "Set in wp-config.php, which wins: change it there."
 msgstr ""
 
-#: includes/insightweb-keys.php:105
-msgid "set here"
+#: includes/insightweb-keys.php:116
+msgid "Saved under Kits → Keys (the old place) and still used until it is copied here. Type one here to replace it."
 msgstr ""
 
-#: includes/insightweb-keys.php:106
-msgid "set under Kits → Keys (old place, still used until it is copied here)"
-msgstr ""
-
-#: includes/insightweb-keys.php:107
-msgid "not set"
-msgstr ""
-
-#: includes/insightweb-keys.php:169
+#: includes/insightweb-keys.php:181
 #: includes/insightweb-ui.php:154
 #: includes/insightweb-ui.php:156
 #: includes/kits-hub.php:30
@@ -172,34 +164,14 @@ msgstr ""
 msgid "Search Insights"
 msgstr ""
 
-#: includes/insightweb-keys.php:192
+#: includes/insightweb-keys.php:238
 msgid "Keys saved."
 msgstr ""
 
-#: includes/insightweb-keys.php:199
-msgid "Keys"
-msgstr ""
-
-#: includes/insightweb-keys.php:215
-msgid "Saved: leave empty to keep it"
-msgstr ""
-
-#: includes/insightweb-keys.php:215
-msgid "Paste the key"
-msgstr ""
-
-#. translators: %s: key label.
-#: includes/insightweb-keys.php:218
-#, php-format
-msgid "Remove the %s"
-msgstr ""
-
-#: includes/insightweb-keys.php:221
-msgid "Save keys"
-msgstr ""
-
-#: includes/insightweb-keys.php:224
-msgid "Paste a key and save; it is never shown again, only whether it is set. A wp-config.php constant of the same name always wins. Keys still under Kits → Keys keep working until they are copied here."
+#: includes/insightweb-keys.php:238
+#: includes/insightweb-rest.php:464
+#: includes/insightweb-rest.php:497
+msgid "Nothing changed."
 msgstr ""
 
 #: includes/insightweb-rest.php:134
@@ -228,8 +200,8 @@ msgstr ""
 #: includes/search-insights/admin.php:546
 #: includes/search-insights/class-aw-si-keywords-table.php:80
 #: includes/search-insights/class-aw-si-pages-table.php:62
-#: src/index.js:61
-#: src/index.js:425
+#: src/index.js:62
+#: src/index.js:426
 msgid "Clicks"
 msgstr ""
 
@@ -237,8 +209,8 @@ msgstr ""
 #: includes/search-insights/admin.php:519
 #: includes/search-insights/admin.php:533
 #: includes/search-insights/admin.php:545
-#: src/index.js:62
-#: src/index.js:426
+#: src/index.js:63
+#: src/index.js:427
 msgid "Impressions"
 msgstr ""
 
@@ -247,7 +219,7 @@ msgid "Times a page of ours showed in Google"
 msgstr ""
 
 #: includes/insightweb-rest.php:179
-#: src/index.js:427
+#: src/index.js:428
 msgid "Click rate"
 msgstr ""
 
@@ -256,7 +228,7 @@ msgid "Clicks for every 100 impressions"
 msgstr ""
 
 #: includes/insightweb-rest.php:187
-#: src/index.js:428
+#: src/index.js:429
 msgid "Average position"
 msgstr ""
 
@@ -265,7 +237,7 @@ msgid "1 is the top of Google; lower is better"
 msgstr ""
 
 #: includes/insightweb-rest.php:195
-#: src/index.js:429
+#: src/index.js:430
 msgid "Pages in search"
 msgstr ""
 
@@ -276,8 +248,8 @@ msgstr ""
 #: includes/insightweb-rest.php:203
 #: includes/search-insights/admin.php:882
 #: includes/search-insights/admin.php:902
-#: src/index.js:430
-#: src/index.js:652
+#: src/index.js:431
+#: src/index.js:655
 msgid "Searches"
 msgstr ""
 
@@ -332,8 +304,8 @@ msgid "Never"
 msgstr ""
 
 #: includes/insightweb-rest.php:285
-#: src/index.js:327
-#: src/index.js:334
+#: src/index.js:328
+#: src/index.js:335
 msgid "Daily jobs"
 msgstr ""
 
@@ -408,11 +380,6 @@ msgstr ""
 
 #: includes/insightweb-rest.php:464
 msgid "Saved. The new numbers are used from the next daily run."
-msgstr ""
-
-#: includes/insightweb-rest.php:464
-#: includes/insightweb-rest.php:497
-msgid "Nothing changed."
 msgstr ""
 
 #: includes/insightweb-rest.php:497
@@ -606,8 +573,8 @@ msgid "Bing crawl (12 weeks)"
 msgstr ""
 
 #: includes/search-insights/admin.php:185
-#: includes/search-insights/admin.php:1111
-#: includes/search-insights/admin.php:1138
+#: includes/search-insights/admin.php:1110
+#: includes/search-insights/admin.php:1137
 #: includes/search-insights/bing.php:465
 #: includes/search-insights/checklist.php:268
 #: includes/search-insights/clarity.php:514
@@ -749,7 +716,7 @@ msgstr ""
 #: includes/search-insights/admin.php:844
 #: includes/search-insights/admin.php:879
 #: includes/search-insights/bing-crawl.php:210
-#: src/index.js:407
+#: src/index.js:408
 msgid "Nothing yet."
 msgstr ""
 
@@ -883,7 +850,7 @@ msgid "Tracked, not ranking"
 msgstr ""
 
 #: includes/search-insights/admin.php:485
-#: src/index.js:307
+#: src/index.js:308
 msgid "All keywords"
 msgstr ""
 
@@ -897,7 +864,7 @@ msgstr ""
 #: includes/search-insights/admin.php:544
 #: includes/search-insights/class-aw-si-keywords-table.php:81
 #: includes/search-insights/class-aw-si-pages-table.php:63
-#: src/index.js:63
+#: src/index.js:64
 msgid "Position"
 msgstr ""
 
@@ -908,7 +875,7 @@ msgstr ""
 #: includes/search-insights/class-aw-si-pages-table.php:60
 #: includes/search-insights/gsc-types.php:217
 #: includes/search-insights/gsc-types.php:659
-#: src/index.js:280
+#: src/index.js:281
 msgid "Page"
 msgstr ""
 
@@ -974,7 +941,7 @@ msgstr ""
 #: includes/search-insights/links-import.php:445
 #: includes/search-insights/rising-drops.php:136
 #: includes/search-insights/rising-drops.php:164
-#: src/index.js:338
+#: src/index.js:339
 msgid "Source"
 msgstr ""
 
@@ -1307,72 +1274,73 @@ msgstr ""
 msgid "Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until %1$d days are stored), keyword roles from Rank Math and Sourcing, then priorities; at 07:15 IST Discover and Google News; from 07:40 IST URL Inspection (up to 2,000 pages a day, not indexed and never checked first). Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Daily at 08:10 IST: Google Alerts feeds (once set on Keys). Sundays at 06:00 IST: PageSpeed (lab scores and Chrome users' figures) for the key pages and every campaign page, a few at a time. Mondays at 06:45 IST: Bing crawl figures; at 08:45 IST crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than %2$d days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set); once a month Bing search volumes for the top keywords. Searches on the site are counted as they happen."
 msgstr ""
 
-#: includes/search-insights/admin.php:1071
+#. translators: 1: days of daily figures stored, 2: the same.
+#: includes/search-insights/admin.php:1070
 msgid "Keyword map seed"
 msgstr ""
 
 #. translators: %s: date.
-#: includes/search-insights/admin.php:1074
+#: includes/search-insights/admin.php:1073
 #, php-format
 msgid "Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now."
 msgstr ""
 
-#: includes/search-insights/admin.php:1075
+#: includes/search-insights/admin.php:1074
 msgid "Not seeded yet: the first run seeds it."
 msgstr ""
 
-#: includes/search-insights/admin.php:1077
+#: includes/search-insights/admin.php:1076
 msgid "Run now"
 msgstr ""
 
-#: includes/search-insights/admin.php:1080
+#: includes/search-insights/admin.php:1079
 msgid "Run the daily update"
 msgstr ""
 
 #. translators: %d: days.
-#: includes/search-insights/admin.php:1081
+#: includes/search-insights/admin.php:1080
 #, php-format
 msgid "Run the %d-day rollup"
 msgstr ""
 
 #. translators: %d: days.
-#: includes/search-insights/admin.php:1082
+#: includes/search-insights/admin.php:1081
 msgid "Run GA4"
 msgstr ""
 
-#: includes/search-insights/admin.php:1083
+#: includes/search-insights/admin.php:1082
 msgid "Start PageSpeed"
 msgstr ""
 
-#: includes/search-insights/admin.php:1085
+#: includes/search-insights/admin.php:1084
 msgid "Run Bing Webmaster"
 msgstr ""
 
-#: includes/search-insights/admin.php:1087
+#: includes/search-insights/admin.php:1086
 msgid "Run Bing keyword volumes"
 msgstr ""
 
-#: includes/search-insights/admin.php:1091
+#: includes/search-insights/admin.php:1090
 msgid "Run Clarity (uses 2 of its 10 daily calls)"
 msgstr ""
 
-#: includes/search-insights/admin.php:1095
+#: includes/search-insights/admin.php:1094
 msgid "The daily update can take a minute on the first run (it fetches up to 19 days of Search Console)."
 msgstr ""
 
-#: includes/search-insights/admin.php:1097
+#: includes/search-insights/admin.php:1096
 msgid "Delete Search Insights data"
 msgstr ""
 
-#: includes/search-insights/admin.php:1100
+#: includes/search-insights/admin.php:1099
 msgid "Drops the Search Insights tables and settings. Deactivating or deleting the plugin never does this. Type DELETE to confirm."
 msgstr ""
 
-#: includes/search-insights/admin.php:1102
+#: includes/search-insights/admin.php:1101
 msgid "Delete data"
 msgstr ""
 
-#: includes/search-insights/admin.php:1143
+#: includes/search-insights/admin.php:1142
 msgid "Not deleted: type DELETE to confirm."
 msgstr ""
 
@@ -3298,7 +3266,7 @@ msgstr ""
 
 #: includes/search-insights/rising.php:55
 #: includes/search-insights/rising.php:1050
-#: src/index.js:633
+#: src/index.js:636
 msgid "News (GDELT)"
 msgstr ""
 
@@ -3530,7 +3498,7 @@ msgid "All rising terms"
 msgstr ""
 
 #: includes/search-insights/rising.php:1053
-#: src/index.js:635
+#: src/index.js:638
 msgid "Use GDELT for Rising (Indian news counts, daily)"
 msgstr ""
 
@@ -3850,7 +3818,7 @@ msgid "%1$s: %2$s (%3$s)%4$s"
 msgstr ""
 
 #: includes/search-insights/tool-imports.php:259
-#: src/index.js:649
+#: src/index.js:652
 msgid "Seeds for keyword tools"
 msgstr ""
 
@@ -3925,180 +3893,203 @@ msgstr ""
 msgid "None counted yet."
 msgstr ""
 
-#: src/index.js:110
+#: src/index.js:111
 msgid "A count is running in the background. The numbers change when it is done."
 msgstr ""
 
-#: src/index.js:126
+#: src/index.js:127
 msgid "Loading the figures…"
 msgstr ""
 
 #. translators: 1: date of the newest figures, 2: date and time of the count.
-#: src/index.js:134
+#: src/index.js:135
 #, js-format
 msgid "Figures up to %1$s, counted %2$s."
 msgstr ""
 
-#: src/index.js:138
+#: src/index.js:139
 msgid "Counting for the first time…"
 msgstr ""
 
 #. translators: %d: number of days.
-#: src/index.js:144
+#: src/index.js:145
 #, js-format
 msgid "The %d days before are not all stored, so no change is shown."
 msgstr ""
 
-#: src/index.js:154
+#: src/index.js:155
 msgid "The count is taking longer than usual; reload this page later."
 msgstr ""
 
-#: src/index.js:167
+#: src/index.js:168
 msgid "Search Insights is off: its data was deleted and nothing runs on schedule. Run the daily update on the current Settings to start it again."
 msgstr ""
 
-#: src/index.js:174
+#: src/index.js:175
 msgid "Time range"
 msgstr ""
 
 #. translators: %d: number of days.
-#: src/index.js:180
+#: src/index.js:181
 #, js-format
 msgid "Last %d days"
 msgstr ""
 
-#: src/index.js:190
+#: src/index.js:191
 msgid "Count now"
 msgstr ""
 
-#: src/index.js:202
+#: src/index.js:203
 msgid "Needs attention"
 msgstr ""
 
-#: src/index.js:213
+#: src/index.js:214
 msgid "Search Insights at a glance"
 msgstr ""
 
-#: src/index.js:223
+#: src/index.js:224
 msgid "No Search Console rows stored yet"
 msgstr ""
 
-#: src/index.js:247
+#: src/index.js:248
 msgid "Clicks per day"
 msgstr ""
 
 #. translators: %d: number of days.
-#: src/index.js:252
+#: src/index.js:253
 #, js-format
 msgid "Clicks per day, last %d days"
 msgstr ""
 
-#: src/index.js:256
+#: src/index.js:257
 msgid "clicks"
 msgstr ""
 
-#: src/index.js:264
-#: src/index.js:276
+#: src/index.js:265
+#: src/index.js:277
 msgid "Top pages"
 msgstr ""
 
-#: src/index.js:265
+#: src/index.js:266
 msgid "The pages with the most clicks from Google in this range."
 msgstr ""
 
-#: src/index.js:271
+#: src/index.js:272
 msgid "All pages"
 msgstr ""
 
-#: src/index.js:292
+#: src/index.js:293
 msgid "No page figures stored for this range yet."
 msgstr ""
 
-#: src/index.js:300
-#: src/index.js:312
+#: src/index.js:301
+#: src/index.js:313
 msgid "Top searches"
 msgstr ""
 
-#: src/index.js:301
+#: src/index.js:302
 msgid "The searches that brought the most clicks in this range."
 msgstr ""
 
-#: src/index.js:314
+#: src/index.js:315
 msgid "Search"
 msgstr ""
 
-#: src/index.js:317
+#: src/index.js:318
 msgid "No search figures stored for this range yet."
 msgstr ""
 
-#: src/index.js:328
+#: src/index.js:329
 msgid "Each source’s last good run. A failed run keeps the figures it had."
 msgstr ""
 
-#: src/index.js:343
+#: src/index.js:344
 msgid "Last good run"
 msgstr ""
 
-#: src/index.js:347
+#: src/index.js:348
 msgid "State"
 msgstr ""
 
-#: src/index.js:360
+#: src/index.js:361
 msgid "No sources yet."
 msgstr ""
 
-#: src/index.js:403
+#: src/index.js:404
 msgid "Loading…"
 msgstr ""
 
-#: src/index.js:554
+#: src/index.js:557
 msgid "Save changes"
 msgstr ""
 
-#: src/index.js:557
+#: src/index.js:560
 msgid "Reset this section"
 msgstr ""
 
-#: src/index.js:558
+#: src/index.js:561
 msgid "Reset this section to its defaults?"
 msgstr ""
 
-#: src/index.js:624
+#: src/index.js:627
 msgid "Delete this plugin's data when it is deleted"
 msgstr ""
 
-#: src/index.js:693
+#: src/index.js:696
 msgid "No connected services."
 msgstr ""
 
-#: src/index.js:700
-#: src/index.js:706
-#: src/index.js:799
+#: src/index.js:703
+#: src/index.js:709
+#: src/index.js:927
 msgid "Connected services"
 msgstr ""
 
-#: src/index.js:701
+#: src/index.js:704
 msgid "Where the figures come from. Search Insights only reads them. Keys are set on Settings → Keys and are never shown."
 msgstr ""
 
-#: src/index.js:792
+#: src/index.js:794
+msgid "Save keys"
+msgstr ""
+
+#: src/index.js:804
+#: src/index.js:934
+msgid "Keys"
+msgstr ""
+
+#: src/index.js:813
+msgid "Service keys"
+msgstr ""
+
+#: src/index.js:814
+msgid "Paste a key and save; it is never shown again, only whether it is set. A wp-config.php constant of the same name always wins. Keys still under Kits → Keys keep working until they are copied here."
+msgstr ""
+
+#. translators: %s: key label.
+#: src/index.js:853
+#, js-format
+msgid "Remove the %s"
+msgstr ""
+
+#: src/index.js:920
 msgid "Loading the settings…"
 msgstr ""
 
-#: src/index.js:809
-#: src/index.js:825
-#: src/index.js:833
+#: src/index.js:946
+#: src/index.js:963
+#: src/index.js:971
 msgid "Runs and data"
 msgstr ""
 
-#: src/index.js:816
+#: src/index.js:953
 msgid "Settings groups"
 msgstr ""
 
-#: src/index.js:826
-msgid "The schedule, keys, Run now, snapshots, imports and Delete data."
+#: src/index.js:964
+msgid "The schedule, Run now, snapshots, imports and Delete data."
 msgstr ""
 
-#: src/index.js:857
+#: src/index.js:995
 msgid "Nothing to show on this tab yet."
 msgstr ""

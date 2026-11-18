@@ -26,6 +26,7 @@ import {
 	MiniChart,
 	Notice,
 	PageParts,
+	SecretField,
 	SectionCard,
 	ServiceList,
 	ServiceRow,
@@ -434,6 +435,7 @@ const PLACEHOLDER = [
 
 const SERVICES = 'services';
 const MORE = 'more'; // Run now, imports, Delete data: the Settings tab's own rows
+const KEYS = 'keys'; // [A] admin: the service keys, administrators only
 
 /**
  * The open group from the address (#numbers), so a link opens the right group.
@@ -445,6 +447,7 @@ function hashGroup( groups ) {
 	if (
 		SERVICES === h ||
 		MORE === h ||
+		( KEYS === h && app.admin ) ||
 		groups.some( ( g ) => g.slug === h )
 	) {
 		return h;
@@ -734,6 +737,131 @@ function Services() {
 	);
 }
 
+/**
+ * [A] admin. The service keys (insightweb/v1/keys): each key's state only, never its value. A new value replaces the
+ * saved one, an empty box keeps it, "Remove" clears it; a key set in wp-config.php cannot be changed here.
+ */
+function Keys() {
+	const [ list, setList ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const [ values, setValues ] = useState( {} );
+	const [ clear, setClear ] = useState( {} );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const load = () => {
+		setError( '' );
+		apiFetch( { path: path( 'keys' ) } )
+			.then( ( r ) => setList( r.keys ) )
+			.catch( ( e ) => setError( errText( e ) ) );
+	};
+	useEffect( load, [] );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( ! list ) {
+		return <LoadingState />;
+	}
+	const typed = Object.fromEntries(
+		Object.entries( values ).filter( ( [ , v ] ) => '' !== v.trim() )
+	);
+	const cleared = Object.keys( clear ).filter( ( k ) => clear[ k ] );
+	const dirty = Object.keys( typed ).length > 0 || cleared.length > 0;
+	const save = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'keys' ),
+			method: 'POST',
+			data: { keys: typed, clear: cleared },
+		} )
+			.then( ( r ) => {
+				setList( r.keys );
+				setValues( {} );
+				setClear( {} );
+				setMsg( { tone: 'success', text: r.message } );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	const footer = (
+		<>
+			<Button
+				variant="primary"
+				busy={ busy }
+				disabled={ ! dirty }
+				onClick={ save }
+			>
+				{ __( 'Save keys', 'insightweb' ) }
+			</Button>
+			<span aria-live="polite">
+				{ msg && 'success' === msg.tone ? msg.text : '' }
+			</span>
+		</>
+	);
+	return (
+		<SettingsGroup
+			id={ `insightweb-group-${ KEYS }` }
+			title={ __( 'Keys', 'insightweb' ) }
+			footer={ footer }
+		>
+			{ msg && 'error' === msg.tone && (
+				<Notice tone="error" onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			<SettingsBlock
+				title={ __( 'Service keys', 'insightweb' ) }
+				description={ __(
+					'Paste a key and save; it is never shown again, only whether it is set. A wp-config.php constant of the same name always wins. Keys still under Kits → Keys keep working until they are copied here.',
+					'insightweb'
+				) }
+			>
+				{ list.map( ( k ) => (
+					<div key={ k.name }>
+						<SecretField
+							label={ k.label }
+							help={ k.help }
+							isSet={ '' !== k.where }
+							stateText={ k.state }
+							value={ values[ k.name ] ?? '' }
+							disabled={ 'config' === k.where }
+							onChange={ ( v ) =>
+								setValues( ( o ) => ( {
+									...o,
+									[ k.name ]: v,
+								} ) )
+							}
+						/>
+						{ 'insightweb' === k.where && (
+							<label
+								htmlFor={ `insightweb-key-clear-${ k.name }` }
+							>
+								<input
+									id={ `insightweb-key-clear-${ k.name }` }
+									type="checkbox"
+									checked={ !! clear[ k.name ] }
+									onChange={ ( e ) => {
+										const on = e.target.checked;
+										setClear( ( o ) => ( {
+											...o,
+											[ k.name ]: on,
+										} ) );
+									} }
+								/>{ ' ' }
+								{ sprintf(
+									/* translators: %s: key label. */
+									__( 'Remove the %s', 'insightweb' ),
+									k.label
+								) }
+							</label>
+						) }
+					</div>
+				) ) }
+			</SettingsBlock>
+		</SettingsGroup>
+	);
+}
+
 function Settings() {
 	const [ data, setData ] = useState( null );
 	const [ error, setError ] = useState( '' );
@@ -799,6 +927,15 @@ function Settings() {
 			label: __( 'Connected services', 'insightweb' ),
 			href: `#${ SERVICES }`,
 		},
+		...( app.admin
+			? [
+					{
+						value: KEYS,
+						label: __( 'Keys', 'insightweb' ),
+						href: `#${ KEYS }`,
+					},
+				]
+			: [] ),
 		...data.groups.map( ( g ) => ( {
 			value: g.slug,
 			label: dirty[ g.slug ] ? `${ g.label } •` : g.label,
@@ -819,12 +956,13 @@ function Settings() {
 				onChange={ setOpen }
 			/>
 			{ SERVICES === open && <Services /> }
+			{ KEYS === open && app.admin && <Keys /> }
 			{ MORE === open && (
 				<SectionCard
 					id={ MORE }
 					title={ __( 'Runs and data', 'insightweb' ) }
 					description={ __(
-						'The schedule, keys, Run now, snapshots, imports and Delete data.',
+						'The schedule, Run now, snapshots, imports and Delete data.',
 						'insightweb'
 					) }
 				>

@@ -106,16 +106,15 @@ function insightweb_key( string $name ): string {
 }
 
 /**
- * Where a key is set, in words for the screen.
+ * Where a key is set, as the Keys section says it ('' for the shell's own "Saved." / "None saved.").
  *
  * @param string $where insightweb_key_where().
  */
 function insightweb_key_where_label( string $where ): string {
 	return array(
-		'config'     => __( 'set in wp-config.php (that one is used)', 'insightweb' ),
-		'insightweb' => __( 'set here', 'insightweb' ),
-		'old'        => __( 'set under Kits → Keys (old place, still used until it is copied here)', 'insightweb' ),
-	)[ $where ] ?? __( 'not set', 'insightweb' );
+		'config' => __( 'Set in wp-config.php, which wins: change it there.', 'insightweb' ),
+		'old'    => __( 'Saved under Kits → Keys (the old place) and still used until it is copied here. Type one here to replace it.', 'insightweb' ),
+	)[ $where ] ?? '';
 }
 
 /**
@@ -149,7 +148,8 @@ function insightweb_keys_sanitize( $value ): array {
 add_action(
 	'init',
 	function () {
-		// Settings API, group insightweb_keys: options.php checks the nonce and manage_options. Not in REST, not exported.
+		// Registered for its sanitize callback (every update_option() goes through it). Not in REST (/wp/v2/settings), not
+		// exported. The Keys section saves through the write-only route below.
 		register_setting(
 			'insightweb_keys',
 			INSIGHTWEB_KEYS_OPTION,
@@ -196,42 +196,87 @@ add_filter(
 	2
 );
 
-// After options.php saves the keys it comes back here with settings-updated=true.
-add_action(
-	'aw_si_settings_notices',
-	function () {
-		if ( current_user_can( 'manage_options' ) && 'true' === sanitize_key( wp_unslash( $_GET['settings-updated'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only; options.php checked the nonce.
-			wp_admin_notice( esc_html__( 'Keys saved.', 'insightweb' ), array( 'type' => 'success' ) );
-		}
-	}
-);
-
-/** Settings → Keys: the form (administrators), or the state of each key (anyone else who sees Settings). */
-function insightweb_keys_settings_row(): void {
-	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'insightweb' ) . '</th><td><ul>';
+/**
+ * The Keys section's data: per key its label, help and where it is set. Never a value.
+ *
+ * @return array{keys: array<int, array{name: string, label: string, help: string, where: string, state: string}>}
+ */
+function insightweb_keys_payload(): array {
+	$out = array();
 	foreach ( insightweb_key_fields() as $name => $f ) {
 		$where = insightweb_key_where( $name );
-		echo '<li><span class="dashicons dashicons-' . ( $where ? 'yes-alt' : 'minus' ) . '" aria-hidden="true"></span> ' . esc_html( $f[0] . ': ' . insightweb_key_where_label( $where ) ) . '</li>';
+		$out[] = array(
+			'name'  => $name,
+			'label' => $f[0],
+			'help'  => $f[1],
+			'where' => $where,
+			'state' => insightweb_key_where_label( $where ),
+		);
 	}
-	echo '</ul>';
-	if ( current_user_can( 'manage_options' ) ) {
-		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
-		settings_fields( 'insightweb_keys' );
-		foreach ( insightweb_key_fields() as $name => $f ) {
-			$where = insightweb_key_where( $name );
-			if ( 'config' === $where ) {
-				continue; // wp-config.php wins; nothing to type here.
-			}
-			$id = 'insightweb-key-' . strtolower( $name );
-			echo '<p><label for="' . esc_attr( $id ) . '">' . esc_html( $f[0] ) . '</label><br>';
-			echo '<input type="text" class="regular-text" id="' . esc_attr( $id ) . '" name="' . esc_attr( INSIGHTWEB_KEYS_OPTION . '[' . $name . ']' ) . '" value="" autocomplete="off" spellcheck="false" placeholder="' . esc_attr( 'insightweb' === $where ? __( 'Saved: leave empty to keep it', 'insightweb' ) : __( 'Paste the key', 'insightweb' ) ) . '"></p>';
-			if ( 'insightweb' === $where ) {
-				/* translators: %s: key label. */
-				echo '<p><label><input type="checkbox" name="' . esc_attr( INSIGHTWEB_KEYS_OPTION . '[__clear][]' ) . '" value="' . esc_attr( $name ) . '"> ' . esc_html( sprintf( __( 'Remove the %s', 'insightweb' ), $f[0] ) ) . '</label></p>';
-			}
-		}
-		submit_button( __( 'Save keys', 'insightweb' ) );
-		echo '</form>';
-	}
-	echo '<p class="description">' . esc_html__( 'Paste a key and save; it is never shown again, only whether it is set. A wp-config.php constant of the same name always wins. Keys still under Kits → Keys keep working until they are copied here.', 'insightweb' ) . '</p></td></tr>';
+	return array( 'keys' => $out );
 }
+
+/**
+ * [A] admin. POST insightweb/v1/keys: save new keys and remove ticked ones. Write-only: the answer is the state again
+ * (set / where), never a value. An empty or missing value keeps the saved key; a key set in wp-config.php is left alone.
+ *
+ * @param WP_REST_Request $request Request: keys (name => new value), clear (names).
+ * @return WP_REST_Response
+ */
+function insightweb_rest_save_keys( WP_REST_Request $request ): WP_REST_Response {
+	$in    = array();
+	$known = array_keys( insightweb_key_fields() );
+	foreach ( (array) $request->get_param( 'keys' ) as $name => $value ) {
+		if ( in_array( (string) $name, $known, true ) && is_string( $value ) && 'config' !== insightweb_key_where( (string) $name ) ) {
+			$in[ (string) $name ] = $value;
+		}
+	}
+	$in['__clear'] = array_values( array_intersect( array_map( 'strval', (array) $request->get_param( 'clear' ) ), $known ) );
+	$changed       = update_option( INSIGHTWEB_KEYS_OPTION, $in, false );
+	return rest_ensure_response(
+		insightweb_keys_payload() + array(
+			'message' => $changed ? __( 'Keys saved.', 'insightweb' ) : __( 'Nothing changed.', 'insightweb' ),
+		)
+	);
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		if ( ! function_exists( 'kits_shell_rest_can' ) || ! defined( 'INSIGHTWEB_REST' ) ) {
+			return;
+		}
+		// Administrators only, with the wp_rest nonce (kits_shell_rest_can), as Kits → Keys was.
+		register_rest_route(
+			INSIGHTWEB_REST,
+			'/keys',
+			array(
+				array(
+					'methods'             => 'GET',
+					'permission_callback' => kits_shell_rest_can( 'manage_options' ),
+					'callback'            => fn() => rest_ensure_response( insightweb_keys_payload() ),
+				),
+				array(
+					'methods'             => 'POST',
+					'permission_callback' => kits_shell_rest_can( 'manage_options' ),
+					'args'                => array(
+						'keys'  => array(
+							'type'                 => 'object',
+							'additionalProperties' => array(
+								'type'      => 'string',
+								'maxLength' => 2048,
+							),
+							'default'              => array(),
+						),
+						'clear' => array(
+							'type'    => 'array',
+							'items'   => array( 'type' => 'string' ),
+							'default' => array(),
+						),
+					),
+					'callback'            => 'insightweb_rest_save_keys',
+				),
+			)
+		);
+	}
+);

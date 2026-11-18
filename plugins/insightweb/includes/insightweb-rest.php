@@ -532,7 +532,7 @@ function insightweb_run_state( string $src ): array {
 function insightweb_services(): array {
 	$sitekit = class_exists( '\Google\Site_Kit\Plugin' );
 	$sk_url  = add_query_arg( 'page', 'googlesitekit-settings', admin_url( 'admin.php' ) );
-	$keys    = current_user_can( 'manage_options' ) ? aw_si_url( 'settings' ) : '';
+	$keys    = current_user_can( 'manage_options' ) ? aw_si_url( 'settings' ) . '#keys' : '';
 	$run     = aw_si_url( 'settings' );
 	$out     = array();
 	$module  = function ( string $slug, string $src, string $name, string $prop ) use ( $sitekit, $sk_url, $run ) {

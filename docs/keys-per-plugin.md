@@ -72,13 +72,15 @@ copy → check → delete. It is never moved to Kits Core.
 InsightWeb gets its own keys, in `plugins/insightweb/includes/insightweb-keys.php` (loaded by `includes/bootstrap.php`,
 so both InsightWeb and RankWeb's bridge load it):
 
-- **Screen:** InsightWeb → Settings, row "Keys" (`admin.php?page=aw-search-insights&tab=settings`). A core Settings API
-  form (`register_setting( 'insightweb_keys', 'insightweb_keys' )`, posted to `options.php`, which checks the nonce and
-  `manage_options`). No new admin page, no CSS. Each key shows its state: set in wp-config.php, set here, set under
-  Kits → Keys (old place, still used), or not set. A key fixed in wp-config.php has no field. Fields are always empty
-  (`value=""`); empty on save keeps the saved key; "Remove the …" clears one. Users who see Settings without
-  `manage_options` see the states only. The shell drops password fields by design, so the field is a plain text input
-  with `autocomplete="off"` and an empty value.
+- **Screen [A] admin:** InsightWeb → Settings, group "Keys" on the Kits admin shell
+  (`admin.php?page=aw-search-insights&tab=settings#keys`), drawn with the shell's own `SettingsGroup`,
+  `SettingsBlock` and `SecretField` (password box with Show/Hide, as MailWeb's secrets), administrators only. Each
+  key shows its state: set in wp-config.php (the box is disabled), saved here, saved under Kits → Keys (old place,
+  still used), or none saved. The box is always empty; an empty box keeps the saved key; "Remove the …" clears one.
+  No new admin page, no CSS. The shell has no no-JS form (without JavaScript it says the screen needs it).
+- **Route [A] admin:** `insightweb/v1/keys`, GET (states) and POST (`keys`: name => new value, `clear`: names), both
+  `manage_options` with the `wp_rest` nonce (`kits_shell_rest_can`). Write-only: both answer with label, help, where
+  and state per key, never a value. A key set in wp-config.php, an unknown name or a non-string value is ignored.
 - **Option:** `insightweb_keys` (name => value), not autoloaded (`wp_set_option_autoload()` on first add), not in REST
   (`show_in_rest` false), not in the Kits → Tools export. Values: white space removed, at most 512 characters, unknown
   names dropped (the same rules as Kits → Keys).
