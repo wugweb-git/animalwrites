@@ -1,7 +1,7 @@
 === InsightWeb ===
 Contributors: wugweb
 Tags: search console, analytics, keywords, pagespeed, seo
-Requires at least: 6.4
+Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 1.0.0

@@ -16,7 +16,7 @@
  * Plugin Name:       InsightWeb
  * Description:       Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.
  * Version:           1.0.0
- * Requires at least: 6.4
+ * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
  * Author URI:        https://wugweb.com/

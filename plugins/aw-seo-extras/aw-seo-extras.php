@@ -12,7 +12,7 @@
  * Plugin URI:        https://animalwrites.in/
  * Description:       SEO extras that run alongside Rank Math: FAQs, canonicals, breadcrumbs, internal links, schema, video and bulk tools.
  * Version:           2.1.0
- * Requires at least: 6.4
+ * Requires at least: 7.1
  * Requires PHP:      8.0
  * Requires Plugins:  seo-by-rank-math
  * Author:            Wugweb

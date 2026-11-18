@@ -1,6 +1,6 @@
 === Kits by Wugweb ===
 Contributors: wugweb
-Requires at least: 6.6
+Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 2.2.0

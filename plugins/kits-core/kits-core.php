@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
  * Version: 1.0.0
- * Requires at least: 6.6
+ * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
  * Author URI: https://wugweb.com

@@ -1,7 +1,7 @@
 === SourceWeb ===
 Contributors: wugweb
 Tags: news, sources, feeds, curation, ai
-Requires at least: 6.5
+Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 0.1.0

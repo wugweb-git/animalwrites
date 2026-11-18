@@ -12,7 +12,7 @@
  * Plugin URI:        https://wugweb.com/plugins/directoryweb/
  * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Needs Kits Core.
  * Version:           1.1.0
- * Requires at least: 6.5
+ * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
  * Author URI:        https://wugweb.com/

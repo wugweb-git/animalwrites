@@ -1,7 +1,7 @@
 === MailWeb ===
 Contributors: wugweb
 Tags: email, inbox, hostinger, smtp, signature
-Requires at least: 6.6
+Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 3.3.0

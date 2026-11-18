@@ -1,7 +1,7 @@
 === DirectoryWeb ===
 Contributors: wugweb
 Tags: directory, listings, places, claims, map
-Requires at least: 6.5
+Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 1.1.0

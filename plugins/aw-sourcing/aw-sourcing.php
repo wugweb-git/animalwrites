@@ -3,7 +3,7 @@
  * Plugin Name: SourceWeb
  * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Kits Core, DirectoryWeb and InsightWeb (the keyword table). Animal Writes Core loads it from this folder while Core is active; it can also be activated on its own.
  * Version: 0.1.0
- * Requires at least: 6.5
+ * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
  * Author URI: https://wugweb.com
