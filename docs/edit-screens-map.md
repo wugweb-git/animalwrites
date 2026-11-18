@@ -916,7 +916,7 @@ The panels, boxes and tables on the admin pages of SourceWeb, RankWeb (with Sear
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-seo-si-settings | Schedule, keys, seed, run now | form | `option:aw_si_seeded`, `option:aw_si_off`, `option:aw_keys` | Key values are never shown. | `seo/search-insights/admin.php:523 (aw_si_settings_tab)` |
+| ap-seo-si-settings | Schedule, keys, seed, run now | form | `option:aw_si_seeded`, `option:aw_si_off`, `option:insightweb_keys`, `option:aw_keys` (old place, read as a fallback) | Key values are never shown; the Keys group saves through POST insightweb/v1/keys (manage_options, write-only). | `seo/search-insights/admin.php:523 (aw_si_settings_tab)` |
 | ap-seo-si-imports | Imports | form | `table:wp_aw_si_obs`, `table:wp_aw_si_keywords` | — | `seo/search-insights/imports.php:209 (aw_si_import_rows)` |
 | ap-seo-si-delete | Delete Search Insights data | form | — | Type DELETE to confirm. | `seo/search-insights/admin.php:562 (aw_si_settings_tab)` |
 

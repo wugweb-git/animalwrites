@@ -1,7 +1,7 @@
 <?php
 /**
  * Bing Webmaster (owner, 31 Oct 2026), free JSON API, monthly on the 2nd at 07:40 IST. Only with
- * AW_BING_WEBMASTER_KEY under Animal Writes → Keys or in wp-config.php (the Webmaster API key, not an IndexNow key); without it nothing runs and the
+ * AW_BING_WEBMASTER_KEY under InsightWeb → Settings → Keys or in wp-config.php (the Webmaster API key, not an IndexNow key); without it nothing runs and the
  * source is not listed. The key is never logged or shown.
  *
  * - Links: GetLinkCounts (our pages with inbound links, paged), then GetUrlLinks for each page (linking page and anchor),
@@ -278,7 +278,7 @@ function aw_si_bing_obs_rows( array $queries, array $pages ): array {
  */
 function aw_si_bing_run( array $args = array() ): array {
 	if ( ! aw_si_bing_on() ) {
-		return array( 'error' => __( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.', 'insightweb' ) );
+		return array( 'error' => __( 'Bing Webmaster is not set up: add its API key under Settings → Keys.', 'insightweb' ) );
 	}
 	$dry = ! empty( $args['dry'] );
 	if ( ! $dry && get_option( 'aw_si_off' ) ) { // After Delete data nothing is written until Search Insights is switched back on.

@@ -126,6 +126,8 @@ That is 15 regular jobs plus 3 short one-off events (`aw_si_geo_refresh`, `aw_si
 
 Kits → Keys (`admin.php?page=aw-keys`, Animal Writes Core `includes/keys.php`) lists only what plugins add with the `aw_keys` filter. Today only Search Insights adds anything: `AW_CLARITY_TOKEN`, `AW_BING_WEBMASTER_KEY`, `AW_PSI_KEY` (optional) in `runs.php`, and `AW_GOOGLE_ALERTS_FEED_1`, `AW_GOOGLE_ALERTS_FEED_2` in `alerts.php`. Both filters move with their files, so Kits → Keys looks the same and the values stay where they are. AI keys are not on this screen and are not touched.
 
+**18 Nov 2026:** InsightWeb keeps its own keys (owner: each plugin stores its own). InsightWeb → Settings → Keys, option `insightweb_keys`, reader `insightweb_key()` with the old `aw_keys` value as a fallback until it is copied; Kits → Keys is being retired. Plan and inventory: `docs/keys-per-plugin.md`.
+
 ### 1.7 SourceWeb's hooks (must keep working)
 
 SourceWeb (`plugins/aw-sourcing`) reads Search Insights in five places. None needs a change, since every name stays and every call is guarded with `function_exists()`.

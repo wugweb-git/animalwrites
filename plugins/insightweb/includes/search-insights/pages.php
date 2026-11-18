@@ -150,7 +150,7 @@ add_action(
 			wp_admin_notice( esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'insightweb' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( ! aw_si_clarity_on() ) {
-			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Animal Writes → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Settings → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		}
 		$note = isset( $_GET['note'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_GET['note'] ) ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- opens a form only.
 		if ( '' !== $note ) {

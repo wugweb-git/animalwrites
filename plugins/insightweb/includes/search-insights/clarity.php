@@ -1,7 +1,7 @@
 <?php
 /**
  * Microsoft Clarity Data Export API (plan §5.2), daily at 06:30 IST, only when the owner has put a project API token in
- * Animal Writes → Keys or wp-config.php as AW_CLARITY_TOKEN (never in the repo). Two calls a day for the last 24 hours:
+ * InsightWeb → Settings → Keys or wp-config.php as AW_CLARITY_TOKEN (never in the repo). Two calls a day for the last 24 hours:
  * by URL and device, then by device. The API allows 10 a day per project, so the job stops itself at 8. Only totals
  * per page and per device are stored: never recordings, session IDs or anything per session.
  *
@@ -238,7 +238,7 @@ function aw_si_clarity_flagged( array $m ): bool {
 function aw_si_clarity_run( array $args = array() ): array {
 	$dry = ! empty( $args['dry'] );
 	if ( ! aw_si_clarity_on() ) {
-		return array( 'error' => __( 'No Clarity token: add it under Animal Writes → Keys.', 'insightweb' ) );
+		return array( 'error' => __( 'No Clarity token: add it under Settings → Keys.', 'insightweb' ) );
 	}
 	if ( ! $dry ) {
 		aw_si_run_start( 'clarity' );

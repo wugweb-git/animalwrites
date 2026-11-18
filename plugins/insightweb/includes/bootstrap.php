@@ -65,6 +65,7 @@ if ( ! function_exists( 'insightweb_caps_grant' ) ) { // Loaded by insightweb.ph
 	require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php';
 }
 require_once INSIGHTWEB_DIR . 'includes/settings.php'; // the seven numbers (constants) and the API rule, first
+require_once INSIGHTWEB_DIR . 'includes/insightweb-keys.php'; // InsightWeb's own service keys (Settings → Keys), before anything reads one
 
 foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'score', 'sourcing-push', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'admin-table', 'rising', 'admin', 'cli' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
@@ -79,7 +80,7 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'sco
 // Referrer icons (3 Nov 2026): site icons beside the referring sources on the Overview.
 // Search Console types (3 Nov 2026): Discover and Google News per page, and URL Inspection index status.
 // Bing crawl (3 Nov 2026): Bing's crawl statistics weekly and keyword volumes monthly.
-// Google Alerts (3 Nov 2026): up to two alert feeds from Animal Writes → Keys, as Mention rows on the Links tab.
+// Google Alerts (3 Nov 2026): up to two alert feeds from Settings → Keys, as Mention rows on the Links tab.
 foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'tool-imports', 'openseo-positions' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
