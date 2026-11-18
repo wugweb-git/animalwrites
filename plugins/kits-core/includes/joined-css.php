@@ -144,7 +144,7 @@ function kits_joined_prune( array $files ): void {
  */
 function kits_bundle_core_css() {
 	$styles  = wp_styles();
-	$handles = array( 'kits-v42', 'kit-tokens', 'kits', 'kit-components', 'kit-primitives' );
+	$handles = array( 'kits-v42', 'kits-tokens', 'kits', 'kits-components', 'kits-primitives' );
 	$dir     = get_template_directory();
 	$uri     = get_template_directory_uri();
 	$files   = array();

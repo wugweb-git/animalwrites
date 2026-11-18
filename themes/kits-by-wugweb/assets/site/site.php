@@ -155,7 +155,7 @@ function kits_site_component_styles( $styles ) {
 		$styles[ $handle ] = array(
 			'src'    => kits_site_uri( $file ),
 			'file'   => kits_site_path( $file ),
-			'deps'   => array( 'aw-tokens', 'kit-components' ),
+			'deps'   => array( 'aw-tokens', 'kits-components' ),
 			'when'   => $c['when'] ?? null,
 			'blocks' => $c['blocks'] ?? array(),
 		);
@@ -167,11 +167,11 @@ add_filter( 'kits_component_styles', 'kits_site_component_styles' );
 /** Design tokens and interactions, over the Kits ones (the component files come through the Kits registry, above). */
 function kits_site_enqueue() {
 	$v = fn( $f ) => (string) filemtime( kits_site_path( $f ) );
-	wp_enqueue_style( 'aw-tokens', kits_site_uri( 'css/tokens.css' ), array( 'kit-tokens' ), $v( 'css/tokens.css' ) ); // Brand values over the Kits defaults.
+	wp_enqueue_style( 'aw-tokens', kits_site_uri( 'css/tokens.css' ), array( 'kits-tokens' ), $v( 'css/tokens.css' ) ); // Brand values over the Kits defaults.
 	wp_enqueue_script(
 		'aw-interactions',
 		kits_site_uri( 'js/aw.js' ),
-		array( 'kit-interactions' ),
+		array( 'kits-interactions' ),
 		$v( 'js/aw.js' ),
 		array(
 			'in_footer' => true,

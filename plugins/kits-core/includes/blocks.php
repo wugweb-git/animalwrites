@@ -30,6 +30,21 @@ add_action(
 	'init',
 	function () {
 		register_block_type_from_metadata( KITS_CORE_DIR . 'blocks/hero' );
+		// The Hero pattern goes with its block (the Kits theme's kits-by-wugweb/hero until 18 Nov 2026).
+		if ( ! WP_Block_Pattern_Categories_Registry::get_instance()->is_registered( 'kits-components' ) ) {
+			register_block_pattern_category( 'kits-components', array( 'label' => __( 'Kits: Components', 'kits-core' ) ) );
+		}
+		register_block_pattern(
+			'kits-core/hero',
+			array(
+				'title'         => __( 'Hero', 'kits-core' ),
+				'description'   => __( 'Page hero (Kits Hero block): label, H1, one line and two actions. Its height, colours and padding are set in Styles > Blocks > Hero.', 'kits-core' ),
+				'categories'    => array( 'kits-components' ),
+				'keywords'      => array( 'hero', 'intro', 'title', 'buttons' ),
+				'viewportWidth' => 1280,
+				'filePath'      => KITS_CORE_DIR . 'patterns/hero.php',
+			)
+		);
 	}
 );
 
@@ -180,7 +195,7 @@ add_action(
 		}
 		// Right after the theme's tokens (kit-tokens.css), so the Styles value wins at every width. A site whose own token
 		// file sets these two tokens names that file's handle here.
-		foreach ( array( apply_filters( 'kits_style_tokens_handle', 'kit-tokens' ), 'global-styles' ) as $handle ) {
+		foreach ( array( apply_filters( 'kits_style_tokens_handle', 'kits-tokens' ), 'global-styles' ) as $handle ) {
 			if ( wp_style_is( $handle, 'enqueued' ) ) {
 				wp_add_inline_style( $handle, $css );
 				return;
