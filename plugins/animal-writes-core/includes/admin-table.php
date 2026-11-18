@@ -1,7 +1,9 @@
 <?php
 /**
  * aw_core_simple_table(): the plugin's plain admin tables as a core list table (admin UI is
- * core WordPress only). The class loads only when a screen draws one.
+ * core WordPress only). A thin back-compat wrapper over Kits Core's generic kits_simple_table()
+ * so the two identical list-table classes are no longer kept in parallel (Kits Core is always
+ * loaded; animal-writes-core.php requires kits-core.php before this file). Callers are unchanged.
  *
  * @package animal-writes-core
  */
@@ -19,11 +21,5 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array  $opts   per_page, total (rows are already that page), primary, fixed, empty, foot, sortable, caption.
  */
 function aw_core_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-core-simple-table.php';
-	$t = new AW_Core_Simple_Table( $plural, $cols, $rows, $opts );
-	$t->prepare_items();
-	$t->display();
+	kits_simple_table( $plural, $cols, $rows, $opts );
 }
