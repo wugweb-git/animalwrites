@@ -29,11 +29,7 @@ return array(
 			'slug'       => 'infographics',
 			'with_front' => false,
 		),
-		'menu_icon' => 'dashicons-chart-pie',
-		'template'  => array(
-			array( 'core/image' ),
-			array( 'core/paragraph', array( 'placeholder' => __( 'Describe in words everything the infographic shows.', 'kits-core' ) ) ),
-		),
+		'menu_icon' => 'dashicons-chart-pie', // The picture and its long description are fields (one place each), not blocks.
 	),
 	'fields'      => array(
 		'kits_infographic_image'       => array(

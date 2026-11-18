@@ -27,6 +27,7 @@ $GLOBALS['t_cpts']     = array();
 $GLOBALS['t_postmeta'] = array();
 $GLOBALS['t_settings'] = array();
 $GLOBALS['t_can']      = false;
+$GLOBALS['t_pages']    = array();
 
 function add_filter( $hook, $cb, $prio = 10, $args = 1 ) {
 	$GLOBALS['t_hooks'][ $hook ][ $prio ][] = array( $cb, $args );
@@ -96,8 +97,46 @@ function delete_option( $k ) {
 function get_post_meta( $id, $k ) {
 	return $GLOBALS['t_meta'][ $id ][ $k ] ?? '';
 }
-function get_post_type( $id ) {
-	return $GLOBALS['t_types'][ $id ] ?? 'post';
+function get_post_type( $id = 0 ) {
+	return $GLOBALS['t_types'][ $id ?: ( $GLOBALS['t_current'] ?? 0 ) ] ?? 'post';
+}
+function is_singular() {
+	return ! empty( $GLOBALS['t_current'] );
+}
+function is_admin() {
+	return false;
+}
+function wp_doing_ajax() {
+	return false;
+}
+function checked( $a, $b, $echo ) {
+	return $a === $b ? ' checked=\'checked\'' : '';
+}
+function get_page_by_path( $path ) {
+	return $GLOBALS['t_pages'][ $path ] ?? null;
+}
+class WP_Post {
+	public $ID;
+	public $post_type;
+	public $post_status = 'publish';
+	public $post_title  = '';
+	public function __construct( $id, $type, $title = '' ) {
+		$this->ID         = $id;
+		$this->post_type  = $type;
+		$this->post_title = $title;
+	}
+}
+class WP_REST_Response {
+	private $data;
+	public function __construct( $data ) {
+		$this->data = $data;
+	}
+	public function get_data() {
+		return $this->data;
+	}
+	public function set_data( $data ) {
+		$this->data = $data;
+	}
 }
 function get_the_ID() {
 	return 1;
@@ -223,6 +262,76 @@ t_check( in_array( 'itemReviewed', $map['kits_testimonial']['requires'], true ),
 t_check( 'Custom' === apply_filters( 'kits_schema_map', array( 'kits_event' => array( 'type' => 'Custom' ) ) )['kits_event']['type'], 'schema: a site\'s own map for a type wins' );
 $src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/presets.php' );
 t_check( false === strpos( $src, 'application/ld+json' ) && false === strpos( $src, 'wp_head' ), 'no JSON-LD and no head output in the loader' );
+
+// Schema values for machines: ISO 8601 dates, and the map says to read them that way.
+t_check( '2026-12-01T18:30:00+00:00' === kits_preset_schema_value( 'kits_event_start', 20 ) && '2026-12-02' === kits_preset_schema_value( 'kits_event_end', 20 ), 'schema value: dates in ISO 8601' );
+t_check( 'kits_preset_schema_value' === $map['kits_event']['value_callback'], 'schema map: value_callback set' );
+t_check( '' === kits_preset_schema_value( 'kits_testimonial_quote', 30 ) && 'Great work.' === kits_preset_schema_value( 'kits_testimonial_quote', 31 ) && '' === kits_preset_schema_value( 'kits_testimonial_consent', 31 ), 'schema value: consent kept, private field never given' );
+
+// Unconsented testimonials leave every query for people who may not edit them; editors keep them.
+$q = array( new WP_Post( 30, 'kits_testimonial' ), new WP_Post( 31, 'kits_testimonial' ), new WP_Post( 20, 'kits_event' ) );
+t_check( array( 31, 20 ) === array_map( fn( $p ) => $p->ID, apply_filters( 'the_posts', $q, null ) ), 'queries: unconsented testimonial left out for visitors' );
+$GLOBALS['t_can'] = true;
+t_check( 3 === count( apply_filters( 'the_posts', $q, null ) ), 'queries: editors still see it' );
+$GLOBALS['t_can'] = false;
+
+// A single item in REST: title, content, excerpt and fields blanked without consent.
+$rest = new WP_REST_Response(
+	array(
+		'title'   => array( 'rendered' => 'A. Person' ),
+		'content' => array(
+			'rendered'  => '<blockquote>Great work.</blockquote>',
+			'protected' => false,
+		),
+		'meta'    => array( 'kits_testimonial_quote' => 'Great work.', 'other' => 1 ),
+	)
+);
+$out = apply_filters( 'rest_prepare_kits_testimonial', $rest, new WP_Post( 30, 'kits_testimonial' ) )->get_data();
+t_check( '' === $out['title']['rendered'] && '' === $out['content']['rendered'] && false === $out['content']['protected'] && array( 'other' => 1 ) === $out['meta'], 'REST: unconsented item blanked' );
+$ok = apply_filters( 'rest_prepare_kits_testimonial', new WP_REST_Response( array( 'title' => array( 'rendered' => 'B' ) ) ), new WP_Post( 31, 'kits_testimonial' ) )->get_data();
+t_check( 'B' === $ok['title']['rendered'], 'REST: consented item untouched' );
+
+// Display formats: a picture as its address, profile links as links.
+$GLOBALS['t_options']['kits_presets_enabled'] = array( 'kits-card', 'kits-person' );
+$GLOBALS['t_types'][40] = 'kits_person';
+$GLOBALS['t_meta'][40]  = array(
+	'kits_person_photo' => 12,
+	'kits_person_links' => "https://www.example.org/a\nhttps://x.test/b",
+);
+$person = kits_presets()['kits-person'];
+t_check( 'https://example.test/uploads/12.png' === kits_preset_field_display( $person, 'kits_person_photo', 40 ), 'attachment shown as its address' );
+t_check( '<a href="https://www.example.org/a">example.org</a> · <a href="https://x.test/b">x.test</a>' === kits_preset_field_display( $person, 'kits_person_links', 40 ), 'profile links shown as links' );
+
+// Cards: viewable for Query Loop, but no list page, noindex and out of the sitemap.
+$card_args = kits_preset_type_args( kits_presets()['kits-card'] );
+t_check( false === $card_args['has_archive'] && true === $card_args['exclude_from_search'], 'card: no list page, not in search' );
+t_check( array( 'kits_card' ) === kits_presets_noindex_types(), 'card: noindex type' );
+$GLOBALS['t_current']   = 41;
+$GLOBALS['t_types'][41] = 'kits_card';
+t_check( ! empty( apply_filters( 'wp_robots', array() )['noindex'] ) && array( 'post' => 1 ) === apply_filters( 'wp_sitemaps_post_types', array( 'post' => 1, 'kits_card' => 1 ) ), 'card: robots noindex and no sitemap' );
+$GLOBALS['t_current'] = 0;
+
+// An address a page already has: the page keeps it, the type gets no list page, and the screen says so.
+$GLOBALS['t_pages']['people'] = new WP_Post( 50, 'page', 'Our people' );
+$GLOBALS['t_cpts']            = array();
+apply_filters( 'init', null );
+t_check( false === $GLOBALS['t_cpts']['kits_person']['has_archive'], 'slug taken by a page: no archive' );
+ob_start();
+kits_presets_field( array( 'preset' => 'kits-person' ) );
+$html = ob_get_clean();
+t_check( false !== strpos( $html, 'address /people/' ) && false !== strpos( $html, 'The page &quot;Our people&quot; already has /people/' ), 'screen: address and the page that has it' );
+
+// The switch when code overrides it: shown disabled; a stored "on" is kept by a hidden field.
+add_filter( 'kits_presets_enabled', fn( $ids ) => array_values( array_diff( $ids, array( 'kits-person' ) ) ), 20 );
+ob_start();
+kits_presets_field( array( 'preset' => 'kits-person' ) );
+$html = ob_get_clean();
+t_check( false !== strpos( $html, ' disabled' ) && false !== strpos( $html, 'type="hidden" name="kits_presets_enabled[]" value="kits-person"' ) && false !== strpos( $html, 'switched off in this site' ), 'screen: code override shown, stored value kept' );
+ob_start();
+kits_presets_field( array( 'preset' => 'kits-card' ) );
+t_check( false === strpos( ob_get_clean(), 'disabled' ), 'screen: a normal switch is not disabled' );
+$GLOBALS['t_hooks']['kits_presets_enabled'] = array();
+$GLOBALS['t_options']['kits_presets_enabled'] = array( 'kits-event', 'kits-testimonial' );
 
 // Code can switch a preset on; a broken definition is dropped.
 add_filter( 'kits_presets_enabled', fn( $ids ) => array_merge( $ids, array( 'kits-card', 'unknown' ) ) );

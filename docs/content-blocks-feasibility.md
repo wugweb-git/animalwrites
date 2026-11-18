@@ -312,6 +312,7 @@ Contract (proposed, for the RankWeb track to accept or change):
 - `kits_schema_map( array $map ): array` — post type => `array( 'type' => 'Article', 'fields' => array( schema
   property => binding key ) )`. RankWeb builds the node from the binding values (`kits_post_field_value()`), so
   schema text is the visible text.
+- An entry may carry `requires` (properties without which no node is built) and `value_callback( $key, $post_id )`: when set, RankWeb reads values through it instead. Presets set it to `kits_preset_schema_value()`, the visible value except dates in ISO 8601 and pictures as their address (built in stage 4).
 - `kits_schema_node( array $node, int $post_id, string $post_type )` — last-mile change by the site.
 - Term and hub pages: `CollectionPage` + `ItemList`, as RankWeb does today.
 

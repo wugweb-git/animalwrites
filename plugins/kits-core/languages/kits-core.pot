@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T12:04:20+00:00\n"
+"POT-Creation-Date: 2026-11-18T12:09:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kits-core\n"
@@ -385,55 +385,73 @@ msgstr ""
 msgid "The column beside an item page's text (below it on phones and tablets)."
 msgstr ""
 
-#: includes/presets/card.php:14
-#: includes/presets/card.php:18
+#. translators: 1: post type slug, 2: address such as /events
+#: includes/presets.php:692
+#, php-format
+msgid "Type %1$s, address %2$s."
+msgstr ""
+
+#. translators: %s: post type slug
+#: includes/presets.php:694
+#, php-format
+msgid "Type %s, with no pages of its own: shown inside other pages."
+msgstr ""
+
+#. translators: 1: address such as /events/, 2: page title
+#: includes/presets.php:699
+#, php-format
+msgid "The page \"%2$s\" already has %1$s: it keeps that address, and this type gets no list page there."
+msgstr ""
+
+#: includes/presets/card.php:15
+#: includes/presets/card.php:19
 #: src/theme-options/sections/cards.js:100
 msgid "Cards"
 msgstr ""
 
-#: includes/presets/card.php:15
-msgid "Small reusable cards, such as tips and facts: a picture, one line and a link."
-msgstr ""
-
-#: includes/presets/card.php:19
-msgid "Card"
+#: includes/presets/card.php:16
+msgid "Small reusable cards, such as tips and facts: a picture, one line and a link, shown inside other pages (no list page, not in search engines)."
 msgstr ""
 
 #: includes/presets/card.php:20
-msgid "Add card"
+msgid "Card"
 msgstr ""
 
 #: includes/presets/card.php:21
-msgid "Edit card"
+msgid "Add card"
 msgstr ""
 
 #: includes/presets/card.php:22
-msgid "View card"
+msgid "Edit card"
 msgstr ""
 
 #: includes/presets/card.php:23
-msgid "Search cards"
+msgid "View card"
 msgstr ""
 
 #: includes/presets/card.php:24
-msgid "No cards found."
+msgid "Search cards"
 msgstr ""
 
 #: includes/presets/card.php:25
+msgid "No cards found."
+msgstr ""
+
+#: includes/presets/card.php:26
 msgid "All cards"
 msgstr ""
 
-#: includes/presets/card.php:35
-#: includes/presets/infographic.php:40
+#: includes/presets/card.php:42
+#: includes/presets/infographic.php:36
 #: src/shell/detail.js:102
 msgid "Picture"
 msgstr ""
 
-#: includes/presets/card.php:39
+#: includes/presets/card.php:46
 msgid "Line"
 msgstr ""
 
-#: includes/presets/card.php:43
+#: includes/presets/card.php:50
 #: includes/presets/portfolio.php:47
 msgid "Link"
 msgstr ""
@@ -581,19 +599,15 @@ msgstr ""
 msgid "All infographics"
 msgstr ""
 
-#: includes/presets/infographic.php:35
-msgid "Describe in words everything the infographic shows."
-msgstr ""
-
-#: includes/presets/infographic.php:44
+#: includes/presets/infographic.php:40
 msgid "Long description (text alternative)"
 msgstr ""
 
-#: includes/presets/infographic.php:48
+#: includes/presets/infographic.php:44
 msgid "Source"
 msgstr ""
 
-#: includes/presets/infographic.php:52
+#: includes/presets/infographic.php:48
 msgid "Data link"
 msgstr ""
 

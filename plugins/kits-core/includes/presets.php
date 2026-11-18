@@ -30,6 +30,7 @@
  *       ),
  *       'consent_field' => '',                // Optional: a field that must be set before any field is shown.
  *       'schema'      => array( 'type' => 'Event', 'fields' => array( 'startDate' => 'kits_event_start' ) ),
+ *       'noindex'     => false,               // Optional: its own pages say noindex and leave the sitemap.
  *   )
  * Field formats: text, textarea, url, urls (one per line), date (Y-m-d), datetime (Y-m-d H:i, site time), html,
  * attachment (a Media Library ID). A field with 'private' => true is not in the REST API and has no binding key.
@@ -136,6 +137,7 @@ function kits_preset_normalise( string $id, $def ): array {
 		'fields'        => $fields,
 		'consent_field' => isset( $fields[ $consent ] ) ? $consent : '',
 		'schema'        => is_array( $def['schema'] ?? null ) ? $def['schema'] : array(),
+		'noindex'       => ! empty( $def['noindex'] ),
 	);
 }
 
@@ -163,7 +165,8 @@ function kits_preset_formats(): array {
  * @return string[]
  */
 function kits_presets_stored(): array {
-	return kits_presets_clean( get_option( KITS_PRESETS_OPTION, array() ) );
+	$stored = get_option( KITS_PRESETS_OPTION, array() );
+	return is_array( $stored ) && $stored ? kits_presets_clean( $stored ) : array(); // All off (the default): no preset file is read.
 }
 
 /**
@@ -178,6 +181,9 @@ function kits_presets_enabled(): array {
 	 * @param string[] $ids The ids saved in Kits → Settings → Content types.
 	 */
 	$ids = (array) apply_filters( 'kits_presets_enabled', kits_presets_stored() );
+	if ( ! $ids ) {
+		return array(); // All off: the definitions are not built on this request.
+	}
 	return array_values( array_intersect( array_keys( kits_presets() ), array_map( 'strval', $ids ) ) );
 }
 
@@ -196,7 +202,11 @@ function kits_preset_enabled( string $id ): bool {
  * @return array<string, array>
  */
 function kits_presets_active(): array {
-	return array_intersect_key( kits_presets(), array_flip( kits_presets_enabled() ) );
+	$on = kits_presets_enabled();
+	if ( ! $on ) {
+		return array();
+	}
+	return array_intersect_key( kits_presets(), array_flip( $on ) );
 }
 
 /**
@@ -282,6 +292,48 @@ function kits_preset_date_valid( string $ymd ): bool {
 }
 
 /**
+ * Whether an item of a preset may be shown: always, unless the preset has a consent field and it is empty.
+ *
+ * @param array $preset  Normalised preset.
+ * @param int   $post_id Post ID.
+ */
+function kits_preset_consented( array $preset, int $post_id ): bool {
+	return '' === $preset['consent_field'] || '' !== (string) get_post_meta( $post_id, $preset['consent_field'], true );
+}
+
+/**
+ * A field's value for machines (the schema contract): dates in ISO 8601 (site time zone), a Media Library item as its
+ * address, other formats as stored. '' when there is nothing, on another type, or without consent.
+ *
+ * @param string $key     Field key.
+ * @param int    $post_id Post ID.
+ */
+function kits_preset_schema_value( string $key, int $post_id ): string {
+	foreach ( kits_presets_active() as $preset ) {
+		if ( ! isset( $preset['fields'][ $key ] ) ) {
+			continue;
+		}
+		if ( $preset['fields'][ $key ]['private'] || get_post_type( $post_id ) !== $preset['post_type'] || ! kits_preset_consented( $preset, $post_id ) ) {
+			return '';
+		}
+		$raw    = get_post_meta( $post_id, $key, true );
+		$format = $preset['fields'][ $key ]['format'];
+		if ( 'attachment' === $format || 'urls' === $format ) {
+			return 'attachment' === $format ? kits_preset_field_display( $preset, $key, $post_id ) : (string) $raw;
+		}
+		if ( ( 'date' === $format || 'datetime' === $format ) && '' !== (string) $raw ) {
+			$when = date_create_immutable( (string) $raw, wp_timezone() );
+			if ( ! $when ) {
+				return '';
+			}
+			return strlen( (string) $raw ) > 10 ? $when->format( 'c' ) : $when->format( 'Y-m-d' );
+		}
+		return is_scalar( $raw ) ? (string) $raw : '';
+	}
+	return '';
+}
+
+/**
  * A field's value as a binding shows it ('' = nothing to show).
  *
  * @param array  $preset  Normalised preset.
@@ -292,7 +344,7 @@ function kits_preset_field_display( array $preset, string $key, int $post_id ): 
 	if ( ! isset( $preset['fields'][ $key ] ) || get_post_type( $post_id ) !== $preset['post_type'] ) {
 		return '';
 	}
-	if ( '' !== $preset['consent_field'] && '' === (string) get_post_meta( $post_id, $preset['consent_field'], true ) ) {
+	if ( ! kits_preset_consented( $preset, $post_id ) ) {
 		return ''; // Nothing of this item is shown without the recorded consent.
 	}
 	$raw = get_post_meta( $post_id, $key, true );
@@ -336,7 +388,11 @@ add_action(
 	'init',
 	function () {
 		foreach ( kits_presets_active() as $preset ) {
-			register_post_type( $preset['post_type'], kits_preset_type_args( $preset ) );
+			$args = kits_preset_type_args( $preset );
+			if ( ! empty( $args['has_archive'] ) && '' !== kits_preset_slug_taken( kits_preset_slug( $args ) ) ) {
+				$args['has_archive'] = false; // A page already has this address: it keeps it (the settings screen says so).
+			}
+			register_post_type( $preset['post_type'], $args );
 			foreach ( $preset['fields'] as $key => $field ) {
 				$format = $field['format'];
 				register_post_meta(
@@ -357,6 +413,33 @@ add_action(
 	},
 	9 // Before the site's own types and Page Options (20).
 );
+
+// A preset marked noindex (a type shown inside other pages, such as cards): its own pages say noindex and it is left
+// out of WordPress's sitemap.
+add_filter(
+	'wp_robots',
+	function ( $robots ) {
+		if ( is_singular() && in_array( get_post_type(), kits_presets_noindex_types(), true ) ) {
+			$robots['noindex'] = true;
+		}
+		return $robots;
+	}
+);
+add_filter(
+	'wp_sitemaps_post_types',
+	function ( $types ) {
+		return array_diff_key( (array) $types, array_flip( kits_presets_noindex_types() ) );
+	}
+);
+
+/**
+ * The post types of switched-on presets marked noindex.
+ *
+ * @return string[]
+ */
+function kits_presets_noindex_types(): array {
+	return array_values( array_map( fn( $p ) => $p['post_type'], array_filter( kits_presets_active(), fn( $p ) => $p['noindex'] ) ) );
+}
 
 // Binding keys: every public field of a switched-on preset, for core blocks through kits/post-field (bindings.php).
 add_filter(
@@ -379,8 +462,51 @@ add_filter(
 	}
 );
 
-// The REST API gives a consent preset's fields only to people who may edit the item, until its consent is recorded
-// (the same rule as the bindings). The item's own words in the editor are the editor's to keep consented.
+// An item of a consent preset is not served to anyone who may not edit it until its consent is recorded: it leaves every
+// front-end and REST query (lists, its own page, which then is a 404, feeds and search), whatever field or block holds
+// its words. Editors still see it everywhere, so they can finish it.
+add_filter(
+	'the_posts',
+	function ( $posts ) {
+		return is_array( $posts ) ? kits_presets_hide_unconsented( $posts ) : $posts;
+	},
+	10,
+	1
+);
+
+/**
+ * The posts without the items of a consent preset that have no consent yet, for people who may not edit them. The
+ * admin screens are left as they are.
+ *
+ * @param array $posts Posts (WP_Post objects or IDs).
+ * @return array
+ */
+function kits_presets_hide_unconsented( array $posts ): array {
+	if ( is_admin() && ! wp_doing_ajax() ) {
+		return $posts;
+	}
+	$guarded = array();
+	foreach ( kits_presets_active() as $preset ) {
+		if ( '' !== $preset['consent_field'] ) {
+			$guarded[ $preset['post_type'] ] = $preset;
+		}
+	}
+	if ( ! $guarded ) {
+		return $posts;
+	}
+	$out = array();
+	foreach ( $posts as $post ) {
+		$id   = is_object( $post ) ? (int) $post->ID : (int) $post;
+		$type = is_object( $post ) ? (string) $post->post_type : (string) get_post_type( $id );
+		if ( isset( $guarded[ $type ] ) && ! kits_preset_consented( $guarded[ $type ], $id ) && ! current_user_can( 'edit_post', $id ) ) {
+			continue;
+		}
+		$out[] = $post;
+	}
+	return count( $out ) === count( $posts ) ? $posts : $out;
+}
+
+// A single item in the REST API is read without a query: its words and fields are blanked there by the same rule.
 add_action(
 	'init',
 	function () {
@@ -402,7 +528,8 @@ add_action(
 );
 
 /**
- * A REST response without the preset's fields while consent is not recorded, for people who may not edit the item.
+ * A REST response with no title, content, excerpt or fields while consent is not recorded, for people who may not edit
+ * the item.
  *
  * @param WP_REST_Response|mixed $response Response.
  * @param WP_Post|mixed          $post     Post.
@@ -413,21 +540,28 @@ function kits_preset_rest_consent( $response, $post, array $preset ) {
 	if ( ! ( $response instanceof WP_REST_Response ) || ! ( $post instanceof WP_Post ) ) {
 		return $response;
 	}
-	if ( current_user_can( 'edit_post', $post->ID ) || '' !== (string) get_post_meta( $post->ID, $preset['consent_field'], true ) ) {
+	if ( kits_preset_consented( $preset, (int) $post->ID ) || current_user_can( 'edit_post', $post->ID ) ) {
 		return $response;
 	}
 	$data = $response->get_data();
+	foreach ( array( 'title', 'content', 'excerpt' ) as $part ) {
+		if ( isset( $data[ $part ] ) && is_array( $data[ $part ] ) ) {
+			$data[ $part ] = array_merge( $data[ $part ], array( 'rendered' => '' ), isset( $data[ $part ]['raw'] ) ? array( 'raw' => '' ) : array() );
+		}
+	}
 	if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
 		$data['meta'] = array_diff_key( $data['meta'], $preset['fields'] );
-		$response->set_data( $data );
 	}
+	$response->set_data( $data );
 	return $response;
 }
 
 /*
  * Schema contract (section 13): post type => [ 'type' => schema.org type, 'fields' => [ property => binding key ],
- * 'requires' => [ properties without which no node is built ] ]. The SEO plugin reads it and builds the node from
- * kits_post_field_value(), so schema text is the visible text. Kits Core prints no JSON-LD.
+ * 'requires' => [ properties without which no node is built ], 'value_callback' => callable( $key, $post_id ) ]. The
+ * SEO plugin reads each value through value_callback when it is set, else kits_post_field_value(). Presets set it to
+ * kits_preset_schema_value(): the visible value, except dates in ISO 8601 and pictures as their address, which
+ * schema.org needs. Kits Core prints no JSON-LD.
  */
 add_filter(
 	'kits_schema_map',
@@ -435,7 +569,7 @@ add_filter(
 		$map = (array) $map;
 		foreach ( kits_presets_active() as $preset ) {
 			if ( ! empty( $preset['schema']['type'] ) && ! isset( $map[ $preset['post_type'] ] ) ) {
-				$map[ $preset['post_type'] ] = $preset['schema'];
+				$map[ $preset['post_type'] ] = array_merge( $preset['schema'], array( 'value_callback' => 'kits_preset_schema_value' ) );
 			}
 		}
 		return $map;
@@ -505,6 +639,32 @@ add_filter(
 );
 
 /**
+ * A type's public address base, or '' when it has no pages of its own.
+ *
+ * @param array $args register_post_type() arguments.
+ */
+function kits_preset_slug( array $args ): string {
+	$public = (bool) ( $args['publicly_queryable'] ?? $args['public'] ?? false );
+	if ( ! $public || false === ( $args['rewrite'] ?? true ) ) {
+		return '';
+	}
+	return (string) ( is_array( $args['rewrite'] ?? null ) && ! empty( $args['rewrite']['slug'] ) ? $args['rewrite']['slug'] : '' );
+}
+
+/**
+ * The title of a published page that already has this address, or ''.
+ *
+ * @param string $slug Address base.
+ */
+function kits_preset_slug_taken( string $slug ): string {
+	if ( '' === $slug ) {
+		return '';
+	}
+	$page = get_page_by_path( $slug );
+	return $page instanceof WP_Post && 'publish' === $page->post_status ? (string) $page->post_title : '';
+}
+
+/**
  * One preset's switch.
  *
  * @param array $args Field arguments (preset id in 'preset').
@@ -517,7 +677,8 @@ function kits_presets_field( array $args ): void {
 	}
 	$stored = in_array( $id, kits_presets_stored(), true );
 	$on     = kits_preset_enabled( $id );
-	$slug   = (string) ( kits_preset_type_args( $preset )['rewrite']['slug'] ?? $preset['post_type'] );
+	$slug   = kits_preset_slug( kits_preset_type_args( $preset ) );
+	$taken  = kits_preset_slug_taken( $slug );
 	printf(
 		'<input type="checkbox" id="%1$s" name="%2$s[]" value="%3$s"%4$s%5$s> <p class="description">%6$s</p>',
 		esc_attr( 'kits_preset_' . $id ),
@@ -525,8 +686,18 @@ function kits_presets_field( array $args ): void {
 		esc_attr( $id ),
 		checked( $stored, true, false ),
 		$stored !== $on ? ' disabled' : '',
-		esc_html( $preset['description'] . ' Type ' . $preset['post_type'] . ', address /' . $slug . '/.' )
+		esc_html( $preset['description'] ) . ' ' . esc_html(
+			'' !== $slug
+				/* translators: 1: post type slug, 2: address such as /events/ */
+				? sprintf( __( 'Type %1$s, address %2$s.', 'kits-core' ), $preset['post_type'], '/' . $slug . '/' )
+				/* translators: %s: post type slug */
+				: sprintf( __( 'Type %s, with no pages of its own: shown inside other pages.', 'kits-core' ), $preset['post_type'] )
+		)
 	);
+	if ( '' !== $taken ) {
+		/* translators: 1: address such as /events/, 2: page title */
+		echo '<p class="description">' . esc_html( sprintf( __( 'The page "%2$s" already has %1$s: it keeps that address, and this type gets no list page there.', 'kits-core' ), '/' . $slug . '/', $taken ) ) . '</p>';
+	}
 	if ( $stored !== $on ) {
 		echo '<p class="description">' . esc_html( $on ? 'On: switched on in this site\'s code.' : 'Off: switched off in this site\'s code.' ) . '</p>';
 		if ( $stored ) {
