@@ -160,7 +160,7 @@ add_action(
 
 /**
  * Page context for analytics (owner, 9 Oct 2026): window.kitsPage and a dataLayer "page_context" push before any tag,
- * so GTM tags and the events in kit.js know the page type, section, category, place, listing type, issuer and
+ * so GTM tags and the events in assets/js/analytics.js know the page type, section, category, place, listing type, issuer and
  * publisher. A site fills the values with the kits_page_context filter. gtag = true while GA4 is placed directly by
  * Site Kit (events then also go to gtag); false once GA4 runs only inside GTM.
  */

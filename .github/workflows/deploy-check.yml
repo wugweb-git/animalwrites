@@ -107,6 +107,8 @@ jobs:
         run: php plugins/animal-writes-core/tests/content-bindings-tests.php
       - name: Kits menu, six items and old addresses (plugins/kits-core/tests/admin-menu-tests.php)
         run: php plugins/kits-core/tests/admin-menu-tests.php
+      - name: Kits admin layer, what Animal Writes Core gave (menu order, site screens, value parsers; plugins/kits-core/tests/admin-layer-tests.php)
+        run: php plugins/kits-core/tests/admin-layer-tests.php
       - name: Kits page parts, a classic screen's output as shell parts (plugins/kits-core/tests/shell-parts-tests.php)
         run: php plugins/kits-core/tests/shell-parts-tests.php
       - name: Kits content-type presets, off by default, native registration only (plugins/kits-core/tests/presets-tests.php)

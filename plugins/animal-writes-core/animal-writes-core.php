@@ -42,12 +42,10 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/
 }
 require_once AW_CORE_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen
 require_once AW_CORE_DIR . 'includes/kits-config.php';
+require_once AW_CORE_DIR . 'includes/admin-config.php'; // the site's values for Kits Core's admin layer (menus, labels, Overview)
 require_once AW_CORE_DIR . 'includes/admin-table.php';
-require_once AW_CORE_DIR . 'includes/admin-home.php';
 require_once AW_CORE_DIR . 'includes/help-tab.php';
 require_once AW_CORE_DIR . 'includes/keys.php'; // Kits → Keys: service keys in WP admin (owner, 31 Oct 2026)
-require_once AW_CORE_DIR . 'includes/edit-screens.php'; // Kits → Edit screens: every edit-screen box, its fields and where they are used (owner, 1 Nov 2026)
-require_once AW_CORE_DIR . 'includes/admin-tidy.php';
 require_once AW_CORE_DIR . 'includes/cdn-cache.php';
 require_once AW_CORE_DIR . 'includes/deploy-purge.php';
 require_once AW_CORE_DIR . 'includes/deploy-status.php'; // /aw/v1/deploy-status: the deploy gate waits while a campaign is sending (3 Nov 2026)
@@ -108,15 +106,13 @@ require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/not-found.php';
 require_once AW_CORE_DIR . 'includes/press.php';
 require_once AW_CORE_DIR . 'includes/social-posts.php'; // Social posts (aw_social, under News): off by default, Kits → Modules (owner, 2 Nov 2026)
-require_once AW_CORE_DIR . 'includes/site-options.php'; // Kits → Modules → Forms and sample listings (12 Nov 2026)
-require_once AW_CORE_DIR . 'includes/edit-fields.php'; // edit fields for values that were WP-CLI only (12 Nov 2026)
+require_once AW_CORE_DIR . 'includes/uninstall-setting.php'; // Kits → Modules → Animal Writes Core data (the rest of Modules is Kits Core's)
 require_once AW_CORE_DIR . 'includes/block-states.php';
 require_once AW_CORE_DIR . 'includes/related.php';
 require_once AW_CORE_DIR . 'includes/law-links.php';
 require_once AW_CORE_DIR . 'includes/home.php'; // Home: sections in the theme template, hero, FAQ section
 require_once AW_CORE_DIR . 'includes/near-opps.php';
 require_once AW_CORE_DIR . 'includes/entity-links.php';
-require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';
 require_once AW_CORE_DIR . 'includes/dashboard-activity.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';

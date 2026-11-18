@@ -10,16 +10,14 @@ plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--commun
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--diwali .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--lab-rules .aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | min-height: var(--kit-hero-h)
-plugins/animal-writes-core/includes/admin-home.php | admin page | add_submenu_page( 'plugins.php', 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
-plugins/animal-writes-core/includes/admin-ia.php | admin page | add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
-plugins/animal-writes-core/includes/admin-ia.php | admin page | add_submenu_page( 'aw-classification', $t->labels->name, $t->labels->name, 'manage_categories', 'edit-tags.php?taxonomy=' . $tax );
+plugins/kits-core/includes/admin-layer/arrange.php | admin page | add_menu_page( __( 'Classification', 'kits-core' ), __( 'Classification', 'kits-core' ), 'manage_categories', KITS_CLASSIFICATION_MENU, '__return_null', 'dashic
+plugins/kits-core/includes/admin-layer/arrange.php | admin page | add_submenu_page( KITS_CLASSIFICATION_MENU, $t->labels->name, $t->labels->name, 'manage_categories', 'edit-tags.php?taxonomy=' . $tax );
 plugins/animal-writes-core/includes/campaign-letters.php | admin page | add_submenu_page( 'edit.php?post_type=aw_campaign', 'Letter report', 'Letter report', 'edit_posts', 'aw-letter-report', 'aw_cl_report_page' )
 plugins/directoryweb/includes/claims-review.php | admin page | add_submenu_page( 'edit.php?post_type=aw_listing', 'Claims', 'Claims', DIRECTORYWEB_CAP, 'aw-claims', 'aw_claims_screen' ); // phpcs:ignore WordPress.WP.Capabil
 plugins/directoryweb/includes/directoryweb-ui.php | admin page | add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), DIRECTORYWEB_CAP, DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', $
 plugins/directoryweb/includes/directoryweb-ui.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'Directory listings', 'directoryweb' ), __( 'Listings', 'directoryweb' ), DIRECTORYWEB_LISTINGS_CAP, DIRECTORYWEB_LISTI
 plugins/directoryweb/includes/directoryweb-ui.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb settings', 'directoryweb' ), __( 'Settings', 'directoryweb' ), 'manage_options', DIRECTORYWEB_SETTINGS_PA
 plugins/directoryweb/includes/directoryweb-ui.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), DIRECTORYWEB_CAP, DIRECTORYWEB_PAGE, 'directoryweb
-plugins/animal-writes-core/includes/edit-screens.php | admin page | add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' );
 plugins/animal-writes-core/includes/keys.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Kits → Keys
 plugins/directoryweb/includes/map-picker.php | admin style | wp_enqueue_style( 'aw-leaflet'
 plugins/kits-core/includes/tools/media-merge.php | admin page | add_submenu_page( 'upload.php', 'Duplicate files', 'Duplicate files', 'manage_options', 'aw-media-duplicates', 'kits_media_merge_screen' );

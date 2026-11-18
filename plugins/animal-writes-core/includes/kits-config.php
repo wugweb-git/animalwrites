@@ -40,7 +40,7 @@ add_filter(
 // End bar on items: categories bottom left, share bottom right.
 
 
-/** Analytics page context (kits-core analytics.php): what this page is, for GTM and the events in kit.js. */
+/** Analytics page context (kits-core analytics.php): what this page is, for GTM and the events in analytics.js. */
 add_filter(
 	'kits_page_context',
 	function ( $c ) {

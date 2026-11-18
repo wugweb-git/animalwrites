@@ -65,6 +65,7 @@ require_once KITS_CORE_DIR . 'includes/system-screen.php';
 require_once KITS_CORE_DIR . 'includes/landmarks.php';
 require_once KITS_CORE_DIR . 'includes/sections.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
+require_once KITS_CORE_DIR . 'includes/frontend-scripts.php'; // share, forms (ALTCHA) and analytics scripts, before the theme's kit.js
 require_once KITS_CORE_DIR . 'includes/image-context.php';
 require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST (moved from Animal Writes Core, 18 Nov 2026)
 require_once KITS_CORE_DIR . 'includes/category-images.php'; // category and tag photos (term meta aw_category_image) and the category banner
@@ -77,6 +78,7 @@ require_once KITS_CORE_DIR . 'includes/tools/media-reuse.php'; // Kits → Tools
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
+require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined stylesheets (the Kits theme's core files, the component files per kind of page)
 require_once KITS_CORE_DIR . 'includes/preview.php';
 // The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
 // InsightWeb's (moved out on 18 Nov 2026 with the same names, option, tables, shortcode and scheduled event).
@@ -94,6 +96,16 @@ require_once KITS_CORE_DIR . 'includes/admin-kits-frame.php'; // Kits → Home, 
 require_once KITS_CORE_DIR . 'includes/admin-app-global-styles.php';
 require_once KITS_CORE_DIR . 'includes/button-hover.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
+// The admin layer (moved from Animal Writes Core, 18 Nov 2026): menu arrangement and tidy, the site's rows on the Kits
+// screens, the edit-screens map, edit fields and the Modules settings. The site's own values come through filters.
+require_once KITS_CORE_DIR . 'includes/admin-layer/arrange.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/tidy.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/site-screens.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/cli-commands.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/edit-screens.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/edit-fields.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/site-options.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/compat.php'; // the older aw_ names, after the files that define what they wrap
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
 require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert (moved from Animal Writes Core, 18 Nov 2026)

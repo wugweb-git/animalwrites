@@ -1,5 +1,5 @@
 /* Lab rules campaign page only (lab-animals-rules-2026): campaign.js kept as it was on the morning of 2 Nov 2026 (owner); campaign-tools.php loads it in campaign.js's place. */
-/* Campaign tools (campaign-tools.php): rule chips, letter tool, phone bar, home band. Events go through kitsTrack (kit.js).
+/* Campaign tools (campaign-tools.php): rule chips, letter tool, phone bar, home band. Events go through kitsTrack (Kits Core analytics.js).
    Standard campaign events (owner, 17 Oct 2026): every action here is also campaign_action (action = the older event's
    name, with campaign_slug and campaign_title), through awCampaignTrack (aw-analytics.js). The older events keep firing
    (objection_sent and objection_confirmed are key events). campaign_view: aw-analytics.js, on every campaign page. */
@@ -54,7 +54,7 @@
 		});
 	});
 
-	/* Share row: the copy-link button (links marked data-kit-share are counted by kit.js); newsletter sign-ups made on a
+	/* Share row: the copy-link button (links marked data-kit-share are counted by analytics.js); newsletter sign-ups made on a
 	   campaign page, once the form plugin reports success. Source: the share row's data-source (e.g. campaign2). */
 	var shareRow = document.querySelector('.aw-camp-share');
 	var source = shareRow && shareRow.dataset.source || 'campaign';
@@ -62,7 +62,7 @@
 		var b = e.target.closest && e.target.closest('button[data-kit-share]');
 		if (b) trackLater('share_click', { network: b.dataset.kitShare });
 	});
-	/* Share: the site's one share bar (kits_share_html, kit.js), as on every page (owner, 13 Nov 2026: the share card is
+	/* Share: the site's one share bar (kits_share_html, share.js), as on every page (owner, 13 Nov 2026: the share card is
 	   the same across the product). Phones: Share (the phone's own sheet) and Copy link; tablets: Share, then the
 	   networks; computers: the networks. The page shares itself; its picture is the link preview's. */
 	var sh = window.awCampShare || {};
@@ -184,7 +184,7 @@
 	function wantsUpdates() { return !!(optin && optin.checked); }
 	function emailOk() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')); }
 
-	/* A field's state, as the theme's forms show it (kit.js): aria-invalid and the message on the field's own error line,
+	/* A field's state, as the theme's forms show it (forms.js): aria-invalid and the message on the field's own error line,
 	   is-valid once it holds a good value. */
 	function mark(el, text) {
 		el.setAttribute('aria-invalid', text ? 'true' : 'false');
