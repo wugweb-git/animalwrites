@@ -2,7 +2,7 @@
 
 **Kits → Edit screens** (administrators; under the Animal Writes tab) lists every box on every edit screen: post types and term screens, boxes from WordPress, plugins (Rank Math, LiteSpeed, Link Whisper), SCF field groups and our own plugins. It also lists the block-editor sidebar panels, the Dashboard widgets and the boxes on the Search Insights report page. For each box it shows the keys it stores, their type and where each key is used on the site. The same rows from the command line: `wp aw-edit-screens [--type=<post_type or taxonomy>] [--format=table|json]`. Nothing on the screen or in the command writes anything.
 
-Code: `plugins/kits-core/includes/admin-layer/edit-screens.php` (moved from animal-writes-core, 18 Nov 2026). Map: `plugins/animal-writes-core/data/edit-screen-map.json` (the site's file, named with the `kits_edit_screen_map_file` filter). The full snapshot the map was filled from (box order per type, duplicates, saved-but-never-read keys, live row counts): [edit-screens-map.md](edit-screens-map.md).
+Code: `plugins/kits-core/includes/admin-layer/edit-screens.php` (moved from animal-writes-core, 18 Nov 2026). Map: `themes/kits-by-wugweb/assets/site/data/edit-screen-map.json` (the site's file, named with the `kits_edit_screen_map_file` filter). The full snapshot the map was filled from (box order per type, duplicates, saved-but-never-read keys, live row counts): [edit-screens-map.md](edit-screens-map.md).
 
 ## How it works
 

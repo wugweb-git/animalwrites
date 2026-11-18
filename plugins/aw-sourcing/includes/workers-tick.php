@@ -6,7 +6,7 @@
  *   cd /home/u544169507/domains/animalwrites.in/public_html && /usr/local/bin/wp aw workers-tick >> /home/u544169507/aw-cron.log 2>&1
  *
  * Each workflow in AW_WORKERS (workers-registry.php) whose cron time has come since the last tick is started through
- * GitHub's API (aw_dispatch_workflow, animal-writes-core cron-health.php) with the input scheduled_cron, so the run
+ * GitHub's API (kits_dispatch_workflow, Kits Core ops/cron-health.php) with the input scheduled_cron, so the run
  * behaves as GitHub's scheduled run for that cron. One start per cron, however many slots were missed; a start GitHub
  * refused is tried again at the next tick. WordPress's own cron is not run here: hPanel already runs wp-cron every
  * 5 minutes (cron-health.php, trigger "hostinger").
@@ -100,11 +100,11 @@ function aw_tick_last_slot( $cron, $after, $now ) {
  * Starts the workflows whose cron came since the last tick. Returns lines for the log.
  *
  * @param int           $now      Unix time.
- * @param callable|null $dispatch fn( $file, $inputs ) => true|WP_Error (default aw_dispatch_workflow).
+ * @param callable|null $dispatch fn( $file, $inputs ) => true|WP_Error (default kits_dispatch_workflow).
  * @return string[]
  */
 function aw_workers_tick( $now, $dispatch = null ) {
-	$dispatch = $dispatch ?? 'aw_dispatch_workflow';
+	$dispatch = $dispatch ?? 'kits_dispatch_workflow';
 	$state    = (array) get_option( 'aw_workers_tick', array() ); // "file|cron" => last slot started; "_last" => last tick
 	$last     = (int) ( $state['_last'] ?? 0 );
 	$lines    = array();
@@ -141,8 +141,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		function ( $args, $assoc ) {
 			$dry = ! empty( $assoc['dry-run'] );
 			$now = time();
-			if ( ! function_exists( 'aw_dispatch_workflow' ) ) {
-				WP_CLI::error( 'aw_dispatch_workflow (animal-writes-core cron-health.php) is needed.' );
+			if ( ! function_exists( 'kits_dispatch_workflow' ) ) {
+				WP_CLI::error( 'kits_dispatch_workflow (Kits Core ops/cron-health.php) is needed.' );
 			}
 			// One tick at a time: two ticks at once would both start the same slot. add_option fails when the lock exists.
 			$held = (int) get_option( 'aw_workers_tick_lock', 0 );

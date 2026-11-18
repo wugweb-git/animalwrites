@@ -1,10 +1,10 @@
 <?php
 /**
- * Daily PHP error count (includes/error-count.php): lines read by kind, without WordPress. Run by the Deploy check.
+ * Daily PHP error count (includes/ops/error-count.php): lines read by kind, without WordPress. Run by the Deploy check.
  *
- * Usage: php plugins/animal-writes-core/tests/error-count-tests.php
+ * Usage: php plugins/kits-core/tests/error-count-tests.php
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
@@ -36,7 +36,7 @@ function home_url() {
 	return 'https://example.org';
 }
 
-require dirname( __DIR__ ) . '/includes/error-count.php';
+require dirname( __DIR__ ) . '/includes/ops/error-count.php';
 
 $fails = 0;
 $count = 0;
@@ -57,16 +57,16 @@ function check( $ok, $name ) {
 }
 
 // One line at a time.
-$p = aw_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Warning:  Undefined array key "x" in /a/b.php on line 3' );
+$p = kits_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Warning:  Undefined array key "x" in /a/b.php on line 3' );
 check( 'warning' === $p['kind'] && 'Undefined array key "x" in /a/b.php on line 3' === $p['msg'], 'warning line' );
-check( 'deprecated' === aw_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Deprecated:  strlen(): Passing null' )['kind'], 'deprecated line' );
-check( 'notice' === aw_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Notice:  Function x was called incorrectly' )['kind'], 'notice line' );
-check( 'fatal' === aw_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Fatal error:  Uncaught Error' )['kind'], 'fatal line' );
-$p = aw_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Parse error:  syntax error' );
+check( 'deprecated' === kits_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Deprecated:  strlen(): Passing null' )['kind'], 'deprecated line' );
+check( 'notice' === kits_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Notice:  Function x was called incorrectly' )['kind'], 'notice line' );
+check( 'fatal' === kits_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Fatal error:  Uncaught Error' )['kind'], 'fatal line' );
+$p = kits_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Parse error:  syntax error' );
 check( 'fatal' === $p['kind'] && 'Parse error: syntax error' === $p['msg'], 'parse error counts as fatal, labelled' );
-check( '' === aw_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] WordPress database error Table x' )['kind'], 'database error is not a PHP kind' );
-check( null === aw_error_count_parse_line( 'Stack trace:' ), 'continuation line skipped' );
-check( strtotime( '13-Nov-2026 10:00:00 UTC' ) === aw_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Notice:  x' )['t'], 'time read' );
+check( '' === kits_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] WordPress database error Table x' )['kind'], 'database error is not a PHP kind' );
+check( null === kits_error_count_parse_line( 'Stack trace:' ), 'continuation line skipped' );
+check( strtotime( '13-Nov-2026 10:00:00 UTC' ) === kits_error_count_parse_line( '[13-Nov-2026 10:00:00 UTC] PHP Notice:  x' )['t'], 'time read' );
 
 // A whole log: four kinds counted apart; old lines and other lines left out.
 $now  = time();
@@ -87,19 +87,19 @@ $body = array(
 );
 file_put_contents( $log, implode( "\n", $body ) . "\n" );
 $GLOBALS['aw_test_log'] = $log;
-$r = aw_error_count_php( $now - DAY_IN_SECONDS );
+$r = kits_error_count_php( $now - DAY_IN_SECONDS );
 unlink( $log );
 check( 'ok' === $r['status'], 'log read' );
 check( 1 === $r['kinds']['fatal']['count'] && 1 === $r['count'], 'one fatal in the window (count kept for the email)' );
 check( 3 === $r['kinds']['warning']['count'] && array( 'W1' => 2, 'W2' => 1 ) === $r['kinds']['warning']['samples'], 'warnings counted with samples' );
 check( 1 === $r['kinds']['notice']['count'], 'notice counted' );
 check( 2 === $r['kinds']['deprecated']['count'], 'deprecated counted' );
-check( '3' === aw_error_count_label( $r, 'warning' ) && '1' === aw_error_count_label( $r ), 'labels per kind' );
-check( 1 === aw_error_count_total( array( 'php' => $r ) ), 'total is fatal only' );
+check( '3' === kits_error_count_label( $r, 'warning' ) && '1' === kits_error_count_label( $r ), 'labels per kind' );
+check( 1 === kits_error_count_total( array( 'php' => $r ) ), 'total is fatal only' );
 
 // A result saved before kinds were counted.
 $saved = array( 'status' => 'ok', 'count' => 4, 'samples' => array( 'x' => 4 ) );
-check( '4' === aw_error_count_label( $saved ) && '0' === aw_error_count_label( $saved, 'warning' ), 'older saved result reads' );
+check( '4' === kits_error_count_label( $saved ) && '0' === kits_error_count_label( $saved, 'warning' ), 'older saved result reads' );
 
 echo $count . ' checks, ' . $fails . " failed\n";
 exit( $fails ? 1 : 0 );

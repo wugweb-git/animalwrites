@@ -3,7 +3,7 @@
  * Daily server-error count. A 500 or 503 page never loads the analytics tag, so analytics cannot see it; the server's
  * own logs can.
  *
- * - Once a day (event aw_error_count_daily) the site counts, for the last 24 hours, the PHP error log lines by kind:
+ * - Once a day (event kits_error_count_daily) the site counts, for the last 24 hours, the PHP error log lines by kind:
  *   fatal ("PHP Fatal error" / "PHP Parse error"), "PHP Warning", "PHP Notice" and "PHP Deprecated", each counted
  *   apart. (The host gives PHP no access log, so 5xx responses are not counted.)
  * - The result (time, counts per kind, files read, up to 5 samples per kind) is kept in the option aw_error_count (not
@@ -15,25 +15,25 @@
  *   wp-config.php, or the filter aw_error_count_php_paths.
  * - `wp aw error-count [--paths]` prints one line per kind, the files read and the most frequent messages (with
  *   --paths, every path tried), without saving or emailing.
- * Large files are read from the end (last 32 MB by default, filter aw_error_count_tail_bytes), line by line; gzipped
+ * Large files are read from the end (last 32 MB by default, filter kits_error_count_tail_bytes), line by line; gzipped
  * logs are streamed.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_ERROR_COUNT_SAMPLES = 5;
-const AW_ERROR_COUNT_KEYS    = 500; // distinct samples tracked while counting, per kind (memory bound)
+const KITS_ERROR_COUNT_SAMPLES = 5;
+const KITS_ERROR_COUNT_KEYS    = 500; // distinct samples tracked while counting, per kind (memory bound)
 
 /**
  * The kinds counted, key => label. "fatal" covers fatal and parse errors.
  *
  * @return array<string,string>
  */
-function aw_error_count_kinds() {
+function kits_error_count_kinds() {
 	return array(
 		'fatal'      => 'PHP fatal errors',
 		'warning'    => 'PHP warnings',
@@ -49,7 +49,7 @@ function aw_error_count_kinds() {
  * @param string $line Line from the log.
  * @return array{t:int,kind:string,msg:string}|null
  */
-function aw_error_count_parse_line( $line ) {
+function kits_error_count_parse_line( $line ) {
 	if ( '[' !== substr( (string) $line, 0, 1 ) || ! preg_match( '/^\[([^\]]+)\] (?:PHP (Fatal error|Parse error|Warning|Notice|Deprecated):)?\s*(.*)$/', (string) $line, $m ) ) {
 		return null;
 	}
@@ -68,7 +68,7 @@ function aw_error_count_parse_line( $line ) {
 }
 
 /** The site root's parents: the domain folder (…/domains/example.com) and the account's home folder. */
-function aw_error_count_dirs() {
+function kits_error_count_dirs() {
 	$root   = untrailingslashit( ABSPATH );
 	$domain = dirname( $root );
 	$home   = dirname( dirname( $domain ) );
@@ -80,8 +80,8 @@ function aw_error_count_dirs() {
  *
  * @return string[]
  */
-function aw_error_count_php_candidates() {
-	$d   = aw_error_count_dirs();
+function kits_error_count_php_candidates() {
+	$d   = kits_error_count_dirs();
 	$out = array();
 	if ( defined( 'AW_PHP_ERROR_LOG' ) && AW_PHP_ERROR_LOG ) {
 		$out[] = (string) AW_PHP_ERROR_LOG;
@@ -109,7 +109,7 @@ function aw_error_count_php_candidates() {
  * @param string $path File or folder.
  * @return bool
  */
-function aw_error_count_allowed( $path ) {
+function kits_error_count_allowed( $path ) {
 	$base = (string) ini_get( 'open_basedir' );
 	if ( '' === $base ) {
 		return true;
@@ -129,13 +129,13 @@ function aw_error_count_allowed( $path ) {
  * @param string[] $candidates Files or folders.
  * @return array{files:string[],tried:array<string,string>,unreadable:bool}
  */
-function aw_error_count_resolve( array $candidates ) {
+function kits_error_count_resolve( array $candidates ) {
 	$files      = array();
 	$tried      = array();
 	$unreadable = false;
 	foreach ( $candidates as $c ) {
 		$c = (string) $c;
-		if ( ! aw_error_count_allowed( $c ) || ! file_exists( $c ) ) {
+		if ( ! kits_error_count_allowed( $c ) || ! file_exists( $c ) ) {
 			$tried[ $c ] = 'not found';
 			continue;
 		}
@@ -178,7 +178,7 @@ function aw_error_count_resolve( array $candidates ) {
  * @param callable $cb   function( string $line ).
  * @return array{lines:int,cut:bool} Lines read; cut = the start of the file was skipped.
  */
-function aw_error_count_each_line( $file, callable $cb ) {
+function kits_error_count_each_line( $file, callable $cb ) {
 	$lines = 0;
 	$cut   = false;
 	// phpcs:disable WordPress.WP.AlternativeFunctions -- reads server log files line by line; WP_Filesystem cannot stream or seek
@@ -202,7 +202,7 @@ function aw_error_count_each_line( $file, callable $cb ) {
 	if ( ! $h ) {
 		return array( 'lines' => 0, 'cut' => false );
 	}
-	$tail = max( 1048576, (int) apply_filters( 'aw_error_count_tail_bytes', 32 * 1048576 ) );
+	$tail = max( 1048576, (int) apply_filters( 'kits_error_count_tail_bytes', 32 * 1048576 ) );
 	$size = (int) filesize( $file );
 	if ( $size > $tail ) {
 		fseek( $h, $size - $tail );
@@ -224,10 +224,10 @@ function aw_error_count_each_line( $file, callable $cb ) {
  * @param array  $samples Sample => count (changed in place).
  * @param string $key     Sample.
  */
-function aw_error_count_tally( array &$samples, $key ) {
+function kits_error_count_tally( array &$samples, $key ) {
 	if ( isset( $samples[ $key ] ) ) {
 		++$samples[ $key ];
-	} elseif ( count( $samples ) < AW_ERROR_COUNT_KEYS ) {
+	} elseif ( count( $samples ) < KITS_ERROR_COUNT_KEYS ) {
 		$samples[ $key ] = 1;
 	}
 }
@@ -238,9 +238,9 @@ function aw_error_count_tally( array &$samples, $key ) {
  * @param array $samples Sample => count.
  * @return array Sample => count.
  */
-function aw_error_count_top( array $samples ) {
+function kits_error_count_top( array $samples ) {
 	arsort( $samples );
-	return array_slice( $samples, 0, AW_ERROR_COUNT_SAMPLES, true );
+	return array_slice( $samples, 0, KITS_ERROR_COUNT_SAMPLES, true );
 }
 
 /**
@@ -249,8 +249,8 @@ function aw_error_count_top( array $samples ) {
  * @param string $msg Message from the log.
  * @return string
  */
-function aw_error_count_clean_message( $msg ) {
-	$root = trailingslashit( aw_error_count_dirs()['root'] );
+function kits_error_count_clean_message( $msg ) {
+	$root = trailingslashit( kits_error_count_dirs()['root'] );
 	$real = realpath( $root );
 	$msg  = str_replace( array( $root, $real ? trailingslashit( $real ) : $root ), '', (string) $msg );
 	$msg  = trim( preg_replace( '/\s+/', ' ', $msg ) );
@@ -264,10 +264,10 @@ function aw_error_count_clean_message( $msg ) {
  * @return array Result: status ok|not_found|unreadable, count (fatal), samples (fatal), kinds (kind => count and
  *               samples), files (path => lines), partial, tried.
  */
-function aw_error_count_php( $since ) {
-	$res   = aw_error_count_resolve( aw_error_count_php_candidates() );
+function kits_error_count_php( $since ) {
+	$res   = kits_error_count_resolve( kits_error_count_php_candidates() );
 	$kinds = array();
-	foreach ( array_keys( aw_error_count_kinds() ) as $k ) {
+	foreach ( array_keys( kits_error_count_kinds() ) as $k ) {
 		$kinds[ $k ] = array( 'count' => 0, 'samples' => array() );
 	}
 	$out = array( 'status' => 'not_found', 'count' => 0, 'files' => array(), 'partial' => false, 'samples' => array(), 'kinds' => $kinds, 'tried' => $res['tried'] );
@@ -281,10 +281,10 @@ function aw_error_count_php( $since ) {
 			continue;
 		}
 		$first              = null;
-		$read               = aw_error_count_each_line(
+		$read               = kits_error_count_each_line(
 			$f,
 			function ( $line ) use ( $since, &$kinds, &$first ) {
-				$p = aw_error_count_parse_line( $line );
+				$p = kits_error_count_parse_line( $line );
 				if ( null === $p ) {
 					return;
 				}
@@ -295,7 +295,7 @@ function aw_error_count_php( $since ) {
 					return;
 				}
 				++$kinds[ $p['kind'] ]['count'];
-				aw_error_count_tally( $kinds[ $p['kind'] ]['samples'], aw_error_count_clean_message( $p['msg'] ) );
+				kits_error_count_tally( $kinds[ $p['kind'] ]['samples'], kits_error_count_clean_message( $p['msg'] ) );
 			}
 		);
 		$out['files'][ $f ] = $read['lines'];
@@ -304,7 +304,7 @@ function aw_error_count_php( $since ) {
 		}
 	}
 	foreach ( $kinds as $k => $v ) {
-		$kinds[ $k ]['samples'] = aw_error_count_top( $v['samples'] );
+		$kinds[ $k ]['samples'] = kits_error_count_top( $v['samples'] );
 	}
 	$out['status']  = 'ok';
 	$out['kinds']   = $kinds;
@@ -318,13 +318,13 @@ function aw_error_count_php( $since ) {
  *
  * @return array{at:int,since:int,php:array}
  */
-function aw_error_count_collect() {
+function kits_error_count_collect() {
 	$now   = time();
 	$since = $now - DAY_IN_SECONDS;
 	return array(
 		'at'    => $now,
 		'since' => $since,
-		'php'   => aw_error_count_php( $since ),
+		'php'   => kits_error_count_php( $since ),
 	);
 }
 
@@ -335,10 +335,10 @@ function aw_error_count_collect() {
  * @param string $kind fatal, warning, notice or deprecated.
  * @return string
  */
-function aw_error_count_label( array $r, $kind = 'fatal' ) {
+function kits_error_count_label( array $r, $kind = 'fatal' ) {
 	switch ( $r['status'] ?? '' ) {
 		case 'ok':
-			return ( empty( $r['partial'] ) ? '' : 'at least ' ) . aw_error_count_kind( $r, $kind )['count'];
+			return ( empty( $r['partial'] ) ? '' : 'at least ' ) . kits_error_count_kind( $r, $kind )['count'];
 		case 'unreadable':
 			return 'Not readable';
 		default:
@@ -353,7 +353,7 @@ function aw_error_count_label( array $r, $kind = 'fatal' ) {
  * @param string $kind fatal, warning, notice or deprecated.
  * @return array{count:int,samples:array}
  */
-function aw_error_count_kind( array $r, $kind ) {
+function kits_error_count_kind( array $r, $kind ) {
 	if ( isset( $r['kinds'][ $kind ] ) && is_array( $r['kinds'][ $kind ] ) ) {
 		$k = $r['kinds'][ $kind ];
 		return array( 'count' => (int) ( $k['count'] ?? 0 ), 'samples' => (array) ( $k['samples'] ?? array() ) );
@@ -367,19 +367,19 @@ function aw_error_count_kind( array $r, $kind ) {
 /**
  * Fatal errors found (when the log could be read).
  *
- * @param array $run Result of aw_error_count_collect().
+ * @param array $run Result of kits_error_count_collect().
  * @return int
  */
-function aw_error_count_total( array $run ) {
+function kits_error_count_total( array $run ) {
 	return 'ok' === ( $run['php']['status'] ?? '' ) ? (int) $run['php']['count'] : 0;
 }
 
 /** Daily event: count, store, and email the admin address when anything was found. */
-function aw_error_count_daily() {
-	$run = aw_error_count_collect();
+function kits_error_count_daily() {
+	$run = kits_error_count_collect();
 	unset( $run['php']['tried'] ); // only the CLI shows them
 	update_option( 'aw_error_count', $run, false );
-	$total = aw_error_count_total( $run );
+	$total = kits_error_count_total( $run );
 	if ( ! $total || get_transient( 'aw_error_count_mailed' ) ) {
 		return; // nothing found, or this day's message is already sent
 	}
@@ -387,8 +387,8 @@ function aw_error_count_daily() {
 		sprintf( 'Server errors on %s in the 24 hours to %s:', wp_parse_url( home_url(), PHP_URL_HOST ), wp_date( 'j M Y, g:i a', $run['at'] ) ),
 		'',
 	);
-	foreach ( aw_error_count_kinds() as $k => $name ) {
-		$lines[] = '- ' . $name . ': ' . aw_error_count_label( $run['php'], $k );
+	foreach ( kits_error_count_kinds() as $k => $name ) {
+		$lines[] = '- ' . $name . ': ' . kits_error_count_label( $run['php'], $k );
 	}
 	if ( $run['php']['samples'] ) {
 		$lines[] = '';
@@ -399,13 +399,14 @@ function aw_error_count_daily() {
 	}
 	$lines[] = '';
 	$lines[] = 'Dashboard: ' . admin_url();
-	/* translators: %d: number of errors. */
-	$subject = sprintf( _n( 'Animal Writes: %d server error in the last 24 hours', 'Animal Writes: %d server errors in the last 24 hours', $total, 'animal-writes-core' ), $total );
+	$site = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+	/* translators: 1: site name, 2: number of errors. */
+	$subject = sprintf( _n( '%1$s: %2$d server error in the last 24 hours', '%1$s: %2$d server errors in the last 24 hours', $total, 'kits-core' ), $site, $total );
 	if ( wp_mail( get_option( 'admin_email' ), $subject, implode( "\n", $lines ) . "\n" ) ) {
 		set_transient( 'aw_error_count_mailed', 1, 20 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'aw_error_count_daily', 'aw_error_count_daily' );
+add_action( 'aw_error_count_daily', 'kits_error_count_daily' );
 add_action(
 	'init',
 	function () {
@@ -435,9 +436,9 @@ add_action(
 				$r     = (array) ( $run['php'] ?? array() );
 				$ok    = 'ok' === ( $r['status'] ?? '' );
 				$files = array_map( 'wp_basename', array_keys( (array) ( $r['files'] ?? array() ) ) );
-				foreach ( aw_error_count_kinds() as $k => $name ) {
-					$kind  = aw_error_count_kind( $r, $k );
-					$label = aw_error_count_label( $r, $k );
+				foreach ( kits_error_count_kinds() as $k => $name ) {
+					$kind  = kits_error_count_kind( $r, $k );
+					$label = kits_error_count_label( $r, $k );
 					$top   = array();
 					foreach ( $kind['samples'] as $s => $n ) {
 						$top[] = esc_html( $s ) . ' (' . (int) $n . ')';
@@ -449,7 +450,7 @@ add_action(
 						'top'   => $top ? implode( '<br>', $top ) : '—',
 					);
 				}
-				aw_core_simple_table( 'error-count', array( 'check' => 'Check', 'count' => 'Count', 'from' => 'Read from', 'top' => 'Most frequent' ), $rows );
+				kits_simple_table( 'error-count', array( 'check' => 'Check', 'count' => 'Count', 'from' => 'Read from', 'top' => 'Most frequent' ), $rows );
 			}
 		);
 	}
@@ -468,10 +469,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		 * : Also list every path tried and what was found there.
 		 */
 		function ( $args, $assoc ) {
-			$r = aw_error_count_collect()['php'];
-			foreach ( aw_error_count_kinds() as $k => $name ) {
-				$kind = aw_error_count_kind( $r, $k );
-				WP_CLI::log( $name . ': ' . aw_error_count_label( $r, $k ) );
+			$r = kits_error_count_collect()['php'];
+			foreach ( kits_error_count_kinds() as $k => $name ) {
+				$kind = kits_error_count_kind( $r, $k );
+				WP_CLI::log( $name . ': ' . kits_error_count_label( $r, $k ) );
 				foreach ( $kind['samples'] as $s => $n ) {
 					WP_CLI::log( '  ' . $s . ' (' . (int) $n . ')' );
 				}

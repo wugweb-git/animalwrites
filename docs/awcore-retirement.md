@@ -78,13 +78,13 @@ Keep them equal until aw-core is deleted.
 | `aw_crm_tag_ids` | DirectoryWeb org people | no `org-approved` CRM tag |
 | `aw_content_type_args`, `aw_register_meta` | DirectoryWeb bootstrap | already guarded: **no listing post type** |
 | `aw_item_issuer`, `aw_set_issuer` | SourceWeb auto-review, ingest | issuer not checked or set (noted in the ingest result) |
-| `aw_dispatch_workflow` | SourceWeb Workers → Run now | `WP_Error` "needs the GitHub dispatch from Animal Writes Core" |
+| `kits_dispatch_workflow` (was `aw_dispatch_workflow`; Kits Core since 19 Nov 2026) | SourceWeb Workers → Run now | `WP_Error` "needs the GitHub dispatch from Kits Core" |
 | `aw_source_download` | SourceWeb enrichment pictures | `WP_Error`, no picture |
 | `aw_research_*` | SourceWeb ingest | already behind `function_exists( 'aw_research_save_citation' )` (same file) |
 | `aw_hub_*`, `AW_HUBS`, `aw_post_types`, `aw_press_list`, `aw_item_date_ts`, `AW_LIST_FILTERS`, `AW_COURT_ISSUERS` | RankWeb canonical, breadcrumbs, titles, schema, sitemap, filtered views, FAQ data | Rank Math's own value is kept; no hub nodes, trail steps or extra sitemap URLs |
 | DirectoryWeb functions (`aw_current_place`, `aw_directory_url`, `aw_place_*`, `aw_listing_place/sources`, `aw_lf`, ...) | RankWeb | guarded the same way (RankWeb does not require DirectoryWeb) |
 | Kits Core `aw_si_table`, `kits_shell_app`, `kits_term_url`, `kits_date` | RankWeb | section skipped |
-| `aw_error_count_*` | InsightWeb server report | already behind `function_exists( 'aw_error_count_resolve' )` (same aw-core file): status "not found" |
+| `kits_error_count_*` (was `aw_error_count_*`; Kits Core since 19 Nov 2026) | InsightWeb server report | behind `function_exists( 'kits_error_count_resolve' )`: status "not found" |
 | SourceWeb `aw_sourcing_kw_lists` | InsightWeb dry run | already behind `aw_sourcing_kw_on` (same SourceWeb file) |
 
 ## 3. Still blocks deleting aw-core
@@ -102,9 +102,9 @@ These no longer crash without aw-core, but stop working:
 3. **Claims:** the Fluent Forms claim form and review (`forms-fluentforms.php`), the private upload folder
    (`aw_private_dir`, `campaigns.php`) and the FluentCRM tag (`fluentcrm.php`).
 4. **Issuers** (`issuers.php`): the Library issuer label written by SourceWeb's ingest and read by auto-review.
-5. **Cron health and Run now** (`cron-health.php`: `aw_dispatch_workflow`, `aw_cron_last`), **picture downloads**
-   (`cc0-images.php`: `aw_source_download`), **research credits** (`research-citation.php`) and the **PHP error
-   report** (`error-count.php`), read by SourceWeb and InsightWeb.
+5. **Cron health and Run now**, the **PHP error report** and **research credits**: moved on 19 Nov 2026 (section 5):
+   Kits Core `includes/ops/` and SourceWeb `includes/research-citation.php`. **Picture downloads** (`cc0-images.php`:
+   `aw_source_download`) moved on 18 Nov (SourceWeb `sourceweb_source_download`).
 6. **Find help and item heads** (`item-head.php`: `aw_item_kind`, `aw_item_here`, `aw_item_date_ts`), campaign roles
    (`model.php`), press (`press.php`).
 7. **Loading.** aw-core loads Kits Core, DirectoryWeb, SourceWeb and InsightWeb from the deploy folder. On live all of
@@ -143,6 +143,78 @@ InsightWeb active (18 Nov 2026).
 relative dates on news cards and publisher-free news slugs need SourceWeb loaded (live: active, and Animal Writes Core
 loads it too). Animal Writes Core's calls to these are behind `function_exists`, except `[aw_source_row]` in
 `item-head.php`, which prints as text if SourceWeb is not loaded.
+
+## 5. Ops, admin and keys leave aw-core (19 Nov 2026)
+
+Owner, 18 Nov 2026: nothing "stays in aw-core". This change gives the ops, admin and keys files of
+`plugins/animal-writes-core` their final homes and deletes them there. Behaviour is the same: same screens, options,
+cron events, hooks, REST routes, shortcodes and WP-CLI commands. Names changed to `kits_` (generic) or the plugin
+slug; every stored name stays. Branch `awcore-ops`.
+
+### Where each file went
+
+| aw-core file | Final home | Who called it (outside the file) | Notes |
+|---|---|---|---|
+| `cron-health.php` | Kits Core `includes/ops/cron-health.php`: `kits_cron_*`, `kits_dispatch_workflow()`, `KITS_CRON_STALE/KEEP` | SourceWeb (`aw_dispatch_workflow` in workers.php, workers-tick.php, sourcing-lists.php; `aw_cron_last` in relevance.php), Kits Core site-screens, `tools/ci/smoke.sh` (option name), uninstall | Options `aw_cron_runs`, `aw_dispatch_log`, dashboard box `aw_cron_health`, action `aw_cron_health_after`, `?aw_tick=` unchanged. The workers repository is no longer hard-coded: filter `kits_dispatch_repo` (site layer `ops.php` gives `wugweb-git/animal-writes-workers`). Token constant `AW_GITHUB_DISPATCH_TOKEN` still read (`KITS_GITHUB_DISPATCH_TOKEN` also accepted). |
+| `cron.php` | `aw_daily` booked by Kits Core `ops/daily.php` (on init, when missing); LiteSpeed night-only crawler to the theme site layer `ops.php` (`kits_site_litespeed_crawler_night_only`) | `aw_daily` event: DirectoryWeb listing-meta.php, SourceWeb opportunities-site.php, Kits Core thumbs.php | The activation and deactivation hooks (`aw_cron_schedule()`, `aw_cron_unschedule()`) are gone with the file; Kits Core's own deactivation unschedules its own events. The `aw_daily()` stub had no caller. |
+| `error-count.php` | Kits Core `ops/error-count.php`: `kits_error_count_*`; test `kits-core/tests/error-count-tests.php` | InsightWeb server report (`aw_error_count_*` now `kits_error_count_*`, still behind `function_exists`), Deploy check | Event `aw_error_count_daily`, option `aw_error_count`, filter `aw_error_count_php_paths`, `wp aw error-count` unchanged. Mail subject uses the site name. Not redesigned (owner: 404 and error count are out of scope for the ops work in #147, but they still block deleting aw-core). |
+| `not-found.php` | Kits Core `ops/not-found.php`: `kits_not_found_*`, `[kits_not_found]` and `[aw_not_found]`; the photos to `kits-core/assets/site/error/` (site-only folder) | the theme's 404 template (shortcode) | The site's sections, 410 types, lead texts, section markup, links and list styles come through `kits_not_found_*` filters in the theme site layer `ops.php`; output is the same. Not redesigned. |
+| `site-check.php` | Kits Core `ops/site-check.php`: `kits_site_check_*` | Kits Core site-screens (Page check, Joined files, summary), `deploy-purge.php` | Option `aw_site_check_last`, event `aw_site_check_deploy`, admin-post `aw_site_check`, action `aw_site_check_after` (MailWeb, backups) unchanged. The page list is the filter `kits_site_check_urls`; the site's list is in `ops.php`. The standalone "Check site" screen (only used without Kits) is gone. |
+| `cdn-cache.php` | Kits Core `ops/cdn-cache.php`: `kits_cdn_*` | RankWeb faq.php (comment only), Kits Core volunteers.php (`kits_cdn_excluded_slugs`), site-screens, site-options | Options `aw_cdn_ttl`, `aw_cdn_ttl_long`, settings group `aw_cdn` unchanged. Never-cached ids (the crisis guides) and the longer-lived types come from `ops.php` filters `kits_cdn_excluded_ids`, `kits_cdn_long_lived_types`. |
+| `deploy-purge.php` | Kits Core `ops/deploy-purge.php`: `kits_deployed_head()`, `kits_deploy_purge_if_new()` | Kits Core site-screens (option), `tools/kits-ship.sh` and the Deploy check (the `?aw_deploy_nudge=` request) | Purges LiteSpeed once per new commit, as before. Tested without WordPress (`site-ops-tests.php`): new commit purges once, same commit does not, unreadable head does nothing. |
+| `deploy-status.php` | Kits Core `ops/deploy-status.php`: `kits_mail_sending()`, route `aw/v1/deploy-status` | `tools/ci/mail_sending_check.py`, `tools/kits-ship.sh` | Route and answer unchanged. |
+| `keep-modified.php` | Kits Core `ops/keep-modified.php`: `kits_keep_modified()` | RankWeb faq.php (sets `$GLOBALS['aw_keep_modified']`, unchanged), SourceWeb news-titles.php | `?aw_keep_modified=1` and `X-AW-Keep-Modified` unchanged. |
+| `retention.php` | Kits Core `ops/retention.php`: `kits_retention_state()`, `kits_open_opportunities_meta_query()`, `kits_opportunity_*` | RankWeb robots, sitemap, schema, helpers; DirectoryWeb listing-template; Core bindings, hubs, related, item-head | The post type `aw_opportunity` and the meta keys `aw_deadline`, `aw_review_until`, `aw_closes` are data and keep their names. It is content-type logic: it moves again with the Opportunities content type (session D). |
+| `research-citation.php` | SourceWeb `includes/research-citation.php`: `sourceweb_research_*` | SourceWeb ingest (writes), RankWeb schema (reads the study title), Core item-head.php | Meta `aw_study_title`, `aw_authors`, `aw_journal`, event `aw_research_citation` unchanged. SourceWeb reads and writes it; RankWeb's schema calls the new name behind `function_exists`. |
+| `keys.php` | Deleted. Each plugin keeps its own keys (owner rule, 18 Nov: no shared vault). | InsightWeb (`aw_key()` through the `kits_service_key` filter), Kits Core site-screens (Keys screen) | Section 5, "The keys vault". |
+| `plugin-info.php`, `help-tab.php` | Deleted (the plugin's own Plugins-screen details and Help tab; they go with the plugin) | none | |
+| `dashboard-activity.php` | Kits Core `dashboard-activity.php`: `kits_activity_*`, off unless the filter `kits_dashboard_activity` is true (site layer `ops.php` turns it on) | none | Widget id `aw_activity` unchanged. |
+| `admin-config.php`, `kits-config.php` | Theme site layer `themes/kits-by-wugweb/assets/site/admin.php` and `config.php` (loaded by `site.php`) | none (filters only) | Plain filters for Kits Core; same values. The edit-screen map `data/edit-screen-map.json` and `js/aw-analytics(.min).js` moved there too (`tools/ci/js_min.py` follows). The Overview's "Plugins screen" link on aw-core's row went with the plugin. |
+| `admin-table.php` | Deleted; `aw_core_simple_table()` is an alias of Kits Core `kits_simple_table()` | Core team-dates, pages, campaign-letters | |
+| `theme-parts-screen.php`, `theme-parts.php` | Screen to the theme site layer `theme-parts-screen.php` (`kits_site_theme_parts_*`). `theme-parts.php` deleted; its two helpers are aliases. | Kits Core site-screens; `aw_theme_file_uri` (Core home.php, DirectoryWeb data-sources and listing-template, all guarded); `aw_use_component_style` (many Core files) | |
+| `staging.php` | Theme site layer `staging.php`: `kits_site_is_staging()` | Kits Core site-screens | |
+| `media-compat.php` | Deleted (no caller left in the repository) | none | |
+| `uninstall-setting.php`, `uninstall.php` | Setting box deleted. The ops options, transient and events went into Kits Core's `uninstall.php`. aw-core's `uninstall.php` is trimmed and now inert (nothing can tick its setting). | | Delete it with the plugin. |
+| `systems.php` (rest) | **Not moved.** The date filter was already gone. What is left is the hub and list engine (`AW_LIST_FILTERS`, `AW_LIST_SORTS`, `aw_filter_*`, `aw_active_*`, `aw_publisher_sync`, the two Query Loop fixes) plus three tiny helpers (`aw_i`, `aw_date`, `aw_src_date`, `aw_first_term`, `aw_text`). It belongs with the hubs (`hubs.php`, `hub-blocks.php`), so it moves with them in the content session. | RankWeb filtered-views, titles, schema, sitemap; Core hubs, hub-blocks, pages | Left for the coordinator. |
+
+### Aliases left (each goes once nothing calls it)
+
+Kits Core `includes/ops/compat.php`: `aw_dispatch_workflow`, `aw_cron_last`, `aw_cron_span`, `aw_keep_modified`,
+`aw_retention_state`, `aw_open_opportunities_meta_query`, `aw_core_simple_table`, `aw_use_component_style`,
+`aw_theme_file_uri`. SourceWeb `includes/research-citation.php`: `aw_research_doi`, `aw_research_study_title`,
+`aw_research_authors_text`. Remaining Core callers: `aw_core_simple_table` (team-dates, pages, campaign-letters),
+`aw_open_opportunities_meta_query` (hubs, related, item-head), `aw_retention_state` (bindings),
+`aw_research_*` (item-head), `aw_theme_file_uri` (home), `aw_use_component_style` (many). The server's
+cron line `wp eval 'aw_dispatch_workflow(...)'` (in `cron-health.php`'s comment) still works.
+
+### The keys vault (Kits → Keys, option `aw_keys`)
+
+Only InsightWeb used it (`docs/keys-per-plugin.md`): `AW_CLARITY_TOKEN`, `AW_BING_WEBMASTER_KEY` (set on live in
+`aw_keys`), `AW_PSI_KEY`, `AW_GOOGLE_ALERTS_FEED_1`, `AW_GOOGLE_ALERTS_FEED_2` (not set). No other plugin has a key
+there. AI keys are out of scope and untouched.
+
+1. **Copy (built, runs by itself).** InsightWeb's `insightweb_keys_copy()` copies each of those five keys from
+   `aw_keys` into its own option `insightweb_keys` when it is empty there and no wp-config.php constant sets it.
+   It runs once on the first administrator request after deploy (flag option `insightweb_keys_copied`; delete it to run
+   again) and as `wp insightweb keys copy [--dry-run]`; `wp insightweb keys status` shows where each key is set.
+   Names and words only; no value is printed, logged or returned. It never changes or deletes `aw_keys`, so it is
+   reversible (delete the entry on InsightWeb → Settings → Keys). Idempotent: a second run copies nothing.
+   Tested in `plugins/insightweb/tests/run.php` (section 9).
+2. **Keep reading the old option until the copy is checked.** `insightweb_key()` still falls back to `aw_keys`, so
+   nothing stops if the copy has not run yet.
+3. **Delete the vault (done in this change).** `keys.php`, the Kits → Keys screen and `admin_post_aw_keys` are gone,
+   with the InsightWeb `aw_keys` and `kits_service_key` filters. `admin.php?page=aw-keys` redirects to InsightWeb →
+   Settings → Keys. The option **`aw_keys` itself stays in the database** until the owner says so, after
+   `wp insightweb keys status` shows both live keys as `set yes (insightweb)` and the next Clarity run (daily 06:30 IST)
+   and Bing run (2nd of the month, 07:40 IST) are OK. Then InsightWeb drops its `aw_keys` fallback, and the option is
+   deleted after a database export to a file (size checked).
+
+### Not verified
+
+No local WordPress (repo rule), so the moved screens and hooks were not run in a browser; `php -l`, every suite of the
+Deploy check, a scan of the `require` targets, PHPCS on the changed files and the new tests are the evidence. After
+the deploy, read-only on live: Kits → Home → Page check and Settings (CDN box), the Dashboard "Scheduled tasks" and
+"Activity" boxes, a 404 page, `aw/v1/deploy-status`, and `wp insightweb keys status`.
 
 ## How it was checked
 

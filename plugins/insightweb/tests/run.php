@@ -686,4 +686,23 @@ $ctx = aw_si_push_context(
 );
 iw_check( 'news' === $ctx['recommended_type'] && false === $ctx['focus_keyphrase'], 'sourcing push: no sourcing: recommendation → type defaults to news, not a focus keyphrase' );
 
+/* ---------- 9. Keys: the copy from the old vault (insightweb-keys.php) ---------- */
+
+require dirname( __DIR__ ) . '/includes/insightweb-keys.php';
+$GLOBALS['iw_options']['aw_keys'] = array( 'AW_CLARITY_TOKEN' => 'old-clarity', 'AW_BING_WEBMASTER_KEY' => 'old-bing', 'AW_OTHER_PLUGIN_KEY' => 'not-ours' );
+unset( $GLOBALS['iw_options']['insightweb_keys'] );
+$writes = $GLOBALS['iw_writes'];
+$res    = insightweb_keys_copy( false );
+iw_check( 'copied' === $res['AW_CLARITY_TOKEN'] && 'copied' === $res['AW_BING_WEBMASTER_KEY'] && 'not in the old place' === $res['AW_PSI_KEY'] && $writes === $GLOBALS['iw_writes'] && ! isset( $GLOBALS['iw_options']['insightweb_keys'] ), 'keys copy: a rehearsal names what it would copy and writes nothing' );
+$res = insightweb_keys_copy( true );
+iw_check( 'copied' === $res['AW_CLARITY_TOKEN'] && 'old-clarity' === ( $GLOBALS['iw_options']['insightweb_keys']['AW_CLARITY_TOKEN'] ?? '' ) && 'old-bing' === ( $GLOBALS['iw_options']['insightweb_keys']['AW_BING_WEBMASTER_KEY'] ?? '' ), 'keys copy: the vault\'s InsightWeb keys are copied into InsightWeb\'s own option' );
+iw_check( ! isset( $GLOBALS['iw_options']['insightweb_keys']['AW_OTHER_PLUGIN_KEY'] ) && isset( $GLOBALS['iw_options']['aw_keys']['AW_OTHER_PLUGIN_KEY'] ) && 'old-clarity' === $GLOBALS['iw_options']['aw_keys']['AW_CLARITY_TOKEN'], 'keys copy: a key InsightWeb does not own is not copied, and the old vault is left as it was' );
+$writes = $GLOBALS['iw_writes'];
+$res    = insightweb_keys_copy( true );
+iw_check( 'already set' === $res['AW_CLARITY_TOKEN'] && 'already set' === $res['AW_BING_WEBMASTER_KEY'] && $writes === $GLOBALS['iw_writes'], 'keys copy: run again, it copies nothing and writes nothing' );
+$GLOBALS['iw_options']['insightweb_keys']['AW_CLARITY_TOKEN'] = 'new-clarity';
+insightweb_keys_copy( true );
+iw_check( 'new-clarity' === $GLOBALS['iw_options']['insightweb_keys']['AW_CLARITY_TOKEN'], 'keys copy: a key already set in InsightWeb is never overwritten by the old one' );
+iw_check( ! in_array( 'old-clarity', array_map( 'strval', array_values( $res ) ), true ), 'keys copy: the result carries names and words, never a value' );
+
 exit( $GLOBALS['iw_fail'] );

@@ -313,7 +313,7 @@ function aw_html_sitemap() {
 		$ids = array_values( array_diff( array_map( 'intval', $ids ), function_exists( 'aw_seo_preview_ids' ) ? array_map( 'intval', (array) aw_seo_preview_ids() ) : array() ) );
 		$out = array();
 		foreach ( $ids as $id ) {
-			if ( $noidx( $id ) || ( 'aw_opportunity' === $type && function_exists( 'aw_retention_state' ) && aw_retention_state( get_post( $id ) ) ) ) {
+			if ( $noidx( $id ) || ( 'aw_opportunity' === $type && function_exists( 'kits_retention_state' ) && kits_retention_state( get_post( $id ) ) ) ) {
 				continue;
 			}
 			$out[] = array( get_permalink( $id ), $title( $id ) );
@@ -398,8 +398,8 @@ add_action( 'save_post', fn() => delete_transient( 'aw_html_sitemap' ) );
 add_shortcode(
 	'aw_html_sitemap',
 	function () {
-		if ( function_exists( 'aw_use_component_style' ) ) {
-			aw_use_component_style( 'aw-single' ); // aw-more-group, aw-more-head
+		if ( function_exists( 'kits_use_component_style' ) ) {
+			kits_use_component_style( 'aw-single' ); // aw-more-group, aw-more-head
 		}
 		return aw_html_sitemap();
 	}

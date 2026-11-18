@@ -11,15 +11,15 @@
  * requests for public pages answered 200 without a query string. Never on: wp-admin, logged-in/commenter/password
  * cookies, REST, feeds, 404, search, previews, forms and nonce pages, crisis guides, anything that sets a cookie.
  *
- * Off by default. Option aw_cdn_ttl (seconds, 0 = off; 60 to 3600). For a test, any public URL with ?cdnprobe=1 gets the
+ * Off by default. Option kits_cdn_ttl (seconds, 0 = off; 60 to 3600). For a test, any public URL with ?cdnprobe=1 gets the
  * header while the option is 0.
  *
  * Pages that change rarely (1 Nov 2026): Directory listings, Library items and Resources get the longer lifetime of option
- * aw_cdn_ttl_long (default 3600 s; 0 = the same as aw_cdn_ttl), plus `stale-while-revalidate=600`, so an edge serves its
- * copy while it fetches a new one. Home, News, hubs, Directory places and campaigns keep aw_cdn_ttl: they change with
+ * aw_cdn_ttl_long (default 3600 s; 0 = the same as kits_cdn_ttl), plus `stale-while-revalidate=600`, so an edge serves its
+ * copy while it fetches a new one. Home, News, hubs, Directory places and campaigns keep kits_cdn_ttl: they change with
  * every sourcing run.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,16 +27,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Pages that carry a form, a nonce or personal data: never in the shared cache. */
-function aw_cdn_excluded_slugs() {
+function kits_cdn_excluded_slugs() {
 	return (array) apply_filters(
-		'aw_cdn_excluded_slugs',
+		'kits_cdn_excluded_slugs',
 		array( 'contact', 'volunteer', 'claim', 'remove-my-data', 'report', 'thank-you', 'corrections', 'helplines', 'search', 'login', 'register', 'my-account' )
 	);
 }
 
 /** The lifetime to send for this request, 0 for none. */
-function aw_cdn_ttl() {
-	$ttl = (int) get_option( 'aw_cdn_ttl', 0 );
+function kits_cdn_ttl() {
+	$ttl = (int) get_option( 'kits_cdn_ttl', 0 );
 	if ( $ttl <= 0 && isset( $_GET['cdnprobe'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$ttl = 300;
 	}
@@ -62,33 +62,33 @@ function aw_cdn_ttl() {
 			return 0;
 		}
 	}
-	if ( is_page( aw_cdn_excluded_slugs() ) || ( is_singular() && false !== stripos( (string) get_post_field( 'post_content', get_queried_object_id() ), 'fluentform' ) ) ) {
+	if ( is_page( kits_cdn_excluded_slugs() ) || ( is_singular() && false !== stripos( (string) get_post_field( 'post_content', get_queried_object_id() ), 'fluentform' ) ) ) {
 		return 0;
 	}
-	if ( is_singular( 'post' ) && defined( 'AW_CRISIS_GUIDES' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
+	if ( is_singular() && in_array( get_queried_object_id(), array_map( 'intval', (array) apply_filters( 'kits_cdn_excluded_ids', array() ) ), true ) ) { // the site's never-cached pages (Animal Writes: the crisis guides, assets/site/ops.php)
 		return 0;
 	}
 	if ( headers_sent() || preg_grep( '/^set-cookie:/i', headers_list() ) ) {
 		return 0;
 	}
-	if ( aw_cdn_is_long_lived() ) {
+	if ( kits_cdn_is_long_lived() ) {
 		$long = (int) get_option( 'aw_cdn_ttl_long', 3600 );
 		$ttl  = $long > 0 ? max( $ttl, min( 3600, $long ) ) : $ttl;
 	}
-	return (int) apply_filters( 'aw_cdn_ttl', $ttl );
+	return (int) apply_filters( 'kits_cdn_ttl', $ttl );
 }
 
 /** Whether this page changes rarely: a Directory listing, a Library item or a Resource (not a hub, not a crisis guide). */
-function aw_cdn_is_long_lived() {
-	return is_singular( array( 'aw_listing', 'aw_legal', 'post' ) ) && ! ( function_exists( 'aw_hub_type' ) && aw_hub_type() );
+function kits_cdn_is_long_lived() {
+	return is_singular( (array) apply_filters( 'kits_cdn_long_lived_types', array( 'post' ) ) ); // Animal Writes adds listings and Library items (assets/site/ops.php)
 }
 
 add_action(
 	'template_redirect',
 	function () {
-		$ttl = aw_cdn_ttl();
+		$ttl = kits_cdn_ttl();
 		if ( $ttl > 0 ) {
-			$swr = aw_cdn_is_long_lived() ? ', stale-while-revalidate=600' : '';
+			$swr = kits_cdn_is_long_lived() ? ', stale-while-revalidate=600' : '';
 			header( 'Cache-Control: public, s-maxage=' . $ttl . $swr, true );
 			header( 'X-AW-CDN: s-maxage=' . $ttl . $swr, true );
 		}
@@ -119,7 +119,7 @@ add_action(
  *
  * @param mixed $v Submitted value.
  */
-function aw_cdn_ttl_sanitize( $v ) {
+function kits_cdn_ttl_sanitize( $v ) {
 	$v = (int) round( (float) $v );
 	return $v <= 0 ? 0 : max( 60, min( 3600, $v ) );
 }
@@ -127,16 +127,16 @@ function aw_cdn_ttl_sanitize( $v ) {
 add_action(
 	'admin_init',
 	function () {
-		register_setting( 'aw_cdn', 'aw_cdn_ttl', array( 'type' => 'integer', 'default' => 0, 'sanitize_callback' => 'aw_cdn_ttl_sanitize', 'show_in_rest' => false ) );
-		register_setting( 'aw_cdn', 'aw_cdn_ttl_long', array( 'type' => 'integer', 'default' => 3600, 'sanitize_callback' => 'aw_cdn_ttl_sanitize', 'show_in_rest' => false ) );
-		add_settings_section( 'aw_cdn', 'Shared cache (CDN)', 'aw_cdn_settings_intro', 'aw-cdn' );
-		add_settings_field( 'aw_cdn_ttl', 'Public pages', 'aw_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'aw_cdn_ttl', 'default' => 0, 'note' => 'Home, News, hubs, Directory places and campaigns. 0 = off.' ) );
-		add_settings_field( 'aw_cdn_ttl_long', 'Listings, Library items and Resources', 'aw_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'aw_cdn_ttl_long', 'default' => 3600, 'note' => '0 = the same as public pages.' ) );
+		register_setting( 'aw_cdn', 'kits_cdn_ttl', array( 'type' => 'integer', 'default' => 0, 'sanitize_callback' => 'kits_cdn_ttl_sanitize', 'show_in_rest' => false ) );
+		register_setting( 'aw_cdn', 'aw_cdn_ttl_long', array( 'type' => 'integer', 'default' => 3600, 'sanitize_callback' => 'kits_cdn_ttl_sanitize', 'show_in_rest' => false ) );
+		add_settings_section( 'aw_cdn', 'Shared cache (CDN)', 'kits_cdn_settings_intro', 'aw-cdn' );
+		add_settings_field( 'kits_cdn_ttl', 'Public pages', 'kits_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'kits_cdn_ttl', 'default' => 0, 'note' => 'Home, News, hubs, Directory places and campaigns. 0 = off.' ) );
+		add_settings_field( 'aw_cdn_ttl_long', 'Listings, Library items and Resources', 'kits_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'aw_cdn_ttl_long', 'default' => 3600, 'note' => '0 = the same as public pages.' ) );
 	}
 );
 
 /** Section text. */
-function aw_cdn_settings_intro() {
+function kits_cdn_settings_intro() {
 	echo '<p>' . esc_html( 'Seconds the CDN keeps a copy of a page for visitors who are not logged in: 0, or 60 to 3600. A published change shows when the copy runs out.' ) . '</p>';
 }
 
@@ -145,7 +145,7 @@ function aw_cdn_settings_intro() {
  *
  * @param array $args label_for (the option), default, note.
  */
-function aw_cdn_settings_field( $args ) {
+function kits_cdn_settings_field( $args ) {
 	$id = (string) $args['label_for'];
 	printf(
 		'<input type="number" class="small-text" id="%1$s" name="%1$s" value="%2$d" min="0" max="3600" step="1"> %3$s<p class="description">%4$s</p>',
@@ -157,13 +157,13 @@ function aw_cdn_settings_field( $args ) {
 }
 
 /** The Cache-Control header public pages get with the saved options ('' when off). */
-function aw_cdn_header_now( bool $long ): string {
-	$ttl = aw_cdn_ttl_sanitize( get_option( 'aw_cdn_ttl', 0 ) );
+function kits_cdn_header_now( bool $long ): string {
+	$ttl = kits_cdn_ttl_sanitize( get_option( 'kits_cdn_ttl', 0 ) );
 	if ( ! $ttl ) {
 		return '';
 	}
 	if ( $long ) {
-		$l   = aw_cdn_ttl_sanitize( get_option( 'aw_cdn_ttl_long', 3600 ) );
+		$l   = kits_cdn_ttl_sanitize( get_option( 'aw_cdn_ttl_long', 3600 ) );
 		$ttl = $l > 0 ? max( $ttl, $l ) : $ttl;
 		return 'public, s-maxage=' . $ttl . ', stale-while-revalidate=600';
 	}
@@ -171,7 +171,7 @@ function aw_cdn_header_now( bool $long ): string {
 }
 
 /** Kits → Settings → Performance: CDN cache times (and Check site without Kits). */
-function aw_cdn_settings_box() {
+function kits_cdn_settings_box() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
@@ -181,15 +181,15 @@ function aw_cdn_settings_box() {
 	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'aw_cdn' );
 	do_settings_sections( 'aw-cdn' );
-	$short = aw_cdn_header_now( false );
-	$long  = aw_cdn_header_now( true );
+	$short = kits_cdn_header_now( false );
+	$long  = kits_cdn_header_now( true );
 	echo '<p>' . esc_html( 'Header now:' ) . '</p><ul>';
 	echo '<li>' . esc_html( 'Public pages: ' ) . ( $short ? '<code>Cache-Control: ' . esc_html( $short ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
 	echo '<li>' . esc_html( 'Listings, Library items and Resources: ' ) . ( $long ? '<code>Cache-Control: ' . esc_html( $long ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
 	echo '</ul>';
 	submit_button();
-	aw_core_reset_button( 'aw_cdn' ); // "Reset this section" (site-options.php)
+	kits_site_reset_button( 'aw_cdn' ); // "Reset this section" (site-options.php)
 	echo '</form>';
-	aw_core_reset_form( 'aw_cdn' );
+	kits_site_reset_form( 'aw_cdn' );
 }
-add_action( 'aw_site_check_after', 'aw_cdn_settings_box', 20 );
+add_action( 'aw_site_check_after', 'kits_cdn_settings_box', 20 );

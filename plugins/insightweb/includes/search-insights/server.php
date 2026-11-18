@@ -154,13 +154,13 @@ function aw_si_srv_php_errors( string $ymd ): array {
 		'kinds'  => array(),
 		'top'    => array(),
 	);
-	if ( ! function_exists( 'aw_error_count_resolve' ) ) {
+	if ( ! function_exists( 'kits_error_count_resolve' ) ) {
 		return $out;
 	}
 	$tz    = wp_timezone();
 	$start = ( new DateTimeImmutable( $ymd . ' 00:00:00', $tz ) )->getTimestamp();
 	$end   = $start + DAY_IN_SECONDS;
-	$res   = aw_error_count_resolve( aw_error_count_php_candidates() );
+	$res   = kits_error_count_resolve( kits_error_count_php_candidates() );
 	if ( ! $res['files'] ) {
 		$out['status'] = $res['unreadable'] ? 'unreadable' : 'not_found';
 		return $out;
@@ -171,7 +171,7 @@ function aw_si_srv_php_errors( string $ymd ): array {
 		if ( (int) filemtime( $f ) < $start ) {
 			continue;
 		}
-		aw_error_count_each_line(
+		kits_error_count_each_line(
 			$f,
 			function ( $line ) use ( $start, $end, &$kinds, &$top ) {
 				if ( '[' !== substr( $line, 0, 1 ) || ! preg_match( '/^\[([^\]]+)\]\s*(.*)$/', $line, $m ) ) {
@@ -192,13 +192,13 @@ function aw_si_srv_php_errors( string $ymd ): array {
 					$kind = 'Other';
 				}
 				$kinds[ $kind ] = (int) ( $kinds[ $kind ] ?? 0 ) + 1;
-				aw_error_count_tally( $top, aw_error_count_clean_message( $kind . ': ' . $msg ) );
+				kits_error_count_tally( $top, kits_error_count_clean_message( $kind . ': ' . $msg ) );
 			}
 		);
 	}
 	$out['status'] = 'ok';
 	$out['kinds']  = $kinds;
-	$out['top']    = aw_error_count_top( $top );
+	$out['top']    = kits_error_count_top( $top );
 	return $out;
 }
 

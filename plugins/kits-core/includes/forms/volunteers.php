@@ -187,7 +187,7 @@ add_action(
 		}
 	}
 );
-add_filter( 'aw_cdn_excluded_slugs', fn( $s ) => array_merge( (array) $s, array( 'update' ) ) );
+add_filter( 'kits_cdn_excluded_slugs', fn( $s ) => array_merge( (array) $s, array( 'update' ) ) );
 
 // Admin list: useful columns, no personal data in the title beyond name and state.
 add_filter( 'manage_aw_volunteer_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Name (state)', 'aw_email' => 'Email', 'aw_phone' => 'Phone', 'aw_city' => 'City', 'aw_roles' => 'Wants to', 'date' => 'Signed up' ) );

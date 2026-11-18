@@ -5,7 +5,7 @@
  * Hostinger's auto-deploy (a git pull into aw_deploy) does not purge LiteSpeed, so a
  * code change could stay invisible behind cached pages for up to the cache lifetime (7 days): PR #16 did, on 24 Oct.
  * The first uncached request after the deployed commit changes purges the whole cache once and remembers the commit
- * (option aw_deployed_head). Cached pages never reach PHP, so that request is made on purpose: after each deploy the
+ * (option kits_deployed_head). Cached pages never reach PHP, so that request is made on purpose: after each deploy the
  * deploy-check workflow requests the home page with a one-off ?aw_deploy_nudge= query (a cache miss, a full page render
  * whose response carries LiteSpeed's purge header) every 30 s for 5 minutes. Those responses are never cached. Any other
  * uncached request (a cache miss, wp-admin) also counts.
@@ -17,11 +17,11 @@
  * `wp litespeed-purge all` cannot notify the web server on this host, 24 Oct 2026). A second nudge is harmless.
  * The same request starts the sweep of uploads/kits-cache/parts/ (the joined component stylesheets of Kits by Wugweb),
  * so sets no page uses any more do not count against the cap (owner, 10 Nov 2026). Files no page has used since the
- * release go two hours later: past the longest time the CDN keeps a page (aw_cdn_ttl, at most an hour, plus
+ * release go two hours later: past the longest time the CDN keeps a page (kits_cdn_ttl, at most an hour, plus
  * stale-while-revalidate 600 s, cdn-cache.php), so a cached page never links to a deleted file.
  * It also schedules Check site for the new commit, two minutes later (site-check.php; owner, 11 Nov 2026).
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,15 +29,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Start the sweep of joined component stylesheets (Kits kits_parts_bundle_sweep_start()), two hours from now. */
-function aw_deploy_sweep_parts_css() {
+function kits_deploy_sweep_parts_css() {
 	if ( function_exists( 'kits_parts_bundle_sweep_start' ) ) {
 		kits_parts_bundle_sweep_start( 2 * HOUR_IN_SECONDS );
 	}
 }
 
 /** The commit checked out in the deploy repository (the one this plugin is served from), '' if unknown. */
-function aw_deployed_head() {
-	$git  = dirname( (string) realpath( AW_CORE_DIR ), 2 ) . '/.git';
+function kits_deployed_head() {
+	$git  = dirname( (string) realpath( KITS_CORE_DIR ), 2 ) . '/.git';
 	$head = is_readable( $git . '/HEAD' ) ? trim( (string) file_get_contents( $git . '/HEAD' ) ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
 	if ( 0 !== strpos( $head, 'ref: ' ) ) {
 		return preg_match( '/^[0-9a-f]{40}$/', $head ) ? $head : ''; // detached: the commit itself
@@ -50,6 +50,27 @@ function aw_deployed_head() {
 	return preg_match( '/^([0-9a-f]{40}) ' . preg_quote( $ref, '/' ) . '$/m', $packed, $m ) ? $m[1] : '';
 }
 
+/**
+ * Purge the page cache once for a newly deployed commit: remember the commit (option aw_deployed_head), start the sweep of
+ * the joined stylesheets, schedule Check site and ask LiteSpeed to purge everything. Does nothing when the commit is
+ * unknown or already remembered. Only called from a web request (see the init hook below).
+ *
+ * @return bool True when it purged.
+ */
+function kits_deploy_purge_if_new(): bool {
+	$head = kits_deployed_head();
+	if ( '' === $head || get_option( 'aw_deployed_head' ) === $head ) {
+		return false;
+	}
+	update_option( 'aw_deployed_head', $head, true );
+	kits_deploy_sweep_parts_css();
+	if ( function_exists( 'kits_site_check_after_deploy' ) ) {
+		kits_site_check_after_deploy(); // Check site runs again for the new commit (site-check.php).
+	}
+	do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active
+	return true;
+}
+
 add_action(
 	'init',
 	function () {
@@ -59,16 +80,7 @@ add_action(
 		if ( isset( $_GET['aw_deploy_nudge'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			do_action( 'litespeed_control_set_nocache', 'deploy nudge' ); // one-off URLs: keep them out of the cache
 		}
-		$head = aw_deployed_head();
-		if ( '' === $head || get_option( 'aw_deployed_head' ) === $head ) {
-			return;
-		}
-		update_option( 'aw_deployed_head', $head, true );
-		aw_deploy_sweep_parts_css();
-		if ( function_exists( 'aw_site_check_after_deploy' ) ) {
-			aw_site_check_after_deploy(); // Check site runs again for the new commit (site-check.php).
-		}
-		do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active
+		kits_deploy_purge_if_new();
 	},
 	99
 );

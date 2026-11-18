@@ -25,7 +25,7 @@ function directoryweb_block_listing_help( $a, $id ) {
 	if ( ! $listing || 'aw_listing' !== $listing->post_type ) {
 		return '';
 	}
-	aw_use_component_style( 'aw-listing' ); // aw-listing-help, aw-claim-link (also on the Kits states sheet)
+	directoryweb_use_style( 'aw-listing' ); // aw-listing-help, aw-claim-link (also on the Kits states sheet)
 	$verified = (bool) get_post_meta( $id, 'aw_verified', true );
 	return '<section class="aw-listing-help" aria-labelledby="aw-listing-help-h"><h2 id="aw-listing-help-h" class="has-x-large-font-size">Is this your organisation?</h2>'
 		. ( $verified ? '' : '<p>This listing comes from public records and hasn\'t been confirmed.</p>' )
@@ -108,7 +108,7 @@ add_shortcode(
 	'aw_claim_page',
 	function () {
 		$listing = directoryweb_form_page_listing();
-		aw_use_component_style( 'aw-listing' ); // aw-claim-find, aw-claim-results, aw-claim-form
+		directoryweb_use_style( 'aw-listing' ); // aw-claim-find, aw-claim-results, aw-claim-form
 		return '<div class="aw-form-page" id="claim">' . ( $listing ? aw_claim_form( $listing ) : directoryweb_claim_finder() ) . '</div>'; // the listing is named in the head band
 	}
 );

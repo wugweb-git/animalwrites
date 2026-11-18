@@ -97,8 +97,8 @@ jobs:
         run: php plugins/directoryweb/tests/directoryweb-tests.php
       - name: DirectoryWeb listing data model and Core's wrappers (plugins/directoryweb/tests/listing-meta-tests.php)
         run: php plugins/directoryweb/tests/listing-meta-tests.php
-      - name: Daily PHP error count by kind (plugins/animal-writes-core/tests/error-count-tests.php)
-        run: php plugins/animal-writes-core/tests/error-count-tests.php
+      - name: Daily PHP error count by kind (plugins/kits-core/tests/error-count-tests.php)
+        run: php plugins/kits-core/tests/error-count-tests.php
       - name: Taxonomy rename to kits_ names, backup and undo (plugins/animal-writes-core/tests/taxonomy-rename-tests.php)
         run: php plugins/animal-writes-core/tests/taxonomy-rename-tests.php
       - name: PlanWeb tests without WordPress (field checks, Dates import mapping; plugins/planweb/tests)
@@ -115,6 +115,8 @@ jobs:
         run: php plugins/kits-core/tests/presets-tests.php
       - name: Kits ops, error pages and daily backup moved from Core (plugins/kits-core/tests/ops-tests.php)
         run: php plugins/kits-core/tests/ops-tests.php
+      - name: Kits site operations moved from Core (cron stats, 404 words, deployed commit and purge, retention, keep-modified; plugins/kits-core/tests/site-ops-tests.php)
+        run: php plugins/kits-core/tests/site-ops-tests.php
       - name: Kits presets' SCF field groups match the presets (plugins/kits-core/tests/presets-scf-tests.php)
         run: php plugins/kits-core/tests/presets-scf-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
@@ -183,7 +185,7 @@ jobs:
       - name: Nudge the site so it purges its page cache once Hostinger has pulled this commit
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/wordpress-dev'
         run: |
-          # Cached pages never run PHP, so the deploy-purge hook (animal-writes-core deploy-purge.php) needs one uncached
+          # Cached pages never run PHP, so the deploy-purge hook (Kits Core includes/ops/deploy-purge.php) needs one uncached
           # request after the pull: the home page with a query string nobody else uses is a cache miss and a full page
           # render, whose response carries LiteSpeed's purge header (the hook marks it not cacheable). It purges once.
           # Hostinger usually pulls within 2 minutes: ask every 30 s for 5 minutes (a request does nothing once purged).

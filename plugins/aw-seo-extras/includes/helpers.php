@@ -265,9 +265,9 @@ function aw_seo_preview_ids() {
  * @return array
  */
 function aw_seo_hub_rules( $type, array $v ) {
-	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
+	if ( 'aw_opportunity' === $type && function_exists( 'kits_open_opportunities_meta_query' ) ) {
 		$v['meta_query']   = (array) ( $v['meta_query'] ?? array() ); // phpcs:ignore WordPress.DB.SlowDBQuery
-		$v['meta_query'][] = aw_open_opportunities_meta_query();
+		$v['meta_query'][] = kits_open_opportunities_meta_query();
 	}
 	if ( aw_seo_preview_ids() ) {
 		$v['post__not_in'] = aw_seo_preview_ids();

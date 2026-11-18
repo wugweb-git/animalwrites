@@ -66,6 +66,7 @@ define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once AW_SOURCING_DIR . 'includes/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
 require_once AW_SOURCING_DIR . 'includes/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
+require_once AW_SOURCING_DIR . 'includes/research-citation.php'; // research papers' credit: study title, authors, journal (moved from Core, 19 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/sources-config.php'; // the sourcing lists, option aw_sources (moved from Kits Core, 18 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/attribution.php'; // [aw_source_row], publisher icons and the favicon run, news slugs (moved from Kits Core, 18 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/summary-rules.php'; // the summary rules (option aw_summary_rules); moved from Core 12 Nov 2026

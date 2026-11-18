@@ -12,11 +12,14 @@
  *   kits_presets_rewrite, kits_presets_consent, kits_core_joined,
  *   kits_daily_backup (the daily backup's switch) and aw_backup_last (its last run, backups.php), aw_error_pages (the error pages' state, error-pages.php),
  *   kits_cli_commands (the Help commands list, cli-commands.php),
+ *   the site operations that came from Animal Writes Core on 19 Nov 2026 (includes/ops/): aw_cdn_ttl, aw_cdn_ttl_long,
+ *   aw_cron_runs, aw_deployed_head, aw_dispatch_log, aw_error_count, aw_site_check_last,
  *   the media records that came from Animal Writes Core on 18 Nov 2026: aw_category_images, aw_thumb_map,
  *   aw_media_merge_log, aw_media_merge_data_*, aw_media_reuse_log, aw_media_webp_log; kits_delete_data_on_uninstall.
  * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*,
- *   aw_media_reuse_notice_*, aw_thumb_dupes_n, aw_error_pages_checked, and the site transient kits_update_release.
- * Scheduled events: kits_spot_map_daily, aw_daily_backup, aw_thumb_rebuild.
+ *   aw_media_reuse_notice_*, aw_thumb_dupes_n, aw_error_count_mailed, aw_error_pages_checked, and the site transient kits_update_release.
+ * Scheduled events: kits_spot_map_daily, aw_daily_backup, aw_thumb_rebuild, aw_daily, aw_error_count_daily,
+ *   aw_site_check_deploy.
  * Tables: none of its own.
  *
  * Never deleted, even when ticked:
@@ -71,6 +74,13 @@ $kits_options = array(
 	'aw_media_merge_log',
 	'aw_media_reuse_log',
 	'aw_media_webp_log',
+	'aw_cdn_ttl',
+	'aw_cdn_ttl_long',
+	'aw_cron_runs',
+	'aw_deployed_head',
+	'aw_dispatch_log',
+	'aw_error_count',
+	'aw_site_check_last',
 );
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the
@@ -89,6 +99,7 @@ foreach ( $kits_options as $kits_option ) {
 global $wpdb;
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'aw_media_merge_data_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: the merge tool's per-group records, once.
 delete_transient( 'aw_thumb_dupes_n' );
+delete_transient( 'aw_error_count_mailed' ); // includes/ops/error-count.php
 foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 'kits_altcha_', 'aw_media_reuse_notice_' ) as $kits_prefix ) {
 	foreach ( array( '_transient_', '_transient_timeout_' ) as $kits_kind ) {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $kits_kind . $kits_prefix ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: transients by prefix, once.
@@ -98,6 +109,9 @@ delete_site_transient( 'kits_update_release' );
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
 wp_unschedule_hook( 'aw_thumb_rebuild' ); // the thumbnail map rebuild (thumbs.php)
+wp_unschedule_hook( 'aw_daily' ); // the daily event (includes/ops/daily.php)
+wp_unschedule_hook( 'aw_error_count_daily' ); // includes/ops/error-count.php
+wp_unschedule_hook( 'aw_site_check_deploy' ); // includes/ops/site-check.php
 wp_unschedule_hook( 'aw_daily_backup' ); // the daily backup (backups.php); the backup files in ~/backups stay
 delete_transient( 'aw_error_pages_checked' ); // error-pages.php; the drop-ins in wp-content stay
 

@@ -5,21 +5,31 @@
  * the next scheduled ones. Covers posts, pages and the public custom post types. Read-only: counts and rows straight
  * from the posts table. No comments part: comments are off on this site.
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core (19 Nov 2026); off unless the site switches it on (kits_dashboard_activity).
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Whether this site swaps WordPress's Activity box for this one. Off unless the site turns it on with the filter
+ * kits_dashboard_activity (Animal Writes: the theme's site layer, assets/site/ops.php).
+ */
+function kits_dashboard_activity_on(): bool {
+	return (bool) apply_filters( 'kits_dashboard_activity', false );
+}
+
 /** The post types the box covers: post, page and every public custom post type. */
-function aw_activity_types(): array {
+function kits_activity_types(): array {
 	$types = array_merge( array( 'post', 'page' ), array_values( get_post_types( array( 'public' => true, '_builtin' => false ) ) ) );
 	return array_values( array_unique( $types ) );
 }
 
 /** One query: published in the last 7 days, scheduled, awaiting review. */
-function aw_activity_counts( array $types ): array {
+function kits_activity_counts( array $types ): array {
 	global $wpdb;
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 	$since = gmdate( 'Y-m-d H:i:s', time() - 7 * DAY_IN_SECONDS );
@@ -32,7 +42,7 @@ function aw_activity_counts( array $types ): array {
 }
 
 /** The 5 newest published items, or the next 5 scheduled ones ('future'). */
-function aw_activity_items( array $types, string $status ): array {
+function kits_activity_items( array $types, string $status ): array {
 	global $wpdb;
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 	$order = 'future' === $status ? 'ASC' : 'DESC';
@@ -40,7 +50,7 @@ function aw_activity_items( array $types, string $status ): array {
 }
 
 /** A table of items: Item (linked to its edit screen when allowed), Type, Date; a core list table. */
-function aw_activity_table( array $items, string $caption ): string {
+function kits_activity_table( array $items, string $caption ): string {
 	$cells = array();
 	foreach ( $items as $p ) {
 		$id    = (int) $p->ID;
@@ -56,7 +66,7 @@ function aw_activity_table( array $items, string $caption ): string {
 		);
 	}
 	ob_start();
-	aw_core_simple_table(
+	kits_simple_table(
 		'aw-activity-' . sanitize_key( $caption ),
 		array(
 			'item' => 'Item',
@@ -75,15 +85,15 @@ function aw_activity_table( array $items, string $caption ): string {
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! kits_dashboard_activity_on() || ! current_user_can( 'edit_posts' ) ) {
 			return;
 		}
 		wp_add_dashboard_widget(
 			'aw_activity',
 			'Activity',
 			function () {
-				$types  = aw_activity_types();
-				$counts = aw_activity_counts( $types );
+				$types  = kits_activity_types();
+				$counts = kits_activity_counts( $types );
 				if ( function_exists( 'kits_dash_cards' ) ) {
 					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 						array(
@@ -93,17 +103,17 @@ add_action(
 						)
 					);
 				}
-				$recent = aw_activity_items( $types, 'publish' );
+				$recent = kits_activity_items( $types, 'publish' );
 				echo '<h3>Recently published</h3>';
 				if ( $recent ) {
-					echo aw_activity_table( $recent, 'Recently published' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+					echo kits_activity_table( $recent, 'Recently published' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 				} else {
 					echo '<p>Nothing published yet.</p>';
 				}
 				if ( $counts['future'] > 0 ) {
-					$next = aw_activity_items( $types, 'future' );
+					$next = kits_activity_items( $types, 'future' );
 					echo '<details><summary>' . esc_html( 'Scheduled (' . number_format_i18n( $counts['future'] ) . ')' ) . '</summary>';
-					echo aw_activity_table( $next, 'Scheduled' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+					echo kits_activity_table( $next, 'Scheduled' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 					echo '</details>';
 				}
 			}
@@ -116,7 +126,9 @@ add_action(
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		remove_meta_box( 'dashboard_activity', 'dashboard', 'normal' );
+		if ( kits_dashboard_activity_on() ) {
+			remove_meta_box( 'dashboard_activity', 'dashboard', 'normal' );
+		}
 	},
 	99
 );

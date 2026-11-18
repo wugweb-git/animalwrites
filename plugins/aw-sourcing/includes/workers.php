@@ -335,9 +335,9 @@ add_filter(
  * @return true|WP_Error
  */
 function aw_workers_run_now( $file ) {
-	$res = function_exists( 'aw_dispatch_workflow' ) // Animal Writes Core's cron-health.php (GitHub token, dispatch)
-		? aw_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) )
-		: new WP_Error( 'sourceweb_no_dispatch', 'Run now needs the GitHub dispatch from Animal Writes Core.' );
+	$res = function_exists( 'kits_dispatch_workflow' ) // Kits Core's ops/cron-health.php (GitHub token, dispatch)
+		? kits_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) )
+		: new WP_Error( 'sourceweb_no_dispatch', 'Run now needs the GitHub dispatch from Kits Core.' );
 	$log = (array) get_option( 'aw_worker_dispatch_log', array() );
 	array_unshift(
 		$log,

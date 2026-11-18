@@ -1,8 +1,9 @@
 <?php
 /**
- * Animal Writes settings for Kits Core (kits_* filters).
+ * Animal Writes settings for Kits Core (kits_* filters). Moved from Animal Writes Core's kits-config.php (19 Nov 2026):
+ * site configuration, never in a distributed theme. Loaded by site.php.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +23,9 @@ add_filter( 'kits_sourced_post_types', fn() => array( 'aw_news', 'aw_legal' ) );
  * Ads: Advanced Ads alone (owner, 21 Oct 2026). Its placements carry the old slot names and its ads carry the rules
  * (where, and no ads on forms, search, crisis guides…): tools/advanced-ads/setup.php. Nothing here.
  */
-const AW_CRISIS_GUIDES = array( 126, 127, 9027, 9028, 9029, 9030, 9031, 9032, 9033 ); // help-now guides + the crisis guides (never cached: cdn-cache.php; no ads: Advanced Ads)
+if ( ! defined( 'AW_CRISIS_GUIDES' ) ) {
+	define( 'AW_CRISIS_GUIDES', array( 126, 127, 9027, 9028, 9029, 9030, 9031, 9032, 9033 ) ); // help-now guides + the crisis guides (never cached: ops.php; no ads: Advanced Ads)
+}
 // The sample listings (the Wugweb sample, and test samples listed in the option aw_sample_listing_ids): only the owner
 // sees them (preview), everyone else gets a 404 and no trace in lists, sitemaps, counts or related blocks.
 add_filter( 'kits_preview_only_ids', fn( $ids ) => array_merge( (array) $ids, array( 9003 ), array_map( 'intval', (array) get_option( 'aw_sample_listing_ids', array() ) ) ) );
@@ -122,8 +125,8 @@ add_action(
 	function () {
 		// The minified copy (tools/ci/js_min.py writes it from the source; the Deploy check keeps them equal), or the
 		// readable source with SCRIPT_DEBUG on.
-		$f = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! is_readable( AW_CORE_DIR . 'assets/js/aw-analytics.min.js' ) ? 'assets/js/aw-analytics.js' : 'assets/js/aw-analytics.min.js';
-		wp_enqueue_script( 'aw-analytics', plugins_url( $f, AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . $f ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		$f = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! is_readable( kits_site_path( 'js/aw-analytics.min.js' ) ) ? 'js/aw-analytics.js' : 'js/aw-analytics.min.js';
+		wp_enqueue_script( 'aw-analytics', kits_site_uri( $f ), array(), (string) filemtime( kits_site_path( $f ) ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		// The forms' hidden fields: GA4 and Clarity IDs are read only with analytics consent (the consent time zones).
 		wp_localize_script( 'aw-analytics', 'awVisitCfg', array( 'zones' => function_exists( 'kits_consent_timezones' ) ? kits_consent_timezones() : array() ) );
 	}

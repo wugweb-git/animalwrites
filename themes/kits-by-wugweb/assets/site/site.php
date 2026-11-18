@@ -266,3 +266,13 @@ if ( ! defined( 'AW_DATE_FORMAT' ) ) {
 	define( 'AW_DATE_FORMAT', 'j M Y' );
 }
 add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );
+
+/*
+ * The site's configuration for Kits Core, moved from Animal Writes Core on 19 Nov 2026: analytics and sharing values
+ * (config.php), the admin menus, labels, Overview and edit-screen map (admin.php), the values Kits Core's site
+ * operations read (ops.php), the staging site's rules (staging.php) and the Developer: theme parts screen.
+ */
+foreach ( array( 'config', 'admin', 'ops', 'staging', 'theme-parts-screen' ) as $kits_site_file ) {
+	require_once __DIR__ . '/' . $kits_site_file . '.php';
+}
+unset( $kits_site_file );

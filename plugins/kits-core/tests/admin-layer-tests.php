@@ -182,7 +182,11 @@ function kits_edit_screen_map_file_for_test(): string {
 
 /* ---------- With Animal Writes' values: what Animal Writes Core gave ---------- */
 
-require AW_CORE_DIR . 'includes/admin-config.php';
+/** The theme's site folder (assets/site/), as the theme's kits_site_path() gives it. */
+function kits_site_path( string $file ): string {
+	return dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $file, '/' );
+}
+require kits_site_path( 'admin.php' ); // Animal Writes' values, moved from Animal Writes Core's admin-config.php (19 Nov 2026)
 define( 'KITS_CAMPAIGN_LINK', 'kits_campaign_link' );
 
 kits_t( true === kits_comments_off(), 'Animal Writes: comments off' );
@@ -222,17 +226,17 @@ kits_t( array( 'aw_message', 'aw_claim' ) === apply_filters( 'kits_admin_hidden_
 kits_t( array( 'aw_message' => 'aw_read' ) === apply_filters( 'kits_admin_read_marks', array() ), 'Animal Writes: opening a message marks it read' );
 $labels = apply_filters( 'kits_admin_post_type_labels', array() );
 kits_t( 'Campaigns' === $labels['aw_campaign']['name'] && 'Contact messages' === $labels['aw_message']['all_items'], 'Animal Writes: labels' );
-kits_t( AW_CORE_DIR . 'data/edit-screen-map.json' === kits_edit_screen_map_file_for_test() && is_readable( kits_edit_screen_map_file_for_test() ), 'Animal Writes: the edit-screen map is the site\'s file' );
+kits_t( kits_site_path( 'data/edit-screen-map.json' ) === kits_edit_screen_map_file_for_test() && is_readable( kits_edit_screen_map_file_for_test() ), 'Animal Writes: the edit-screen map is the site\'s file' );
 kits_t( 'aw_legal' === kits_library_post_type(), 'Animal Writes: Library type' );
 
 /* ---------- The site's screens and their menu positions ---------- */
 
 $screens = kits_site_screens( true );
-kits_t( array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-keys', 'aw-modules', 'aw-edit-screens' ) === array_keys( $screens ), 'site screens in the same order' );
-kits_t( array( 20, 21, 22, 23, 24, 25, 26, 29 ) === array_map( 'kits_site_menu_priority', array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-keys', 'aw-modules', 'aw-edit-screens', 'unknown' ) ), 'menu positions 20 to 26, unknown 29' );
-kits_t( 'manage_options' === kits_site_screen_cap( 'aw-keys' ) && 'edit_pages' === kits_site_screen_cap( 'aw-elsewhere' ) && 'edit_others_posts' === kits_site_screen_cap( 'aw-dates' ), 'capabilities as before' );
+kits_t( array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens' ) === array_keys( $screens ), 'site screens in the same order, without the retired Keys' );
+kits_t( array( 20, 21, 22, 23, 24, 25, 29 ) === array_map( 'kits_site_menu_priority', array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens', 'unknown' ) ), 'menu positions 20 to 25, unknown 29' );
+kits_t( 'manage_options' === kits_site_screen_cap( 'aw-modules' ) && 'edit_pages' === kits_site_screen_cap( 'aw-elsewhere' ) && 'edit_others_posts' === kits_site_screen_cap( 'aw-dates' ), 'capabilities as before' );
 kits_t( 'kits' === aw_core_menu_parent() && 'animal-writes' === AW_CORE_MENU, 'older names: the menu parent is Kits' );
-kits_t( aw_core_screens( true ) === $screens && 24 === aw_core_menu_priority( 'aw-keys' ), 'older names: the same screens and positions' );
+kits_t( aw_core_screens( true ) === $screens && 24 === aw_core_menu_priority( 'aw-modules' ), 'older names: the same screens and positions' );
 
 /* ---------- Tidy: labels and the hidden links ---------- */
 

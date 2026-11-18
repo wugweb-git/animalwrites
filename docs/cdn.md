@@ -2,7 +2,7 @@
 
 ## What the site sends
 
-`animal-writes-core/includes/cdn-cache.php` adds `Cache-Control: public, s-maxage=N` (and `X-AW-CDN`) to anonymous GET requests for public pages answered 200 without a query string. Never on wp-admin, logged-in requests, REST, feeds, search, 404, forms, nonce pages or crisis guides.
+`plugins/kits-core/includes/ops/cdn-cache.php` adds `Cache-Control: public, s-maxage=N` (and `X-AW-CDN`) to anonymous GET requests for public pages answered 200 without a query string. Never on wp-admin, logged-in requests, REST, feeds, search, 404, forms, nonce pages or crisis guides.
 
 | Pages | Lifetime at the edge | Option |
 |---|---|---|
@@ -15,7 +15,7 @@ Browsers get no lifetime (no `max-age`), so they always ask again. A URL with an
 
 > 3 Nov 2026: LiteSpeed Cache is active on live again (`wp plugin list`; pages answer `x-litespeed-cache: hit`). There are two caches in front of WordPress: the server's LiteSpeed page cache and the Hostinger CDN. The paragraph below describes 2 Nov.
 
-Nothing. LiteSpeed Cache is inactive on live, so its hooks do nothing: `deploy-purge.php` still runs after each deploy but has no page cache to purge, and publishing or editing a post purges nothing either (the `litespeed_purge_*` calls in the plugins are no-ops). The only cache left is the Hostinger CDN (`server: hcdn`), and WordPress cannot purge it. A change (a deploy, a new post, an edit) shows at the edge when the stored copy runs out: within 15 minutes for Home, News, hubs and campaigns (`aw_cdn_ttl` 900), within an hour for listings, Library items and Resources (`aw_cdn_ttl_long` 3600, plus up to 10 minutes stale). Each edge keeps its own copy. To show a change at once: hPanel → CDN → Purge cache (step 4 below).
+Nothing. LiteSpeed Cache is inactive on live, so its hooks do nothing: `ops/deploy-purge.php` (Kits Core) still runs after each deploy but has no page cache to purge, and publishing or editing a post purges nothing either (the `litespeed_purge_*` calls in the plugins are no-ops). The only cache left is the Hostinger CDN (`server: hcdn`), and WordPress cannot purge it. A change (a deploy, a new post, an edit) shows at the edge when the stored copy runs out: within 15 minutes for Home, News, hubs and campaigns (`aw_cdn_ttl` 900), within an hour for listings, Library items and Resources (`aw_cdn_ttl_long` 3600, plus up to 10 minutes stale). Each edge keeps its own copy. To show a change at once: hPanel → CDN → Purge cache (step 4 below).
 
 Checked 2 Nov 2026: `/` answers `cache-control: public, s-maxage=900`, `x-hcdn-cache-status: HIT`, edge `fra` (Frankfurt).
 

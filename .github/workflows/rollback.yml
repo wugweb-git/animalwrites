@@ -38,7 +38,7 @@ jobs:
           # As in deploy-check.yml: one-off home URLs are cache misses, so the release's deploy-purge hook runs and purges.
           # A release made before that hook existed (24 Oct 2026) cannot purge itself: then purge by hand.
           target="${{ steps.move.outputs.target }}"
-          if ! git cat-file -e "$target:plugins/animal-writes-core/includes/deploy-purge.php" 2>/dev/null; then
+          if ! git cat-file -e "$target:plugins/kits-core/includes/ops/deploy-purge.php" 2>/dev/null && ! git cat-file -e "$target:plugins/animal-writes-core/includes/deploy-purge.php" 2>/dev/null; then
             echo "::warning::$target has no deploy-purge hook: run 'wp litespeed-purge all' on the server after Hostinger pulls it"
             exit 0
           fi

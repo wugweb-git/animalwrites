@@ -4,13 +4,13 @@
  * the schema, the sitemaps and the "Updated" line, so it moves only when a reader would see a change. A save that only
  * changes letter case, moves data between fields or repairs a value keeps the date the page had:
  *
- * - in PHP: aw_keep_modified( fn() => wp_update_post( … ) ) (or set $GLOBALS['aw_keep_modified'] around the save);
+ * - in PHP: kits_keep_modified( fn() => wp_update_post( … ) ) (or set $GLOBALS['aw_keep_modified'] around the save);
  * - over the REST API (a script in the logged-in browser, WP-CLI's REST calls): add ?aw_keep_modified=1 to the request, or
  *   the header X-AW-Keep-Modified: 1. The user still needs the right to edit the item; only the date stays.
  *
  * Only updates of an existing item are affected; a new item gets its date as usual. Revisions are still saved.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param callable $save The save (wp_update_post, wp_insert_post with an ID, …).
  * @return mixed
  */
-function aw_keep_modified( callable $save ) {
+function kits_keep_modified( callable $save ) {
 	$was                         = ! empty( $GLOBALS['aw_keep_modified'] );
 	$GLOBALS['aw_keep_modified'] = true;
 	try {
@@ -34,7 +34,7 @@ function aw_keep_modified( callable $save ) {
 }
 
 /** Whether the save in progress asked to keep the modified date. */
-function aw_keep_modified_requested() {
+function kits_keep_modified_requested() {
 	if ( ! empty( $GLOBALS['aw_keep_modified'] ) ) {
 		return true;
 	}
@@ -50,7 +50,7 @@ add_filter(
 	'wp_insert_post_data',
 	function ( $data, $postarr ) {
 		$id = (int) ( $postarr['ID'] ?? 0 );
-		if ( ! $id || 'revision' === ( $data['post_type'] ?? '' ) || ! aw_keep_modified_requested() ) {
+		if ( ! $id || 'revision' === ( $data['post_type'] ?? '' ) || ! kits_keep_modified_requested() ) {
 			return $data;
 		}
 		$old = get_post( $id );
