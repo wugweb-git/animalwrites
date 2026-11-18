@@ -14,6 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// This site's campaign pages, Home sections and item heads (moved from Animal Writes Core, 19 Nov 2026; function, block,
+// shortcode, post-type and option names unchanged). The campaign engines (links, short links, letters, press, social
+// posts) are Kits Core's; the campaign stylesheets and scripts are in campaign/.
+foreach ( array( 'campaigns', 'campaign-tools', 'campaign-record', 'item-head', 'home' ) as $kits_site_file ) {
+	require_once __DIR__ . '/includes/' . $kits_site_file . '.php';
+}
+unset( $kits_site_file );
+
+/**
+ * The site's content layer (19 Nov 2026; it was Animal Writes Core's includes/ until then): the content types and their
+ * meta, tags and relations, the hub pages and the animal-writes/* blocks, the SCF field-group folder, bindings, related
+ * lists, the Acts and Rules links and the rest, in the order Animal Writes Core loaded them. Only this site uses them,
+ * so they live in the site folder, which the distributed theme leaves out (docs/awcore-retirement.md, section 5).
+ */
+foreach ( array( 'content-types', 'category-moves', 'tags', 'meta', 'scf', 'summary-display', 'news-article', 'bindings', 'also-reported', 'display', 'sections', 'hubs', 'hub-blocks', 'term-page', 'faq-data', 'model', 'helpers-public', 'pages', 'block-states', 'related', 'law-links', 'near-opps', 'entity-links' ) as $kits_site_content_file ) {
+	require_once __DIR__ . '/content/' . $kits_site_content_file . '.php';
+}
+unset( $kits_site_content_file );
+
 /**
  * Component stylesheets (css/aw-*.css in this folder): each loads only on the pages that print its component, joined
  * into one file per page by Kits (kits_component_styles, Kits functions.php). handle => [

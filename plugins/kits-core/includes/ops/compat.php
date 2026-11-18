@@ -4,7 +4,7 @@
  * for callers that still use them: the rest of Animal Writes Core until its files move (content types, hubs,
  * campaigns), the server's cron line (`wp eval 'aw_dispatch_workflow(...)'`) and code on open branches. Every caller
  * in the plugins SourceWeb, RankWeb, InsightWeb and DirectoryWeb uses the new names. Each wrapper goes once nothing
- * calls it (docs/awcore-retirement.md, section 5).
+ * calls it (docs/awcore-retirement.md, section 6).
  *
  * @package kits-core
  */

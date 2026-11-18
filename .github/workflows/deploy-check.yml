@@ -99,12 +99,12 @@ jobs:
         run: php plugins/directoryweb/tests/listing-meta-tests.php
       - name: Daily PHP error count by kind (plugins/kits-core/tests/error-count-tests.php)
         run: php plugins/kits-core/tests/error-count-tests.php
-      - name: Taxonomy rename to kits_ names, backup and undo (plugins/animal-writes-core/tests/taxonomy-rename-tests.php)
-        run: php plugins/animal-writes-core/tests/taxonomy-rename-tests.php
+      - name: Taxonomy rename to kits_ names, backup and undo (plugins/kits-core/tests/taxonomy-rename-tests.php)
+        run: php plugins/kits-core/tests/taxonomy-rename-tests.php
       - name: PlanWeb tests without WordPress (field checks, Dates import mapping; plugins/planweb/tests)
         run: php plugins/planweb/tests/run.php
-      - name: Content bindings, icon and date in Kits Core print what the site printed (plugins/animal-writes-core/tests/content-bindings-tests.php)
-        run: php plugins/animal-writes-core/tests/content-bindings-tests.php
+      - name: Content bindings, icon and date in Kits Core print what the site printed (plugins/kits-core/tests/content-bindings-tests.php)
+        run: php plugins/kits-core/tests/content-bindings-tests.php
       - name: Kits menu, six items and old addresses (plugins/kits-core/tests/admin-menu-tests.php)
         run: php plugins/kits-core/tests/admin-menu-tests.php
       - name: Kits admin layer, what Animal Writes Core gave (menu order, site screens, value parsers; plugins/kits-core/tests/admin-layer-tests.php)

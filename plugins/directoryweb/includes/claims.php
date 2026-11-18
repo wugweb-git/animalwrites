@@ -98,12 +98,12 @@ function aw_claim_logo_ok( $logo ) {
 /** A logo as a PNG of at most 800 px in the private folder: its file name, or ''. */
 function aw_claim_logo_store( $tmp, $name = '' ) {
 	$editor = wp_get_image_editor( $tmp );
-	if ( is_wp_error( $editor ) || ! function_exists( 'aw_private_dir' ) ) { // never saved outside the private folder (Animal Writes Core's)
+	if ( is_wp_error( $editor ) || ! function_exists( 'kits_private_dir' ) ) { // never saved outside the private folder (Kits Core's)
 		return '';
 	}
 	$editor->resize( 800, 800, false );
 	$name  = $name ? $name : wp_generate_password( 20, false ) . '.png';
-	$saved = $editor->save( aw_private_dir() . '/' . $name, 'image/png' );
+	$saved = $editor->save( kits_private_dir() . '/' . $name, 'image/png' );
 	return is_wp_error( $saved ) ? '' : $name;
 }
 
@@ -184,7 +184,7 @@ add_action(
 		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'aw_claim_logo' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
-		$path = function_exists( 'aw_private_dir' ) ? aw_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) ) : '';
+		$path = function_exists( 'kits_private_dir' ) ? kits_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) ) : '';
 		if ( ! is_file( $path ) ) {
 			wp_die( 'Not found.', 404 );
 		}
@@ -223,7 +223,7 @@ add_action(
 				}
 			}
 			$logo = (string) get_post_meta( $id, 'aw_c_logo', true );
-			$path = $logo && function_exists( 'aw_private_dir' ) ? aw_private_dir() . '/' . basename( $logo ) : ''; // without the private folder the logo is not brought in
+			$path = $logo && function_exists( 'kits_private_dir' ) ? kits_private_dir() . '/' . basename( $logo ) : ''; // without the private folder the logo is not brought in
 			if ( $path && is_file( $path ) ) {
 				require_once ABSPATH . 'wp-admin/includes/media.php';
 				require_once ABSPATH . 'wp-admin/includes/file.php';

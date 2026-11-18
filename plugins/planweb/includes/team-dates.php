@@ -9,7 +9,7 @@
  * file then adds no menu, form or Dashboard box and writes nothing; aw_team_dates() still reads the option, which is
  * kept unchanged as the backup of what was imported. Switched off again, Dates works as before.
  *
- * @package animal-writes-core
+ * @package planweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

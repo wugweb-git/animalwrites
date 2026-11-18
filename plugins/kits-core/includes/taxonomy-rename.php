@@ -21,7 +21,7 @@
  *
  * WP-CLI (local and staging): `wp kits taxonomy-rename status|run|undo`.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

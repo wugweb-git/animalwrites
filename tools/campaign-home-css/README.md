@@ -8,6 +8,6 @@ cd tools/campaign-home-css && npm i puppeteer-core@23.5.0 && node extract.mjs ht
 
 `campaign-home.css` is gone (10 Nov 2026): the Home campaign hero now uses `aw-camp-tokens.css` and `aw-camp-band.css`, which are kept by hand.
 
-The script makes `campaign-record-home.css` (the community-dogs story, pattern `animal-writes/aw1-story`): `node extract.mjs https://animalwrites.in/ /campaign-record.css record-used`, then copy `record-used.css` under that file's header. While the pattern is missing from Home, the full campaign-record.css loads.
+The script makes `campaign-record-home.css` (now `themes/kits-by-wugweb/assets/site/campaign/css/`) (the community-dogs story, pattern `animal-writes/aw1-story`): `node extract.mjs https://animalwrites.in/ /campaign-record.css record-used`, then copy `record-used.css` under that file's header. While the pattern is missing from Home, the full campaign-record.css loads.
 
 Core block stylesheets (home): the extract also works on core's block CSS (`STATE` is a regex for state variants to keep, default the campaign band's), for example `STATE=zzzz node extract.mjs https://animalwrites.in/ /cover/style.min.css cover-used`. The Home core-block copies printed by the retired child theme on WordPress 7.1.3 were removed on 14 Nov 2026.

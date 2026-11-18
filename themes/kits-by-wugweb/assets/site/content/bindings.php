@@ -155,7 +155,7 @@ function aw_binding_value( $key, $post_id ) {
 				// Past its deadline: a visible "Closed" tag and the date it closed (owner, 18 Oct 2026).
 				return '<span class="kit-tag kit-tag--closed">' . esc_html__( 'Closed', 'animal-writes-core' ) . '</span> ' . __( 'Applications closed on', 'animal-writes-core' ) . ' ' . aw_date( $d . ' 12:00:00' );
 			}
-			return $d && function_exists( 'aw_date' ) ? __( 'Apply by', 'animal-writes-core' ) . ' ' . aw_date( $d . ' 12:00:00' ) : '';
+			return $d ? __( 'Apply by', 'animal-writes-core' ) . ' ' . kits_date( $d . ' 12:00:00', AW_DATE_FORMAT, 'aw-date' ) : '';
 		case 'file_url':
 			return $m( 'aw_file_url' );
 	}

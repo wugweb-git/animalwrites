@@ -43,7 +43,7 @@ add_action(
 	'deactivate_plugin',
 	function ( $plugin ) {
 		static $core_off = false;
-		if ( plugin_basename( AW_CORE_DIR . 'animal-writes-core.php' ) === $plugin ) {
+		if ( 'animal-writes-core/animal-writes-core.php' === $plugin ) {
 			$core_off = true;
 			return;
 		}
@@ -64,7 +64,7 @@ add_action(
 const AW_SCF_GROUPS = array( 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource', 'group_aw_social', 'group_aw_campaign_social' );
 
 // Our acf-json/ folder, through Kits Core's bridge (kits-core/includes/scf.php): read, and our groups saved back to it.
-kits_scf_json_folder( AW_CORE_DIR . 'acf-json', AW_SCF_GROUPS );
+kits_scf_json_folder( kits_site_path( 'acf-json' ), AW_SCF_GROUPS );
 
 // Our groups first, then what plugins add through the older aw_scf_groups filter (DirectoryWeb), then kits_scf_groups.
 add_filter( 'kits_scf_groups', fn( $groups ) => array_merge( AW_SCF_GROUPS, (array) apply_filters( 'aw_scf_groups', array() ), (array) $groups ), 5 );

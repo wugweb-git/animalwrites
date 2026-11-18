@@ -6,11 +6,14 @@
  * backup of its links is in uploads/aw-private/issuers-backup-2026-10-08.json. Old /source/{slug}/ URLs 301 to the
  * Library (places.php).
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+if ( function_exists( 'aw_issuers' ) ) { // loaded before the dependency check, so aw-sourcing.php may reach this twice (from Core, and as an active plugin, by another path)
+	return;
 }
 
 /** Issuer names: slug => name (the former list's values). An editor can add one from the item's Issuer box. */

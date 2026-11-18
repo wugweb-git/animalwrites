@@ -515,10 +515,10 @@ function aw_claim_clean( $meta_key, $v ) {
 
 /** A private upload (claim logo or photo) into the media library for the listing; attachment ID or 0. */
 function aw_claim_sideload( $file, $lid, $title ) {
-	if ( ! function_exists( 'aw_private_dir' ) ) {
+	if ( ! function_exists( 'kits_private_dir' ) ) {
 		return 0; // the private folder is Animal Writes Core's: no file to bring in
 	}
-	$path = aw_private_dir() . '/' . $file;
+	$path = kits_private_dir() . '/' . $file;
 	if ( ! preg_match( '/^[A-Za-z0-9]{20}\.png$/', (string) $file ) || ! is_file( $path ) ) {
 		return 0;
 	}

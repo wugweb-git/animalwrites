@@ -26,7 +26,7 @@
  *                      one is hidden as a whole
  *   aw-unused-review   blocks kept for the owner's review after a page was restructured
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -296,7 +296,7 @@ add_action(
 		if ( 'aw_campaign' !== get_post_type() ) {
 			return;
 		}
-		wp_register_style( 'aw-campaign-record-editor', false, array(), AW_CORE_VERSION );
+		wp_register_style( 'aw-campaign-record-editor', false, array(), (string) wp_get_theme( get_template() )->get( 'Version' ) );
 		wp_enqueue_style( 'aw-campaign-record-editor' );
 		wp_add_inline_style(
 			'aw-campaign-record-editor',
@@ -316,18 +316,18 @@ add_action(
 			return;
 		}
 		$deps = wp_style_is( 'aw-campaign', 'registered' ) ? array( 'aw-campaign' ) : ( wp_style_is( 'aw-camp-band', 'registered' ) ? array( 'aw-camp-band' ) : array() ); // after campaign.css (Home: the band's file), so a campaign's colours win
-		$home = 'assets/css/campaign-record-home.css';
-		if ( is_front_page() && is_readable( AW_CORE_DIR . $home ) ) {
+		$home = 'campaign/css/campaign-record-home.css';
+		if ( is_front_page() && is_readable( kits_site_path( $home ) ) ) {
 			// Home: only the story's rules, inline in campaign-record.css's place, so nothing blocks the first paint (owner,
 			// 22 Oct 2026; tools/campaign-home-css). The story (pattern aw1-story) is part of the home template.
-			wp_register_style( 'aw-campaign-record', false, $deps, (string) filemtime( AW_CORE_DIR . $home ) );
+			wp_register_style( 'aw-campaign-record', false, $deps, (string) filemtime( kits_site_path( $home ) ) );
 			wp_enqueue_style( 'aw-campaign-record' );
-			wp_add_inline_style( 'aw-campaign-record', (string) file_get_contents( AW_CORE_DIR . $home ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			wp_add_inline_style( 'aw-campaign-record', (string) file_get_contents( kits_site_path( $home ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 			return;
 		}
-		wp_enqueue_style( 'aw-campaign-record', plugins_url( 'assets/css/campaign-record.css', AW_CORE_DIR . 'animal-writes-core.php' ), $deps, (string) filemtime( AW_CORE_DIR . 'assets/css/campaign-record.css' ) );
+		wp_enqueue_style( 'aw-campaign-record', kits_site_uri( 'campaign/css/campaign-record.css' ), $deps, (string) filemtime( kits_site_path( 'campaign/css/campaign-record.css' ) ) );
 		if ( is_singular( 'aw_campaign' ) ) { // the campaign marks: motif icons and the timeline's nodes, after every campaign stylesheet (aw-camp-marks.css)
-			wp_enqueue_style( 'aw-camp-marks', plugins_url( 'assets/css/aw-camp-marks.css', AW_CORE_DIR . 'animal-writes-core.php' ), array( 'aw-campaign-record' ), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-marks.css' ) );
+			wp_enqueue_style( 'aw-camp-marks', kits_site_uri( 'campaign/css/aw-camp-marks.css' ), array( 'aw-campaign-record' ), (string) filemtime( kits_site_path( 'campaign/css/aw-camp-marks.css' ) ) );
 		}
 	},
 	30

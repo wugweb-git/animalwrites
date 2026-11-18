@@ -106,7 +106,7 @@ Update 19 Nov 2026: the copy is built as `insightweb_keys_copy()`, which runs on
 after deploy and as `wp insightweb keys copy [--dry-run]` / `wp insightweb keys status`. The vault code (`keys.php`, the
 screen, `admin_post_aw_keys`, the `aw_keys` and `kits_service_key` filters) is already deleted; `admin.php?page=aw-keys`
 redirects to InsightWeb. Only the option `aw_keys` and InsightWeb's read fallback stay, until the owner's word (step 2,
-point 3 below). See `docs/awcore-retirement.md` section 5.
+point 3 below). See `docs/awcore-retirement.md` section 6.
 
 
 ### Step 1: copy InsightWeb's keys (one WP-CLI command, read-only check before and after)
