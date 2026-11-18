@@ -175,7 +175,7 @@ function planweb_settings_reset(): bool {
 	return planweb_delete_data_save( $default );
 }
 
-// Kits → Modules → PlanWeb gets "Reset this section" (Animal Writes Core's aw_core_reset_sections()).
+// Kits → Modules → PlanWeb gets "Reset this section" (Kits Core's aw_core_reset_sections() filter).
 add_filter(
 	'aw_core_reset_sections',
 	function ( $sections ) {

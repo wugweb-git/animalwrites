@@ -81,7 +81,7 @@ All are dynamic (a PHP render callback), except `kits/hero`, which saves its mar
 | Block | Defined at | Attributes | Live use | Row that covers it |
 |---|---|---|---|---|
 | `kits/hero` | `kits-core/blocks/hero/block.json` (editor script `src/hero/` → `build/hero/`), `kits-core/includes/blocks.php:32` | `align` (`full`) + block supports | Kits theme pattern `hero.php` | `kits/hero`: no change |
-| `animal-writes/sponsored-item` | `kits-core/includes/sponsored-blocks.php:73` | `postId` | None | `kits/sponsored` |
+| `animal-writes/sponsored-item` | `themes/kits-by-wugweb/assets/site/includes/sponsored-blocks.php` | `postId` | None | `kits/sponsored` |
 | `animal-writes/sponsored-banner` | `sponsored-blocks.php:82` | `mediaId`, `mediaAlt`, `heading`, `text`, `url`, `linkText`, `sponsor` | None | `kits/sponsored` |
 | `rankweb/breadcrumbs` | `aw-seo-extras/blocks/breadcrumbs/block.json`, registered in `aw-seo-extras/includes/breadcrumbs-render.php` (18 Nov 2026); editor script `src/blocks/breadcrumbs.js`, built by wp-scripts to `build/blocks/breadcrumbs.js` | none | Theme files `single.html`, `single-aw_listing.html` | The trail, once per page (`rankweb_breadcrumbs_block()`); `animal-writes/breadcrumb` below renders the same, for saved pages (RankWeb's alias) |
 | `animal-writes/breadcrumb` | `aw-seo-extras/includes/breadcrumbs-render.php` (alias, since 18 Nov 2026; Animal Writes Core registered it before) | none | Hub pages 8811, 8935, 8937, 8939, 8941, 8943, 8945 (post content) | Same output as `rankweb/breadcrumbs`; hidden from the inserter. Registered by RankWeb only when no other plugin registered the name. Swapping the 7 pages to `rankweb/breadcrumbs` is optional (content edit, owner's yes) |
@@ -130,7 +130,7 @@ All are dynamic (a PHP render callback), except `kits/hero`, which saves its mar
 | `animal-writes/term-faq` | `animal-writes-core/includes/term-page.php:29` (filter) | none | Theme files `category.html`, `tag.html` | FAQ → core Details blocks; RankWeb adds the schema |
 | `animal-writes/term-share` | `term-page.php:30` (filter) | none | Theme files `category.html`, `tag.html` | `kits/share` |
 | `animal-writes/term-related` | `term-page.php:31` (filter) | none | Theme files `category.html`, `tag.html` | Query Loop variation (3.18) |
-| `animal-writes/social-posts` | `kits-core/includes/social-posts.php:926` (filter) | none | Campaign 13848 | Query Loop variation, SourceWeb (3.18) |
+| `animal-writes/social-posts` | `themes/kits-by-wugweb/assets/site/includes/social-posts.php` (filter) | none | Campaign 13848 | Query Loop variation, SourceWeb (3.18) |
 
 Notes on the rows (facts only; the decision stays with the owner):
 1. `animal-writes/section-head` is the whole head band: breadcrumb, H1, intro, count and filters. The section-head pattern covers the heading part; the filters go to `kits/collection-filter`; the breadcrumb goes to Rank Math's Breadcrumbs block (3.18).

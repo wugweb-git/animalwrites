@@ -26,7 +26,7 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) {
 // below: SourceWeb uses them even when Search Insights is off.
 require_once INSIGHTWEB_DIR . 'includes/keywords.php';
 
-// Kits Core (loaded by Animal Writes Core on live) and Rank Math are needed, as for RankWeb's Search Insights module
+// Kits Core and Rank Math are needed, as for RankWeb's Search Insights module
 // (owner, 11 Nov 2026: checked here, not with a Requires Plugins header).
 $aw_si_missing = array_keys(
 	array_filter(

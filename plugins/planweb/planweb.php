@@ -53,7 +53,7 @@ add_action( 'activate_planweb/planweb.php', 'planweb_activate' );
 add_action( 'deactivate_planweb/planweb.php', 'planweb_deactivate' );
 
 if ( defined( 'PLANWEB_VERSION' ) ) {
-	return; // Loaded already (active on its own and also loaded by Animal Writes Core).
+	return; // Loaded already.
 }
 
 define( 'PLANWEB_VERSION', '0.2.0' );
