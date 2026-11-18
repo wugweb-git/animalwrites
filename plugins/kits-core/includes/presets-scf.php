@@ -7,7 +7,8 @@
  *
  * A preset's folder is given to SCF only while that preset is switched on (Kits → Settings → Content types), so a site
  * with every preset off sees no Kits groups on SCF's screen. Edits made in SCF's own field-group screen are saved back
- * to the same file. tests/presets-scf-tests.php checks that each group matches its preset.
+ * to the same file, to be committed (kits_scf_json_folder()); on a live site a deploy replaces the file, so change a
+ * group in development and commit it. tests/presets-scf-tests.php checks that each group matches its preset.
  *
  * @package kits-core
  */
