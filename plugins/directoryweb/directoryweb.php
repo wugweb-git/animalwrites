@@ -55,6 +55,8 @@ define( 'DIRECTORYWEB_URL', plugin_dir_url( __FILE__ ) );
 
 // Kept in the order Animal Writes Core loaded these files in, so hooks added at the same priority keep their order.
 $directoryweb_includes = array(
+	'listing-meta', // the listing's meta, phones, hours and never-publish list (from Core's meta.php, 18 Nov 2026)
+	'data-sources', // where a listing's details come from (from Core, 18 Nov 2026)
 	'directoryweb-help-tab',
 	'places',
 	'places-admin',

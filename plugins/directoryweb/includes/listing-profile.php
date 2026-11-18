@@ -175,8 +175,8 @@ function aw_listing_details_box( $post ) {
 			echo '<div class="directoryweb-field directoryweb-field--' . esc_attr( $f[1] ) . '">' . directoryweb_listing_control( $key, $f, (string) get_post_meta( $post->ID, $key, true ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- control built with escaping above.
 		}
 		if ( 'Contact' === $group ) {
-			$ph = implode( "\n", array_map( fn( $r ) => $r['number'] . ' | ' . $r['label'] . ' | ' . ( $r['whatsapp'] ? 'whatsapp' : '' ), aw_listing_phones( $post->ID ) ) );
-			$hr = implode( "\n", array_map( fn( $r ) => $r['day'] . ' ' . ( $r['closed'] ? 'closed' : $r['open'] . '-' . $r['close'] ), aw_listing_hours( $post->ID ) ) );
+			$ph = implode( "\n", array_map( fn( $r ) => $r['number'] . ' | ' . $r['label'] . ' | ' . ( $r['whatsapp'] ? 'whatsapp' : '' ), directoryweb_listing_phones( $post->ID ) ) );
+			$hr = implode( "\n", array_map( fn( $r ) => $r['day'] . ' ' . ( $r['closed'] ? 'closed' : $r['open'] . '-' . $r['close'] ), directoryweb_listing_hours( $post->ID ) ) );
 			echo '<div class="directoryweb-field"><label class="directoryweb-profile__label" for="aw_phones_lines">' . esc_html__( 'Phone numbers', 'directoryweb' ) . '</label>'
 				. '<textarea class="widefat" rows="3" autocomplete="off" id="aw_phones_lines" name="aw_phones_lines">' . esc_textarea( $ph ) . '</textarea>'
 				. '<p class="description">' . esc_html__( 'One per line: number | label | whatsapp (the last two optional), e.g. 98765 43210 | Helpline | whatsapp', 'directoryweb' ) . '</p></div>';
@@ -226,14 +226,14 @@ add_action(
 				$rows[] = array( 'number' => $p[0], 'label' => $p[1] ?? '', 'whatsapp' => 'whatsapp' === strtolower( $p[2] ?? '' ) );
 			}
 		}
-		aw_set_listing_list( $id, 'aw_phones', $rows );
+		directoryweb_set_listing_list( $id, 'aw_phones', $rows );
 		$rows = array();
 		foreach ( preg_split( '/\R/', (string) wp_unslash( $_POST['aw_hours_lines'] ?? '' ) ) as $line ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			if ( preg_match( '/^\s*(' . implode( '|', AW_WEEKDAYS ) . ')\s+(?:(closed)|(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2}))\s*$/i', sanitize_text_field( $line ), $x ) ) {
+			if ( preg_match( '/^\s*(' . implode( '|', DIRECTORYWEB_WEEKDAYS ) . ')\s+(?:(closed)|(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2}))\s*$/i', sanitize_text_field( $line ), $x ) ) {
 				$rows[] = array( 'day' => ucfirst( strtolower( $x[1] ) ), 'open' => $x[3] ?? '', 'close' => $x[4] ?? '', 'closed' => ! empty( $x[2] ) );
 			}
 		}
-		aw_set_listing_list( $id, 'aw_opening_hours', $rows );
+		directoryweb_set_listing_list( $id, 'aw_opening_hours', $rows );
 	}
 );
 
@@ -262,8 +262,8 @@ function aw_block_org_details( $a, $id ) {
 	// Contact details as rows (the number, address or link), and the details most people look for say when they are missing
 	// (owner, 15 Oct 2026): "… not available yet", with a link to suggest an update (the Report form).
 	$rel     = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
-	$phones  = aw_listing_phones( $id ); // the Phone numbers list
-	$hours   = aw_org_hours_html( aw_listing_hours( $id ) ); // the Opening hours by day list
+	$phones  = directoryweb_listing_phones( $id ); // the Phone numbers list
+	$hours   = aw_org_hours_html( directoryweb_listing_hours( $id ) ); // the Opening hours by day list
 	$contact = array(
 		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', aw_org_phones_html( $phones, $id ) ),
 		'aw_email'   => array( 'mail', 'Email', aw_org_two_values( $id, 'aw_email', 'email', $rel ) ),
@@ -338,7 +338,7 @@ function aw_org_two_values( $id, $key, $kind, $rel ) {
  * The phone numbers: each a Call link (tel:), with its label, and a WhatsApp link when the row is flagged. The links are
  * what the site's analytics count (call_click on tel:, whatsapp_click on wa.me; kit.js).
  *
- * @param array $phones aw_listing_phones().
+ * @param array $phones directoryweb_listing_phones().
  * @return string HTML, or '' when there is no number that can be dialled.
  */
 function aw_org_phones_html( $phones, $lid = 0 ) {
@@ -361,7 +361,7 @@ function aw_org_phones_html( $phones, $lid = 0 ) {
  * Opening hours by day as a small table: one row per day (Monday first), split days as two times, "Closed", or "Open 24
  * hours" for 00:00 to 23:59. Days with no row are not stated, so they are not listed.
  *
- * @param array $rows aw_listing_hours().
+ * @param array $rows directoryweb_listing_hours().
  * @return string
  */
 function aw_org_hours_html( $rows ) {
@@ -374,7 +374,7 @@ function aw_org_hours_html( $rows ) {
 		$days[ $r['day'] ][] = $r['closed'] ? 'Closed' : ( '00:00' === $r['open'] && '23:59' === $r['close'] ? 'Open 24 hours' : $fmt( $r['open'] ) . ' – ' . $fmt( $r['close'] ) );
 	}
 	$trs = '';
-	foreach ( AW_WEEKDAYS as $d ) {
+	foreach ( DIRECTORYWEB_WEEKDAYS as $d ) {
 		if ( isset( $days[ $d ] ) ) {
 			$closed = array( 'Closed' ) === array_unique( $days[ $d ] );
 			$trs   .= '<tr' . ( $closed ? ' class="aw-org-hours-closed"' : '' ) . '><th scope="row">' . esc_html( $d ) . '</th><td>' . esc_html( implode( ', ', array_unique( $days[ $d ] ) ) ) . '</td></tr>';

@@ -67,9 +67,9 @@ function aw_district_helpline_listings( $code, $max = 6 ) {
 		if ( get_post_meta( $id, 'aw_reported_closed', true ) ) {
 			continue;
 		}
-		$num = function_exists( 'aw_listing_first_phone' ) ? aw_listing_first_phone( $id ) : '';
+		$num = function_exists( 'directoryweb_listing_first_phone' ) ? directoryweb_listing_first_phone( $id ) : '';
 		if ( ! $num ) {
-			$p   = aw_listing_phones( $id );
+			$p   = directoryweb_listing_phones( $id );
 			$num = $p ? $p[0]['number'] : '';
 		}
 		if ( ! $num ) {

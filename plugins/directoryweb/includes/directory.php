@@ -660,7 +660,7 @@ add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );
 /** How many ways to reach a listing: phone, WhatsApp, email, website. */
 function aw_contact_score( $id ) {
 	$n      = 0;
-	$phones = function_exists( 'aw_listing_phones' ) ? aw_listing_phones( $id ) : array(); // the Phone numbers list
+	$phones = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $id ) : array(); // the Phone numbers list
 	$n     += $phones ? 1 : 0;
 	$n     += in_array( true, wp_list_pluck( $phones, 'whatsapp' ), true ) ? 1 : 0;
 	foreach ( array( 'aw_email', 'aw_website' ) as $k ) {

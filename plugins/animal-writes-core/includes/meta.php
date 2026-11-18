@@ -18,7 +18,7 @@ function aw_meta_schema() {
 	$cards = array( 'aw_news', 'aw_legal', 'aw_listing', 'aw_opportunity' ); // listings and opportunities: where a record came from
 	$all   = array_keys( aw_post_types() );
 
-	return array(
+	$schema = array(
 		// Thin cards: summary lives in the excerpt; this is the attribution.
 		'aw_source_url'      => array( 'string', $cards, 'Original source URL' ),
 		'aw_source_name'     => array( 'string', $cards, 'Original source name' ),
@@ -33,55 +33,8 @@ function aw_meta_schema() {
 		'aw_sponsored'       => array( 'boolean', $all, 'Sponsored content' ),
 		'aw_sponsor_name'    => array( 'string', $all, 'Sponsor name' ),
 
-		// Directory.
-		'aw_verified'        => array( 'boolean', array( 'aw_listing' ), 'Verified by Animal Writes' ),
-		'aw_verified_on'     => array( 'string', array( 'aw_listing' ), 'Last verified date (Y-m-d)' ),
-		'aw_awbi_recognised' => array( 'string', array( 'aw_listing' ), 'AWBI recognised on (Y-m-d)' ),
-		'aw_awbi_renewed'    => array( 'string', array( 'aw_listing' ), 'AWBI renewed on (Y-m-d)' ),
-		'aw_awbi_valid'      => array( 'string', array( 'aw_listing' ), 'AWBI recognition valid until (Y-m-d)' ),
-		'aw_awbi_code'       => array( 'string', array( 'aw_listing' ), 'AWBI recognition code (from the AWBI list; read only)' ),
-		'aw_awbi_dropped'    => array( 'string', array( 'aw_listing' ), 'Date of the current AWBI list the code is missing from (Y-m-d): recognition may have lapsed' ),
-		'aw_awbi_list_on'    => array( 'string', array( 'aw_listing' ), 'Date of the AWBI list the code comes from (Y-m-d; empty = 31 May 2026 list)' ),
-		'aw_needs_reverify'  => array( 'boolean', array( 'aw_listing' ), 'Flagged for re-verification' ),
-		'aw_gov_verified_on' => array( 'string', array( 'aw_listing' ), 'Verified: date of the government document (Y-m-d; set by code, gov-verified.php)' ),
-		'aw_gov_verified_by' => array( 'string', array( 'aw_listing' ), 'Verified: the government sources (set by code)' ),
-		'aw_email'           => array( 'string', array( 'aw_listing' ), 'Email' ),
-		'aw_website'         => array( 'string', array( 'aw_listing', 'aw_opportunity' ), 'Website' ),
-		'aw_area'            => array( 'string', array( 'aw_listing' ), 'Area / locality (no full address)' ),
-		'aw_services'        => array( 'string', array( 'aw_listing' ), 'Services offered, as stated by the organisation or a named list (comma separated)' ),
-		'aw_services_source' => array( 'string', array( 'aw_listing' ), 'Who stated the services (e.g. "the organisation", or the list name)' ),
-		'aw_services_on'     => array( 'string', array( 'aw_listing' ), 'Date the services were stated (YYYY-MM-DD)' ),
-		'aw_maps_url'        => array( 'string', array( 'aw_listing' ), 'Google Maps link' ),
-		'aw_lat'             => array( 'string', array( 'aw_listing' ), 'Latitude (from Google Maps)' ),
-		'aw_lng'             => array( 'string', array( 'aw_listing' ), 'Longitude (from Google Maps)' ),
-		'aw_place_id'        => array( 'string', array( 'aw_listing' ), 'Google place ID' ),
-		'aw_g_rating'        => array( 'string', array( 'aw_listing' ), 'Google rating (out of 5)' ),
-		'aw_g_reviews'       => array( 'string', array( 'aw_listing' ), 'Number of Google reviews' ),
-		'aw_g_category'      => array( 'string', array( 'aw_listing' ), 'Google category (e.g. Animal shelter)' ),
-		'aw_g_profile'       => array( 'string', array( 'aw_listing' ), 'Google Business Profile link' ),
-		'aw_instagram'       => array( 'string', array( 'aw_listing' ), 'Instagram' ),
-		'aw_facebook'        => array( 'string', array( 'aw_listing' ), 'Facebook' ),
-		'aw_ngobase_url'     => array( 'string', array( 'aw_listing' ), 'ngobase.org profile' ),
-		'aw_x'               => array( 'string', array( 'aw_listing' ), 'X (Twitter)' ),
-		'aw_youtube'         => array( 'string', array( 'aw_listing' ), 'YouTube' ),
-		'aw_gallery'         => array( 'string', array( 'aw_listing' ), 'Photos: up to 6 media IDs, comma separated' ),
-		'aw_founded'         => array( 'string', array( 'aw_listing' ), 'Year established' ),
-		'aw_head'            => array( 'string', array( 'aw_listing' ), 'Head of the organisation (name and role, as the organisation publishes it)' ),
-		'aw_registration'    => array( 'string', array( 'aw_listing' ), 'Registration (Trust/Society number)' ),
-		'aw_reg_12a'         => array( 'string', array( 'aw_listing' ), '12A registration number' ),
-		'aw_reg_80g'         => array( 'string', array( 'aw_listing' ), '80G registration number' ),
-		'aw_darpan_id'       => array( 'string', array( 'aw_listing' ), 'NGO Darpan ID' ),
-		'aw_darpan_blacklisted_by' => array( 'string', array( 'aw_listing' ), 'Blacklisted on NGO Darpan by (as Darpan lists it)' ),
-		'aw_darpan_blacklisted_on' => array( 'string', array( 'aw_listing' ), 'Blacklisted on NGO Darpan from (Y-m-d)' ),
-		'aw_reg_authority'   => array( 'string', array( 'aw_listing' ), 'Registration authority (from NGO Darpan; admin only)' ),
-		'aw_reg_act'         => array( 'string', array( 'aw_listing' ), 'Registered under (Act; from NGO Darpan; admin only)' ),
-		'aw_reg_date'        => array( 'string', array( 'aw_listing' ), 'Registration date (Y-m-d; from NGO Darpan; admin only)' ),
-		'aw_sectors'         => array( 'string', array( 'aw_listing' ), 'Sectors of work as NGO Darpan lists them (comma separated; admin only)' ),
-		'aw_animals'         => array( 'string', array( 'aw_listing' ), 'Animals helped (comma separated)' ),
-		'aw_languages'       => array( 'string', array( 'aw_listing' ), 'Languages spoken (comma separated)' ),
-		'aw_donate_url'      => array( 'string', array( 'aw_listing' ), 'Donate link' ),
-		'aw_volunteer_url'   => array( 'string', array( 'aw_listing' ), 'Volunteer link' ),
-		'aw_rel_nofollow'    => array( 'string', array( 'aw_listing' ), 'Links marked nofollow (1)' ),
+		// Directory: the listing fields are DirectoryWeb's (directoryweb_meta_schema(), added below). Websites stay here for Opportunities.
+		'aw_website'         => array( 'string', array( 'aw_opportunity' ), 'Website' ),
 
 		// Opportunities.
 		'aw_org_name'        => array( 'string', array( 'aw_opportunity' ), 'Organisation' ),
@@ -128,6 +81,17 @@ function aw_meta_schema() {
 		// An explicit cover the owner chose for an item, used ahead of the document preview, the ingested photo and the category photo (attachment ID).
 		'aw_cover_image_id'  => array( 'string', array( 'aw_news', 'aw_legal', 'post' ), 'Cover picture override (attachment ID): shown ahead of the document preview and category photo' ),
 	);
+
+	// The Directory's fields, registered by DirectoryWeb, listed here too so every reader of the whole schema sees them
+	// (scf.php). A key on both sides (aw_website) gets both sides' post types.
+	foreach ( function_exists( 'directoryweb_meta_schema' ) ? directoryweb_meta_schema() : array() as $key => $def ) {
+		if ( isset( $schema[ $key ] ) ) {
+			$schema[ $key ][1] = array_values( array_unique( array_merge( $schema[ $key ][1], $def[1] ) ) );
+		} else {
+			$schema[ $key ] = $def;
+		}
+	}
+	return $schema;
 }
 
 /**
@@ -138,8 +102,11 @@ function aw_meta_schema() {
  * @return mixed
  */
 function aw_sanitize_meta( $value, $key ) {
-	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url', 'aw_ngobase_url' );
-	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid', 'aw_services_on', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed' );
+	if ( function_exists( 'directoryweb_meta_schema' ) && isset( directoryweb_meta_schema()[ $key ] ) ) {
+		return directoryweb_sanitize_meta( $value, $key ); // the Directory's fields: DirectoryWeb's rules
+	}
+	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url' );
+	$date_keys = array( 'aw_source_date', 'aw_deadline', 'aw_review_until', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );
@@ -151,26 +118,8 @@ function aw_sanitize_meta( $value, $key ) {
 	if ( 'aw_campaign_short' === $key ) { // one path segment (campaign-short.php)
 		return function_exists( 'aw_camp_short_clean' ) ? aw_camp_short_clean( $value ) : sanitize_title( (string) $value );
 	}
-	if ( 'aw_gallery' === $key ) { // up to six media IDs
-		return implode( ',', array_slice( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ), 0, 6 ) );
-	}
-	if ( in_array( $key, array( 'aw_lat', 'aw_lng', 'aw_g_rating' ), true ) ) {
-		return is_numeric( trim( (string) $value ) ) ? trim( (string) $value ) : '';
-	}
-	if ( 'aw_g_reviews' === $key ) {
-		return ctype_digit( trim( (string) $value ) ) ? trim( (string) $value ) : '';
-	}
 	if ( 'aw_cover_image_id' === $key ) { // an attachment ID, or empty to clear
 		return (int) $value ? (string) (int) $value : '';
-	}
-	if ( 'aw_founded' === $key ) {
-		return preg_match( '/^(18|19|20)\d{2}$/', trim( (string) $value ) ) ? trim( (string) $value ) : '';
-	}
-	if ( 'aw_rel_nofollow' === $key ) {
-		return $value ? '1' : '';
-	}
-	if ( 'aw_email' === $key ) {
-		return sanitize_email( (string) $value );
 	}
 	if ( 'aw_employment_type' === $key ) { // Google's JobPosting values only
 		$value = strtoupper( str_replace( array( '-', ' ' ), '_', trim( (string) $value ) ) );
@@ -185,9 +134,13 @@ function aw_sanitize_meta( $value, $key ) {
  * Register meta.
  */
 function aw_register_meta() {
+	$dw = function_exists( 'directoryweb_meta_schema' ) ? directoryweb_meta_schema() : array(); // registered by DirectoryWeb
 	foreach ( aw_meta_schema() as $key => $def ) {
 		list( $type, $post_types, $description ) = $def;
 		foreach ( $post_types as $post_type ) {
+			if ( isset( $dw[ $key ] ) && in_array( $post_type, $dw[ $key ][1], true ) ) {
+				continue;
+			}
 			$args = array(
 				'type'          => $type,
 				'description'   => $description,
@@ -211,201 +164,64 @@ add_action( 'init', 'aw_register_meta' );
 // The featured-flag backfill and the clean-up of its option ran and were removed (audit item 16; the option is gone on live, 25 Oct 2026).
 
 /*
- * Phone numbers and opening hours: the only source is the two lists (SCF repeaters aw_phones and aw_opening_hours),
- * stored the way SCF stores a repeater: the row count under the key, each sub-field under "{key}_{row}_{name}", and the
- * field-key reference rows SCF writes. Read and written here straight from the meta, so the page, the schema, imports
- * and claims work with or without SCF. (The former single fields aw_phone, aw_whatsapp, aw_hours and aw_hours_spec were
- * copied into these lists on 16 Oct 2026; their stored values are left in the database and nothing reads them.)
+ * Phone numbers, opening hours and the never-publish list are DirectoryWeb's (includes/listing-meta.php, moved there
+ * on 18 Nov 2026; privacy takedown hashes are added there, in DIRECTORYWEB_NEVER_PUBLISH_PHONES). The old names stay
+ * as wrappers for SourceWeb, RankWeb, the FAQ feeders, the bindings and the import tools. Without DirectoryWeb they
+ * read as empty and write nothing.
  */
 
 /** The days in order, Monday first. */
 const AW_WEEKDAYS = array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' );
 
-/** Sub-fields of the two lists: name => SCF field key. */
-const AW_LIST_FIELDS = array(
-	'aw_phones'        => array( 'number' => 'field_aw_listing_phones_number', 'label' => 'field_aw_listing_phones_label', 'whatsapp' => 'field_aw_listing_phones_whatsapp' ),
-	'aw_opening_hours' => array( 'day' => 'field_aw_listing_opening_hours_day', 'open' => 'field_aw_listing_opening_hours_open', 'close' => 'field_aw_listing_opening_hours_close', 'closed' => 'field_aw_listing_opening_hours_closed' ),
-);
-
-/**
- * Never-publish list: numbers taken down on privacy grounds, as SHA-256 of the normalised digits (aw_normalise_phone,
- * e.g. 91XXXXXXXXXX) so the code holds no copy of the number. Checked on every phone write (imports, ingest, claims,
- * the listing profile, enrichment) and on display. Add a hash with: php -r 'echo hash("sha256","91XXXXXXXXXX");'
- */
-const AW_NEVER_PUBLISH_PHONES = array(
-	'6eafd3202ed0fb7bd82d280061d154ede4b1c5a97a7b2b76fbf1a46646631289', // Privacy takedown, owner 25 Oct 2026 (contact form entry #4).
-);
-
-/** Whether a phone number is on the never-publish list, in any format (+91, spaces, dashes, leading 0). */
-function aw_phone_never_publish( $raw ) {
-	$n = function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $raw ) : preg_replace( '/\D+/', '', (string) $raw );
-	if ( 10 === strlen( $n ) ) {
-		$n = '91' . $n;
+if ( ! function_exists( 'aw_phone_never_publish' ) ) {
+	/** Whether a phone number is on the never-publish list (DirectoryWeb). */
+	function aw_phone_never_publish( $raw ) {
+		return function_exists( 'directoryweb_phone_never_publish' ) ? directoryweb_phone_never_publish( $raw ) : false;
 	}
-	return '' !== $n && in_array( hash( 'sha256', $n ), (array) apply_filters( 'aw_never_publish_phones', AW_NEVER_PUBLISH_PHONES ), true );
 }
 
-/**
- * A listing's phone numbers: [ [ number, label, whatsapp (bool) ], … ] from aw_phones.
- *
- * @param int $id Listing ID.
- * @return array
- */
-function aw_listing_phones( $id ) {
-	$rows = array();
-	$n    = (int) get_post_meta( $id, 'aw_phones', true );
-	for ( $i = 0; $i < $n; $i++ ) {
-		$num = trim( (string) get_post_meta( $id, "aw_phones_{$i}_number", true ) );
-		if ( '' !== $num && ! aw_phone_never_publish( $num ) ) {
-			$rows[] = array(
-				'number'   => $num,
-				'label'    => trim( (string) get_post_meta( $id, "aw_phones_{$i}_label", true ) ),
-				'whatsapp' => (bool) get_post_meta( $id, "aw_phones_{$i}_whatsapp", true ),
-			);
-		}
+if ( ! function_exists( 'aw_listing_phones' ) ) {
+	/** A listing's phone numbers (DirectoryWeb). */
+	function aw_listing_phones( $id ) {
+		return function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $id ) : array();
 	}
-	return $rows;
 }
 
-/**
- * A listing's opening hours by day: [ [ day, open (H:i), close (H:i), closed (bool) ], … ] from aw_opening_hours, in
- * weekday order.
- *
- * @param int $id Listing ID.
- * @return array
- */
-function aw_listing_hours( $id ) {
-	$rows = array();
-	$n    = (int) get_post_meta( $id, 'aw_opening_hours', true );
-	$hm   = fn( $t ) => preg_match( '/^(\d{1,2}):(\d{2})/', trim( (string) $t ), $x ) ? sprintf( '%02d:%s', $x[1], $x[2] ) : '';
-	for ( $i = 0; $i < $n; $i++ ) {
-		$day = (string) get_post_meta( $id, "aw_opening_hours_{$i}_day", true );
-		if ( ! in_array( $day, AW_WEEKDAYS, true ) ) {
-			continue;
-		}
-		$closed = (bool) get_post_meta( $id, "aw_opening_hours_{$i}_closed", true );
-		$open   = $hm( get_post_meta( $id, "aw_opening_hours_{$i}_open", true ) );
-		$close  = $hm( get_post_meta( $id, "aw_opening_hours_{$i}_close", true ) );
-		if ( $closed || ( $open && $close ) ) {
-			$rows[] = array( 'day' => $day, 'open' => $closed ? '' : $open, 'close' => $closed ? '' : $close, 'closed' => $closed );
-		}
+if ( ! function_exists( 'aw_listing_hours' ) ) {
+	/** A listing's opening hours by day (DirectoryWeb). */
+	function aw_listing_hours( $id ) {
+		return function_exists( 'directoryweb_listing_hours' ) ? directoryweb_listing_hours( $id ) : array();
 	}
-	usort( $rows, fn( $a, $b ) => array( array_search( $a['day'], AW_WEEKDAYS, true ), $a['open'] ) <=> array( array_search( $b['day'], AW_WEEKDAYS, true ), $b['open'] ) );
-	return $rows;
 }
 
-/**
- * Write a whole list in SCF's repeater format (count, rows, reference rows); rows past the new count are removed, as SCF
- * does when rows are taken out.
- *
- * @param int    $id   Listing ID.
- * @param string $key  aw_phones or aw_opening_hours.
- * @param array  $rows Rows keyed by sub-field name (number/label/whatsapp, or day/open/close/closed).
- */
-function aw_set_listing_list( $id, $key, array $rows ) {
-	$subs = AW_LIST_FIELDS[ $key ];
-	$old  = (int) get_post_meta( $id, $key, true );
-	if ( 'aw_phones' === $key ) {
-		$rows = array_filter( $rows, fn( $r ) => ! aw_phone_never_publish( $r['number'] ?? '' ) );
-	}
-	$rows = array_values( $rows );
-	foreach ( $rows as $i => $r ) {
-		foreach ( $subs as $name => $fkey ) {
-			$v = $r[ $name ] ?? '';
-			if ( in_array( $name, array( 'whatsapp', 'closed' ), true ) ) {
-				$v = $v ? 1 : 0;
-			} elseif ( in_array( $name, array( 'open', 'close' ), true ) ) {
-				$v = preg_match( '/^\d{2}:\d{2}$/', (string) $v ) ? $v . ':00' : (string) $v;
-			}
-			update_post_meta( $id, "{$key}_{$i}_{$name}", is_int( $v ) ? $v : sanitize_text_field( (string) $v ) );
-			update_post_meta( $id, "_{$key}_{$i}_{$name}", $fkey );
+if ( ! function_exists( 'aw_set_listing_list' ) ) {
+	/** Write a listing's phone or hours list (DirectoryWeb). */
+	function aw_set_listing_list( $id, $key, array $rows ) {
+		if ( function_exists( 'directoryweb_set_listing_list' ) ) {
+			directoryweb_set_listing_list( $id, $key, $rows );
 		}
 	}
-	for ( $i = count( $rows ); $i < $old; $i++ ) {
-		foreach ( array_keys( $subs ) as $name ) {
-			delete_post_meta( $id, "{$key}_{$i}_{$name}" );
-			delete_post_meta( $id, "_{$key}_{$i}_{$name}" );
-		}
-	}
-	update_post_meta( $id, $key, count( $rows ) );
-	update_post_meta( $id, '_' . $key, 'aw_phones' === $key ? 'field_aw_listing_phones' : 'field_aw_listing_opening_hours' );
 }
 
-/**
- * Put a phone and/or WhatsApp number into a listing's phone list (imports, the ingest endpoint, approved claims): the
- * phone replaces the first number (keeping its label and WhatsApp mark) or is added; the WhatsApp number marks the row
- * with the same number, else replaces the first number marked WhatsApp, else is added as a WhatsApp row. Other rows stay.
- *
- * @param int    $id       Listing ID.
- * @param string $phone    Phone ('' to leave as is).
- * @param string $whatsapp WhatsApp number ('' to leave as is).
- */
-function aw_listing_put_phone( $id, $phone = '', $whatsapp = '' ) {
-	$phone    = trim( sanitize_text_field( (string) $phone ) );
-	$whatsapp = trim( sanitize_text_field( (string) $whatsapp ) );
-	if ( '' === $phone && '' === $whatsapp ) {
-		return;
-	}
-	$rows = aw_listing_phones( $id );
-	$norm = fn( $n ) => function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $n ) : preg_replace( '/\D+/', '', $n );
-	if ( '' !== $phone ) {
-		if ( $rows ) {
-			$rows[0]['number'] = $phone;
-		} else {
-			$rows[] = array( 'number' => $phone, 'label' => '', 'whatsapp' => false );
+if ( ! function_exists( 'aw_listing_put_phone' ) ) {
+	/** Put a phone and/or WhatsApp number into a listing's phone list (DirectoryWeb). */
+	function aw_listing_put_phone( $id, $phone = '', $whatsapp = '' ) {
+		if ( function_exists( 'directoryweb_listing_put_phone' ) ) {
+			directoryweb_listing_put_phone( $id, $phone, $whatsapp );
 		}
 	}
-	if ( '' !== $whatsapp ) {
-		$done = false;
-		foreach ( $rows as $i => $r ) {
-			if ( $norm( $r['number'] ) === $norm( $whatsapp ) ) {
-				$rows[ $i ]['whatsapp'] = $done = true;
-				break;
-			}
-		}
-		if ( ! $done ) {
-			foreach ( $rows as $i => $r ) {
-				if ( $r['whatsapp'] && ( 0 !== $i || '' === $phone ) ) {
-					$rows[ $i ]['number'] = $whatsapp;
-					$done                 = true;
-					break;
-				}
-			}
-		}
-		if ( ! $done ) {
-			$rows[] = array( 'number' => $whatsapp, 'label' => '', 'whatsapp' => true );
-		}
-	}
-	aw_set_listing_list( $id, 'aw_phones', $rows );
 }
 
-/** The first number of a listing (Call), or the first marked WhatsApp. */
-function aw_listing_first_phone( $id, $whatsapp = false ) {
-	foreach ( aw_listing_phones( $id ) as $p ) {
-		if ( ! $whatsapp || $p['whatsapp'] ) {
-			return $p['number'];
-		}
+if ( ! function_exists( 'aw_listing_first_phone' ) ) {
+	/** The first number of a listing, or the first marked WhatsApp (DirectoryWeb). */
+	function aw_listing_first_phone( $id, $whatsapp = false ) {
+		return function_exists( 'directoryweb_listing_first_phone' ) ? directoryweb_listing_first_phone( $id, $whatsapp ) : '';
 	}
-	return '';
 }
 
-/**
- * Opening hours by day as schema.org OpeningHoursSpecification: days with the same hours in one node; a closed day as
- * opens and closes 00:00 (Google's form for "closed all day").
- *
- * @param array $rows aw_listing_hours().
- * @return array
- */
-function aw_hours_rows_spec( $rows ) {
-	$groups = array();
-	foreach ( $rows as $r ) {
-		$k = $r['closed'] ? '00:00-00:00' : $r['open'] . '-' . $r['close'];
-		$groups[ $k ][] = $r['day'];
+if ( ! function_exists( 'aw_hours_rows_spec' ) ) {
+	/** Opening hours as schema.org OpeningHoursSpecification (DirectoryWeb). */
+	function aw_hours_rows_spec( $rows ) {
+		return function_exists( 'directoryweb_hours_rows_spec' ) ? directoryweb_hours_rows_spec( $rows ) : array();
 	}
-	$out = array();
-	foreach ( $groups as $k => $days ) {
-		list( $open, $close ) = explode( '-', $k );
-		$out[] = array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => array_values( array_unique( $days ) ), 'opens' => $open, 'closes' => $close );
-	}
-	return $out;
 }
