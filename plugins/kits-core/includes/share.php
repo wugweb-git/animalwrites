@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Share bar HTML for a post (owner, 20 Oct 2026): one row, left-aligned with the text, the same button for every network
  * in this order: X, Facebook, LinkedIn, WhatsApp, Email, Copy link. Icon buttons (44px) with an aria-label and a title;
- * the names show only at lg when the whole row fits on one line (kit.js adds .is-labelled), never on two rows.
+ * the names show only at lg when the whole row fits on one line (share.js adds .is-labelled), never on two rows.
  *
  * @param int $post_id Post ID.
  * @return string
@@ -83,7 +83,7 @@ function kits_share_types() {
 
 /**
  * The one share payload of a page (owner, 13 Nov 2026: "page should share image and content and link and hashtag ...
- * standardise this function"): what every share sends, the server's share bar, the phone's share sheet (kit.js) and a
+ * standardise this function"): what every share sends, the server's share bar, the phone's share sheet (assets/js/share.js) and a
  * campaign's own script (window.awCampShare, campaign-tools.php) alike.
  *
  * Filter kits_share_args fills it in: 'text' (the share line: a campaign's share line, else the page's og:description;
@@ -155,9 +155,9 @@ function kits_share_html( $url, $title, $only = null, $campaign = '', $args = ar
 		}
 	}
 	$out = '<div class="kit-share" role="group" aria-label="' . esc_attr__( 'Share', 'kits-core' ) . '"><span class="kit-share-label" aria-hidden="true">' . esc_html__( 'Share', 'kits-core' ) . '</span>';
-	// The phone's own share sheet (Web Share): hidden until kit.js finds navigator.share. It hands over the payload: the
+	// The phone's own share sheet (Web Share): hidden until share.js finds navigator.share. It hands over the payload: the
 	// line with its hashtags, the link and the page's 1080x1080 share picture; each app keeps what it accepts.
-	// A page Share section's one button ('button'): shown without waiting for kit.js; where the browser has no share sheet
+	// A page Share section's one button ('button'): shown without waiting for share.js; where the browser has no share sheet
 	// it copies the link (data-fallback), so the one button always does something.
 	$main  = '' !== (string) $args['button'];
 	$share = $main ? (string) $args['button'] : __( 'Share', 'kits-core' );

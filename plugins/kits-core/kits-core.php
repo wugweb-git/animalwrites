@@ -57,6 +57,7 @@ require_once KITS_CORE_DIR . 'includes/system-screen.php';
 require_once KITS_CORE_DIR . 'includes/landmarks.php';
 require_once KITS_CORE_DIR . 'includes/sections.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
+require_once KITS_CORE_DIR . 'includes/frontend-scripts.php'; // share, forms (ALTCHA) and analytics scripts, before the theme's kit.js
 require_once KITS_CORE_DIR . 'includes/image-context.php';
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';

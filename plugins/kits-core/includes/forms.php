@@ -58,7 +58,7 @@ function kits_form_generic_error( $form ) {
 	return (string) apply_filters( 'kits_form_generic_error', 'Couldn\'t send. Your details are still here — try again.', $form );
 }
 
-/** Was this submitted by kit.js with fetch() (X-Kits-Fetch header; the legacy X-AW-Fetch is still accepted). */
+/** Was this submitted by forms.js with fetch() (X-Kits-Fetch header; the legacy X-AW-Fetch is still accepted). */
 function kits_form_is_fetch() {
 	return ! empty( $_SERVER['HTTP_X_KITS_FETCH'] ) || ! empty( $_SERVER['HTTP_X_AW_FETCH'] );
 }
@@ -73,7 +73,7 @@ function kits_form_is_fetch() {
  */
 function kits_form_success( $url, $title, $text = '', $more = array() ) {
 	if ( kits_form_is_fetch() ) {
-		// A thank-you page URL: kit.js goes there; otherwise the form is replaced by the message in place.
+		// A thank-you page URL: forms.js goes there; otherwise the form is replaced by the message in place.
 		$go = kits_is_thanks_url( $url ) ? array( 'redirect' => $url ) : array();
 		wp_send_json( array_merge( array( 'ok' => true, 'title' => $title, 'text' => $text ), $more, $go ) );
 	}
@@ -187,7 +187,7 @@ function kits_form_open( $form, $attrs = array() ) {
 		$html .= ' ' . esc_attr( $k ) . '="' . esc_attr( $v ) . '"';
 	}
 	$html .= '>';
-	// One status region per form: form-level errors and success (filled by the server or by kit.js).
+	// One status region per form: form-level errors and success (filled by the server or by forms.js).
 	$html .= '<div class="kit-form-status" role="status" aria-live="polite" tabindex="-1">' . ( $state['notice'] && ! $state['errors'] ? esc_html( $state['notice'] ) : '' ) . '</div>';
 	if ( count( $state['errors'] ) > 1 ) { // a summary only when there is more than one error
 		$html .= '<div class="kit-form-summary" role="alert" tabindex="-1">';
