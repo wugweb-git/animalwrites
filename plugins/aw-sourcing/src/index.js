@@ -957,6 +957,8 @@ function Enrichment() {
 							title={ __( 'Proposed details', 'aw-sourcing' ) }
 							fields={ listing.fields.map( ( f ) => ( {
 								...f,
+								rejectForGood:
+									f.applied && 'closed' !== f.field,
 								label: `${ f.label } (${ f.confidence || '–' }${
 									f.source ? ', ' + f.source : ''
 								})`,
@@ -1001,36 +1003,9 @@ function Enrichment() {
 							onUndo={ ( id ) =>
 								decide( { do: 'undo', ids: [ id ] } )
 							}
+							onRejectForGood={ ( f ) => rejectForGood( f ) }
 							after={
 								<>
-									{ listing.applied > 0 && (
-										<p>
-											{ listing.fields
-												.filter(
-													( f ) =>
-														f.applied &&
-														'closed' !== f.field
-												)
-												.map( ( f ) => (
-													<Button
-														key={ f.key }
-														busy={ busy }
-														onClick={ () =>
-															rejectForGood( f )
-														}
-													>
-														{ sprintf(
-															/* translators: %s: field name. */
-															__(
-																'Reject %s for good',
-																'aw-sourcing'
-															),
-															f.label
-														) }
-													</Button>
-												) ) }
-										</p>
-									) }
 									{ listing.waiting > 0 && (
 										<>
 											<WaitingEdit

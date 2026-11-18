@@ -544,6 +544,7 @@ export function FieldReview( {
 	onApply,
 	onReject,
 	onUndo,
+	onRejectForGood,
 	busy,
 	applyLabel,
 	after,
@@ -630,6 +631,25 @@ export function FieldReview( {
 												} }
 											/>
 										) }
+										{ onRejectForGood &&
+											f.rejectForGood && (
+												<>
+													{ ' ' }
+													<RowAction
+														action={ {
+															label: __(
+																'Reject for good',
+																'kits-core'
+															),
+															tone: 'error',
+															onClick: () =>
+																onRejectForGood(
+																	f
+																),
+														} }
+													/>
+												</>
+											) }
 									</>
 								) : (
 									__( 'Waiting', 'kits-core' )
