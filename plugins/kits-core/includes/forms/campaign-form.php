@@ -96,7 +96,7 @@ function kits_raw_mark( $id, $status, $entry_id = 0 ) {
 
 // Every Fluent Forms send, before Fluent Forms looks at it (its own handler runs at priority 10).
 $GLOBALS['aw_raw_id'] = 0;
-foreach ( array( 'wp_ajax_nopriv_fluentform_submit', 'wp_ajax_fluentform_submit' ) as $aw_hook ) {
+foreach ( array( 'wp_ajax_nopriv_fluentform_submit', 'wp_ajax_fluentform_submit' ) as $kits_cf_hook ) {
 	add_action(
 		$aw_hook,
 		function () {

@@ -447,10 +447,10 @@ const KITS_FF_ICONS = array(
 	'l_adopt'      => 'link',
 );
 
-foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select', 'input_checkbox', 'input_radio', 'input_hidden' ) as $aw_ff_el ) {
+foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select', 'input_checkbox', 'input_radio', 'input_hidden' ) as $kits_ff_el ) {
 	// The step check (kit.js) uses the browser's rules with the site's words.
 	add_filter(
-		'fluentform/rendering_field_data_' . $aw_ff_el,
+		'fluentform/rendering_field_data_' . $kits_ff_el,
 		function ( $data, $form ) {
 			if ( ! kits_ff_styled( $form ) ) {
 				return $data;
@@ -480,7 +480,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 		2
 	);
 	add_filter(
-		'fluentform/rendering_field_html_' . $aw_ff_el,
+		'fluentform/rendering_field_html_' . $kits_ff_el,
 		function ( $html, $data, $form ) {
 			if ( ! kits_ff_styled( $form ) ) { // a form in a kit wrapper ([data-kit-form]) gets the field icons only
 				$name = is_array( $data ) ? (string) ( $data['attributes']['name'] ?? '' ) : '';
