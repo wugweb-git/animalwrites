@@ -805,7 +805,9 @@ function aw_enrich_approve( $id ) {
  * Reject a row: a person says no to this value for this listing and field, for good. A waiting row is turned down. An
  * applied row (auto-applied or approved) is undone first, so the value before it comes back; an undone row already has
  * its old value back. The row becomes 'rejected', and a later check never proposes or applies the same value for the
- * same listing and field again (aw_enrich_rest_results()).
+ * same listing and field again (aw_enrich_rest_results()). An applied "Reported closed" row is not rejected (it follows
+ * Google on every check; Undo it instead), and an applied row that a newer applied value already replaced is only
+ * marked rejected, so the newer value stays.
  *
  * @param int $id Row ID.
  * @return bool False when the row is missing, already settled another way, or could not be undone.
@@ -816,8 +818,17 @@ function aw_enrich_reject( $id ) {
 		return false;
 	}
 	$was = (string) $r['status'];
-	if ( in_array( $was, array( 'auto-applied', 'approved' ), true ) && ! aw_enrich_undo( $id ) ) {
-		return false;
+	if ( 'closed' === $r['field'] && 'pending' !== $was ) {
+		return false; // "Reported closed" follows Google on every check, not the rows: Undo it instead.
+	}
+	if ( in_array( $was, array( 'auto-applied', 'approved' ), true ) ) {
+		global $wpdb;
+		// A newer applied value for the same field has already replaced this one: undoing this row would put back what
+		// was there before it, over the newer value. Then the row is only marked rejected.
+		$newer = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND id > %d AND status IN ('auto-applied','approved') LIMIT 1", aw_enrich_table(), (int) $r['listing_id'], $r['field'], (int) $id ) ); // phpcs:ignore WordPress.DB
+		if ( ! $newer && ! aw_enrich_undo( $id ) ) {
+			return false;
+		}
 	}
 	if ( 'pending' === $was && 'closed' === $r['field'] ) {
 		delete_post_meta( (int) $r['listing_id'], 'aw_reported_closed' );

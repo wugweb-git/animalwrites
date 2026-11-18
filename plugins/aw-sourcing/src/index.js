@@ -956,7 +956,11 @@ function Enrichment() {
 									{ listing.applied > 0 && (
 										<p>
 											{ listing.fields
-												.filter( ( f ) => f.applied )
+												.filter(
+													( f ) =>
+														f.applied &&
+														'closed' !== f.field
+												)
 												.map( ( f ) => (
 													<Button
 														key={ f.key }
@@ -1030,7 +1034,8 @@ function Enrichment() {
 								[ f.status, f.created, f.proposed, f.note ]
 									.filter( Boolean )
 									.join( ' · ' ),
-								'undone' === f.status ? (
+								'undone' === f.status &&
+								'closed' !== f.field ? (
 									<Button
 										busy={ busy }
 										onClick={ () => rejectForGood( f ) }
