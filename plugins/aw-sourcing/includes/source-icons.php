@@ -7,7 +7,7 @@
  *   load. It takes the icon the home page declares (<link rel="icon">, kept by that check), else /favicon.ico.
  * - PNG, ICO, JPEG, GIF or WebP up to 100 KB that PHP reads as an image; never SVG (it can carry script).
  * - Stored as an attachment titled "Source icon: host" (file source-icon-host), Media group "Source icon".
- * - Only hosts with no publisher icon in Kits Core (aw_favicon_url()) are fetched. A host that has an icon is not fetched again; one with none is tried again after 7 days. Nothing is deleted.
+ * - Only hosts with no publisher icon (aw_favicon_url(), attribution.php) are fetched. A host that has an icon is not fetched again; one with none is tried again after 7 days. Nothing is deleted.
  * - Option aw_source_icons (autoload off): host => { id, at, src, miss, v }.
  *
  * @package aw-sourcing
@@ -23,7 +23,7 @@ const AW_SRC_ICONS = 'aw_source_icons';
 add_action( AW_SOURCING_SITE_META_CRON, 'aw_src_icons_run', 20 );
 
 /**
- * The icon's address in the media library for a host, or ''. The publisher's icon that Kits Core keeps (aw_favicon_url(),
+ * The icon's address in the media library for a host, or ''. The publisher's icon that attribution.php keeps (aw_favicon_url(),
  * the one the News cards show) comes first; this store only fills the hosts that has none.
  *
  * @param string $host Host as aw_host() keeps it.
@@ -164,7 +164,7 @@ function aw_src_icons_run( $limit = 10 ) {
 	}
 	foreach ( array_keys( $want ) as $h ) {
 		if ( (int) ( $pubs[ $h ]['icon'] ?? 0 ) > 0 ) {
-			unset( $want[ $h ] ); // Kits Core already keeps this publisher's icon
+			unset( $want[ $h ] ); // attribution.php already keeps this publisher's icon
 		}
 	}
 	$retry = gmdate( 'Y-m-d H:i', time() - 7 * DAY_IN_SECONDS );

@@ -11,8 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // The role constants, AW_SI_BRAND, AW_SI_NOT_PLURAL, aw_si_roles(), aw_si_is_brand(), aw_si_norm() and aw_si_lang() moved
-// to Animal Writes Core with the keyword table (includes/keyword-model.php and keyword-table.php; owner's decision 3,
-// 25 Oct 2026), so SourceWeb reads and writes the table without this plugin.
+// out with the keyword table (owner's decision 3, 25 Oct 2026); since 18 Nov 2026 they are in InsightWeb's
+// includes/keyword-model.php and keyword-table.php, loaded by includes/keywords.php before Search Insights itself.
 
 /** Map of norm => id for every keyword record. */
 function aw_si_kw_map(): array {

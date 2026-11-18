@@ -1,9 +1,10 @@
 <?php
 /**
  * The keyword table (owner's decision 3, 25 Oct 2026): wp_aw_si_keywords, the same table and name Search Insights
- * created, now installed and owned by Animal Writes Core so sourcing never depends on aw-seo-extras. One record per
- * normalised keyword with its roles (keyword-model.php); Search Insights adds its own columns' figures, AW Sourcing
- * its roles, other spellings, search and category mapping.
+ * created. Installed by Animal Writes Core from 25 Oct, by Kits Core from 12 Nov, and by InsightWeb from 18 Nov 2026
+ * (same table, option and functions; no data moved). One record per normalised keyword with its roles
+ * (keyword-model.php); Search Insights adds its own columns' figures, SourceWeb its roles, other spellings, search and
+ * category mapping. Loaded once by keywords.php.
  *
  * Version 2 (sourcing restructure phase 2) adds to each record:
  * - variants: other spellings, one per line (a trailing * matches the start of a word);
@@ -15,14 +16,12 @@
  * Version 3 (1 Nov 2026) adds quick_win: 1 when Search Insights' daily calculation finds the keyword at position 8–20
  * with enough impressions (aw_si_quick_win), so the Quick wins view, the weekly read and exports count the same rows.
  *
- * @package kits-core
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-require_once __DIR__ . '/keyword-model.php';
 
 const AW_KW_DB_VERSION = '3';
 const AW_KW_DB_OPTION  = 'aw_kw_db';
@@ -45,17 +44,17 @@ function aw_si_now(): string {
 /** Role bits with their labels (Search Insights' filters and AW Sourcing's Keywords screen). */
 function aw_si_roles(): array {
 	return array(
-		AW_SI_ROLE_TRACKED  => __( 'Tracked', 'kits-core' ),
-		AW_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'kits-core' ),
-		AW_SI_ROLE_SOURCING => __( 'Include', 'kits-core' ),
-		AW_KW_ROLE_ANIMAL   => __( 'Animal', 'kits-core' ),
-		AW_KW_ROLE_CONTEXT  => __( 'Context', 'kits-core' ),
-		AW_KW_ROLE_EXCLUDE  => __( 'Exclude', 'kits-core' ),
-		AW_KW_ROLE_SEARCH   => __( 'Search', 'kits-core' ),
-		AW_KW_ROLE_PRESS    => __( 'Press', 'kits-core' ),
-		AW_KW_ROLE_CATEGORY => __( 'Category word', 'kits-core' ),
-		AW_SI_ROLE_BRAND    => __( 'Brand', 'kits-core' ),
-		AW_SI_ROLE_SEARCHED => __( 'Searched', 'kits-core' ),
+		AW_SI_ROLE_TRACKED  => __( 'Tracked', 'insightweb' ),
+		AW_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'insightweb' ),
+		AW_SI_ROLE_SOURCING => __( 'Include', 'insightweb' ),
+		AW_KW_ROLE_ANIMAL   => __( 'Animal', 'insightweb' ),
+		AW_KW_ROLE_CONTEXT  => __( 'Context', 'insightweb' ),
+		AW_KW_ROLE_EXCLUDE  => __( 'Exclude', 'insightweb' ),
+		AW_KW_ROLE_SEARCH   => __( 'Search', 'insightweb' ),
+		AW_KW_ROLE_PRESS    => __( 'Press', 'insightweb' ),
+		AW_KW_ROLE_CATEGORY => __( 'Category word', 'insightweb' ),
+		AW_SI_ROLE_BRAND    => __( 'Brand', 'insightweb' ),
+		AW_SI_ROLE_SEARCHED => __( 'Searched', 'insightweb' ),
 	);
 }
 

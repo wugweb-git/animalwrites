@@ -40,7 +40,7 @@ Found with `grep` for `add_shortcode`, `register_block_type`, `registerBlockType
 | Shortcode | File and line | Attributes | Live use | Row that covers it |
 |---|---|---|---|---|
 | `[kits_demo]` | `kits-core/includes/demo.php:221` | none | Page 8928 `kits-demo` (private) | `[kits_demo]`: stays the admin demo page |
-| `[aw_source_row]` | `kits-core/includes/attribution.php:68` | `link` (`0`/`1`) | None in content | Source row → core post blocks with Block Bindings |
+| `[aw_source_row]` | `aw-sourcing/includes/attribution.php` (SourceWeb; Kits Core until 18 Nov 2026) | `link` (`0`/`1`) | None in content | Source row → core post blocks with Block Bindings |
 | `[aw_rule_chip]` | `animal-writes-core/includes/campaign-tools.php:259` | `rule`, `label`, `allows`, `doc` | Campaign 13848 (Lab) | `[aw_rule_chip]` → a text format |
 | `[aw_letter_tool]` | `campaign-tools.php:292` | `to`, `subject`, `ticked` (comma list), `salute` (`Sir/Madam,`), `intro`, `closing`, `sign` (`Yours faithfully,`), `address`, `source` | Campaign 13848 (Lab) | `kits/letter` |
 | `[aw_campaign_count]` | `campaign-tools.php:488` | `min` (campaign meta, else 100), `label` (`objections sent`) | None | `kits/metric` |
@@ -151,7 +151,7 @@ Rows marked (3.18) were Unmapped in the first draft and have an answer since 11 
 | Block Bindings source `animal-writes/field` | `animal-writes-core/includes/bindings.php:170` | Item meta, attributes, listing sections (existing source) |
 | FAQ box added after the post content | `aw-seo-extras/includes/faq.php:777` (`render_block_core/post-content`) | FAQ |
 
-The other `render_block_*` filters (about 90, in `kits-core/includes/{sections,landmarks,attribution,page-options,site-parts}.php`, the Kits theme `functions.php` and 27 files of Animal Writes Core) restyle core blocks: post titles, dates, terms, excerpts, featured images, queries, groups. They are not shortcodes or blocks and no row names them. They stay; section 4 lists the ones a move has to keep working.
+The other `render_block_*` filters (about 90, in `kits-core/includes/{sections,landmarks,page-options,site-parts}.php`, SourceWeb's `attribution.php`, the Kits theme `functions.php` and 27 files of Animal Writes Core) restyle core blocks: post titles, dates, terms, excerpts, featured images, queries, groups. They are not shortcodes or blocks and no row names them. They stay; section 4 lists the ones a move has to keep working.
 
 ### 1d. Unmapped
 
