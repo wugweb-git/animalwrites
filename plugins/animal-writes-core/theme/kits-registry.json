@@ -1575,7 +1575,7 @@
     "aw-pair"
    ],
    "states": [
-    "default: canvas band with the Supreme Court campaign (photograph overlay) and AW_Festive (pictures on top) cards, each its own design; stacked on phones, two equal columns of equal height from 768; same padding and radius"
+    "default: canvas band with the Supreme Court campaign (photograph overlay) and Rabies card (words on an ink band at the top) cards, then the Animal Writes card, each its own design; stacked on phones, two equal columns of equal height from 768; same padding and radius"
    ],
    "tokens": [],
    "a11y": {
@@ -1820,7 +1820,7 @@
    "type": "pattern",
    "status": "live",
    "classes": ["aw-festive", "kit-photo-card"],
-   "states": ["default: the Diwali 2026 campaign card on Home: photo card (core Cover, dim 50) on the portrait campaign photo, H2, one line, one Brand button (What to do after Diwali); on Home until 20 Nov 2026 (owner, 13 Nov) at the top; 500px tall at every width (--aw-pair-card-h)"],
+   "states": ["default: the Diwali 2026 campaign card on Home: photo card (core Cover, dim 50) on the portrait campaign photo, H2, one line, one Brand button (What to do after Diwali); 500px tall at every width (--aw-pair-card-h); off Home after the festival (the rabies card took its slot), kept for next year"],
    "tokens": ["--kit-btn-brand-bg", "--kit-color-on-ink", "--kit-radius-card"],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\"); card with H2, one line and one button",
@@ -1838,6 +1838,30 @@
     "schema": "none"
    },
    "block": "animal-writes/festive"
+  },
+  {
+   "name": "Rabies card",
+   "type": "pattern",
+   "status": "live",
+   "classes": ["aw-festive", "kit-photo-card"],
+   "states": ["default: the rabies card on Home, in the Diwali card's slot in the campaign row: the festive card's layout (core Cover, dim 50) on the vaccine cool box photo (Media 23370), the words at the top on the action-card ink band (--kit-action-scrim-mix, fading out --kit-space-7 below them), H2, one line, one Brand button at the bottom (Rabies injection: timing and cost); 500px tall at every width (--aw-pair-card-h)"],
+   "tokens": ["--kit-btn-brand-bg", "--kit-color-on-ink", "--kit-radius-card", "--kit-action-scrim-mix", "--kit-space-7", "--aw-pair-card-h"],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\"); card with H2, one line and one button",
+    "aria": "none",
+    "keyboard": "Tab to the button",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px button",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "one button to /resources/rabies-after-a-bite-india/",
+    "alt": "the photo described",
+    "schema": "none"
+   },
+   "block": "animal-writes/rabies-card"
   },
   {
    "name": "Animal Writes card",
