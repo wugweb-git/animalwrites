@@ -11,7 +11,7 @@
  * Plugin Name:       DirectoryWeb
  * Plugin URI:        https://wugweb.com/plugins/directoryweb/
  * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Needs Animal Writes Core.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -47,8 +47,8 @@ if ( ! defined( 'AW_CORE_VERSION' ) ) {
 	return;
 }
 
-define( 'DIRECTORYWEB_LOADED', '1.0.0' );
-define( 'DIRECTORYWEB_VERSION', '1.0.0' );
+define( 'DIRECTORYWEB_LOADED', '1.1.0' );
+define( 'DIRECTORYWEB_VERSION', '1.1.0' );
 define( 'DIRECTORYWEB_FILE', __FILE__ );
 define( 'DIRECTORYWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DIRECTORYWEB_URL', plugin_dir_url( __FILE__ ) );

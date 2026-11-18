@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,10 +47,16 @@ DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
 
 == Changelog ==
 
+= 1.1.0 =
+* The listing's data model moves in from Animal Writes Core: the 48 listing fields and their rules, the phone and opening-hours lists, the never-publish list, where a listing's details come from, and the daily re-check flags. Same keys and stored values; nothing changes on the site.
+
 = 1.0.0 =
 * The Directory moves out of Animal Writes Core into its own plugin. Same pages, data, field groups, blocks, shortcodes and routes; nothing changes on the site.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+The listing fields are registered by DirectoryWeb now; no change on the site.
 
 = 1.0.0 =
 First release as its own plugin; no change on the site.
