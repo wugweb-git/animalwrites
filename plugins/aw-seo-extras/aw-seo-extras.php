@@ -33,6 +33,7 @@ define( 'AW_SEO_EXTRAS_DIR', plugin_dir_path( __FILE__ ) );
 require_once AW_SEO_EXTRAS_DIR . 'includes/rankweb-caps.php'; // RankWeb's own capability, manage_rankweb (granted from manage_categories).
 require_once AW_SEO_EXTRAS_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen, with or without Rank Math.
 require_once AW_SEO_EXTRAS_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
+require_once AW_SEO_EXTRAS_DIR . 'includes/breadcrumbs-render.php'; // the visible trail above the page title, with or without Rank Math and the Breadcrumbs module.
 
 /** Whether Rank Math is active (it loads after this plugin, so this is asked on plugins_loaded). */
 function aw_seo_extras_rank_math() {
@@ -55,7 +56,7 @@ add_action(
 		}
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( ! in_array( $file, $off, true ) ) { // a module switched off in RankWeb → Settings is not loaded
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}

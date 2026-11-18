@@ -78,7 +78,6 @@ if ( ! defined( 'DIRECTORYWEB_LOADED' ) ) {
 require_once AW_CORE_DIR . 'includes/issuers.php';
 require_once AW_CORE_DIR . 'includes/summary-display.php'; // an item's own page shows its whole summary (the rules are SourceWeb's)
 require_once AW_CORE_DIR . 'includes/news-article.php'; // News article: read-more fold and the ad-slot hook
-require_once AW_CORE_DIR . 'includes/data-sources.php';
 require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/also-reported.php';
 require_once AW_CORE_DIR . 'includes/category-images.php';
@@ -102,7 +101,7 @@ require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/term-page.php';
-require_once AW_CORE_DIR . 'includes/faq-data.php'; // the site's FAQ questions and rules for AW SEO Plus (owner, 31 Oct 2026)
+require_once AW_CORE_DIR . 'includes/faq-data.php'; // the Library item fields (the FAQ questions are RankWeb's faq-data.php since 18 Nov 2026)
 require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
@@ -115,7 +114,7 @@ require_once AW_CORE_DIR . 'includes/retention.php';
 require_once AW_CORE_DIR . 'includes/newsletter.php';
 require_once AW_CORE_DIR . 'includes/model.php';
 require_once AW_CORE_DIR . 'includes/helpers-public.php'; // [aw_helpers] on the Volunteer page: approved helpers (owner, 13 Nov 2026)
-require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
+require_once AW_CORE_DIR . 'includes/breadcrumbs.php'; // fallback: RankWeb's breadcrumb renderer when RankWeb is not active
 require_once AW_CORE_DIR . 'includes/item-head.php';
 require_once AW_CORE_DIR . 'includes/research-citation.php';
 require_once AW_CORE_DIR . 'includes/pages.php';

@@ -17,7 +17,7 @@
 .aw-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); gap: var(--kit-space-5); }
 .aw-count { display: flex; flex-direction: column; }
 .aw-count strong { font-family: var(--kit-font-display); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-heading); font-size: var(--kit-type-stat); line-height: 1; color: var(--kit-color-accent); }
-.aw-testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); gap: var(--kit-space-5); margin: var(--kit-space-5) 0; }
+.aw-testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(var(--kit-card-min), 100%), 1fr)); gap: var(--kit-space-5); margin: var(--kit-space-5) 0; }
 .aw-testimonial { margin: 0; padding: var(--kit-space-5); background: var(--kit-color-surface); border-radius: var(--kit-radius-card); }
 .aw-testimonial blockquote { margin: 0 0 var(--kit-space-4); font-family: var(--kit-font-display); font-weight: var(--kit-weight-medium); font-size: var(--kit-type-h4); line-height: 1.4; border: 0; padding: 0; }
 .aw-testimonial figcaption { display: flex; flex-direction: column; font-size: var(--kit-type-sm); }

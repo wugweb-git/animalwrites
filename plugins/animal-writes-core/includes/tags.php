@@ -240,7 +240,7 @@ add_filter(
 		}
 		return $html;
 	},
-	5, // before the breadcrumb trail is put in front (breadcrumbs.php)
+	5, // before the breadcrumb trail is put in front (RankWeb breadcrumbs-render.php)
 	3
 );
 
