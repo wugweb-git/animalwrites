@@ -95,6 +95,9 @@ function get_template_directory() {
 function get_template_directory_uri() {
 	return 'https://example.test';
 }
+function plugins_url( $path = '', $plugin = '' ) {
+	return 'https://example.test/wp-content/plugins/' . basename( dirname( (string) $plugin ) ) . '/' . ltrim( (string) $path, '/' );
+}
 function wp_register_script_module() {
 }
 function untrailingslashit( $s ) {

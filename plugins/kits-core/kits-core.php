@@ -65,10 +65,12 @@ require_once KITS_CORE_DIR . 'includes/system-screen.php';
 require_once KITS_CORE_DIR . 'includes/landmarks.php';
 require_once KITS_CORE_DIR . 'includes/sections.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
+require_once KITS_CORE_DIR . 'includes/frontend-scripts.php'; // share, forms (ALTCHA) and analytics scripts, before the theme's kit.js
 require_once KITS_CORE_DIR . 'includes/image-context.php';
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
+require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined stylesheets (the Kits theme's core files, the component files per kind of page)
 require_once KITS_CORE_DIR . 'includes/preview.php';
 // The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
 // InsightWeb's (moved out on 18 Nov 2026 with the same names, option, tables, shortcode and scheduled event).

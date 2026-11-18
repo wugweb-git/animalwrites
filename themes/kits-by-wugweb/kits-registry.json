@@ -468,7 +468,7 @@
     "alt": "n/a",
     "schema": "none"
    },
-   "note": "One standard for every form (S5.2); behaviour in kit.js."
+   "note": "One standard for every form (S5.2); behaviour in Kits Core forms.js."
   },
   {
    "name": "Form status and done message",

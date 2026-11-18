@@ -7,7 +7,7 @@
      the band (mixed surfaces are for bentos only). Every wash keeps white text at least 5:1 over the picture's lightest
      pixels (WCAG AA): 0.72 or more where text can sit; from 1200 it opens to 0.35 on the right, past the text.
    - Heading, the one line (60ch at most), then one row: the "Share this page" button, 48px (--kit-size-control), in the
-     campaign colour (the phone's share sheet, kit.js; where there is none it copies the link). No row of network
+     campaign colour (the phone's share sheet, share.js; where there is none it copies the link). No row of network
      icons: kits_share_html's own Copy link button is hidden, the one button copies.
    - Follow us on the same band: the label, then our own account icons (Instagram, Threads, X, Facebook, LinkedIn, and
      Reddit, Discord once set), white, 44px (--kit-size-target), each with its aria-label and title.

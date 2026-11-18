@@ -2,7 +2,7 @@
 /**
  * Form kit (S5): the field dictionary (one definition per field, used by every form), clean-up helpers, the source
  * tag on every entry, a fresh form key for cached pages, and two patterns: the expandable form (S5.6) and the
- * multi-step form (S5.7). Field markup, the spam guard and messages live in forms.php; behaviour in kit.js.
+ * multi-step form (S5.7). Field markup, the spam guard and messages live in forms.php; behaviour in assets/js/forms.js.
  *
  * @package kits-core
  */
@@ -84,7 +84,7 @@ function kits_submitted_source() {
 	return substr( sanitize_text_field( wp_unslash( $_POST['aw_source'] ?? '' ) ), 0, 120 ); // phpcs:ignore WordPress.Security.NonceVerification
 }
 
-// A fresh form key when a cached page's key has expired: kit.js asks once, then sends again.
+// A fresh form key when a cached page's key has expired: forms.js asks once, then sends again.
 add_action( 'wp_ajax_nopriv_kits_form_nonce', 'kits_form_nonce_json' );
 add_action( 'wp_ajax_kits_form_nonce', 'kits_form_nonce_json' );
 function kits_form_nonce_json() {

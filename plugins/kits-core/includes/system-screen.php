@@ -151,8 +151,8 @@ function kits_styles_root() {
 function kits_token_values() {
 	$vals = array();
 	$css  = array( get_template_directory() . '/assets/css/kits-v42.css', get_template_directory() . '/assets/css/kit-tokens.css' );
-	foreach ( kits_system_dirs() as $dir ) { // The child theme's or the site plugin's own tokens.
-		$css[] = $dir . '/assets/css/tokens.css';
+	foreach ( kits_system_dirs() as $dir ) { // The child theme's or the site folder's own tokens (assets/css/ or css/).
+		$css[] = is_readable( $dir . '/assets/css/tokens.css' ) ? $dir . '/assets/css/tokens.css' : $dir . '/css/tokens.css';
 	}
 	foreach ( array_unique( $css ) as $f ) {
 		$s = is_readable( $f ) ? (string) file_get_contents( $f ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions

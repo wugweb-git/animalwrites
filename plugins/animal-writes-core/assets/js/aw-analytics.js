@@ -1,4 +1,4 @@
-/* Animal Writes analytics (owner's audit, 17 Oct 2026). Events go through kitsTrack (kit.js) to the dataLayer (GTM ->
+/* Animal Writes analytics (owner's audit, 17 Oct 2026). Events go through kitsTrack (Kits Core analytics.js) to the dataLayer (GTM ->
  * GA4); window.kitsPage (kits_page_context, kits-config.php) says what the page is. docs/analytics/ga4-setup.md lists
  * every event, its parameters and the GA4 settings.
  *
