@@ -272,29 +272,33 @@ A preset declares, and Kits Core does only this with it:
 | templates and patterns | `single-{type}.html` / `archive-{type}.html` block templates, patterns in a pattern category | [front-end] |
 | schema | a mapping key the SEO layer reads (section 13) | [front-end] (output in `<head>`) |
 
-**The presets.** "AW" presets reproduce today exactly: same slug, rewrite, supports, meta keys and terms; they only
-describe what `aw_post_types()` already registers, and are switched on only in a later stage, after a diff shows
-the registered arguments are identical.
+**Naming (owner, 18 Nov 2026).** Data keeps its aw_ names on this site; code, presets, blocks and functions never
+use aw. Presets are named `kits-<type>`. On this site, the enabled presets point at the existing type slugs
+(`aw_news`…), which stay unchanged as stored data (section 6).
 
-| Preset | Type slug | Status | Fields (examples) | Notes |
+**The presets.** This site's enabled presets reproduce today exactly: same slug, rewrite, supports, meta keys and
+terms. They only describe what `aw_post_types()` already registers, and are switched on only in a later stage,
+after a diff shows the registered arguments are identical.
+
+| Preset | Type slug (this site's stored data, or new) | Status | Fields (examples) | Notes |
 |---|---|---|---|---|
-| News | `aw_news` (AW) | live | source url/name/date, key facts | re-sorted by source date (Part I, 3) |
-| Library | `aw_legal` (AW) | live | document, issuer, law date | |
-| Press (Media & PR) | `aw_press` (AW) | live | publisher, format, url | |
-| Resources | `post` (relabelled) | live | — | WordPress's own Posts |
-| Opportunities | `aw_opportunity` (AW) | live | deadline, apply url, org | |
-| Adoption | none: a page with a Query Loop of Opportunities | live | — | stays a page |
-| Campaigns | `aw_campaign` (AW) | live | dates, document, orgs, outcome, share | 4 sizes stay one component (section 14) |
-| Portfolio | `kits_portfolio` | new | client, year, role, link | |
-| Card | `kits_card` | new | image, line, link | a reusable small card (tips, facts) |
-| Infographic | `kits_infographic` | new | image, alt long description, source, data link | needs a text alternative (WCAG 1.1.1) |
-| Case study | `kits_case_study` | suggested | problem, approach, outcome, figures | |
-| Event | `kits_event` | suggested | start, end, place, online url | dates through `kits_date()` / `kits_datecard()` |
-| Team / Person | `kits_person` | suggested | role, photo, profile links | no private data |
-| Testimonial | `kits_testimonial` | suggested | quote, name, role, consent date | only with the person's consent |
+| `kits-news` | `aw_news` | live | source url/name/date, key facts | re-sorted by source date (Part I, 3) |
+| `kits-library` | `aw_legal` | live | document, issuer, law date | |
+| `kits-press` | `aw_press` | live | publisher, format, url | |
+| `kits-resource` | `post` (relabelled) | live | — | WordPress's own Posts |
+| `kits-opportunity` | `aw_opportunity` | live | deadline, apply url, org | |
+| `kits-adoption` | none: a page with a Query Loop of Opportunities | live | — | stays a page; the preset only gives the pattern |
+| `kits-campaign` | `aw_campaign` | live | dates, document, orgs, outcome, share | 4 sizes stay one component (section 14) |
+| `kits-portfolio` | `kits_portfolio` | new | client, year, role, link | |
+| `kits-card` | `kits_card` | new | image, line, link | a reusable small card (tips, facts) |
+| `kits-infographic` | `kits_infographic` | new | image, alt long description, source, data link | needs a text alternative (WCAG 1.1.1) |
+| `kits-case-study` | `kits_case_study` | suggested | problem, approach, outcome, figures | |
+| `kits-event` | `kits_event` | suggested | start, end, place, online url | dates through `kits_date()` / `kits_datecard()` |
+| `kits-person` | `kits_person` | suggested | role, photo, profile links | no private data |
+| `kits-testimonial` | `kits_testimonial` | suggested | quote, name, role, consent date | only with the person's consent |
 
 New type slugs use the `kits_` prefix (owner naming rule). Effort: preset loader S, each new preset S–M (fields +
-templates + pattern), AW presets M (must be byte-identical; checked by comparing `get_post_type_object()` output
+templates + pattern), this site's enabled presets M (must be byte-identical; checked by comparing `get_post_type_object()` output
 before/after). Risk: low for new types, medium for switching AW types onto presets (rewrite rules, permalinks) —
 not before the owner's word.
 
@@ -460,7 +464,7 @@ Front-end: term archives are `category.html` / `tag.html` (block templates); the
 term sharing through `kits/share` `context: term` (section 17).
 Admin: core term screens; REST `show_in_rest` already on; core sitemaps list category and tag archives (Rank Math's
 sitemap on live).
-No term, slug or data change for the AW set.
+No term, slug or data change for this site's enabled presets.
 
 ## 19. WordPress-native integration
 
@@ -522,10 +526,10 @@ Not moved, renamed or deleted here. When the monetisation plan (including ads) s
 | 4 | Preset loader + new presets (Portfolio, Card, Infographic) on a site that wants them | new types only |
 | 5 | Layout block styles + rail; `kits/share` with aliases | yes, on the owner's yes |
 | 6 | Schema contract read by RankWeb | `<head>` only |
-| 7 | AW types onto presets (byte-identical registration) | none intended |
+| 7 | This site's existing types onto their `kits-*` presets (byte-identical registration) | none intended |
 
 Owner questions (added):
-5. Which new presets first: Portfolio, Card, Infographic; and are Case study, Event, Person, Testimonial wanted?
+5. Which new presets first: `kits-portfolio`, `kits-card`, `kits-infographic`; and are `kits-case-study`, `kits-event`, `kits-person`, `kits-testimonial` wanted?
 6. Tabs: allowed anywhere, given "no folds sitewide"? (Not built until answered.)
 7. Card minimum width: `docs/card-sizes.md` says 18rem, the token is 17rem — which is right?
 8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
