@@ -4,7 +4,10 @@
  * "Latest Form Submissions" box with cards (unread, new in 7 days) and one table: form, unread, last 7 days, total,
  * each form linking to its entries in Fluent Forms. Read-only: counts from Fluent Forms' own submissions table.
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core `includes/dashboard-forms.php` (18 Nov 2026); options, meta keys, tags, hooks and
+ * slugs are unchanged, and the old function names still work (back-compat wrappers).
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Whether the current user may see entry counts: Fluent Forms' own rule, else administrators. */
-function aw_forms_widget_allowed(): bool {
+function kits_forms_widget_allowed(): bool {
 	if ( class_exists( '\FluentForm\App\Modules\Acl\Acl' ) ) {
 		$acl = '\FluentForm\App\Modules\Acl\Acl';
 		return (bool) $acl::getCurrentUserCapability() && (bool) $acl::hasPermission( array( 'fluentform_entries_viewer', 'fluentform_manage_entries' ) );
@@ -21,7 +24,7 @@ function aw_forms_widget_allowed(): bool {
 }
 
 /** Per form: id, title, unread, week, total (trashed entries left out), busiest first. */
-function aw_forms_widget_rows(): array {
+function kits_forms_widget_rows(): array {
 	global $wpdb;
 	$s    = $wpdb->prefix . 'fluentform_submissions';
 	$f    = $wpdb->prefix . 'fluentform_forms';
@@ -35,14 +38,14 @@ add_action(
 		if ( ! defined( 'FLUENTFORM' ) && ! class_exists( '\FluentForm\Framework\Foundation\Application' ) ) {
 			return; // Fluent Forms is not active
 		}
-		if ( ! aw_forms_widget_allowed() ) {
+		if ( ! kits_forms_widget_allowed() ) {
 			return;
 		}
 		wp_add_dashboard_widget(
 			'aw_form_entries',
 			'Form entries',
 			function () {
-				$rows = aw_forms_widget_rows();
+				$rows = kits_forms_widget_rows();
 				if ( ! $rows ) {
 					echo '<p>No forms yet.</p>';
 					return;
@@ -68,7 +71,7 @@ add_action(
 						'total'  => esc_html( number_format_i18n( (int) $r->total ) ),
 					);
 				}
-				aw_core_simple_table(
+				kits_simple_table(
 					'aw-form-entries',
 					array(
 						'form'   => 'Form',

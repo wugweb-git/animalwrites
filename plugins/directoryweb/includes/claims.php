@@ -85,7 +85,7 @@ function aw_claim_current( $lid, $key ) {
 
 /** The claim form for a listing: the Fluent Forms form. */
 function aw_claim_form( $listing ) {
-	return aw_ff_form( 'claim', array( 'listing' => $listing ) );
+	return kits_ff_form( 'claim', array( 'listing' => $listing ) );
 }
 
 /** Is the uploaded logo a PNG, JPG or WebP under 2 MB? */

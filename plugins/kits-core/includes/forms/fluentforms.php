@@ -16,11 +16,14 @@
  *   (transactional, tag claimant); every contact gets the newsletter box as 1/0 ("Newsletter box (last form)"); a
  *   volunteer's State, District and PIN code from the LGD picker go into their Volunteer fields.
  * - The site's look on Fluent Forms fields (icons, tick-box styles, the browser rules kit.js checks with).
- * - aw_ff_form() shows each form. Fluent Forms is the only form since 25 Oct 2026 (owner): the site's own forms and
+ * - kits_ff_form() shows each form. Fluent Forms is the only form since 25 Oct 2026 (owner): the site's own forms and
  *   their submit handlers were removed, so a missing form shows nothing to visitors and a short note to administrators.
- * - Emails: none since 21 Oct 2026 (owner): nothing is sent when a Fluent Forms form is submitted (aw_ff_mail_off).
+ * - Emails: none since 21 Oct 2026 (owner): nothing is sent when a Fluent Forms form is submitted (kits_ff_mail_off).
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core `includes/forms-fluentforms.php` (18 Nov 2026); options, meta keys, tags, hooks and
+ * slugs are unchanged, and the old function names still work (back-compat wrappers).
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,13 +34,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 // switched off, and while a submission is handled every wp_mail is dropped (the contact@ alerts for messages,
 // volunteers and claims, the newsletter confirmation, any opt-in email). Entries are still saved where they always are.
 // On again: Kits → Modules → Emails from forms (or wp option update aw_ff_send_email 1)
-function aw_ff_mail_off() {
+function kits_ff_mail_off() {
 	return '1' !== (string) get_option( 'aw_ff_send_email', '0' );
 }
 add_filter(
 	'fluentform/global_notification_active_types',
 	function ( $keys ) {
-		if ( aw_ff_mail_off() ) {
+		if ( kits_ff_mail_off() ) {
 			unset( $keys['notifications'] );
 		}
 		return $keys;
@@ -47,30 +50,30 @@ add_filter(
 add_action(
 	'fluentform/before_insert_submission',
 	function () {
-		if ( aw_ff_mail_off() ) {
+		if ( kits_ff_mail_off() ) {
 			add_filter( 'pre_wp_mail', '__return_true', 999 ); // "handled": nothing is sent
 		}
 	},
 	0
 );
 
-const AW_FF_OPTION = 'aw_ff_forms'; // key => Fluent Forms form ID
-const AW_FF_FORMS  = array(
+const KITS_FF_OPTION = 'aw_ff_forms'; // key => Fluent Forms form ID
+const KITS_FF_FORMS  = array(
 	'contact'     => array( 'title' => 'Contact', 'thanks' => 'contact', 'limit' => 5 ),
 	'volunteer'   => array( 'title' => 'Volunteer sign-up', 'thanks' => 'volunteer', 'limit' => 5 ),
 	'claim'       => array( 'title' => 'Claim this listing', 'thanks' => 'claim', 'limit' => 5 ),
 	'report'      => array( 'title' => 'Report a mistake', 'thanks' => 'report', 'limit' => 10 ),
 );
 /** What the custom fields post (Fluent Forms keeps only fields it knows, plus these). */
-const AW_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token', 'photo_tokens' );
+const KITS_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token', 'photo_tokens' );
 /** Private uploads: field => most files (photo_tokens: comma-separated tokens; owner, 31 Oct 2026). */
-const AW_FF_UPLOADS = array( 'logo_token' => 1, 'proof_token' => 1, 'photo_tokens' => 5 );
+const KITS_FF_UPLOADS = array( 'logo_token' => 1, 'proof_token' => 1, 'photo_tokens' => 5 );
 
 /** Indian phone fields (owner, 31 Oct 2026): +91 shown before the box, 10 digits typed, saved as "+91 98765 43210". */
-const AW_FF_PHONES = array( 'phone', 'whatsapp', 'org_phone', 'l_phone1', 'l_phone2', 'l_phone3' );
+const KITS_FF_PHONES = array( 'phone', 'whatsapp', 'org_phone', 'l_phone1', 'l_phone2', 'l_phone3' );
 
 /** Claim form social fields => [listing field, link before the username] (the username alone is typed). */
-const AW_FF_SOCIAL = array(
+const KITS_FF_SOCIAL = array(
 	'l_instagram' => array( 'aw_instagram', 'https://www.instagram.com/%s/' ),
 	'l_facebook'  => array( 'aw_facebook', 'https://www.facebook.com/%s' ),
 	'l_x'         => array( 'aw_x', 'https://x.com/%s' ),
@@ -79,10 +82,10 @@ const AW_FF_SOCIAL = array(
 );
 
 /** Claim form dates: typed and shown in the site's format ("8 Oct 2026"), saved as Y-m-d. */
-const AW_FF_DATES = array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' );
+const KITS_FF_DATES = array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' );
 
 /** An Indian number's 10 digits ('' when it is not one): +91, 91 or 0 before it, spaces and dashes allowed. */
-function aw_ff_phone10( $v ) {
+function kits_ff_phone10( $v ) {
 	$d = preg_replace( '/\D+/', '', (string) $v );
 	if ( 12 === strlen( $d ) && 0 === strpos( $d, '91' ) ) {
 		$d = substr( $d, 2 );
@@ -93,13 +96,13 @@ function aw_ff_phone10( $v ) {
 }
 
 /** A number as the site saves it: "+91 98765 43210"; anything else unchanged. */
-function aw_ff_phone_store( $v ) {
-	$d = aw_ff_phone10( $v );
+function kits_ff_phone_store( $v ) {
+	$d = kits_ff_phone10( $v );
 	return '' !== $d ? '+91 ' . substr( $d, 0, 5 ) . ' ' . substr( $d, 5 ) : trim( (string) $v );
 }
 
 /** Each social field's own hosts and the path before the username in its links. */
-const AW_FF_SOCIAL_HOSTS = array(
+const KITS_FF_SOCIAL_HOSTS = array(
 	'l_instagram' => array( 'instagram\.com', '' ),
 	'l_facebook'  => array( '(?:facebook|fb)\.com', '' ),
 	'l_x'         => array( '(?:x|twitter)\.com', '' ),
@@ -108,10 +111,10 @@ const AW_FF_SOCIAL_HOSTS = array(
 );
 
 /** A social link or "@name" as the username alone ('' when it is not a username or a link of that field's platform). */
-function aw_ff_social_user( $field, $v ) {
+function kits_ff_social_user( $field, $v ) {
 	$v = trim( (string) $v );
 	if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) { // a link: only this platform's, in its username form
-		$h = AW_FF_SOCIAL_HOSTS[ $field ] ?? null;
+		$h = KITS_FF_SOCIAL_HOSTS[ $field ] ?? null;
 		if ( ! $h || ! preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . $h[0] . '/' . preg_quote( $h[1], '#' ) . '([A-Za-z0-9._-]{1,100})/?(?:[?\#].*)?$#i', $v, $m ) ) {
 			return '';
 		}
@@ -122,7 +125,7 @@ function aw_ff_social_user( $field, $v ) {
 }
 
 /** A date typed as "8 Oct 2026" (or 2026-10-08) as Y-m-d; '' when it cannot be read. */
-function aw_ff_date_ymd( $v ) {
+function kits_ff_date_ymd( $v ) {
 	$v = trim( (string) $v );
 	if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $v, $m ) ) {
 		return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) ? $v : ''; // a real calendar date only (not 2026-99-99)
@@ -138,33 +141,33 @@ function aw_ff_date_ymd( $v ) {
 }
 
 /** The form's values as saved (phones +91, claim usernames, claim dates Y-m-d). */
-function aw_ff_normalise( $data ) {
+function kits_ff_normalise( $data ) {
 	if ( array_key_exists( 'org_listing', $data ) ) { // the Organisation picked from the Directory: only a published listing; its own name
-		$lid                 = function_exists( 'aw_org_listing_ok' ) && aw_ff_ticked( $data, 'org_assoc' ) ? aw_org_listing_ok( $data['org_listing'] ) : 0;
+		$lid                 = function_exists( 'aw_org_listing_ok' ) && kits_ff_ticked( $data, 'org_assoc' ) ? aw_org_listing_ok( $data['org_listing'] ) : 0;
 		$data['org_listing'] = $lid ? (string) $lid : '';
 		if ( $lid ) {
 			$data['org_name'] = html_entity_decode( get_the_title( $lid ), ENT_QUOTES );
 		}
 	}
-	if ( aw_ff_ticked( $data, 'wa_same' ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
+	if ( kits_ff_ticked( $data, 'wa_same' ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
 		$data['whatsapp'] = (string) $data['phone']; // "Same as my phone" (entries before 12 Nov 2026)
 	}
-	if ( aw_ff_ticked( $data, 'wa_optin' ) && '' === trim( (string) ( $data['whatsapp'] ?? '' ) ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
+	if ( kits_ff_ticked( $data, 'wa_optin' ) && '' === trim( (string) ( $data['whatsapp'] ?? '' ) ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
 		$data['whatsapp'] = (string) $data['phone']; // one Mobile field; "On WhatsApp" ticked = it is their WhatsApp (owner, 12 Nov 2026)
 	}
-	foreach ( AW_FF_PHONES as $k ) {
+	foreach ( KITS_FF_PHONES as $k ) {
 		if ( isset( $data[ $k ] ) && is_string( $data[ $k ] ) && '' !== trim( $data[ $k ] ) ) {
-			$data[ $k ] = aw_ff_phone_store( $data[ $k ] );
+			$data[ $k ] = kits_ff_phone_store( $data[ $k ] );
 		}
 	}
-	foreach ( array_keys( AW_FF_SOCIAL ) as $k ) {
-		$u = isset( $data[ $k ] ) && is_string( $data[ $k ] ) ? aw_ff_social_user( $k, $data[ $k ] ) : '';
+	foreach ( array_keys( KITS_FF_SOCIAL ) as $k ) {
+		$u = isset( $data[ $k ] ) && is_string( $data[ $k ] ) ? kits_ff_social_user( $k, $data[ $k ] ) : '';
 		if ( '' !== $u ) {
 			$data[ $k ] = $u;
 		}
 	}
-	foreach ( AW_FF_DATES as $k ) {
-		$d = isset( $data[ $k ] ) && is_string( $data[ $k ] ) ? aw_ff_date_ymd( $data[ $k ] ) : '';
+	foreach ( KITS_FF_DATES as $k ) {
+		$d = isset( $data[ $k ] ) && is_string( $data[ $k ] ) ? kits_ff_date_ymd( $data[ $k ] ) : '';
 		if ( '' !== $d ) {
 			$data[ $k ] = $d;
 		}
@@ -173,18 +176,18 @@ function aw_ff_normalise( $data ) {
 }
 
 /** The Fluent Forms form ID for a form key, or 0 (Fluent Forms off, or the form not set up: nothing shows). */
-function aw_ff_id( $key ) {
+function kits_ff_id( $key ) {
 	if ( ! defined( 'FLUENTFORM' ) ) {
 		return 0;
 	}
-	return (int) ( ( (array) get_option( AW_FF_OPTION, array() ) )[ $key ] ?? 0 );
+	return (int) ( ( (array) get_option( KITS_FF_OPTION, array() ) )[ $key ] ?? 0 );
 }
 
 /** The form key of a Fluent Forms form, or '' when it is not one of these five. */
-function aw_ff_key( $form ) {
+function kits_ff_key( $form ) {
 	$id = (int) ( is_object( $form ) ? $form->id : $form );
-	foreach ( (array) get_option( AW_FF_OPTION, array() ) as $k => $fid ) {
-		if ( $id && (int) $fid === $id && isset( AW_FF_FORMS[ $k ] ) ) {
+	foreach ( (array) get_option( KITS_FF_OPTION, array() ) as $k => $fid ) {
+		if ( $id && (int) $fid === $id && isset( KITS_FF_FORMS[ $k ] ) ) {
 			return $k;
 		}
 	}
@@ -192,17 +195,17 @@ function aw_ff_key( $form ) {
 }
 
 /** A form that gets the site's look: the site's forms and Newsletter (full) #9 (the footer box #3 keeps its own). */
-function aw_ff_styled( $form ) {
+function kits_ff_styled( $form ) {
 	$id = (int) ( is_object( $form ) ? $form->id : $form );
-	return '' !== aw_ff_key( $form ) || ( $id && (int) get_option( 'aw_nl_ff_form_full' ) === $id );
+	return '' !== kits_ff_key( $form ) || ( $id && (int) get_option( 'aw_nl_ff_form_full' ) === $id );
 }
 
 /**
  * Whether a Fluent Forms form is being rendered inside one of the site's kit wrappers ([data-kit-form]); set by the
- * wrapper around its do_shortcode() call (aw_ff_kit_wrap()). Such a form gets the kit field icons (owner, 2 Nov 2026).
+ * wrapper around its do_shortcode() call (kits_ff_kit_wrap()). Such a form gets the kit field icons (owner, 2 Nov 2026).
  */
-function aw_ff_in_kit_wrap() {
-	return ! empty( $GLOBALS['aw_ff_kit_wrap'] );
+function kits_ff_in_kit_wrap() {
+	return ! empty( $GLOBALS['kits_ff_kit_wrap'] );
 }
 
 /**
@@ -211,16 +214,28 @@ function aw_ff_in_kit_wrap() {
  * @param string $shortcode The [fluentform …] shortcode.
  * @return string
  */
-function aw_ff_kit_wrap( $shortcode ) {
-	$GLOBALS['aw_ff_kit_wrap'] = true;
+function kits_ff_kit_wrap( $shortcode ) {
+	$GLOBALS['kits_ff_kit_wrap'] = true;
 	$html                      = do_shortcode( $shortcode );
-	$GLOBALS['aw_ff_kit_wrap'] = false;
+	$GLOBALS['kits_ff_kit_wrap'] = false;
 	return $html;
 }
 
+/**
+ * A form part's stylesheet from the site's component sheets (the theme layer's aw_use_component_style(), when it is
+ * loaded; without it nothing is added).
+ *
+ * @param string $handle Component sheet handle.
+ */
+function kits_ff_style( $handle ) {
+	if ( function_exists( 'aw_use_component_style' ) ) {
+		aw_use_component_style( $handle );
+	}
+}
+
 /** What a form is shown for (listing, item, source, the update link's contact), while it renders. */
-function aw_ff_ctx( $k = null ) {
-	$c = (array) ( $GLOBALS['aw_ff_ctx'] ?? array() );
+function kits_ff_ctx( $k = null ) {
+	$c = (array) ( $GLOBALS['kits_ff_ctx'] ?? array() );
 	return null === $k ? $c : ( $c[ $k ] ?? null );
 }
 
@@ -230,22 +245,22 @@ function aw_ff_ctx( $k = null ) {
  * A form, as Fluent Forms renders it, in the site's wrapper (the same classes, so the same look and analytics).
  * Without Fluent Forms or the form's ID (wp aw ff-form): nothing for visitors, a short note for administrators.
  *
- * @param string $key Form key (AW_FF_FORMS).
+ * @param string $key Form key (KITS_FF_FORMS).
  * @param array  $ctx What the form is shown for: listing, item, reason, source, vol_contact.
  * @return string
  */
-function aw_ff_form( $key, $ctx = array() ) {
-	$id = aw_ff_id( $key );
+function kits_ff_form( $key, $ctx = array() ) {
+	$id = kits_ff_id( $key );
 	if ( ! $id ) {
-		return aw_ff_missing( AW_FF_FORMS[ $key ]['title'] ?? $key, 'wp aw ff-form ' . $key . ' <form ID>' );
+		return kits_ff_missing( KITS_FF_FORMS[ $key ]['title'] ?? $key, 'wp aw ff-form ' . $key . ' <form ID>' );
 	}
-	aw_use_component_style( 'aw-forms' ); // the kit-form aw-form-ff wrapper
+	kits_ff_style( 'aw-forms' ); // the kit-form aw-form-ff wrapper
 	if ( 'volunteer' === $key ) {
-		aw_use_component_style( 'aw-volunteer' ); // aw-volunteer-form, aw-vol-roles, aw-vol-role
+		kits_ff_style( 'aw-volunteer' ); // aw-volunteer-form, aw-vol-roles, aw-vol-role
 	}
-	$GLOBALS['aw_ff_ctx'] = (array) $ctx + array( 'key' => $key );
+	$GLOBALS['kits_ff_ctx'] = (array) $ctx + array( 'key' => $key );
 	$form                 = do_shortcode( '[fluentform id="' . $id . '"]' );
-	$GLOBALS['aw_ff_ctx'] = array();
+	$GLOBALS['kits_ff_ctx'] = array();
 	$attrs                = '';
 	if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor
 		$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
@@ -258,7 +273,7 @@ function aw_ff_form( $key, $ctx = array() ) {
 }
 
 /** A form that cannot show (Fluent Forms off, or its ID not set): nothing for visitors, a note for administrators. */
-function aw_ff_missing( $title, $fix ) {
+function kits_ff_missing( $title, $fix ) {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return '';
 	}
@@ -267,20 +282,20 @@ function aw_ff_missing( $title, $fix ) {
 }
 
 // No browser bubbles: Fluent Forms and the site's messages show the errors.
-add_filter( 'fluentform/html_attributes', fn( $a, $form ) => aw_ff_key( $form ) ? $a + array( 'novalidate' => 'novalidate' ) : $a, 10, 2 );
+add_filter( 'fluentform/html_attributes', fn( $a, $form ) => kits_ff_key( $form ) ? $a + array( 'novalidate' => 'novalidate' ) : $a, 10, 2 );
 
 /** The page path a submission comes from (S5.8): the listing's page for claims and reports, else the page. */
-function aw_ff_source() {
-	$listing = aw_ff_ctx( 'listing' );
+function kits_ff_source() {
+	$listing = kits_ff_ctx( 'listing' );
 	if ( $listing ) {
 		return trim( wp_make_link_relative( (string) get_permalink( $listing ) ), '/' );
 	}
-	$src = (string) aw_ff_ctx( 'source' );
+	$src = (string) kits_ff_ctx( 'source' );
 	return '' !== $src ? $src : kits_form_source();
 }
 
 /** A Fluent Forms-shaped field group around our own control (so its error messages land in the same place). */
-function aw_ff_group( $id, $label, $control, $o = array() ) {
+function kits_ff_group( $id, $label, $control, $o = array() ) {
 	$opt  = empty( $o['required'] ) ? ' <span class="kit-optional">(optional)</span>' : '';
 	$hint = empty( $o['hint'] ) ? '' : '<div class="ff-el-help-message ff_ahm">' . esc_html( $o['hint'] ) . '</div>';
 	$icon = empty( $o['icon'] ) ? '' : '<span class="kit-ico kit-ico--' . esc_attr( $o['icon'] ) . ' kit-field-icon" aria-hidden="true"></span>';
@@ -301,9 +316,9 @@ add_action(
 			return;
 		}
 		$fields = array(
-			'aw_places' => array( 'PIN code, State and District', 'aw_ff_render_places' ),
-			'aw_check'  => array( 'Spam check (ALTCHA)', 'aw_ff_render_check' ),
-			'aw_logo'   => array( 'Private upload (logo, proof)', 'aw_ff_render_logo' ),
+			'aw_places' => array( 'PIN code, State and District', 'kits_ff_render_places' ),
+			'aw_check'  => array( 'Spam check (ALTCHA)', 'kits_ff_render_check' ),
+			'aw_logo'   => array( 'Private upload (logo, proof)', 'kits_ff_render_logo' ),
 		);
 		foreach ( $fields as $key => $f ) {
 			new class( $key, $f[0], $f[1] ) extends \FluentForm\App\Services\FormBuilder\BaseFieldManager {
@@ -313,7 +328,7 @@ add_action(
 					parent::__construct( $key, $title, array( 'animal writes' ), 'advanced' );
 				}
 				public function pushFormInputType( $types ) {
-					return $types; // posts its own inputs (see AW_FF_EXTRA); not an entry column of its own
+					return $types; // posts its own inputs (see KITS_FF_EXTRA); not an entry column of its own
 				}
 				public function getComponent() {
 					return array(
@@ -341,9 +356,9 @@ add_action(
 
 /** PIN code → State and District (LGD), as in places.php: the PIN fills both (aw.js); never a typed state. Setting
  *  "required": "no" (the Newsletter form) makes the state optional. */
-function aw_ff_render_places( $element, $form ) {
+function kits_ff_render_places( $element, $form ) {
 	$need = 'no' !== ( $element['settings']['required'] ?? 'yes' );
-	$who  = aw_ff_ctx( 'vol_contact' ); // the update link: their State and PIN code to start with
+	$who  = kits_ff_ctx( 'vol_contact' ); // the update link: their State and PIN code to start with
 	$cf   = $who ? (array) $who->custom_fields() : array();
 	$f    = 'ff' . (int) $form->id;
 	$dict = kits_field_dict();
@@ -353,14 +368,14 @@ function aw_ff_render_places( $element, $form ) {
 	foreach ( array_merge( $pin['attrs'], array( 'placeholder' => $pin['placeholder'] ) ) as $k => $v ) {
 		$a .= ' ' . esc_attr( $k ) . '="' . esc_attr( (string) $v ) . '"';
 	}
-	$html  = aw_ff_group( $pid, 'PIN code', '<input type="text" id="' . esc_attr( $pid ) . '" name="pincode" class="ff-el-form-control" value="' . esc_attr( (string) ( $cf['vol_pincode'] ?? '' ) ) . '" aria-describedby="' . esc_attr( $pid ) . '-error"' . $a . '><span class="kit-field-message kit-field-error" id="' . esc_attr( $pid ) . '-error" aria-live="polite"></span>', array( 'icon' => $pin['icon'], 'class' => 'aw-form-ff-half' ) );
+	$html  = kits_ff_group( $pid, 'PIN code', '<input type="text" id="' . esc_attr( $pid ) . '" name="pincode" class="ff-el-form-control" value="' . esc_attr( (string) ( $cf['vol_pincode'] ?? '' ) ) . '" aria-describedby="' . esc_attr( $pid ) . '-error"' . $a . '><span class="kit-field-message kit-field-error" id="' . esc_attr( $pid ) . '-error" aria-live="polite"></span>', array( 'icon' => $pin['icon'], 'class' => 'aw-form-ff-half' ) );
 	$sid   = $f . '-state';
 	$did   = $f . '-district';
 	$opts  = '<option value="">Choose a state</option>';
 	foreach ( aw_place_states() as $st ) {
 		$opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( (string) ( $cf['vol_state'] ?? '' ), $st->name, false ) . '>' . esc_html( $st->name ) . '</option>';
 	}
-	$html .= aw_ff_group( $sid, 'State', '<select id="' . esc_attr( $sid ) . '" name="state" class="ff-el-form-control"' . ( $need ? ' required data-msg-required="Choose a state"' : '' ) . ' autocomplete="address-level1" data-district-select="' . esc_attr( $did ) . '">' . $opts . '</select>', array( 'required' => $need, 'class' => 'aw-form-ff-half' ) );
+	$html .= kits_ff_group( $sid, 'State', '<select id="' . esc_attr( $sid ) . '" name="state" class="ff-el-form-control"' . ( $need ? ' required data-msg-required="Choose a state"' : '' ) . ' autocomplete="address-level1" data-district-select="' . esc_attr( $did ) . '">' . $opts . '</select>', array( 'required' => $need, 'class' => 'aw-form-ff-half' ) );
 	$opts  = '<option value="" data-none="Choose a state first" data-all="Choose a district">Choose a state first</option>';
 	foreach ( aw_place_states() as $st ) {
 		$opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '" hidden disabled>';
@@ -369,25 +384,25 @@ function aw_ff_render_places( $element, $form ) {
 		}
 		$opts .= '</optgroup>';
 	}
-	$html .= aw_ff_group( $did, 'District', '<select id="' . esc_attr( $did ) . '" name="district" class="ff-el-form-control" autocomplete="address-level2" disabled>' . $opts . '</select>', array( 'class' => 'aw-form-ff-half' ) );
+	$html .= kits_ff_group( $did, 'District', '<select id="' . esc_attr( $did ) . '" name="district" class="ff-el-form-control" autocomplete="address-level2" disabled>' . $opts . '</select>', array( 'class' => 'aw-form-ff-half' ) );
 	return '<div class="aw-ff-places">' . $html . '</div>'; // PIN, State, District as one row from 768 (owner, 31 Oct 2026)
 }
 
 /** The spam check: ALTCHA (no third party, no cookies), plus the site's timing, honeypot and source fields. */
-function aw_ff_render_check( $element, $form ) {
+function kits_ff_render_check( $element, $form ) {
 	$widget = str_replace( '<div class="kit-captcha"', '<div class="kit-captcha" data-placed', kits_altcha_widget() ); // stays here, above Send
 	return '<div class="ff-el-group aw-form-ff-check"><div class="ff-el-input--content" data-name="altcha">'
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
-		. '<input type="hidden" name="aw_source" value="' . esc_attr( aw_ff_source() ) . '">'
+		. '<input type="hidden" name="aw_source" value="' . esc_attr( kits_ff_source() ) . '">'
 		. '<p class="kit-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="kits_hp" tabindex="-1" autocomplete="off"></label></p>'
 		. $widget . '</div></div>';
 }
 
 /** A private upload: picked → checked and sent at once to the private folder (aw.js), the form then carries its token
- *  (several, comma-separated, for photo_tokens). The field's name (AW_FF_UPLOADS), label and help come from the form. */
-function aw_ff_render_logo( $element, $form ) {
-	$name = isset( AW_FF_UPLOADS[ $element['attributes']['name'] ?? '' ] ) ? $element['attributes']['name'] : 'logo_token';
-	$max  = AW_FF_UPLOADS[ $name ];
+ *  (several, comma-separated, for photo_tokens). The field's name (KITS_FF_UPLOADS), label and help come from the form. */
+function kits_ff_render_logo( $element, $form ) {
+	$name = isset( KITS_FF_UPLOADS[ $element['attributes']['name'] ?? '' ] ) ? $element['attributes']['name'] : 'logo_token';
+	$max  = KITS_FF_UPLOADS[ $name ];
 	$id   = 'ff' . (int) $form->id . '-' . $name;
 	$d    = kits_field_dict()['logo'];
 	$ctl  = '<input type="file" id="' . esc_attr( $id ) . '" accept="' . esc_attr( $d['attrs']['accept'] ) . '" data-max-bytes="' . (int) $d['attrs']['data-max-bytes'] . '" data-msg-file="' . esc_attr( $d['attrs']['data-msg-file'] ) . '" data-aw-upload="' . esc_url( admin_url( 'admin-ajax.php?action=aw_ff_upload' ) ) . '"' . ( $max > 1 ? ' multiple data-max-files="' . (int) $max . '" data-msg-files="' . esc_attr( 'Choose up to ' . $max . ' pictures.' ) . '"' : '' ) . ' aria-describedby="' . esc_attr( $id ) . '-error">'
@@ -395,14 +410,14 @@ function aw_ff_render_logo( $element, $form ) {
 		. '<span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite"></span>';
 	$label = wp_strip_all_tags( (string) ( $element['settings']['label'] ?? 'Logo' ) );
 	$hint  = (string) ( $element['settings']['help_message'] ?? 'PNG, JPG or WebP, up to 2 MB.' );
-	return aw_ff_group( $id, $label, $ctl, array( 'hint' => $hint, 'data_name' => $name ) );
+	return kits_ff_group( $id, $label, $ctl, array( 'hint' => $hint, 'data_name' => $name ) );
 }
 
 /* ---------- Fluent Forms fields: the site's look ---------- */
 
 /** The Volunteer form's ways to help => Kits icon (owner, 31 Oct 2026). */
 /** An icon before each choice: field name => ( option value => Kits icon ). Tiles and chips use the same map. */
-const AW_FF_OPTION_ICONS = array(
+const KITS_FF_OPTION_ICONS = array(
 	'roles'        => array( 'coordinate' => 'campaign', 'letters' => 'send', 'rescue' => 'injured', 'creative' => 'share', 'legal' => 'legal' ),
 	'availability' => array( 'weekdays' => 'calendar', 'weekends' => 'sun', 'evenings' => 'moon', 'emergencies' => 'siren' ),
 	'travel_range' => array( '5km' => 'map-pin', 'district' => 'map', 'state' => 'landmark', 'anywhere' => 'world' ),
@@ -410,7 +425,7 @@ const AW_FF_OPTION_ICONS = array(
 );
 
 /** Icons inside fields, as the site's own forms have them. Social link boxes take the "Elsewhere" icons (aw_social_icon, pages.php). */
-const AW_FF_ICONS = array(
+const KITS_FF_ICONS = array(
 	'name'         => 'name',
 	'email'        => 'mail',
 	'l_email'      => 'mail',
@@ -437,7 +452,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 	add_filter(
 		'fluentform/rendering_field_data_' . $aw_ff_el,
 		function ( $data, $form ) {
-			if ( ! aw_ff_styled( $form ) ) {
+			if ( ! kits_ff_styled( $form ) ) {
 				return $data;
 			}
 			$rules = (array) ( $data['settings']['validation_rules'] ?? array() );
@@ -450,14 +465,14 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 					$data['attributes']['data-msg-email'] = (string) $rules['email']['message'];
 				}
 			}
-			$data = function_exists( 'aw_ff_update_values' ) ? aw_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
+			$data = function_exists( 'kits_ff_update_values' ) ? kits_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
 			$name = (string) ( $data['attributes']['name'] ?? '' );
-			if ( 'org_name' === $name && 'volunteer' === aw_ff_key( $form ) ) { // the Directory picker (aw.js, org-people.php)
-				aw_use_component_style( 'aw-directory' ); // aw.js adds aw-org-host and aw-org-list
+			if ( 'org_name' === $name && 'volunteer' === kits_ff_key( $form ) ) { // the Directory picker (aw.js, org-people.php)
+				kits_ff_style( 'aw-directory' ); // aw.js adds aw-org-host and aw-org-list
 				$data['attributes']['data-aw-org-search'] = admin_url( 'admin-ajax.php?action=aw_org_search' );
 			}
-			if ( in_array( $name, AW_FF_PHONES, true ) && is_string( $data['attributes']['value'] ?? null ) && '' !== aw_ff_phone10( $data['attributes']['value'] ) ) {
-				$data['attributes']['value'] = aw_ff_phone10( $data['attributes']['value'] ); // the 10 digits after the "+91" in front of the box
+			if ( in_array( $name, KITS_FF_PHONES, true ) && is_string( $data['attributes']['value'] ?? null ) && '' !== kits_ff_phone10( $data['attributes']['value'] ) ) {
+				$data['attributes']['value'] = kits_ff_phone10( $data['attributes']['value'] ); // the 10 digits after the "+91" in front of the box
 			}
 			return $data;
 		},
@@ -467,10 +482,10 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 	add_filter(
 		'fluentform/rendering_field_html_' . $aw_ff_el,
 		function ( $html, $data, $form ) {
-			if ( ! aw_ff_styled( $form ) ) { // a form in a kit wrapper ([data-kit-form]) gets the field icons only
+			if ( ! kits_ff_styled( $form ) ) { // a form in a kit wrapper ([data-kit-form]) gets the field icons only
 				$name = is_array( $data ) ? (string) ( $data['attributes']['name'] ?? '' ) : '';
-				$icon = AW_FF_ICONS[ $name ] ?? '';
-				return aw_ff_in_kit_wrap() && $icon && is_array( $data ) && in_array( $data['element'] ?? '', array( 'input_text', 'input_email', 'input_url' ), true ) && empty( $data['settings']['prefix_label'] )
+				$icon = KITS_FF_ICONS[ $name ] ?? '';
+				return kits_ff_in_kit_wrap() && $icon && is_array( $data ) && in_array( $data['element'] ?? '', array( 'input_text', 'input_email', 'input_url' ), true ) && empty( $data['settings']['prefix_label'] )
 					? (string) preg_replace( '/(<input\b[^>]*>)/', '<div class="kit-field-control"><span class="kit-ico kit-ico--' . $icon . ' kit-field-icon" aria-hidden="true"></span>$1</div>', $html, 1 )
 					: $html;
 			}
@@ -490,13 +505,13 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 				}
 				$html = (string) preg_replace( '#<div class=([\'"])ff-el-input--content\1#', '<div role="' . ( 'input_radio' === $el ? 'radiogroup' : 'group' ) . '" aria-labelledby="' . $gid . '" class=$1ff-el-input--content$1', $html, 1 );
 			}
-			$opt_icons = AW_FF_OPTION_ICONS[ rtrim( $name, '[]' ) ] ?? array(); // each choice with its icon: role tiles, chips and the segment
+			$opt_icons = KITS_FF_OPTION_ICONS[ rtrim( $name, '[]' ) ] ?? array(); // each choice with its icon: role tiles, chips and the segment
 			foreach ( $opt_icons as $val => $ico ) {
 				$html = (string) preg_replace( '#(value=[\'"]' . preg_quote( $val, '#' ) . '[\'"][^>]*>)(\s*)<span>#', '$1$2<span class="kit-ico kit-ico--' . $ico . ' aw-ff-opt-ico" aria-hidden="true"></span><span>', $html, 1 );
 			}
 			$prefix = (string) ( $data['settings']['prefix_label'] ?? '' );
 			$social = '' !== $prefix && '+91' !== $prefix ? aw_social_icon( $prefix ) : '';
-			$icon   = AW_FF_ICONS[ $name ] ?? ( '' === $prefix ? '' : ( '+91' === $prefix ? 'phone' : ( '' !== $social ? $social : 'world' ) ) );
+			$icon   = KITS_FF_ICONS[ $name ] ?? ( '' === $prefix ? '' : ( '+91' === $prefix ? 'phone' : ( '' !== $social ? $social : 'world' ) ) );
 			$boxes  = array( 'input_text', 'input_email', 'input_url' );
 			if ( $icon && '' !== $prefix && in_array( $el, $boxes, true ) ) { // the icon, then the fixed part ("+91", "instagram.com/") as plain text inside the same box
 				$value = $data['attributes']['value'] ?? '';
@@ -522,25 +537,25 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 /* ---------- Submitting ---------- */
 
 // The values the FluentCRM links and the follow-up below see: the same as saved (+91 numbers and so on).
-add_filter( 'fluentform/submission_form_data', fn( $data, $insert_id, $form ) => aw_ff_key( $form ) ? aw_ff_normalise( (array) $data ) : $data, 10, 3 );
+add_filter( 'fluentform/submission_form_data', fn( $data, $insert_id, $form ) => kits_ff_key( $form ) ? kits_ff_normalise( (array) $data ) : $data, 10, 3 );
 
 // The custom fields' inputs are kept with the entry.
-add_filter( 'fluentform/white_listed_fields', fn( $f, $form_id ) => aw_ff_key( $form_id ) ? array_merge( $f, AW_FF_EXTRA ) : $f, 10, 2 );
+add_filter( 'fluentform/white_listed_fields', fn( $f, $form_id ) => kits_ff_key( $form_id ) ? array_merge( $f, KITS_FF_EXTRA ) : $f, 10, 2 );
 
 /** Was a Fluent Forms tick box ticked? Fluent Forms saves nothing for an unticked box: empty is 0. */
-function aw_ff_ticked( $data, $name ) {
+function kits_ff_ticked( $data, $name ) {
 	return (bool) array_filter( (array) ( $data[ $name ] ?? array() ), fn( $v ) => '' !== (string) $v && '0' !== (string) $v );
 }
 
 /** An upload for this form (its token), as a file in the private folder, or ''. */
-function aw_ff_logo_file( $token ) {
+function kits_ff_logo_file( $token ) {
 	$token = (string) $token;
 	return preg_match( '/^[a-f0-9]{32}$/', $token ) && is_file( aw_private_dir() . '/tmp-' . $token . '.png' ) ? 'tmp-' . $token . '.png' : '';
 }
 
 /** An upload moved from its temporary name to its own, or ''. */
-function aw_ff_keep_upload( $token ) {
-	$file = aw_ff_logo_file( $token );
+function kits_ff_keep_upload( $token ) {
+	$file = kits_ff_logo_file( $token );
 	if ( ! $file ) {
 		return '';
 	}
@@ -549,7 +564,7 @@ function aw_ff_keep_upload( $token ) {
 }
 
 /** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (AW-12, AW-C-3 …). */
-function aw_ff_ref( $key, $entry_id ) {
+function kits_ff_ref( $key, $entry_id ) {
 	$prefix = array( 'contact' => 'AW-', 'volunteer' => 'AW-V-', 'claim' => 'AW-C-', 'report' => 'AW-R-' );
 	$serial = (int) \FluentForm\App\Models\Submission::where( 'id', (int) $entry_id )->value( 'serial_number' );
 	return $serial ? ( $prefix[ $key ] ?? 'AW-' ) . $serial : '';
@@ -559,30 +574,30 @@ function aw_ff_ref( $key, $entry_id ) {
  * The custom fields' own checks: a real State and District from the LGD picker (the Volunteer form needs a state) and
  * an upload that arrived. Everything else (required, email, web address) is Fluent Forms' own validation.
  */
-function aw_ff_errors( $key, $data ) {
+function kits_ff_errors( $key, $data ) {
 	$errors = array();
 	if ( 'volunteer' === $key ) {
-		$errors = array_intersect_key( aw_volunteer_errors( aw_volunteer_values( $data ) ), array_flip( array( 'state', 'district', 'pincode' ) ) );
+		$errors = array_intersect_key( kits_volunteer_errors( kits_volunteer_values( $data ) ), array_flip( array( 'state', 'district', 'pincode' ) ) );
 	}
 	$lid  = 'claim' === $key ? absint( $data['listing'] ?? 0 ) : 0;
 	$have = $lid && function_exists( 'aw_listing_phones' ) ? array_map( fn( $r ) => preg_replace( '/\D+/', '', $r['number'] ), aw_listing_phones( $lid ) ) : array();
-	foreach ( AW_FF_PHONES as $k ) {
+	foreach ( KITS_FF_PHONES as $k ) {
 		$v = trim( (string) ( is_string( $data[ $k ] ?? '' ) ? ( $data[ $k ] ?? '' ) : '' ) );
-		if ( '' !== $v && '' === aw_ff_phone10( $v ) && ! in_array( preg_replace( '/\D+/', '', $v ), $have, true ) ) { // a listing's own number may stay as it is (helplines like 1962)
+		if ( '' !== $v && '' === kits_ff_phone10( $v ) && ! in_array( preg_replace( '/\D+/', '', $v ), $have, true ) ) { // a listing's own number may stay as it is (helplines like 1962)
 			$errors[ $k ] = in_array( $k, array( 'phone', 'whatsapp' ), true ) ? 'Enter 10 digits.' : 'Enter a 10-digit number, like 9876543210.'; // Mobile wording: owner, 12 Nov 2026
 		}
 	}
 	if ( 'claim' === $key ) {
-		foreach ( array_keys( AW_FF_SOCIAL ) as $k ) {
+		foreach ( array_keys( KITS_FF_SOCIAL ) as $k ) {
 			$v = trim( (string) ( $data[ $k ] ?? '' ) );
-			$own = (bool) preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . AW_FF_SOCIAL_HOSTS[ $k ][0] . '/#i', $v ); // a link of this platform the box cannot reduce (a channel, an /in/ profile) is kept
-			if ( '' !== $v && '' === aw_ff_social_user( $k, $v ) && ! $own ) {
+			$own = (bool) preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . KITS_FF_SOCIAL_HOSTS[ $k ][0] . '/#i', $v ); // a link of this platform the box cannot reduce (a channel, an /in/ profile) is kept
+			if ( '' !== $v && '' === kits_ff_social_user( $k, $v ) && ! $own ) {
 				$errors[ $k ] = 'Enter the username only, like animalwrites.';
 			}
 		}
-		foreach ( AW_FF_DATES as $k ) {
+		foreach ( KITS_FF_DATES as $k ) {
 			$v = trim( (string) ( $data[ $k ] ?? '' ) );
-			if ( '' !== $v && '' === aw_ff_date_ymd( $v ) ) {
+			if ( '' !== $v && '' === kits_ff_date_ymd( $v ) ) {
 				$errors[ $k ] = 'Enter a date like 8 Oct 2026.';
 			}
 		}
@@ -591,9 +606,9 @@ function aw_ff_errors( $key, $data ) {
 			$errors['l_founded'] = 'Enter a year, like 2010.';
 		}
 	}
-	foreach ( AW_FF_UPLOADS as $up => $max ) {
+	foreach ( KITS_FF_UPLOADS as $up => $max ) {
 		$tokens = array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) );
-		if ( count( $tokens ) > $max || array_filter( $tokens, fn( $t ) => ! aw_ff_logo_file( $t ) ) ) {
+		if ( count( $tokens ) > $max || array_filter( $tokens, fn( $t ) => ! kits_ff_logo_file( $t ) ) ) {
 			$errors[ $up ] = 1 < $max ? 'Use up to ' . $max . ' PNG, JPG or WebP pictures, each under 2 MB.' : 'Use a PNG, JPG or WebP under 2 MB.';
 		}
 	}
@@ -601,22 +616,22 @@ function aw_ff_errors( $key, $data ) {
 }
 
 /** Rate-limit key: per form and connection (the key the site's own forms used, so counts carry on). */
-function aw_ff_rl( $key ) {
+function kits_ff_rl( $key ) {
 	return 'aw_rl_aw_' . $key . '_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 }
 
 add_filter(
 	'fluentform/validation_errors',
 	function ( $errors, $data, $form, $fields ) {
-		$key = aw_ff_key( $form );
+		$key = kits_ff_key( $form );
 		if ( ! $key ) {
 			return $errors;
 		}
 		// Bots (honeypot filled, or sent within 3 seconds) see a success; nothing is saved.
 		if ( ! empty( $data['kits_hp'] ) || ( time() - (int) ( $data['aw_t'] ?? 0 ) ) < 3 ) {
-			wp_send_json_success( array( 'insert_id' => 0, 'result' => array( 'redirectUrl' => kits_thanks_url( AW_FF_FORMS[ $key ]['thanks'] ), 'message' => '' ) ) );
+			wp_send_json_success( array( 'insert_id' => 0, 'result' => array( 'redirectUrl' => kits_thanks_url( KITS_FF_FORMS[ $key ]['thanks'] ), 'message' => '' ) ) );
 		}
-		foreach ( aw_ff_errors( $key, $data ) as $field => $msg ) {
+		foreach ( kits_ff_errors( $key, $data ) as $field => $msg ) {
 			if ( empty( $errors[ $field ] ) ) {
 				$errors[ $field ] = array( 'aw' => $msg );
 			}
@@ -624,7 +639,7 @@ add_filter(
 		if ( $errors ) {
 			return $errors; // the ALTCHA answer is checked (and used up) only when everything else is right
 		}
-		if ( (int) get_transient( aw_ff_rl( $key ) ) >= AW_FF_FORMS[ $key ]['limit'] ) {
+		if ( (int) get_transient( kits_ff_rl( $key ) ) >= KITS_FF_FORMS[ $key ]['limit'] ) {
 			return array( 'aw_form' => array( 'aw' => 'Too many tries. Wait a minute, then try again.' ) );
 		}
 		if ( ! kits_altcha_verify( (string) ( $data['altcha'] ?? '' ) ) ) {
@@ -641,14 +656,14 @@ add_filter(
 add_filter(
 	'fluentform/insert_response_data',
 	function ( $data, $form_id ) {
-		if ( ! aw_ff_key( $form_id ) ) {
+		if ( ! kits_ff_key( $form_id ) ) {
 			return $data;
 		}
-		$data = aw_ff_normalise( $data ); // phones +91, claim usernames and dates as saved
-		foreach ( AW_FF_UPLOADS as $up => $max ) {
+		$data = kits_ff_normalise( $data ); // phones +91, claim usernames and dates as saved
+		foreach ( KITS_FF_UPLOADS as $up => $max ) {
 			$links = array();
 			foreach ( array_slice( array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) ), 0, $max ) as $token ) {
-				$file = aw_ff_keep_upload( $token );
+				$file = kits_ff_keep_upload( $token );
 				if ( $file ) {
 					$links[] = add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $file ), admin_url( 'admin-post.php' ) );
 				}
@@ -677,90 +692,14 @@ add_action(
 	}
 );
 
-/*
- * After each form's FluentCRM link (it runs at priority 10, only when "Email me updates" is ticked): what a link cannot
- * do. A link only makes "subscribed" contacts and cannot add a note, so: every Contact, Claim and Volunteer sender
- * (and the /update/ link, which uses the Volunteer form) becomes a contact (tags contact-form, claimant, volunteer),
- * the message or the claim as a note, and the newsletter box as 1/0. The box is only recorded as 1/0; no form changes
- * a contact's status (owner, 1 Nov 2026). Unticked senders are on the Newsletter list all the same, with everything
- * the link would have saved (aw_crm_unticked()). A Contact send
- * with the reason Remove my data never reaches FluentCRM (owner, 31 Oct 2026),
- * whatever is ticked; its entry is kept like any other. Also counts the submission for the per-connection limit.
- */
+// Each send counts towards the per-connection limit (kits_ff_rl()). What happens next for the sender's contact is
+// MailWeb's (mailweb/includes/fluentcrm.php, the same hook and priority).
 add_action(
 	'fluentform/submission_inserted',
-	function ( $entry_id, $data, $form ) {
-		$key = aw_ff_key( $form );
-		if ( ! $key ) {
-			return;
-		}
-		set_transient( aw_ff_rl( $key ), (int) get_transient( aw_ff_rl( $key ) ) + 1, HOUR_IN_SECONDS );
-		if ( ! in_array( $key, array( 'contact', 'claim', 'volunteer' ), true ) || ! aw_crm_on() ) {
-			return;
-		}
-		if ( 'contact' === $key && 'remove' === (string) ( $data['about'] ?? '' ) ) {
-			return; // Remove my data (owner, 31 Oct 2026): the entry is kept, but the sender never becomes or changes a FluentCRM contact (the form's FluentCRM link has the same condition)
-		}
-		$email = strtolower( trim( (string) ( $data['email'] ?? '' ) ) );
-		$name  = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
-		$tags  = array( 'contact' => array( 'contact-form' ), 'claim' => array( 'claimant' ), 'volunteer' => array( 'volunteer' ) )[ $key ];
-		$c     = aw_crm_contact_for( $email, $name, $tags, array( 'contact' => 'contact-form', 'claim' => 'claim', 'volunteer' => 'volunteer-form' )[ $key ] );
-		if ( ! $c ) {
-			return;
-		}
-		if ( ! aw_ff_ticked( $data, 'nl_optin' ) ) {
-			aw_crm_unticked( $c, (int) $form->id, $data );
-		}
-		aw_crm_nl_box( $c, aw_ff_ticked( $data, 'nl_optin' ), AW_FF_FORMS[ $key ]['title'], (string) ( $data['consent_version'] ?? '' ) );
-		if ( 'volunteer' === $key ) { // the LGD picker's values (a link only maps Fluent Forms' own fields): names, not slugs
-			$st = ! empty( $data['state'] ) ? aw_place_by_slug( sanitize_title( (string) $data['state'] ) ) : null;
-			$di = ! empty( $data['district'] ) ? aw_place_by_slug( sanitize_title( (string) $data['district'] ) ) : null;
-			// and the ticks as 1/0: an unticked box sends nothing, so the link leaves the field blank
-			$c->syncCustomFieldValues(
-				array_filter( array( 'vol_state' => $st ? $st->name : '', 'vol_district' => $di ? $di->name : '', 'vol_pincode' => preg_replace( '/\D/', '', (string) ( $data['pincode'] ?? '' ) ) ) )
-				+ array(
-					'vol_wa_optin'      => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0',
-					'vol_org_show'      => aw_ff_ticked( $data, 'org_show' ) ? '1' : '0',
-					// helper profile (owner, 13 Nov 2026; helpers-public.php): both ticks, as 1/0, and the form-B answers
-					'vol_helper_public' => aw_ff_ticked( $data, 'helper_public' ) ? '1' : '0',
-					'vol_verify_ok'     => aw_ff_ticked( $data, 'verify_ok' ) ? '1' : '0',
-					'vol_vehicle'       => sanitize_text_field( implode( ', ', (array) ( $data['vehicle'] ?? array() ) ) ),
-					'vol_can_do'        => sanitize_text_field( implode( ', ', (array) ( $data['can_do'] ?? array() ) ) ),
-					'vol_animals_ok'    => sanitize_text_field( implode( ', ', (array) ( $data['animals_ok'] ?? array() ) ) ),
-				),
-				false
-			);
-			if ( aw_ff_ticked( $data, 'helper_public' ) && aw_ff_ticked( $data, 'verify_ok' ) ) { // waits in FluentCRM until the owner swaps helper-pending for helper-approved
-				try {
-					if ( ! $c->tags()->where( 'slug', 'helper-approved' )->exists() ) {
-						$c->attachTags( aw_crm_tag_ids( array( 'helper-pending' ) ) );
-					}
-				} catch ( \Throwable $e ) { // never let a tag problem stop the sign-up
-					error_log( 'aw helpers: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				}
-			}
-		}
-		if ( 'contact' === $key ) {
-			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
-		}
-		$ph = trim( sanitize_text_field( (string) ( $data['phone'] ?? '' ) ) ); // the Mobile (required since 12 Nov 2026) into the contact's own phone field, when it has none
-		$ph = '' !== $ph ? aw_ff_phone_store( $ph ) : '';
-		$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
-		$wa = '' !== $wa ? aw_ff_phone_store( $wa ) : ( aw_ff_ticked( $data, 'wa_optin' ) ? $ph : '' ); // ticked "On WhatsApp": the Mobile
-		if ( 'volunteer' === $key && '' !== $wa ) {
-			$c->syncCustomFieldValues( array( 'vol_whatsapp' => $wa ), false );
-		}
-		if ( '' !== $ph && '' === (string) $c->phone ) {
-			$c->phone = $ph;
-			$c->save();
-		}
-		if ( 'claim' === $key ) {
-			aw_crm_claim_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
-		}
-		if ( in_array( $key, array( 'contact', 'claim' ), true ) ) { // Claim asks for WhatsApp too (found 21 Oct 2026: not copied)
-			if ( '' !== $wa || '' !== $ph ) { // as the link maps them, also for a sender who left the newsletter unticked (the link does not run)
-				$c->syncCustomFieldValues( array_filter( array( 'whatsapp' => $wa ) ) + array( 'wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0' ), false );
-			}
+	function ( $entry_id, $data, $form ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- the hook's arguments
+		$key = kits_ff_key( $form );
+		if ( $key ) {
+			set_transient( kits_ff_rl( $key ), (int) get_transient( kits_ff_rl( $key ) ) + 1, HOUR_IN_SECONDS );
 		}
 	},
 	20,
@@ -768,7 +707,7 @@ add_action(
 );
 
 /** The upload (claim logo and proof): checked like the site's own form, kept in the private folder until sent. */
-function aw_ff_upload() {
+function kits_ff_upload() {
 	nocache_headers();
 	$rl = 'aw_rl_aw_ff_upload_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	if ( (int) get_transient( $rl ) >= 20 ) { // a claim can send 7 (logo, 5 photos, proof)
@@ -790,8 +729,8 @@ function aw_ff_upload() {
 	set_transient( $rl, (int) get_transient( $rl ) + 1, HOUR_IN_SECONDS );
 	wp_send_json_success( array( 'token' => $token ) );
 }
-add_action( 'wp_ajax_nopriv_aw_ff_upload', 'aw_ff_upload' );
-add_action( 'wp_ajax_aw_ff_upload', 'aw_ff_upload' );
+add_action( 'wp_ajax_nopriv_aw_ff_upload', 'kits_ff_upload' );
+add_action( 'wp_ajax_aw_ff_upload', 'kits_ff_upload' );
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	// wp aw ff-form <key> <id>: which Fluent Forms form shows as the site's <key> form (a setup tool: needed again
@@ -802,12 +741,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		function ( $args ) {
 			$key = (string) ( $args[0] ?? '' );
 			$id  = (int) ( $args[1] ?? 0 );
-			if ( ! isset( AW_FF_FORMS[ $key ] ) || ! $id ) {
-				WP_CLI::error( 'Use: wp aw ff-form <' . implode( '|', array_keys( AW_FF_FORMS ) ) . '> <form ID>' );
+			if ( ! isset( KITS_FF_FORMS[ $key ] ) || ! $id ) {
+				WP_CLI::error( 'Use: wp aw ff-form <' . implode( '|', array_keys( KITS_FF_FORMS ) ) . '> <form ID>' );
 			}
-			$ids         = (array) get_option( AW_FF_OPTION, array() );
+			$ids         = (array) get_option( KITS_FF_OPTION, array() );
 			$ids[ $key ] = $id;
-			update_option( AW_FF_OPTION, $ids, false );
+			update_option( KITS_FF_OPTION, $ids, false );
 			WP_CLI::success( "{$key}: form {$id}" );
 		}
 	);

@@ -6,6 +6,12 @@ Generated from `wordpress-dev` at `302f431b` (18 Nov 2026) by matching every `aw
 deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb `aw_i()` / `aw_date()` calls in
 `enrichment-front.php` and the `tools/content/campaign2-page.php` ones are already switched on the content-blocks branch.
 
+Forms, FluentCRM and newsletter (18 Nov 2026, Track G): the `aw_ff_*`, `aw_crm_*`, `aw_report_url()`, `aw_claim_url()`,
+`aw_form_page_listing()`, `AW_FF_*` and `AW_CRM_TAG_TITLES` callers in DirectoryWeb, MailWeb, RankWeb and `tools/forms` now
+call the new names (`kits_ff_*`, `kits_report_url()`, `directoryweb_*`, `mailweb_fcrm_*`). The old names stay as wrappers
+in Kits Core (`forms/compat.php`), MailWeb (`fluentcrm-compat.php`) and DirectoryWeb (`claim-page.php`) for the rest of
+Core and older code.
+
 | Plugin / tool | Calls | Functions | Files |
 |---|---|---|---|
 | `plugins/directoryweb` | 188 | 57 | 19 |
@@ -221,7 +227,7 @@ deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb 
 
 | Function | Calls | Files |
 |---|---|---|
-| `aw_crm_contact_for()` | 1 | `includes/crm-sync.php` (1) |
+| `aw_crm_contact_for()` | 1 | `includes/crm-sync.php` (1); switched to MailWeb's own `mailweb_fcrm_contact_for()` (18 Nov 2026, forms move) |
 
 ## `tools/lgd`
 
