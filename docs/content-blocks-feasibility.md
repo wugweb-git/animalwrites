@@ -1,9 +1,10 @@
 # Content blocks under Kits Core: feasibility (18 Nov 2026)
 
 Scope: the content parts of `plugins/animal-writes-core` (Animal Writes Core, "the tenant plugin"): the content types,
-their render files, and the blocks and helpers they print with. The goal is to retire the tenant plugin step by step.
-Generic rendering moves to Kits Core as blocks, patterns and helpers. What only Animal Writes needs stays as tenant
-config. The CPT registration stays thin.
+their render files, and the blocks and helpers they print with. The tenant plugin is deleted at the end (owner, 18 Nov 2026): no
+code stays in it. Generic code moves to Kits Core (blocks, patterns, helpers, presets) or to RankWeb, DirectoryWeb,
+SourceWeb, MailWeb, PlanWeb or the Kits theme. What only Animal Writes needs becomes site data (options, preset
+settings, global styles, SCF groups, page content). Section 22 gives every part its final home.
 
 Out of scope here, each done on its own track: breadcrumbs and FAQ data (they go to RankWeb); the Directory
 (`aw_listing`, claims, places, listing template; it goes to DirectoryWeb); Keys and the admin shell (Kits Core admin).
@@ -26,7 +27,7 @@ How a theme vendor ships its content layer (Uncode + Uncode Core, and the instal
   shortcodes (WordPress theme review, "Plugin territory": make.wordpress.org/themes/handbook/review/required/).
 - **The companion plugin** (Uncode Core / Kits Core) holds the functions the theme's look relies on: blocks, block
   bindings, render helpers, shortcodes, the admin. It works with the theme but does not depend on one site's data.
-- **The site** (here: Animal Writes Core, and later only a small config) says *what* the content is: its post types,
+- **The site** (here: Animal Writes Core today; at the end only site data: options, preset settings, global styles) says *what* the content is: its post types,
   meta keys, labels and words. It answers Kits Core's filters (`kits_*`); Kits Core never names an `aw_` key.
 
 Kits Core already follows this for the pieces it holds: `kits/hero` (`blocks/hero/block.json`), primitives
@@ -47,24 +48,24 @@ WordPress's own public types are only `post` and `page`. Everything else is a CP
 
 | Type | Public name | Registered in | Fields | Verdict |
 |---|---|---|---|---|
-| `post` | Resources (`/resources/`) | WordPress; relabelled by `aw_resources_post_args()` (`content-types.php`) | `group_aw_resource.json` | Stays tenant config (labels and slug are AW's words) |
+| `post` | Resources (`/resources/`) | WordPress; relabelled by `aw_resources_post_args()` (`content-types.php`) | `group_aw_resource.json` | Final: Kits Core preset `kits-resource`; labels and slug are preset settings (site data) |
 | `page` | Pages | WordPress | — | No change |
-| `aw_news` | News | `aw_register_content_types()` from `aw_post_types()` (`content-types.php:23`) | `group_aw_news.json` | Registration stays in the tenant |
-| `aw_legal` | Library | same | `group_aw_legal*.json` | stays |
-| `aw_campaign` | Campaign Hub | same | 7 `group_aw_campaign*.json` | stays |
-| `aw_opportunity` | Opportunities | same | `group_aw_opportunity.json` | stays |
+| `aw_news` | News | `aw_register_content_types()` from `aw_post_types()` (`content-types.php:23`) | `group_aw_news.json` | Final: Kits Core preset `kits-news`, slug `aw_news` in its settings |
+| `aw_legal` | Library | same | `group_aw_legal*.json` | Final: Kits Core preset `kits-library`, slug `aw_legal` |
+| `aw_campaign` | Campaign Hub | same | 7 `group_aw_campaign*.json` | Final: Kits Core preset `kits-campaign`, slug `aw_campaign` |
+| `aw_opportunity` | Opportunities | same | `group_aw_opportunity.json` | Final: Kits Core preset `kits-opportunity`, slug `aw_opportunity` |
 | `aw_listing` | Directory | DirectoryWeb (`directoryweb/includes/bootstrap.php:20`, with `aw_content_type_args()`) | DirectoryWeb | DirectoryWeb's |
-| `aw_press` | Media & PR | `press.php:102` | in code | stays |
-| `aw_social` | Social posts (under News; off by default) | `social-posts.php:127` | `group_aw_social.json` | stays |
-| `aw_report`, `aw_volunteer`, `aw_message` | private records | `reports.php`, `volunteers.php`, `pages.php` | — | stays (not content) |
+| `aw_press` | Media & PR | `press.php:102` | in code | Final: Kits Core preset `kits-press`, slug `aw_press` |
+| `aw_social` | Social posts (under News; off by default) | `social-posts.php:127` | `group_aw_social.json` | Final: Kits Core (social card + preset `kits-social`), slug `aw_social` |
+| `aw_report`, `aw_volunteer`, `aw_message` | private records | `reports.php`, `volunteers.php`, `pages.php` | — | Final: `aw_report` and `aw_volunteer` → Kits Core private-record presets (same slugs); `aw_message` → MailWeb (inbox) |
 | Adoption | a **page** (`/adoption/`, 200 on live) with a Query Loop of Opportunities (`hubs.php:297`) | — | — | Not a type; no move needed |
-| Taxonomy `aw_campaign_link` | campaign items | `campaign-links.php:26` | — | stays (SourceWeb and campaign pages query it) |
+| Taxonomy `aw_campaign_link` | campaign items | `campaign-links.php:26` | — | Final: Kits Core, registered by `kits-campaign` under the same slug (SourceWeb and campaign pages query it) |
 
-**Why the registration stays in the tenant (not Kits Core):** `aw_post_types()` is six rows of the site's own words
-(names, slugs, supports). Moving it to Kits Core would put `aw_` slugs in the generic plugin, or need a
-"register any type from config" layer, which is the CPT framework we do not want. When the tenant plugin is finally
-reduced, these rows become a small site plugin or a `kits-config.php` filter answer, still `register_post_type()`.
-CPT slugs, rewrite slugs and meta keys never change (section 6).
+**Where the registration ends up (animal-writes-core is deleted, owner 18 Nov 2026):** `aw_post_types()` is six rows of
+the site's own words (names, slugs, supports). The code goes to Kits Core as presets (section 12); the words and the
+`aw_*` slugs are this site's preset settings (an option), so no `aw_` name is written in Kits Core's code. Still
+`register_post_type()`, no CPT builder. CPT slugs, rewrite slugs and meta keys never change (section 6). Every final
+home is listed in section 22.
 
 ---
 
@@ -74,22 +75,22 @@ CPT slugs, rewrite slugs and meta keys never change (section 6).
 
 | File (tenant) | Lines | What it renders | Generic part | Verdict |
 |---|---|---|---|---|
-| `systems.php` (`aw_i()`, `aw_date()`) | 462 | The icon span and **the one date component** (calendar icon + `<time>`), used by about 100 calls in the tenant, DirectoryWeb and SourceWeb | **All of both functions** (they print only `kit-ico`/`kit-date` markup) | **Move now** → `kits_icon()`, `kits_date()` (Stage 2). The list filters (`AW_LIST_FILTERS`) stay (AW taxonomies) |
-| `bindings.php` (source `animal-writes/field`) | 246 | Block Bindings: card and item fields bound to core blocks; empty bound blocks removed | The source, the key registry, "drop a block whose bound value is empty" | **Move now** → source `kits/post-field`, filter `kits_post_fields` (Stage 2). The keys and their AW rules stay in the tenant; the listing contact-button rules stay (Directory) |
-| `hub-blocks.php` | 770 | 34 `animal-writes/*` server-rendered blocks (band, card parts, item rows, listing groups) and their loader | The loader (list → `register_block_type` + ServerSideRender preview) | Later (phase B). Block names `animal-writes/*` are saved in content and templates: they never rename; a Kits loader can register them under the same names. The listing blocks are DirectoryWeb's |
-| `item-head.php` | 588 | The item page rows: meta row, sources, tags, share, "more" | Meta-row order (date first), card media | Later, through `kits/post-field` and Query Loop variations (blocks-spec 3.6, 3.18) |
-| `sections.php` | 400 | `[aw_section_head]` (no live use) | — | Retire with the head band (blocks-spec 3.1) |
-| `hubs.php` | 799 | Hub page Query Loops and the filters they read | Query-var plumbing (`query_loop_block_query_vars`) | Later with `kits/collection-filter` (blocks-spec 2.4) |
-| `form-blocks.php` | 308 | Volunteer, claim, report and thank-you pages | — | Fluent Forms block (blocks-spec 3.7, 3.14); claim is DirectoryWeb's |
-| `campaign-tools.php` | 1588 | Campaign state, letters, sticky bar, share section, **timelines** (`aw_camp_dates_timeline()`, `aw_steps_dateline()`) | Timelines already call `kits_datecard()` / `kits_milestone_state()` | The calendar is already Kits. The rest is campaign rules: stays tenant config until `kits/countdown`, `kits/sticky-cta`, `kits/letter` exist |
-| `campaign-record.php` | 362 | Campaign metrics, impact, outcome | — | Tenant (data) until `kits/metric` (blocks-spec 2.3) |
-| `social-posts.php` (`aw_social_card_html()`) | 1174 | **Social post card**, one sitewide component | The card markup from an array (no meta reads) | Phase B: needs the `aw-social-*` classes renamed in CSS (visible risk) and `AW_SOCIAL_PLATFORMS` / `aw_social_parse_url()` moved with it. Not in Stage 2 |
-| `related.php` | 356 | `[aw_related]` groups | — | Query Loop variation `kits/related` (blocks-spec 3.3) |
-| `press.php` | 459 | Media & PR cards, og: fetch | — | Tenant (data model) |
-| `near-opps.php` | ~100 | Home "near you" REST swap | — | Tenant |
-| `home.php`, `term-page.php` | 468, ~120 | Home and term pages | Story-band dates use `kits_datecard()` already | Patterns (blocks-spec 3.18) |
-| `news-article.php`, `summary-display.php` | small | Key facts card, summary display | — | Tenant |
-| `block-states.php` | 248 | AW block states on `/kits-demo/` | — | Tenant (it shows AW blocks) |
+| `systems.php` (`aw_i()`, `aw_date()`) | 462 | The icon span and **the one date component** (calendar icon + `<time>`), used by about 100 calls in the tenant, DirectoryWeb and SourceWeb | **All of both functions** (they print only `kit-ico`/`kit-date` markup) | **Moved** → `kits_icon()`, `kits_date()` (Stage 2). The list filters (`AW_LIST_FILTERS`): Kits Core `kits_collection_filters`, values as preset settings |
+| `bindings.php` (source `animal-writes/field`) | 246 | Block Bindings: card and item fields bound to core blocks; empty bound blocks removed | The source, the key registry, "drop a block whose bound value is empty" | **Moved** → source `kits/post-field`, filter `kits_post_fields` (Stage 2). Final: each preset declares its keys in Kits Core; the listing keys and contact-button rules → DirectoryWeb |
+| `hub-blocks.php` | 770 | 34 `animal-writes/*` server-rendered blocks (band, card parts, item rows, listing groups) and their loader | The loader (list → `register_block_type` + ServerSideRender preview) | Final: Kits Core block loader, registering the saved `animal-writes/*` names unchanged (stored data); the listing blocks → DirectoryWeb |
+| `item-head.php` | 588 | The item page rows: meta row, sources, tags, share, "more" | Meta-row order (date first), card media | Final: Kits Core (`kits/post-field`, Query Loop variations; blocks-spec 3.6, 3.18) + Kits theme patterns |
+| `sections.php` | 400 | `[aw_section_head]` (no live use) | — | Final: none, deleted with animal-writes-core (no live use; blocks-spec 3.1) |
+| `hubs.php` | 799 | Hub page Query Loops and the filters they read | Query-var plumbing (`query_loop_block_query_vars`) | Final: Kits Core `kits/collection-filter` (blocks-spec 2.4); hub pages are page content (site data) |
+| `form-blocks.php` | 308 | Volunteer, claim, report and thank-you pages | — | Final: Fluent Forms blocks in page content (site data) through Kits Core forms; claim → DirectoryWeb |
+| `campaign-tools.php` | 1588 | Campaign state, letters, sticky bar, share section, **timelines** (`aw_camp_dates_timeline()`, `aw_steps_dateline()`) | Timelines already call `kits_datecard()` / `kits_milestone_state()` | Final: Kits Core (`kits-campaign` preset, `kits/countdown`, `kits/sticky-cta`, `kits/letter`); each campaign's dates and state are its post meta (data) |
+| `campaign-record.php` | 362 | Campaign metrics, impact, outcome | — | Final: Kits Core `kits/metric` (blocks-spec 2.3); figures stay post meta |
+| `social-posts.php` (`aw_social_card_html()`) | 1174 | **Social post card**, one sitewide component | The card markup from an array (no meta reads) | Final: Kits Core, with the `kit-social-*` rename (owner yes, own PR) and the platform list / URL parser moved with it |
+| `related.php` | 356 | `[aw_related]` groups | — | Final: Kits Core `kits/related` (blocks-spec 3.3) |
+| `press.php` | 459 | Media & PR cards, og: fetch | — | Final: cards → Kits Core `kits-press`; og: fetch → SourceWeb; `aw_press_logos` → preset settings |
+| `near-opps.php` | ~100 | Home "near you" REST swap | — | Final: Kits Core (Query Loop variation + REST route; the `aw/v1` path stays until its script switches) |
+| `home.php`, `term-page.php` | 468, ~120 | Home and term pages | Story-band dates use `kits_datecard()` already | Final: Kits theme patterns (blocks-spec 3.18); Home and term pages are page content |
+| `news-article.php`, `summary-display.php` | small | Key facts card, summary display | — | Final: Kits Core (`kits-news` binding keys and pattern) |
+| `block-states.php` | 248 | AW block states on `/kits-demo/` | — | Final: Kits Core demo (`includes/demo.php`) |
 
 **Components already in Kits (no move needed):**
 
@@ -136,12 +137,12 @@ so no change at 375/768/1280.
 
 | With | Tenant → it | It → tenant | Effect of the Stage 2 move |
 |---|---|---|---|
-| Kits theme templates (`plugins/animal-writes-core/theme/`, the AW child copy) | `single.html` binds `animal-writes/field` | Templates use `animal-writes/*` blocks | None: `animal-writes/field` stays registered with the same keys and output |
+| Kits theme templates (`plugins/animal-writes-core/theme/`, the AW child copy) | `single.html` binds `animal-writes/field` | Templates use `animal-writes/*` blocks | None: `animal-writes/field` stays registered with the same keys and output. Final: generic templates → Kits theme; AW-only templates/parts → site data (Site Editor) |
 | `kit.css` / `aw.css` (two identical copies of `aw.css`: theme and plugin; change both, `diff -q`) | `kit-date`, `kit-ico`, `aw-date` classes | — | None: markup byte-identical; no CSS change in Stage 2 |
-| RankWeb (schema, FAQ, breadcrumbs: its own track) | `faq-data.php`, `breadcrumbs.php` stay put | RankWeb reads tenant helpers via `function_exists` | None; `aw_date()` keeps its name and output |
+| RankWeb (schema, FAQ, breadcrumbs: its own track) | `faq-data.php`, `breadcrumbs.php` (final: RankWeb) | RankWeb reads tenant helpers via `function_exists` | None; `aw_date()` keeps its name and output |
 | DirectoryWeb (its own track) | Tenant loads it; `aw_content_type_args()` | 40 calls to `aw_i()` / `aw_date()` (`listing-template.php`, `listing-profile.php`, `gov-verified.php` and others); `aw_binding_value( 'blacklisted_label' )` (`gov-verified.php:213`) | None now. After this move DirectoryWeb can call `kits_icon()` / `kits_date()` and register its listing keys on `kits_post_fields`, which is what lets it stop depending on the tenant |
-| SourceWeb (`aw-sourcing`) / Sourcing | `aw_campaign_link` taxonomy for campaign items | 6 calls to `aw_i()`/`aw_date()` (`enrichment-front.php`) | None; can switch to `kits_*` later |
-| MailWeb | `mailweb-aw.php` (tenant config for mail) | — | None |
+| SourceWeb (`aw-sourcing`) / Sourcing | `aw_campaign_link` taxonomy for campaign items | 6 calls to `aw_i()`/`aw_date()` (`enrichment-front.php`) | Switched in this PR; the other SourceWeb calls are in section 22 (a) |
+| MailWeb | `mailweb-aw.php` (final: MailWeb settings, site data) | — | None |
 | InsightWeb | Loaded by the tenant | Reads analytics hooks (`data-act`, `kit-*` classes) | None: `data-act` on listing buttons is kept |
 | SCF / ACF field groups (`acf-json/*.json`) | Field keys = the `aw_*` meta keys | — | None: no field or key changes |
 | Fluent Forms | Forms printed by `aw_ff_form()` | — | None |
@@ -202,7 +203,7 @@ Code moves; data stays. In this PR and every later step:
 | 3 | C: DirectoryWeb and SourceWeb switch to `kits_*` names | Their tracks | none |
 | 4 | D + E: block loader and social card | Owner (CSS rename) | none intended; checked at 375/768/1280 |
 | 5 | F + G + H: blocks-spec phases 1–3 | Owner review of blocks-spec | yes, per page on the owner's yes |
-| 6 | The tenant keeps only: CPT rows, meta keys, binding keys, campaign rules, words. It becomes a small site plugin | Owner | none |
+| 6 | animal-writes-core is deleted: every part has a final home (section 22); words, slugs and settings are site data | Owner | none |
 
 ---
 
@@ -227,10 +228,10 @@ Code moves; data stays. In this PR and every later step:
 1. **Blocks spec review.** The bigger content moves (F, G, H) wait on `docs/blocks-spec.md`. Is it approved as written?
 2. **Social card class rename (E).** `aw-social-*` → `kit-social-*` in both `aw.css` copies and the card markup. OK to
    do as its own PR with a before/after check?
-3. **Where the CPT rows end up (stage 6).** A small "Animal Writes site" plugin (registration + keys + words only), or
-   answers inside `kits-config.php`? Either way no Kits Core CPT layer.
-4. **Compat for the old names.** When the tenant goes: keep `aw_i()` / `aw_date()` / `animal-writes/field` alive in a
-   Kits Core compat file (like `compat-sourcing.php`, the precedent of 17 Nov), or require every caller to switch first?
+3. **Where the CPT rows end up (stage 6).** Answered 18 Nov: animal-writes-core is deleted, no site plugin. The rows
+   become Kits Core presets; slugs and words are preset settings (section 22). No Kits Core CPT layer.
+4. **Compat for the old names.** Answered 18 Nov: replace aw with kits, no compat file; every caller switches first
+   (section 22 (a)).
 
 ---
 
@@ -496,25 +497,25 @@ Native first; SCF, Rank Math and form adapters are layers on top.
 
 | File | Lines | What it does | Side | Goes to | Effort / risk |
 |---|---|---|---|---|---|
-| `model.php` | 334 | Content model: Library sub-type, court, category → listing types for "Find help", two-sided relations between items | [admin] (relation boxes) + data | Stays tenant (AW's model); a preset can later declare relations, storage unchanged | M / medium (relations shown on both sides) |
-| `reports.php` | 204 | "Report a mistake": `/report/?item=`, `[aw_report_box]`, private type `aw_report` | [front-end] form + [admin] records | Form → Fluent Forms block (blocks-spec 3.7); `aw_report` records stay tenant | S / low |
-| `near-opps.php` | 82 | Home "Opportunities near you": server draws the newest, `GET aw/v1/opps-near?state=` swaps in local rows | [front-end] | Stays tenant; later a Query Loop variation with a "near the visitor" filter in Kits Core; the REST route stays custom (core has none) | M / medium (cached Home) |
-| `team-dates.php` | 351 | The team's calendar, Kits → Dates (option `aw_team_dates`); PlanWeb takes over when switched on | [admin] | Stays tenant until PlanWeb replaces it (PlanWeb's track); not Kits Core | — / low |
-| `category-moves.php` | 78 | 301s from the old `/topic/{slug}/` addresses to `/category/{slug}/` | [front-end] (redirects) | Stays tenant for good (AW's own URL history) | none / low |
+| `model.php` | 334 | Content model: Library sub-type, court, category → listing types for "Find help", two-sided relations between items | [admin] (relation boxes) + data | Final: Kits Core (preset relations, two-sided); Library sub-type and court → `kits-library` settings; category → listing types → DirectoryWeb; storage unchanged | M / medium (relations shown on both sides) |
+| `reports.php` | 204 | "Report a mistake": `/report/?item=`, `[aw_report_box]`, private type `aw_report` | [front-end] form + [admin] records | Final: form → Fluent Forms block via Kits Core forms; `aw_report` records → Kits Core private-record preset | S / low |
+| `near-opps.php` | 82 | Home "Opportunities near you": server draws the newest, `GET aw/v1/opps-near?state=` swaps in local rows | [front-end] | Final: Kits Core, a Query Loop variation with a "near the visitor" filter; the REST route stays custom (core has none) | M / medium (cached Home) |
+| `team-dates.php` | 351 | The team's calendar, Kits → Dates (option `aw_team_dates`); PlanWeb takes over when switched on | [admin] | Final: PlanWeb, which takes ownership of option `aw_team_dates` (name unchanged) | — / low |
+| `category-moves.php` | 78 | 301s from the old `/topic/{slug}/` addresses to `/category/{slug}/` | [front-end] (redirects) | Final: RankWeb redirects; the old-to-new list is RankWeb data | none / low |
 | `law-links.php` | 204 | Acts and Rules: crawlable links to every Act and Rule (`render_block_core/query`) | [front-end] | RankWeb (internal-links track) | S / low |
-| `issuers.php` | 106 | Issuer label on Library items (meta `aw_issuer`) | [front-end] label + [admin] field | Stays tenant (AW's issuer list); its label becomes a `kits_post_fields` key (`issuer`) | S / low |
-| `research-citation.php` | 141 | Research credit line in Sources; the ScholarlyArticle it is based on in schema | [front-end] | Credit line: tenant binding key. Schema part: RankWeb, through the contract (section 13) | S / low |
+| `issuers.php` | 106 | Issuer label on Library items (meta `aw_issuer`) | [front-end] label + [admin] field | Final: Kits Core `kits-library` (binding key `issuer`); the issuer list (`aw_issuer_short`) is preset settings | S / low |
+| `research-citation.php` | 141 | Research credit line in Sources; the ScholarlyArticle it is based on in schema | [front-end] | Final: credit line → Kits Core `kits-library` binding key; schema → RankWeb (section 13) | S / low |
 | `entity-links.php` | 112 | Names in a summary linked to their pages (`render_block_core/post-excerpt`, meta `aw_entities`) | [front-end] | RankWeb (internal linking), reading SourceWeb's `aw_entities` | M / medium (changes summary text links) |
-| `retention.php` | 105 | Content rules: nothing deleted; Opportunities past their deadline closed (out of the list, noindex via RankWeb) | [front-end] lists + data rules | Stays tenant (AW's rules). Kits Core could later offer a generic "closed after date" state for any preset | S / low |
-| `systems.php` | 462 | Shared list helpers and the hub list filters (`AW_LIST_FILTERS`); `aw_i()` / `aw_date()` (now wrappers, this PR) | [front-end] | Filters: stay tenant config, answered through `kits_collection_filters` when `kits/collection-filter` exists (blocks-spec 2.4) | L / medium (hub pages) |
+| `retention.php` | 105 | Content rules: nothing deleted; Opportunities past their deadline closed (out of the list, noindex via RankWeb) | [front-end] lists + data rules | Final: Kits Core, a generic "closed after date" state on `kits-opportunity`; noindex → RankWeb | S / low |
+| `systems.php` | 462 | Shared list helpers and the hub list filters (`AW_LIST_FILTERS`); `aw_i()` / `aw_date()` (now wrappers, this PR) | [front-end] | Final: Kits Core `kits_collection_filters` / `kits/collection-filter` (blocks-spec 2.4); this site's filter values are preset settings | L / medium (hub pages) |
 | `category-images.php` | 155 | Category and tag photos on the term screens (term meta `aw_category_image`, attachment ID); default photos in option `aw_category_images['default']`; items fall back to their category's photo | [admin] term field + [front-end] item image | **Kits Core**, as a generic "term image" field on any taxonomy. The `aw_category_image` key and the default option stay unchanged; images stay in the Media Library | S–M / low (admin field is core UI; output unchanged) |
 
-None of these moves in this PR (docs only). `category-images.php` is the one planned for Kits Core; the move keeps its stored key and option.
+None of these moves in this PR (docs only). Every move keeps its stored keys and options.
 
 **`sponsored-blocks.php` — KEEP (owner, 18 Nov 2026).** `animal-writes/sponsored-item` and
 `animal-writes/sponsored-banner` (104 lines; [front-end] blocks, inserter group "Sponsored") are **dormant until the
 monetisation plan; the hide-monetary rule applies** (no money items shown on the site until the owner says so).
-Not moved, renamed or deleted here. When the monetisation plan (including ads) starts, they are the base for
+Not moved, renamed or deleted here. Final: Kits Core, kept dormant; when the monetisation plan (including ads) starts, they are the base for
 `kits/sponsored` (blocks-spec 2.7), and the Advanced Ads rule (a page with a sponsored block carries no ads) stays.
 
 ## 20. Updated staged plan and owner questions
@@ -553,3 +554,124 @@ Owner answers (18 Nov 2026):
 - **Masonry (question 9):** wanted, as one layout option of the layout block (section 16), with DOM order = reading order.
 - **Sponsored blocks (question 10):** yes, dormant until the monetisation plan.
 - **Social card rename (question 2):** yes, `aw-social-*` → `kit-social-*`, in its own PR (both aw.css copies, markup).
+
+---
+
+## 22. Final homes: animal-writes-core is deleted (owner, 18 Nov 2026)
+
+No code stays in animal-writes-core. Every row above that used to say "stays tenant" or "later" now names its final
+home: Kits Core (generic code and presets), RankWeb, DirectoryWeb, SourceWeb, MailWeb, PlanWeb, the Kits theme, or
+**site data**. Site data means options, preset settings, global styles, SCF field groups, Site Editor templates and
+page content. Stored names never change. That covers meta keys, CPT and taxonomy slugs, option names, block names,
+the binding source `animal-writes/field` and the SCF group and field keys (section 6). The plugin that becomes their
+home owns them under the same names.
+
+**Order.** Each item moves only after its home exists and its callers have switched, (a) to (d) below. The plugin is
+switched off only when nothing outside it calls into it. Before it is deleted, the "Delete this plugin's data" box
+must be unticked (d).
+
+### (a) Callers in other plugins that must switch first
+
+The full list, per function and file, is in `docs/aw-core-callers.md`: 482 calls to 150-odd animal-writes-core
+functions, from `wordpress-dev` at `302f431b`.
+
+| Plugin | Calls | Functions | Main ones | Switch to |
+|---|---|---|---|---|
+| DirectoryWeb | 188 | 57 | `aw_i` 22, `aw_use_component_style` 14, `aw_item_editor_preview` 13, `aw_listing_type_slugs` 12, `aw_date` 11, `aw_listing_phones` 10, `aw_ff_*` 16, `aw_binding_value` 1, `aw_scf_active` 1, the `aw_scf_groups` filter | `kits_icon` / `kits_date` / `kits_scf_*` / `kits_post_fields`. The listing helpers (`aw_listing_*`, phones, hours, services) become DirectoryWeb's own code; the form helpers (`aw_ff_*`) go to Kits Core forms |
+| RankWeb (`aw-seo-extras`) | 173 | 44 | `aw_seo_plain` 76, `aw_hub_*` 30, `aw_retention_state` 6, `aw_text` 5, `aw_research_study_title` 4, `aw_category_image_id` 2 | RankWeb's own text helper; hub, retention, issuer and category-image readers come from Kits Core (presets, term image); listing readers come from DirectoryWeb |
+| SourceWeb (`aw-sourcing`) | 79 | 33 | `aw_listing_phones` 8, `aw_post_types` 6, `aw_service_slugs` 6, `aw_sanitize_meta` 5, `aw_date` 4 + `aw_i` 3 (switched in this PR), tags/issuer/campaign-link setters, research and press ingest; `AW_CORE_DIR` in `aw-sourcing.php` and `relay.php` | Kits Core presets (type list, meta sanitising, tags, campaign links); DirectoryWeb (listing writes); ingest and research code moves into SourceWeb |
+| InsightWeb | 7 | 7 | `aw_error_count_*` 6, `aw_key` 1 | InsightWeb owns the error count; `aw_key` follows the keys plan (each plugin keeps its own keys) |
+| PlanWeb | 2 | 2 | `aw_core_reset_sections`, `aw_social_on` | Kits Core |
+| MailWeb | 1 | 1 | `aw_crm_contact_for` | MailWeb |
+| `tools/` (ci, content, directory, lgd) | 33 | — | `aw_core_screen_*` (ci), `aw_listing_*` (directory), `aw_hub_item`, `aw_press_ingest` | follow the functions they call |
+
+The SourceWeb count is 7 `aw_i()` / `aw_date()` calls (all in `enrichment-front.php`, now switched), not about 46.
+The rest of SourceWeb's 79 calls go to other helpers.
+
+### (b) Site CSS and values that would change on live if animal-writes-core vanished
+
+animal-writes-core enqueues `theme/assets/css/tokens.css` ("Brand values over the Kits defaults",
+`theme-parts-assets.php:271`). It also enqueues about 20 component sheets (`aw.css`, `aw-home.css`, `aw-single.css`,
+`aw-listing.css`, `aw-lists.css`, `aw-directory.css`, `aw-forms.css`, …) and the campaign sheets in `assets/css/`
+(`campaign.css` 1,103 lines, `campaign-lab.css` 922, `campaign-record.css` 413, `aw-camp-*`, `aw-share.css`).
+It also supplies the AW copy of the theme folder: `theme.json` (different from the Kits theme's), 11 templates (4
+with the same name as the Kits theme's: `404`, `archive`, `page`, `single`), 4 parts, 19 patterns, 9 images. If the
+plugin vanished, these 19 token overrides would fall back to the Kits defaults without any warning:
+
+| Token | Live (aw-core) | Kits default |
+|---|---|---|
+| `--kit-card-min` | 18rem (`docs/card-sizes.md`) | 17rem. **Owner deciding** which live keeps |
+| `--kit-card-min-width` | `min(100%, var(--kit-card-min))` | auto |
+| `--kit-card-stacked-gap` | `clamp(space-3, 5vw, space-5)` | space-5 |
+| `--kit-card-stacked-media` / `-max` / `-flex` / `-min` | `clamp(thumb-min, 30%, thumb-max)` / none / `0 1 auto` / thumb-min | 40% / 40% / none / auto |
+| `--kit-card-stacked-body-flex` / `-min` | `1 1 0` / `--kit-body-min` (10rem) | `1 1 auto` / 0 |
+| `--kit-card-block-media-max` | `--kit-card-media-max` (22.5rem) | none |
+| `--kit-color-on-accent` | `#141414` | `var(--color-ash)` |
+| `--kit-surface-page` | `var(--kit-color-canvas)` | `var(--neutral-1)` |
+| `--kit-field-text-size` | 1rem (phones; .875rem from 768) | .875rem |
+| `--kit-btn-font-size` | .875rem | `var(--fluid-body-md)` |
+| `--kit-section-desc-size` | .875rem | `var(--kit-type-lead)` |
+| `--kit-lead-title-leading` | 1.25 | 1.2 |
+| `--kit-type-sm` / `--kit-type-xs` / `--kit-meta-size` (from 768) | fixed clamps / .8125rem | fluid tokens / 12px |
+
+Four more tokens exist only in aw-core and would become undefined: `--kit-card-media-max`, `--kit-thumb-min`,
+`--kit-thumb-max`, `--kit-body-min`.
+
+**Where each goes:**
+- **Brand token values** → the theme's style variation `themes/kits-by-wugweb/styles/animal-writes.json`
+  (it already exists, and the aw-core copy is identical), as the variation's `styles.css`. The site keeps it as the
+  active global styles (site data). Generic card tokens (`--kit-card-media-max`, thumb and body minimums) → the Kits
+  theme's `tokens.json`, where `kit-tokens.css` is generated from.
+- **`aw.css` and the component sheets** → whatever is generic goes into the Kits theme `kit.css` (stacked card, social
+  card, meta row). What only AW uses goes into the style variation's CSS. Today the two `aw.css` copies stay
+  identical.
+- **Campaign sheets** → Kits Core, with the `kits-campaign` preset. Each campaign's colours and motif are its
+  settings (post meta), not code.
+- **Templates, parts, patterns, `theme.json`** → generic ones into the Kits theme. AW-only ones become site data
+  (Site Editor templates and parts, synced patterns). Before the switch, diff the two `theme.json` files.
+
+### (c) The 13 SCF field groups and the Library meta
+
+| Group | Type | Final home |
+|---|---|---|
+| `group_aw_news` | `aw_news` | `kits-news` preset |
+| `group_aw_legal`, `group_aw_legal_document` (**Library meta**: source url/name/date, file id/url, number, in force, email gate `aw_requires_email`; issuer `aw_issuer` comes from `issuers.php`) | `aw_legal` | `kits-library` preset |
+| `group_aw_campaign`, `_dates`, `_document`, `_orgs`, `_outcome`, `_share`, `_social` (7) | `aw_campaign` | `kits-campaign` preset |
+| `group_aw_opportunity` | `aw_opportunity` | `kits-opportunity` preset |
+| `group_aw_resource` | `post` | `kits-resource` preset |
+| `group_aw_social` | `aw_social` | Kits Core social preset |
+
+**How they are stored.**
+- Each preset registers its fields with `register_post_meta()` under the meta keys its settings name (here the
+  existing `aw_*` keys), so content and `kits/post-field` work without SCF.
+- This site's 13 group JSON files are **site data**: they keep their group and field keys, which saved posts point
+  to through `_aw_*` reference meta.
+- They are loaded from a site folder that Kits Core registers with `kits_scf_json_folder()`, outside
+  animal-writes-core, so deleting the plugin cannot drop them. The repo keeps a copy.
+- `meta.php`'s `register_post_meta()` calls (keys, types, sanitising) move into the presets. The SCF value guard
+  (`scf.php`) goes to Kits Core's SCF bridge.
+
+### (d) Options other plugins read that aw-core's `uninstall.php` would delete
+
+`uninstall.php` deletes these only when `aw_delete_data_on_uninstall` is true ("Delete this plugin's data"). Ownership
+moves to the reader; the option names stay the same.
+
+| Option | Read by | New owner |
+|---|---|---|
+| `aw_team_dates` | PlanWeb | PlanWeb |
+| `aw_keys` | InsightWeb | each plugin's own keys (keys plan); migrate, then retire |
+| `aw_ff_forms` | DirectoryWeb, `tools/forms` | Kits Core forms |
+| `aw_ff_send_email` | DirectoryWeb | Kits Core forms |
+| `aw_nl_ff_form_full` | `tools/forms` | MailWeb (newsletter) |
+| `aw_district_helplines`, `aw_place_intros`, `aw_gov_verified_live` | DirectoryWeb | DirectoryWeb |
+| `aw_place_counts` | DirectoryWeb, RankWeb | DirectoryWeb |
+| `aw_social_on`, `aw_social_show` | SourceWeb, PlanWeb | Kits Core (social preset settings) |
+| `aw_category_images` (and term meta `aw_category_image`) | RankWeb through `aw_category_image_id()` | Kits Core term image |
+| `aw_issuer_short`, `aw_press_logos`, `aw_internal_org`, `aw_elsewhere`, `aw_follow_reddit`, `aw_follow_discord`, `aw_sample_listing_ids`, `aw_cdn_ttl*` | aw-core only today | Kits Core preset or share settings (`aw_sample_listing_ids` → DirectoryWeb; `aw_cdn_ttl*` → Kits Core deploy purge) |
+
+The same uninstall also deletes the DirectoryWeb transient `directoryweb_stats` and unschedules its
+`directoryweb_stats_build` event. The two tables `{prefix}aw_form_raw` and `{prefix}aw_camp_letters` are kept today;
+they are supporters' own records, always kept, and their ownership goes to Kits Core forms and `kits-campaign`.
+
+Until every row above has moved, the box stays unticked. When animal-writes-core is deleted, its `uninstall.php` goes
+with it, so no option is deleted.
