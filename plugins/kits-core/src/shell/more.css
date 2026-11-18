@@ -695,9 +695,9 @@ body.kits-shell-screen {
 	font-weight: 600;
 }
 
-.kits-shell .kits-shell-prose table.wp-list-table tr:last-child > td,
-.kits-shell .kits-shell-prose table.widefat tr:last-child > td,
-.kits-shell .kits-shell-prose table.widefat tr:last-child > th {
+.kits-shell .kits-shell-prose table.wp-list-table > tbody > tr:last-child > td,
+.kits-shell .kits-shell-prose table.widefat > tbody > tr:last-child > td,
+.kits-shell .kits-shell-prose table.widefat > tbody > tr:last-child > th {
 	border-bottom: 0;
 }
 

@@ -19,19 +19,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * The joined screens (kits_frame_extra_screens filter), read once per request.
+ *
+ * @return array slug => [ capability, tab ].
+ */
+function kits_frame_extra_all(): array {
+	static $all = null;
+	if ( null === $all ) {
+		$all = (array) apply_filters( 'kits_frame_extra_screens', array() );
+	}
+	return $all;
+}
+
+/**
  * The screens drawn in the frame: slug => capability (the menu's).
  *
  * Screens that sit under other menus (Media, Campaigns, Tools) join through the kits_frame_extra_screens filter, see
  * kits_frame_screen(). The five Kits screens come first and cannot be replaced.
  */
 function kits_frame_screens(): array {
-	$caps = array(
+	$extra = kits_frame_extra_all();
+	$caps  = array(
 		KITS_MENU       => KITS_CAP,
 		'kits-settings' => 'manage_options',
 		'kits-tools'    => 'manage_options',
 		'kits-help'     => KITS_CAP,
 	);
-	foreach ( (array) apply_filters( 'kits_frame_extra_screens', array() ) as $slug => $def ) {
+	foreach ( $extra as $slug => $def ) {
 		if ( is_string( $slug ) && ! isset( $caps[ $slug ] ) && is_array( $def ) && isset( $def[0] ) ) {
 			$caps[ $slug ] = (string) $def[0];
 		}
@@ -45,7 +59,7 @@ function kits_frame_screens(): array {
  * @param string $slug The screen's page= value.
  */
 function kits_frame_extra_tab( string $slug ): string {
-	$extra = (array) apply_filters( 'kits_frame_extra_screens', array() );
+	$extra = kits_frame_extra_all();
 	return isset( $extra[ $slug ][1] ) ? (string) $extra[ $slug ][1] : '';
 }
 
