@@ -2,7 +2,8 @@
 /**
  * Old names of the media functions that moved out of this plugin on 18 Nov 2026 (Track F of its retirement):
  * card images, category photos, the no-repeat thumbnail rule and the media tools to Kits Core; Media Library autofill
- * and columns to RankWeb; publisher images and the CC0 fetch to SourceWeb. Every caller in this repository uses the
+ * and columns to RankWeb; publisher images and the CC0 fetch to SourceWeb; the Library document viewer to Kits Core and
+ * the government PDF mirror to SourceWeb. Every caller in this repository uses the
  * new names. These one-line wrappers only cover code on other open branches that still calls an old name; they go
  * with this plugin. Each forwards to the new function when that plugin is loaded, else returns an empty value.
  *
@@ -178,5 +179,53 @@ if ( ! function_exists( 'aw_media_usage' ) ) {
 	 */
 	function aw_media_usage( ...$args ) {
 		return function_exists( 'rankweb_media_usage' ) ? rankweb_media_usage( ...$args ) : array();
+	}
+}
+
+if ( ! function_exists( 'aw_doc_preview_html' ) ) {
+	/**
+	 * Old name of kits_doc_preview_html().
+	 *
+	 * @param mixed ...$args Same arguments.
+	 * @return mixed
+	 */
+	function aw_doc_preview_html( ...$args ) {
+		return function_exists( 'kits_doc_preview_html' ) ? kits_doc_preview_html( ...$args ) : '';
+	}
+}
+
+if ( ! function_exists( 'aw_doc_hostable' ) ) {
+	/**
+	 * Old name of sourceweb_doc_hostable().
+	 *
+	 * @param mixed ...$args Same arguments.
+	 * @return mixed
+	 */
+	function aw_doc_hostable( ...$args ) {
+		return function_exists( 'sourceweb_doc_hostable' ) ? sourceweb_doc_hostable( ...$args ) : false;
+	}
+}
+
+if ( ! function_exists( 'aw_doc_refetch' ) ) {
+	/**
+	 * Old name of sourceweb_doc_refetch().
+	 *
+	 * @param mixed ...$args Same arguments.
+	 * @return mixed
+	 */
+	function aw_doc_refetch( ...$args ) {
+		return function_exists( 'sourceweb_doc_refetch' ) ? sourceweb_doc_refetch( ...$args ) : 0;
+	}
+}
+
+if ( ! function_exists( 'aw_mirror_gov_pdf' ) ) {
+	/**
+	 * Old name of sourceweb_mirror_gov_pdf().
+	 *
+	 * @param mixed ...$args Same arguments.
+	 * @return mixed
+	 */
+	function aw_mirror_gov_pdf( ...$args ) {
+		return function_exists( 'sourceweb_mirror_gov_pdf' ) ? sourceweb_mirror_gov_pdf( ...$args ) : 0;
 	}
 }

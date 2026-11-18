@@ -159,7 +159,6 @@ deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb 
 | `aw_keep_modified()` | 1 | `includes/news-titles.php` (1) |
 | `aw_listing_put_phone()` | 1 | `includes/ingest.php` (1) |
 | `aw_listing_types()` | 1 | `includes/enrichment.php` (1) |
-| `aw_mirror_gov_pdf()` | 1 | `includes/ingest.php` (1) |
 | `aw_phone_never_publish()` | 1 | `includes/enrichment.php` (1) |
 | `aw_press_ingest()` | 1 | `includes/ingest.php` (1) |
 | `aw_research_doi()` | 1 | `includes/ingest.php` (1) |
@@ -207,7 +206,6 @@ deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb 
 | `aw_hub_item()` | 2 | `aw1-post-page.php` (2) |
 | `aw_date()` | 1 | `campaign2-page.php` (1) |
 | `aw_i()` | 1 | `campaign2-page.php` (1) |
-| `aw_mirror_gov_pdf()` | 1 | `aw1-library.php` (1) |
 | `aw_press_ingest()` | 1 | `aw1-post-site.php` (1) |
 
 ## `plugins/planweb`

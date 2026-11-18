@@ -3407,7 +3407,7 @@
 				{
 					"kind": "display",
 					"where": "card and page image; listing logo",
-					"file": "core/media.php"
+					"file": "kits/card-images.php"
 				},
 				{
 					"kind": "schema",
@@ -4464,7 +4464,7 @@
 				{
 					"kind": "display",
 					"where": "PDF cover / featured image",
-					"file": "core/media.php:24"
+					"file": "kits/library-documents.php:20"
 				},
 				{
 					"kind": "schema",
@@ -4478,8 +4478,8 @@
 				},
 				{
 					"kind": "sourcing",
-					"where": "written by aw_mirror_gov_pdf",
-					"file": "core/media.php:418"
+					"where": "written by sourceweb_mirror_gov_pdf",
+					"file": "src/library-pdfs.php:107"
 				}
 			]
 		},

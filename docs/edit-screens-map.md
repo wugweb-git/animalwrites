@@ -486,7 +486,7 @@ R = reads, W = writes. "Display" = front-end block/output. Only box-edited (or b
 | `aw_legal_act` | — | — | "Issued under" answers `core/faq-data.php:396` | — |
 | `aw_key_sections` | — | — | "What does section N say?" `core/faq-data.php:45, 419–450` | — |
 | `aw_legal_dated` | "Dated {date}" in the meta row `core/item-head.php:152–156` | — | — | no box |
-| `aw_file_id` | featured image / PDF cover (`core/media.php:24–173`, `core/hub-blocks.php:207,719`, `core/sections.php:30,104`) | `aw_schema_pdf` `seo/schema.php:363` (DigitalDocument/encoding) | PDF question `core/faq-data.php:40, 331` | written by `aw_mirror_gov_pdf` `core/media.php:418` |
+| `aw_file_id` | featured image / PDF cover (`kits/library-documents.php`, `kits/card-images.php`, `core/hub-blocks.php:207,719`, `core/sections.php:30,104`) | `aw_schema_pdf` `seo/schema.php:363` (DigitalDocument/encoding) | PDF question `core/faq-data.php:40, 331` | written by `sourceweb_mirror_gov_pdf` `src/library-pdfs.php:107` |
 | `aw_file_url` | binding `file_url` `core/bindings.php:158` | court document url `seo/schema.php:564` | — | 0 rows on live |
 | `aw_legal_number` | — | `legislationIdentifier` `seo/schema.php:483` | date question `core/faq-data.php:42, 371` | ingest match `src/ingest.php:97, 382` |
 | `aw_legal_force` | — | `legislationLegalForce` `seo/schema.php:484` | in-force questions `core/faq-data.php:41, 68, 348, 973` | ingest `src/ingest.php:390` |

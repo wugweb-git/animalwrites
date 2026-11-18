@@ -967,7 +967,7 @@ function sourceweb_cc0_counts() {
 	return array_map( 'intval', (array) $row );
 }
 
-/** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. */
+/** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. Registered here, not by Animal Writes Core, since 18 Nov 2026. */
 function sourceweb_cc0_site_check() {
 	$c = sourceweb_cc0_counts();
 	echo '<h2>Pictures on News, Library and research items</h2><table class="form-table" role="presentation"><tbody>';
@@ -992,7 +992,19 @@ function sourceweb_cc0_site_check() {
 		echo '<details><summary>Last log lines</summary><pre style="white-space:pre-wrap;max-width:900px">' . esc_html( implode( "\n", array_reverse( $log ) ) ) . '</pre></details>';
 	}
 }
-add_action( 'aw_site_check_after', 'sourceweb_cc0_site_check' );
+add_filter(
+	'kits_home_sections',
+	function ( $sections ) {
+		$sections             = (array) $sections;
+		$sections['pictures'] = array(
+			'title'  => 'Pictures',
+			'render' => 'sourceweb_cc0_site_check',
+			'cap'    => 'manage_options',
+			'order'  => 72,
+		);
+		return $sections;
+	}
+);
 
 /*
  * The per-item switch for the publisher's image (sourceweb_publisher_image() above), editable over the REST API so an editor

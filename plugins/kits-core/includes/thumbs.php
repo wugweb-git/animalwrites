@@ -159,10 +159,22 @@ add_action(
 	}
 );
 
-/** Kits → Home → Thumbnails (until the SourceWeb dashboard has it): pictures used by more than one item. */
+/** Kits → Home → Thumbnails: pictures used by more than one item (moved off Animal Writes Core's Check site, 18 Nov 2026). */
 function kits_thumbs_site_check() {
 	$d = kits_thumb_duplicates();
 	// In a Kits → Home card its title is the card's; the Check site screen (without Kits) needs its own heading.
 	echo ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ? '' : '<h2>Thumbnails</h2>' ) . '<p>' . ( $d ? esc_html( count( $d ) . ' picture(s) used by more than one item: ' . implode( '; ', array_map( fn( $ids ) => '#' . implode( ', #', $ids ), $d ) ) ) : 'No picture is used twice.' ) . '</p>';
 }
-add_action( 'aw_site_check_after', 'kits_thumbs_site_check' );
+add_filter(
+	'kits_home_sections',
+	function ( $sections ) {
+		$sections               = (array) $sections;
+		$sections['thumbnails'] = array(
+			'title'  => 'Thumbnails',
+			'render' => 'kits_thumbs_site_check',
+			'cap'    => 'manage_options',
+			'order'  => 71,
+		);
+		return $sections;
+	}
+);

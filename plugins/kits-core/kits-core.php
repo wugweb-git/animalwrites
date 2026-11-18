@@ -62,6 +62,7 @@ require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label f
 require_once KITS_CORE_DIR . 'includes/category-images.php'; // category and tag photos (term meta aw_category_image) and the category banner
 require_once KITS_CORE_DIR . 'includes/thumbs.php'; // card pictures never repeat: option aw_thumb_map, GET /aw/v1/thumb-dupes (the deploy gate)
 require_once KITS_CORE_DIR . 'includes/card-images.php'; // card images: the item's own picture, the category photo, the placard fallback
+require_once KITS_CORE_DIR . 'includes/library-documents.php'; // Library documents on the item's page: PDF viewer, preview, print button (moved from Core, 18 Nov 2026)
 require_once KITS_CORE_DIR . 'includes/media-webp.php'; // resized copies of JPEG and PNG uploads as WebP; Media → Make WebP with Undo
 require_once KITS_CORE_DIR . 'includes/tools/media-merge.php'; // Kits → Tools: Media → Duplicate files (one-off clean-up, Undo, never deletes)
 require_once KITS_CORE_DIR . 'includes/tools/media-reuse.php'; // Kits → Tools: Media → Reuse pictures (recycle, never delete)

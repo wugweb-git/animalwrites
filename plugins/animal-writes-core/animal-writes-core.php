@@ -83,7 +83,6 @@ require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/also-reported.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
-require_once AW_CORE_DIR . 'includes/media.php'; // Library documents: PDF viewer, preview, hosting rules, gov PDF mirror (card images moved to Kits Core, 18 Nov 2026)
 require_once AW_CORE_DIR . 'includes/media-compat.php'; // old aw_ names of the media functions that moved to Kits Core, RankWeb and SourceWeb (18 Nov 2026)
 require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';

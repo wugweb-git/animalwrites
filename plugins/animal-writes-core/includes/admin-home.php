@@ -6,7 +6,7 @@
  * With Kits Core (docs/admin-ui-spec.md §B, §C, §E3; owner, 11 Nov 2026) there is no "Animal Writes" tab or menu item:
  * the site adds rows and sections to the six Kits screens through Kits' filters (kits_admin_hooks() below):
  * - Home: Page check, Backup, Deployed commit, Joined files, and until the MailWeb and SourceWeb dashboards have them,
- *   Email sending, Thumbnails and Pictures; Dates is linked from Home and keeps its address (aw-dates) until PlanWeb.
+ *   Email sending (Thumbnails and Pictures are added by Kits Core and SourceWeb since 18 Nov 2026); Dates is linked from Home and keeps its address (aw-dates) until PlanWeb.
  * - Settings: CDN cache times (Performance); Keys and Modules are linked from Settings and keep their addresses
  *   (aw-keys, aw-modules) until the RankWeb and SourceWeb screens exist.
  * - Theme Options → Socials: Contact links. Help: the Overview below (Docs) and Edit screens and Theme parts
@@ -204,8 +204,8 @@ function aw_core_section( string $title, callable $render, int $order, string $c
 }
 
 /**
- * Kits → Home: the site's checks (docs/admin-ui-spec.md §B1, §D6). Email, thumbnails and pictures stay here until the
- * MailWeb and SourceWeb dashboards have them (owner, 11 Nov 2026). Nothing WordPress or another plugin already shows
+ * Kits → Home: the site's checks (docs/admin-ui-spec.md §B1, §D6). Email stays here until the MailWeb dashboard has
+ * it (owner, 11 Nov 2026); Thumbnails and Pictures are added by Kits Core (thumbs.php) and SourceWeb (cc0-images.php). Nothing WordPress or another plugin already shows
  * (owner, 11 Nov 2026): backups are UpdraftPlus's, the theme is Appearance → Themes, dates are PlanWeb's.
  *
  * @param array $sections Kits' sections.
@@ -223,8 +223,6 @@ function aw_core_home_sections( $sections ) {
 	);
 	$sections['joined-files'] = aw_core_section( 'Joined files', 'aw_site_check_joined', 50 );
 	$sections['email']        = aw_core_section( 'Email sending', 'aw_mail_site_check', 70 );
-	$sections['thumbnails']   = aw_core_section( 'Thumbnails', 'kits_thumbs_site_check', 71 );
-	$sections['pictures']     = aw_core_section( 'Pictures', 'sourceweb_cc0_site_check', 72 );
 	return $sections;
 }
 
