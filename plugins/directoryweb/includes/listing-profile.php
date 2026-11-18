@@ -308,13 +308,9 @@ function aw_block_org_details( $a, $id ) {
 		return '';
 	}
 	if ( $photos ) {
-		if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-			kits_use_component_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
-		}
+		directoryweb_use_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
 	}
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-listing' ); // aw-org-details, aw-org-facts, aw-org-phones
-	}
+	directoryweb_use_style( 'aw-listing' ); // aw-org-details, aw-org-facts, aw-org-phones
 	return '<section class="aw-org-details" aria-label="About the organisation">'
 		. ( $links ? '<div class="aw-org-details-links">' . $links . '</div>' : '' )
 		. ( $photos ? '<div class="aw-org-gallery">' . $photos . '</div>' : '' )

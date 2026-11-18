@@ -36,6 +36,7 @@ foreach ( array( 'KITS_CORE_LOADED' => 'kits-core/kits-core.php', 'DIRECTORYWEB_
 	if ( ! defined( $sourceweb_const ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/' . $sourceweb_main )
 		&& ( in_array( $sourceweb_main, (array) get_option( 'active_plugins', array() ), true )
 			|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )[ $sourceweb_main ] ) ) ) ) {
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $sourceweb_main ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
 		require_once WP_PLUGIN_DIR . '/' . $sourceweb_main;
 	}
 }

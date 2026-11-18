@@ -27,6 +27,10 @@ DirectoryWeb stop a second load with their `*_LOADED` constants, and WordPress's
 file does nothing. A plugin that is not active is never loaded. With aw-core active, aw-core has already loaded
 Kits Core and DirectoryWeb before these lines run, so they do nothing.
 
+Before each early load the plugin's linked folder is registered (`wp_register_plugin_realpath()`, which WordPress
+calls before it loads any active plugin), so on live, where the plugin folders are links into the deploy folder,
+`plugin_dir_url()` still gives the `wp-content/plugins/…` address (aw-core does the same for its siblings).
+
 Without the dependency, each shows one admin notice (as before) and loads nothing else.
 
 SourceWeb's relay CA bundle read `AW_CORE_DIR . 'data/certs/*.pem'`, which is fatal without aw-core. The three
@@ -50,6 +54,8 @@ plugin, because they require none of them.
 | `aw_listing_phones/hours/first_phone/put_phone`, `aw_set_listing_list`, `aw_hours_rows_spec`, `aw_phone_never_publish` | DirectoryWeb `directoryweb_*` (`listing-meta.php`, already there) | DirectoryWeb, SourceWeb, RankWeb |
 | `aw_service_slugs`, `aw_listing_type_slugs`, `aw_listing_types`, `aw_listing_service_names`, `aw_item_tags` (with a list), `aw_set_item_tags`, `aw_normalise_phone`, `aw_tel_url`, `AW_SERVICES` | DirectoryWeb `directoryweb_*`, `DIRECTORYWEB_SERVICES` (new `includes/listing-terms.php`) | DirectoryWeb, SourceWeb, RankWeb |
 | `aw_district_centroid`, `aw_district_km` | DirectoryWeb `directoryweb_district_centroid/_km` (`directory-map.php`, reading its own `data/district-centroids.json`) | DirectoryWeb |
+| `aw_use_component_style()` (DirectoryWeb's 15 calls) | DirectoryWeb `directoryweb_use_style()`, one guarded call to the theme's `kits_use_component_style()` | DirectoryWeb |
+| `aw_theme_file_uri( 'assets/img/google-maps.png' )` | Core's address while Core is active, else DirectoryWeb's own copy `assets/img/google-maps.png` | DirectoryWeb |
 | `aw_hub_url( 'aw_listing' )` | DirectoryWeb `directoryweb_hub_url()` (Core's answer while Core is active, else `/directory/`) | DirectoryWeb |
 | `aw_section_tags`, `aw_section_categories`, `aw_item_tags` (by section), `aw_cron_span`, `AW_WEEKDAYS`, `AW_LEGAL_KINDS`, `AW_SAME_STORY_TYPES`, `AW_CRON_STALE` | SourceWeb `sourceweb_*`, `SOURCEWEB_*` (new `includes/content-helpers.php`) | SourceWeb |
 | `aw_sanitize_meta` (ingest) | SourceWeb `sourceweb_sanitize_meta()`: Core's rules while Core is active, else DirectoryWeb's for listing keys and the same date, address and employment-type rules | SourceWeb |
@@ -70,7 +76,6 @@ Keep them equal until aw-core is deleted.
 | `aw_item_kind`, `aw_item_here` | DirectoryWeb Find help | no guide detection, item block skipped |
 | `aw_campaign_organiser`, `aw_campaign_partner_ids` | DirectoryWeb listing template | no campaign roles |
 | `aw_crm_tag_ids` | DirectoryWeb org people | no `org-approved` CRM tag |
-| `aw_theme_file_uri` | DirectoryWeb | `get_theme_file_uri()` |
 | `aw_content_type_args`, `aw_register_meta` | DirectoryWeb bootstrap | already guarded: **no listing post type** |
 | `aw_item_issuer`, `aw_set_issuer` | SourceWeb auto-review, ingest | issuer not checked or set (noted in the ingest result) |
 | `aw_dispatch_workflow` | SourceWeb Workers → Run now | `WP_Error` "needs the GitHub dispatch from Animal Writes Core" |

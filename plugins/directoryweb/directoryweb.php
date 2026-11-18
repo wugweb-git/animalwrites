@@ -40,6 +40,7 @@ if ( defined( 'DIRECTORYWEB_LOADED' ) ) {
 if ( ! defined( 'KITS_CORE_LOADED' ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/kits-core/kits-core.php' )
 	&& ( in_array( 'kits-core/kits-core.php', (array) get_option( 'active_plugins', array() ), true )
 		|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )['kits-core/kits-core.php'] ) ) ) ) {
+	wp_register_plugin_realpath( WP_PLUGIN_DIR . '/kits-core/kits-core.php' ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
 	require_once WP_PLUGIN_DIR . '/kits-core/kits-core.php';
 }
 // Without Kits Core, say so and do nothing else.

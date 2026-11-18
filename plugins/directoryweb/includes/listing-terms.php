@@ -143,3 +143,15 @@ function directoryweb_tel_url( $raw ): string {
 	}
 	return 'tel:' . ( strlen( $d ) <= 5 ? '' : '+' ) . $d;
 }
+
+/**
+ * This page loads one of the theme's component stylesheets (Kits by Wugweb's kits_use_component_style(); nothing
+ * under another theme).
+ *
+ * @param string $handle Component style handle (aw-directory, aw-single, aw-listing...).
+ */
+function directoryweb_use_style( string $handle ): void {
+	if ( function_exists( 'kits_use_component_style' ) ) {
+		kits_use_component_style( $handle );
+	}
+}

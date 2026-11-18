@@ -318,7 +318,7 @@ function aw_block_listing_profiles( $a, $id ) {
 		if ( aw_lf( $id, $k ) ) {
 			/* translators: 1: organisation, 2: network. */
 			$label  = sprintf( __( '%1$s on %2$s', 'directoryweb' ), get_the_title( $id ), $l[1] );
-			$mark   = 'aw_g_profile' === $k ? '<img class="aw-listing-profile-img" src="' . esc_url( function_exists( 'aw_theme_file_uri' ) ? aw_theme_file_uri( 'assets/img/google-maps.png' ) : get_theme_file_uri( 'assets/img/google-maps.png' ) ) . '" alt="" width="20" height="20">' : '<span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span>'; // Google: its own Maps mark
+			$mark   = 'aw_g_profile' === $k ? '<img class="aw-listing-profile-img" src="' . esc_url( function_exists( 'aw_theme_file_uri' ) ? aw_theme_file_uri( 'assets/img/google-maps.png' ) : DIRECTORYWEB_URL . 'assets/img/google-maps.png' ) . '" alt="" width="20" height="20">' : '<span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span>'; // Google: its own Maps mark
 			$links .= '<a class="aw-listing-profile" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $l[1] ) . '">' . $mark . '</a>';
 		}
 	}
@@ -367,9 +367,7 @@ function aw_block_listing_photos( $a, $id ) {
 		$out .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
 	}
 	if ( '' !== $out ) {
-		if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-			kits_use_component_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
-		}
+		directoryweb_use_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
 	}
 	return aw_listing_group( 'photos', __( 'Photos', 'directoryweb' ), '' !== $out ? '<div class="aw-org-gallery">' . $out . '</div>' : '' );
 }
@@ -473,9 +471,7 @@ function aw_block_listing_activity( $a, $id ) {
 
 /** A small card for "In the press": 4:3 picture, type and date, title (press coverage links to the article itself). */
 function aw_listing_press_card( $pid ) {
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
-	}
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	$type = get_post_type( $pid );
 	$url  = function_exists( 'aw_featured_url' ) ? aw_featured_url( $pid ) : get_permalink( $pid );
 	$ext  = 'aw_press' === $type;
@@ -486,9 +482,7 @@ function aw_listing_press_card( $pid ) {
 }
 
 function aw_block_listing_press( $a, $id ) {
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
-	}
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) || ! function_exists( 'aw_featured_items' ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'In the press: items on the site that name this organisation' ) : '';
 	}
@@ -517,9 +511,7 @@ function aw_block_listing_opportunities( $a, $id ) {
 	if ( ! $ids || ! function_exists( 'aw_item_more_card' ) ) {
 		return '';
 	}
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
-	}
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	/* translators: %s: organisation. */
 	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'directoryweb' ), get_the_title( $id ) ) ) . '</h2><ul class="kit-minicard-list aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
 }
@@ -555,9 +547,7 @@ function aw_listing_campaigns( $id, $max = 3 ) {
 }
 
 function aw_block_listing_campaigns( $a, $id ) {
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
-	}
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Campaigns with the organisation (Organiser / Partner / Supporter, up to 3)' ) : '';
 	}

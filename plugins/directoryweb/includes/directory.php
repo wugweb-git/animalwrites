@@ -644,9 +644,7 @@ function aw_directory_filter( $type = '' ) {
 	$n_active = count( array_filter( array( $district ? $district : $state, $cur_type, $service && aw_request_services(), $verified, $gov ) ) );
 	$checks   = ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
 		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
-	}
+	directoryweb_use_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
 	// Row 1: search and Search. Then the filters: inline rows from 768, a "Filters" bottom sheet on phones (the Kits
 	// sheet, kit.js), applied only with "Apply filters". On phones Filters and Near me share one row under the search
 	// (owner's Directory mobile spec, 14 Nov 2026); Near me there opens the toolbar's Near me (aw.js), and shows only
@@ -700,9 +698,7 @@ function aw_browse_states() {
 	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['tag'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return ''; // the hub and the home page only
 	}
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-single' ); // aw-browse-states
-	}
+	directoryweb_use_style( 'aw-single' ); // aw-browse-states
 	$items = '';
 	foreach ( aw_place_states() as $st ) {
 		$n = aw_state_count( $st );

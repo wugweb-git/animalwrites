@@ -138,9 +138,7 @@ function aw_district_helplines_row() {
 	foreach ( $items as $it ) {
 		$chips .= '<a class="kit-chip" href="' . esc_attr( aw_helpline_tel( $it[1] ) ) . '"><span class="aw-dh-row-name">' . esc_html( $it[0] ) . '</span> <strong>' . esc_html( $it[1] ) . '</strong></a>';
 	}
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-directory' ); // aw-dh-row
-	}
+	directoryweb_use_style( 'aw-directory' ); // aw-dh-row
 	/* translators: %s: district. */
 	$label = sprintf( __( 'Animal helpline numbers in %s', 'directoryweb' ), $d->name );
 	return '<nav class="kit-tags aw-dh-row" aria-label="' . esc_attr( $label ) . '"><span class="aw-dh-row-label">' . esc_html__( 'Helplines', 'directoryweb' ) . '</span>'
@@ -168,9 +166,7 @@ function aw_district_helplines_html( $d ) {
 	if ( $mvu ) {
 		$cards .= aw_helpline_card( __( 'Mobile Veterinary Units', 'directoryweb' ), '1962', __( 'A vet comes to the animal.', 'directoryweb' ), esc_html( sprintf( '%s animal husbandry department', $state->name ) ), get_permalink( $mvu ) );
 	}
-	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
-		kits_use_component_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
-	}
+	directoryweb_use_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
 	$id = 'aw-dh-' . wp_unique_id();
 	/* translators: %s: district. */
 	return '<section class="aw-district-helplines" id="district-helplines" aria-labelledby="' . esc_attr( $id ) . '"><h2 id="' . esc_attr( $id ) . '">' . esc_html( sprintf( __( 'Animal helpline numbers in %s', 'directoryweb' ), $d->name ) ) . '</h2>'

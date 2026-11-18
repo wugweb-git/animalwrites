@@ -326,9 +326,7 @@ function aw_dir_tools_html() {
 function aw_dir_panels_html() {
 	$icons = ''; // one icon per type; dir-map.js reads each one's picture (--i) for the map's markers
 	foreach ( directoryweb_listing_type_slugs() as $slug ) {
-		if ( function_exists( 'kits_use_component_style' ) ) {
-			kits_use_component_style( 'aw-type-icons' ); // the type pictures (aw-type-icons.css)
-		}
+		directoryweb_use_style( 'aw-type-icons' ); // the type pictures (aw-type-icons.css)
 		$icons .= kits_icon( 'type-' . $slug, 'kit-ico--type' ); // as Core's aw_type_icon(): kit-ico--type keeps its 1em size, spacing and the text colour
 	}
 	return '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
