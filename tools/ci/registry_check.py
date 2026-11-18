@@ -1,5 +1,5 @@
 """Kits registry check (deploy gate): every kit-* / aw-* class used in markup or stylesheets, and every animal-writes/*
-block, must have an entry in a kits-registry.json (Kits master or Animal Writes, in animal-writes-core/theme). A registered class or
+block, must have an entry in a kits-registry.json (Kits master or Animal Writes, in the Kits site folder assets/site). A registered class or
 block that is used nowhere is reported as a warning only.
 
     python3 tools/ci/registry_check.py        # exit 1 when something is missing
@@ -12,7 +12,7 @@ import sys
 from theme_copies import is_copy, theme_file
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-REGS = ["themes/kits-by-wugweb/kits-registry.json", theme_file("kits-registry.json")]  # Kits master, then Animal Writes (animal-writes-core/theme)
+REGS = ["themes/kits-by-wugweb/kits-registry.json", theme_file("kits-registry.json")]  # Kits master, then Animal Writes (assets/site)
 
 prefixes, blocks = [], set()
 for r in REGS:

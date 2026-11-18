@@ -1,29 +1,34 @@
 #!/usr/bin/env python3
-"""Deploy check: the Animal Writes theme files that animal-writes-core carries (plugins/animal-writes-core/theme/, served
-while Kits by Wugweb is the active theme) are all there, and fonts live only in Kits.
+"""Deploy check: the Animal Writes site files in the Kits theme's site folder (themes/kits-by-wugweb/assets/site/,
+served by the theme's inc/site-layer.php and left out of the distributed theme) are all there, and fonts live only in
+Kits.
 
-Kits by Wugweb runs with no child theme, and the plugin's theme/ folder is the one source of the Animal Writes theme
-files (assets, templates, parts, patterns, theme.json, kits-registry.json, tokens/). This check fails when one of those
-is missing, or when a font folder appears there: Kits by Wugweb declares Inter in its theme.json and ships the one file
-(assets/fonts/inter/inter-latin.woff2).
+Kits by Wugweb runs with no child theme, and the site folder is the one source of the Animal Writes site files (css,
+js, img, templates, parts, patterns, theme.json, kits-registry.json, tokens/, site.php). Until 18 Nov 2026 they were
+animal-writes-core's theme/ folder. This check fails when one of those is missing, or when a font folder appears there:
+Kits by Wugweb declares Inter in its theme.json and ships the one file (assets/fonts/inter/inter-latin.woff2).
 
 The other checks import is_copy() and theme_file() from here:
-- is_copy() is true for the generated .min.css files (tools/ci/css_min.py writes aw*.min.css in the plugin's folder and
+- is_copy() is true for the generated .min.css files (tools/ci/css_min.py writes aw*.min.css in the site folder and
   kit-tokens/kit/kit-primitives.min.css in Kits; MIN_FILES), so the checks read their sources instead;
-- theme_file(rel) is the plugin's file.
+- theme_file(rel) is the site file; rel may be the old path below the theme root ("assets/css/tokens.css" is
+  css/tokens.css in the site folder).
 
     python3 tools/ci/theme_copies.py        # exit 1 when a required file is missing or a font folder is there
 """
 import pathlib
+import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-COPY = ROOT / "plugins/animal-writes-core/theme"
-# Each of these must be in the plugin's theme/ folder (the plugin serves them; a missing one would be missing on the site).
+COPY = ROOT / "themes/kits-by-wugweb/assets/site"
+COPY_REL = "themes/kits-by-wugweb/assets/site"
+# Each of these must be in the site folder (the theme serves them; a missing one would be missing on the site).
 REQUIRED = (
-    "assets/css/aw.css",
-    "assets/css/tokens.css",
-    "assets/js/aw.js",
+    "site.php",
+    "site.css",
+    "css/tokens.css",
+    "js/aw.js",
     "templates",
     "parts",
     "patterns",
@@ -47,8 +52,8 @@ def is_copy(path):
 
 
 def theme_file(rel):
-    """The Animal Writes theme file (path relative to the theme root) in the plugin's theme/ folder."""
-    return COPY / rel
+    """The Animal Writes site file (path relative to the site folder, or its old path below the theme root)."""
+    return COPY / re.sub(r"^assets/", "", str(rel))
 
 
 def main():
@@ -56,17 +61,17 @@ def main():
     for rel in REQUIRED:
         p = COPY / rel
         if not p.exists() or (p.is_dir() and not any(f.is_file() for f in p.rglob("*"))):
-            bad.append(f"MISSING plugins/animal-writes-core/theme/{rel}")
+            bad.append(f"MISSING {COPY_REL}/{rel}")
     if not (ROOT / KITS_FONT).is_file():
         bad.append(f"FONT {KITS_FONT} is missing (Kits' theme.json declares it)")
-    folder = COPY / "assets/fonts"
+    folder = COPY / "fonts"
     if folder.is_dir() and any(f.is_file() and f.name != ".DS_Store" for f in folder.rglob("*")):
         bad.append(f"FONT {folder.relative_to(ROOT)} has font files; Inter is declared once, in Kits")
     if bad:
-        print("Animal Writes theme files in animal-writes-core:")
+        print("Animal Writes site files in the Kits theme:")
         print("\n".join("  " + b for b in bad))
         return 1
-    print(f"theme files check passed ({len(REQUIRED)} required paths in plugins/animal-writes-core/theme/, fonts only in Kits)")
+    print(f"theme files check passed ({len(REQUIRED)} required paths in {COPY_REL}/, fonts only in Kits)")
     return 0
 
 

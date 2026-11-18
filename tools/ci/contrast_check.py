@@ -17,7 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 TOKEN_FILES = [
     ROOT / "themes/kits-by-wugweb/assets/css/kits-v42.css",
     ROOT / "themes/kits-by-wugweb/assets/css/kit-tokens.css",
-    theme_file("assets/css/tokens.css"),  # animal-writes-core/theme
+    theme_file("assets/css/tokens.css"),  # the Kits site folder (assets/site)
 ]
 REGISTRIES = sorted(set((ROOT / "themes").glob("*/kits-registry.json")) | {theme_file("kits-registry.json")})
 CAMPAIGN_CSS = ROOT / "plugins/animal-writes-core/assets/css/campaign.css"

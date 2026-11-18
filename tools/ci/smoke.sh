@@ -19,6 +19,9 @@ wp rewrite structure '/%postname%/' --quiet
 # Kits by Wugweb alone, as on the live site: Animal Writes Core serves the Animal Writes theme parts (includes/theme-parts*.php).
 wp theme activate kits-by-wugweb --quiet
 wp plugin activate animal-writes-core --quiet
+# Kits Core active on its own too, as on the live site (Core also loads it; it must not load twice). DirectoryWeb's
+# header names it (Requires Plugins: kits-core), so WordPress refuses to activate DirectoryWeb without it.
+wp plugin activate kits-core --quiet
 # DirectoryWeb: Core already loads it from the sibling folder; activating it on its own must not load it twice.
 wp plugin activate directoryweb --quiet
 # Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).
@@ -442,9 +445,9 @@ wp cache flush --quiet
 wp transient delete --all --quiet || true
 wp rewrite flush --quiet
 curl -s -o /dev/null http://127.0.0.1:8080/ || true
-# Animal Writes component stylesheets: aw.css and theme/assets/css/aw-*.css as separate links, or the joined file
+# Animal Writes component stylesheets: the theme site folder css/aw-*.css as separate links, or the joined file
 # uploads/kits-cache/parts/*.css (Kits kits_component_styles). aw_links FILE prints how many links a page has.
-aw_links() { grep -oE "<link[^>]*rel=['\"]stylesheet['\"][^>]*>" "$1" | grep -cE "/animal-writes-core/theme/assets/css/|/kits-cache/parts/" || true; }
+aw_links() { grep -oE "<link[^>]*rel=['\"]stylesheet['\"][^>]*>" "$1" | grep -cE "/kits-by-wugweb/assets/site/css/|/kits-cache/parts/" || true; }
 for u in "${URLS[@]}"; do
   code=$(curl -s -o /tmp/page.html -w '%{http_code}' "http://127.0.0.1:8080$u")
   if [ "$code" != "200" ] || grep -qiE 'critical error on this website|(Fatal|Parse) error(</b>)?: ' /tmp/page.html; then
@@ -465,14 +468,16 @@ curl -s -o /tmp/listing.html "http://127.0.0.1:8080$(single aw_listing)"
 # joined FILE: the joined component file a page links to (kits-parts-css), fetched to /tmp/joined-NAME.css.
 joined() { href=$(grep -oE "<link[^>]*id=['\"]kits-parts-css['\"][^>]*>" "$1" | grep -oE "href=['\"][^'\"]+" | head -1 | cut -c7-); [ -n "$href" ] && curl -s -o "/tmp/joined-$2.css" "$href"; }
 if joined /tmp/home.html home; then
-  has "joined file on / starts with aw.css" /tmp/joined-home.css '/* aw-components */'
-  # aw.css's wordmark url() is rewritten to the folder it came from: the plugin's copy, not a theme folder.
-  has "joined aw.css is the plugin copy" /tmp/joined-home.css '/wp-content/plugins/animal-writes-core/theme/assets/'
+  # aw.css was retired (18 Nov 2026): the joined file holds the component files only.
+  if grep -qF '/* aw-components */' /tmp/joined-home.css; then echo "FAIL joined file on / still has aw.css"; FAIL=1; else echo "ok   joined file on / has no aw.css"; fi
+  # The theme's site file (assets/site/site.css) joins first; its wordmark url() is rewritten to the theme's site folder.
+  has "joined file on / has the site CSS" /tmp/joined-home.css '/* kits-site */'
+  has "joined site CSS points at the theme's site folder" /tmp/joined-home.css '/wp-content/themes/kits-by-wugweb/assets/site/'
 else
   echo "FAIL no joined component file on /"; FAIL=1
 fi
 # Markers of the component files, once they exist: aw-home on the front page only.
-if [ -f "$REPO/plugins/animal-writes-core/theme/assets/css/aw-home.css" ]; then
+if [ -f "$REPO/themes/kits-by-wugweb/assets/site/css/aw-home.css" ]; then
   has "joined file on / has aw-home" /tmp/joined-home.css '/* aw-home */'
   if joined /tmp/state.html state && grep -qF '/* aw-home */' /tmp/joined-state.css; then echo "FAIL joined file on a state page has aw-home"; FAIL=1; else echo "ok   joined file on a state page has no aw-home"; fi
 fi
@@ -481,18 +486,14 @@ wp eval '$o = (array) get_option( "kits_theme_options", array() ); $o["css_bundl
 curl -s -o /tmp/home.html http://127.0.0.1:8080/
 curl -s -o /tmp/state.html http://127.0.0.1:8080/directory/kerala/
 curl -s -o /tmp/listing.html "http://127.0.0.1:8080$(single aw_listing)"
-# The component stylesheet comes from the plugin's copy (aw.min.css, or aw.css when the min file is missing), not a theme folder.
-if grep -oE "<link[^>]*id=['\"]aw-components-css['\"][^>]*>" /tmp/home.html | grep -qE '/wp-content/plugins/animal-writes-core/theme/assets/css/aw(\.min)?\.css'; then
-  echo "ok   aw-components-css from the plugin (joined off)"
-else
-  echo "FAIL aw-components-css from the plugin (joined off)"; FAIL=1
-fi
+# aw.css was retired (18 Nov 2026): no aw-components stylesheet with the joined file off either.
+if grep -qE "id=['\"]aw-components-css['\"]" /tmp/home.html; then echo "FAIL aw-components-css still loads (joined off)"; FAIL=1; else echo "ok   no aw-components-css (joined off)"; fi
 if grep -qF 'kits-cache/parts/' /tmp/home.html; then echo "FAIL joined component file on / with the switch off"; FAIL=1; else echo "ok   no joined component file with the switch off"; fi
-if [ -f "$REPO/plugins/animal-writes-core/theme/assets/css/aw-home.css" ]; then
+if [ -f "$REPO/themes/kits-by-wugweb/assets/site/css/aw-home.css" ]; then
   has "aw-home-css on / (joined off)" /tmp/home.html "id='aw-home-css'"
   if grep -qF "id='aw-home-css'" /tmp/state.html; then echo "FAIL aw-home-css on a state page (joined off)"; FAIL=1; else echo "ok   no aw-home-css on a state page (joined off)"; fi
 fi
-if [ -f "$REPO/plugins/animal-writes-core/theme/assets/css/aw-listing.css" ]; then
+if [ -f "$REPO/themes/kits-by-wugweb/assets/site/css/aw-listing.css" ]; then
   has "aw-listing-css on a listing (joined off)" /tmp/listing.html "id='aw-listing-css'"
 fi
 # Back on: the options cleaner keeps a saved value for a missing key, so "on" is set (and dropped as the default).
@@ -502,7 +503,7 @@ curl -s -o /tmp/home.html http://127.0.0.1:8080/
 # attribute so a stylesheet rule cannot match them.
 has "front-page template is the Animal Writes one" /tmp/home.html 'class="wp-block-group kit-static' # the front page's main group (only our front-page template uses kit-static); the Take part band went back to its pattern and the FAQ section is empty without FAQ items (5 Nov 2026)
 has "header part is the Animal Writes one" /tmp/home.html 'class="kit-header-utility" data-menu="secondary"'
-want=$(ls "$REPO"/plugins/animal-writes-core/theme/patterns/*.php | wc -l | tr -d ' ')
+want=$(ls "$REPO"/themes/kits-by-wugweb/assets/site/patterns/*.php | wc -l | tr -d ' ')
 got=$(wp eval 'echo count(array_filter(WP_Block_Patterns_Registry::get_instance()->get_all_registered(), fn($p)=>str_starts_with($p["name"],"animal-writes/")));' 2>/dev/null || echo error)
 if [ "$got" = "$want" ]; then echo "ok   $got animal-writes/ patterns registered"; else echo "FAIL $got animal-writes/ patterns registered, want $want"; FAIL=1; fi
 # InsightWeb (Search Insights, moved out of RankWeb; docs/insightweb-plan.md 3.2): it loads once and every job has a

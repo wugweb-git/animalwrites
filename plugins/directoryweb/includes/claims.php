@@ -34,7 +34,7 @@ const AW_CLAIM_FIELDS = array(
 	'aw_email'    => array( 'Public email', 'email' ),
 	'aw_website'  => array( 'Website', 'url' ),
 	'aw_area'     => array( 'Area or locality', 'max:120' ),
-	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (AW_SERVICES); saved as service tags
+	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (DIRECTORYWEB_SERVICES); saved as service tags
 );
 
 const AW_CLAIM_LOGO_BYTES = 2 * MB_IN_BYTES;
@@ -85,7 +85,7 @@ function aw_claim_current( $lid, $key ) {
 
 /** The claim form for a listing: the Fluent Forms form. */
 function aw_claim_form( $listing ) {
-	return aw_ff_form( 'claim', array( 'listing' => $listing ) );
+	return function_exists( 'aw_ff_form' ) ? aw_ff_form( 'claim', array( 'listing' => $listing ) ) : ''; // the form is Animal Writes Core's Fluent Forms embed
 }
 
 /** Is the uploaded logo a PNG, JPG or WebP under 2 MB? */
@@ -98,7 +98,7 @@ function aw_claim_logo_ok( $logo ) {
 /** A logo as a PNG of at most 800 px in the private folder: its file name, or ''. */
 function aw_claim_logo_store( $tmp, $name = '' ) {
 	$editor = wp_get_image_editor( $tmp );
-	if ( is_wp_error( $editor ) ) {
+	if ( is_wp_error( $editor ) || ! function_exists( 'aw_private_dir' ) ) { // never saved outside the private folder (Animal Writes Core's)
 		return '';
 	}
 	$editor->resize( 800, 800, false );
@@ -162,7 +162,7 @@ function aw_claim_review_box( $post ) {
 	if ( get_post_meta( $post->ID, 'aw_c_feature', true ) ) { // asked before featured listings were dropped (owner, 24 Oct 2026)
 		$cells[] = array( 'field' => 'Featured', 'now' => 'Asked to be featured; featured listings are no longer offered, so tell them when you reply.' );
 	}
-	aw_core_simple_table( 'claim-fields', array( 'field' => 'Field', 'now' => 'Now', 'proposed' => 'Proposed' ), $cells, array( 'empty' => 'No changes proposed.' ) );
+	kits_simple_table( 'claim-fields', array( 'field' => 'Field', 'now' => 'Now', 'proposed' => 'Proposed' ), $cells, array( 'empty' => 'No changes proposed.' ) );
 	$notes = (string) get_post_meta( $post->ID, 'aw_c_notes', true );
 	if ( $notes ) {
 		echo '<p><strong>Notes:</strong><br>' . nl2br( esc_html( $notes ) ) . '</p>';
@@ -184,7 +184,7 @@ add_action(
 		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'aw_claim_logo' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
-		$path = aw_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) );
+		$path = function_exists( 'aw_private_dir' ) ? aw_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) ) : '';
 		if ( ! is_file( $path ) ) {
 			wp_die( 'Not found.', 404 );
 		}
@@ -208,7 +208,7 @@ add_action(
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
 				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {
 					if ( 'aw_services' === $key ) {
-						aw_set_item_tags( $lid, explode( ',', (string) $val ), aw_service_slugs() ); // the services only; the listing's types stay
+						directoryweb_set_item_tags( $lid, explode( ',', (string) $val ), directoryweb_service_slugs() ); // the services only; the listing's types stay
 					} elseif ( 'aw_phone' === $key ) {
 						directoryweb_listing_put_phone( $lid, (string) $val, '' ); // into the Phone numbers list
 					} elseif ( 'aw_whatsapp' === $key ) {
@@ -223,7 +223,7 @@ add_action(
 				}
 			}
 			$logo = (string) get_post_meta( $id, 'aw_c_logo', true );
-			$path = $logo ? aw_private_dir() . '/' . basename( $logo ) : '';
+			$path = $logo && function_exists( 'aw_private_dir' ) ? aw_private_dir() . '/' . basename( $logo ) : ''; // without the private folder the logo is not brought in
 			if ( $path && is_file( $path ) ) {
 				require_once ABSPATH . 'wp-admin/includes/media.php';
 				require_once ABSPATH . 'wp-admin/includes/file.php';

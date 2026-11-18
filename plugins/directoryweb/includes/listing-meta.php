@@ -203,7 +203,7 @@ const DIRECTORYWEB_NEVER_PUBLISH_PHONES = array(
  * @return bool
  */
 function directoryweb_phone_never_publish( $raw ) {
-	$n = function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $raw ) : preg_replace( '/\D+/', '', (string) $raw );
+	$n = directoryweb_normalise_phone( $raw );
 	if ( 10 === strlen( $n ) ) {
 		$n = '91' . $n;
 	}
@@ -326,7 +326,7 @@ function directoryweb_listing_put_phone( $id, $phone = '', $whatsapp = '' ) {
 		return;
 	}
 	$rows = directoryweb_listing_phones( $id );
-	$norm = fn( $n ) => function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $n ) : preg_replace( '/\D+/', '', $n );
+	$norm = fn( $n ) => directoryweb_normalise_phone( $n );
 	if ( '' !== $phone ) {
 		if ( $rows ) {
 			$rows[0]['number'] = $phone;

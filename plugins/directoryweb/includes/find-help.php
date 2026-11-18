@@ -113,7 +113,7 @@ function aw_findhelp_applies( $id ) {
 	if ( 'publish' !== get_post_status( $id ) ) {
 		return false;
 	}
-	return in_array( $type, array( 'aw_news', 'aw_legal', 'aw_campaign' ), true ) || ( 'post' === $type && 'guide' === aw_item_kind( $id ) );
+	return in_array( $type, array( 'aw_news', 'aw_legal', 'aw_campaign' ), true ) || ( 'post' === $type && function_exists( 'aw_item_kind' ) && 'guide' === aw_item_kind( $id ) );
 }
 
 /* ---------- Place detection ---------- */
@@ -239,7 +239,7 @@ function aw_places_in_text( $title, $summary = '', $strict = true ) {
 /** Whether an item should get a detected place: a News, Library or guide item with no place. */
 function aw_place_detect_wanted( $id ) {
 	$type = get_post_type( $id );
-	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'post' ), true ) || ( 'post' === $type && 'guide' !== aw_item_kind( $id ) ) ) {
+	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'post' ), true ) || ( 'post' === $type && ( ! function_exists( 'aw_item_kind' ) || 'guide' !== aw_item_kind( $id ) ) ) ) {
 		return false;
 	}
 	list( $s, $d ) = aw_item_codes( $id );
@@ -296,7 +296,7 @@ function aw_findhelp_places( $id, $place = null ) {
 	if ( 'district' === $place->kind ) {
 		$km = array();
 		foreach ( $ds as $code => $d ) {
-			$km[ $code ] = $code === $place->code ? -1 : ( aw_district_km( $place->code, $code ) ?? PHP_INT_MAX );
+			$km[ $code ] = $code === $place->code ? -1 : ( directoryweb_district_km( $place->code, $code ) ?? PHP_INT_MAX );
 		}
 		asort( $km );
 		$ds = array_map( fn( $c ) => $ds[ $c ], array_keys( $km ) );
@@ -332,12 +332,12 @@ function aw_findhelp_states_window( $id ) {
  * @return string
  */
 function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
-	aw_use_component_style( 'aw-single' ); // aw-findhelp-line, aw-browse-states, aw-findhelp (item More, campaign band)
+	directoryweb_use_style( 'aw-single' ); // aw-findhelp-line, aw-browse-states, aw-findhelp (item More, campaign band)
 	$hid = 'aw-findhelp-' . (int) $id;
 	if ( ! $places ) {
 		return '<p class="aw-findhelp-line"><strong>' . esc_html__( 'Find help near you', 'directoryweb' ) . '</strong>'
 			. '<a href="' . esc_url( home_url( '/directory/' ) ) . '">' . esc_html__( 'All states and districts', 'directoryweb' ) . '</a>'
-			. '<a href="' . esc_url( home_url( '/directory/#near-me' ) ) . '">' . aw_i( 'map-pin' ) . esc_html__( 'Near me', 'directoryweb' ) . '</a></p>';
+			. '<a href="' . esc_url( home_url( '/directory/#near-me' ) ) . '">' . kits_icon( 'map-pin' ) . esc_html__( 'Near me', 'directoryweb' ) . '</a></p>';
 	}
 	$items = '';
 	foreach ( $places as list( $p, $n ) ) {
@@ -355,7 +355,7 @@ add_filter(
 	'render_block_animal-writes/item-more',
 	function ( $html, $block, $instance ) {
 		$id = (int) ( $instance->context['postId'] ?? get_queried_object_id() );
-		if ( ! aw_item_here( $id ) || 'aw_campaign' === get_post_type( $id ) || ! aw_findhelp_applies( $id ) ) {
+		if ( ! function_exists( 'aw_item_here' ) || ! aw_item_here( $id ) || 'aw_campaign' === get_post_type( $id ) || ! aw_findhelp_applies( $id ) ) {
 			return $html;
 		}
 		$near = '<div class="aw-findhelp-group">' . aw_findhelp_html( $id, aw_findhelp_places( $id ), 'aw-more-head has-x-large-font-size' ) . '</div>';
@@ -433,7 +433,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			foreach ( $types as $t ) {
 				$c = array( 'items' => 0, 'had' => 0, 'found' => 0, 'district' => 0, 'edited' => 0, 'nosource' => 0, 'states' => array() );
 				foreach ( get_posts( array( 'post_type' => $t, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'DESC' ) ) as $id ) {
-					if ( 'post' === $t && 'guide' !== aw_item_kind( $id ) ) {
+					if ( 'post' === $t && ( ! function_exists( 'aw_item_kind' ) || 'guide' !== aw_item_kind( $id ) ) ) { // what an item is: Animal Writes Core's
 						continue;
 					}
 					++$c['items'];

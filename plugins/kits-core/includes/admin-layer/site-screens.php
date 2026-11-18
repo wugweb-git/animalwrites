@@ -81,17 +81,12 @@ function kits_site_screen_nav( string $current ): void {
 	kits_admin_tabs( $current );
 }
 
-// Kits → Home → Versions and limits: scheduled tasks and the last theme switch.
+// Kits → Home → Versions and limits: scheduled tasks.
 add_filter(
 	'kits_status_rows',
 	function ( $rows ) {
 		$st     = kits_site_status( false );
 		$rows[] = array( __( 'Scheduled tasks', 'kits-core' ), $st['cron'] );
-		if ( current_user_can( 'switch_themes' ) ) {
-			$log    = get_option( 'aw_theme_switch_log', array() );
-			$last   = is_array( $log ) && $log ? end( $log ) : array();
-			$rows[] = array( __( 'Last theme switch', 'kits-core' ), $last ? esc_html( (string) ( $last['from'] ?? '' ) . ' → ' . (string) ( $last['to'] ?? '' ) . ', ' . ( isset( $last['time'] ) ? wp_date( 'j M Y, H:i', (int) $last['time'] ) : '' ) ) . ' ' . kits_site_link( 'Log', 'admin.php?page=' . KITS_MENU . '#theme-switch' ) : esc_html( 'None yet.' ) );
-		}
 		return $rows;
 	}
 );

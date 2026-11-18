@@ -142,7 +142,7 @@ function aw_seo_filtered_view() {
 	}
 	$view  = array( 'type' => $type, 'key' => '', 'slug' => '', 'name' => '', 'n' => 0, 'index' => false, 'canonical' => '' );
 	$key   = (string) array_key_first( $params );
-	$own   = 'aw_listing' === $type ? array( 'tag', 'q', 'verified', 'gov' ) : array_column( AW_LIST_FILTERS[ $type ] ?? array(), 0 );
+	$own   = 'aw_listing' === $type ? array( 'tag', 'q', 'verified', 'gov' ) : array_column( defined( 'AW_LIST_FILTERS' ) ? ( AW_LIST_FILTERS[ $type ] ?? array() ) : array(), 0 );
 	$value = (string) $params[ $key ];
 	if ( count( $params ) > 1 || ! in_array( $key, $own, true ) || preg_match( '/,|%2C|\[\]/i', $value ) ) {
 		return $view; // several filters, several values, or not a filter of this hub: noindex
@@ -156,7 +156,7 @@ function aw_seo_filtered_view() {
 		if ( '' === $name ) {
 			return $view; // names nothing: noindex
 		}
-		$view = array_merge( $view, array( 'key' => $key, 'slug' => $slug, 'name' => aw_seo_plain( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) ), 'n' => $n ) );
+		$view = array_merge( $view, array( 'key' => $key, 'slug' => $slug, 'name' => rankweb_plain_text( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) ), 'n' => $n ) );
 		if ( $n >= AW_FILTERED_MIN_ITEMS && ! ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) ) {
 			$view['index']     = true;
 			$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), aw_hub_canonical() );
@@ -176,7 +176,7 @@ function aw_seo_filtered_view() {
 	}
 	$view['key']  = $key;
 	$view['slug'] = $slug;
-	$view['name'] = aw_seo_plain( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) );
+	$view['name'] = rankweb_plain_text( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) );
 	$view['n']    = aw_seo_filtered_count( $type, $key, $slug );
 	if ( $view['n'] < AW_FILTERED_MIN_ITEMS ) {
 		return $view;
@@ -306,6 +306,9 @@ add_filter(
  */
 function aw_sitemap_filtered_build() {
 	$urls = array();
+	if ( ! function_exists( 'aw_hub_url' ) ) { // the hubs (Animal Writes Core) are not loaded
+		return $urls;
+	}
 	foreach ( AW_FILTERED_CATEGORY_HUBS as $type ) {
 		$cats = function_exists( 'aw_section_categories' ) ? aw_section_categories( $type ) : array();
 		foreach ( (array) $cats as $slug ) {

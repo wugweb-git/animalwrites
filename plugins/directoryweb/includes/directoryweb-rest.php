@@ -440,7 +440,7 @@ function directoryweb_rest_claims( WP_REST_Request $request ) {
 	if ( $ids ) {
 		_prime_post_caches( $ids, true, true );
 	}
-	$types = function_exists( 'aw_listing_type_slugs' ) ? aw_listing_type_slugs() : array();
+	$types = directoryweb_listing_type_slugs();
 	foreach ( $light as &$r ) {
 		$lid                = 'aw_listing' === get_post_type( $r['listing'] ) ? (int) $r['listing'] : 0;
 		$r['listing']       = $lid;
@@ -894,7 +894,7 @@ function directoryweb_settings_payload(): array {
 	);
 
 	$types = array();
-	foreach ( function_exists( 'aw_listing_type_slugs' ) ? aw_listing_type_slugs() : array() as $slug ) {
+	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		$types[] = function_exists( 'aw_listing_type_name' ) && '' !== aw_listing_type_name( $slug ) ? aw_listing_type_name( $slug ) : $slug;
 	}
 	$roles  = defined( 'AW_CLAIM_ROLES' ) ? array_values( array_filter( AW_CLAIM_ROLES, fn( $k ) => '' !== $k, ARRAY_FILTER_USE_KEY ) ) : array();

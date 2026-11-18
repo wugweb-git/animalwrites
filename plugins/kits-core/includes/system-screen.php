@@ -314,10 +314,9 @@ function kits_content_path( $path ) {
 
 /** Where each class is used: class => list of files relative to wp-content, each once (theme and plugin files; kept 12 hours). */
 function kits_class_usage() {
-	$watch = array( get_template_directory() . '/assets/css/kit.css' );
+	$watch = array( get_template_directory() . '/assets/css/kit.css', get_template_directory() . '/assets/css/kits.css' );
 	foreach ( kits_system_dirs() as $dir ) {
 		$watch[] = $dir . '/kits-registry.json';
-		$watch[] = $dir . '/assets/css/aw.css';
 	}
 	$watch  = array_unique( $watch );
 	$key    = 'kits_class_usage_4_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.

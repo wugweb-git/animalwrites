@@ -9,7 +9,7 @@ in Appearance > Editor > Styles reaches core blocks and Kits components alike.
 
   themes/kits-by-wugweb: tokens.json -> assets/css/kit-tokens.css (and its kit-tokens.min.css) + theme.json (the neutral
                          Kits defaults)
-  plugins/animal-writes-core/theme (the Animal Writes theme files Animal Writes Core serves over Kits):
+  themes/kits-by-wugweb/assets/site (the Animal Writes site files the Kits theme serves over its own):
                          tokens.json -> assets/css/tokens.css (only tokens with no preset) + theme.json (only presets
                          whose values differ from Kits; a list it writes is complete, as it replaces the Kits one when
                          merged over it)
@@ -26,11 +26,11 @@ engine = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(engine)
 
 KITS = ROOT / "themes/kits-by-wugweb"
-AW = ROOT / "plugins/animal-writes-core/theme"  # the Animal Writes theme files (tools/ci/theme_copies.py)
+AW = ROOT / "themes/kits-by-wugweb/assets/site"  # the Animal Writes site files (tools/ci/theme_copies.py)
 prims = engine.primitives_from(KITS / "tokens/kits-v42.json")
 kits_src = json.loads((KITS / "tokens/tokens.json").read_text())
 n1, kits_presets = engine.build(KITS / "tokens/tokens.json", KITS / "assets/css/kit-tokens.css", KITS / "tokens/tokens.compiled.json", "kit", theme_json=KITS / "theme.json", prims=prims)
-n2, _ = engine.build(AW / "tokens/tokens.json", AW / "assets/css/tokens.css", AW / "tokens/tokens.compiled.json", "kit", theme_json=AW / "theme.json", prims=prims, parent=kits_src, parent_presets=kits_presets)
+n2, _ = engine.build(AW / "tokens/tokens.json", AW / "css/tokens.css", AW / "tokens/tokens.compiled.json", "kit", theme_json=AW / "theme.json", prims=prims, parent=kits_src, parent_presets=kits_presets)
 css_min = importlib.util.module_from_spec(importlib.util.spec_from_file_location("css_min", ROOT / "tools/ci/css_min.py"))
 css_min.__spec__.loader.exec_module(css_min)
 min_out = KITS / "assets/css/kit-tokens.min.css"  # the file the site serves (tools/ci/css_min.py)

@@ -186,7 +186,7 @@ add_filter(
 		if ( ! $videos ) {
 			return $data;
 		}
-		$fallback = function_exists( 'aw_seo_plain' ) ? (string) aw_seo_plain( get_the_excerpt( $id ) ) : wp_strip_all_tags( (string) get_the_excerpt( $id ) );
+		$fallback = function_exists( 'rankweb_plain_text' ) ? (string) rankweb_plain_text( get_the_excerpt( $id ) ) : wp_strip_all_tags( (string) get_the_excerpt( $id ) );
 		$n        = 0;
 		foreach ( $videos as $v ) {
 			$node = AW_Video::node( (array) $v, $fallback );

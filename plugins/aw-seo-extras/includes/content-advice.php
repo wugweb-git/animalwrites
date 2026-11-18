@@ -203,7 +203,7 @@ function aw_seo_content_advice( WP_Post $post ) {
 	}
 
 	// 2. Search queries this page was shown for (Search Console, 28 days).
-	if ( $out['insights'] && function_exists( 'aw_si_object_path' ) ) {
+	if ( $out['insights'] && function_exists( 'aw_si_object_path' ) && function_exists( 'aw_si_table' ) ) {
 		$path = aw_si_object_path( 'post', $id );
 		if ( '' !== $path ) {
 			global $wpdb;
