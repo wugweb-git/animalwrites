@@ -3,7 +3,7 @@
  * The item page (owner, 20 Oct 2026): one structure for News, Library (sourced and our own documents), Resources
  * (research and guides) and Opportunities, from one template (single.html); Directory listings use rows 1–4.
  *
- *   1 Breadcrumb   animal-writes/breadcrumb   Home › Section › primary category (the BreadcrumbList is the same trail)
+ *   1 Breadcrumb   rankweb/breadcrumbs        Home › Section › primary category (the BreadcrumbList is the same trail)
  *   2 Title        core/post-title (H1)
  *   3 Meta row     animal-writes/item-meta    one date, Sponsored, type, place, deadline, status, categories
  *   4 Image        core/post-featured-image

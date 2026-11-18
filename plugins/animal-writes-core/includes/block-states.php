@@ -90,7 +90,7 @@ add_filter(
 		$out .= '</div>';
 		// Page-level blocks: they draw from the page they are on (its query, filters, place), so the sheet shows where they render; browse-states works anywhere.
 		$page_blocks = array(
-			array( 'Breadcrumb (animal-writes/breadcrumb)', 'every page top', '/library/' ),
+			array( 'Breadcrumb (rankweb/breadcrumbs; earlier animal-writes/breadcrumb)', 'every page top', '/library/' ),
 			array( 'Head band (animal-writes/section-head)', 'Pages, archives, category and Directory place pages', '/about/' ),
 			array( 'Section page count (animal-writes/hub-count)', 'section page head bands (prints nothing: the count sits with the filters under the band, owner 20 Oct)', '/news/' ),
 			array( 'Section page pictures (animal-writes/hub-visual)', 'section page head bands (prints nothing: no pictures in page top bands, owner 8 Oct)', '/news/' ),

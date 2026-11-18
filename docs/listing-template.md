@@ -8,7 +8,7 @@ Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF gr
 
 | # | Row | Block | What fills it |
 |---|-----|-------|---------------|
-| 1 | Breadcrumb | `animal-writes/breadcrumb` | Home › Directory › State › District (each a link); the BreadcrumbList is the same trail. |
+| 1 | Breadcrumb | `rankweb/breadcrumbs` (RankWeb; the earlier `animal-writes/breadcrumb` renders the same) | Home › Directory › State › District (each a link); the BreadcrumbList is the same trail. |
 | 2 | H1 | `core/post-title` | The organisation's name. No tick (the meta row says Claimed). |
 | 3 | Meta row | `animal-writes/item-meta` | Up to 3 type chips (primary first) · place chip · status: "Claimed on {date}" (aw_verified, aw_verified_on), or "Needs re-check" (aw_needs_reverify), "Blacklisted on NGO Darpan"; then, for registrations from government documents, "Verified on {date}" (aw_gov_verified_on). No other date. |
 | 7 | Contact | `animal-writes/listing-contact` | Labelled buttons: Call {first number} · WhatsApp (first number marked WhatsApp) · Email · Website ↗ · Directions (aw_maps_url; greyed out without it). Then the other numbers, one per line: "{label}: {number}" (+ WhatsApp link). Contact data appears only here. |

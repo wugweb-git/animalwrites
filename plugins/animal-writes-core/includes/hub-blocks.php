@@ -4,7 +4,7 @@
  * (no shortcodes), editable in the block editor (preview via ServerSideRender), used in the hub Pages and their list
  * patterns. Inside a Query Loop they read the item from the block context (postId).
  *
- * Band: breadcrumb · hub-count · hub-visual · list-filters (Kits filter bar or the Directory search bar).
+ * Band: hub-count · hub-visual · list-filters (Kits filter bar or the Directory search bar).
  * Lists: publisher · doc-date · issuer ("Issued by …" label) · doc-link (PDF) · task-icon · read-meta · place ·
  * deadline (validThrough) · opp-actions · org-mark · badges (Verified/Sponsored + sources + types) ·
  * contact (icons only when the contact exists) · org-actions · result-head (count + sort) · browse-states ·
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_hub_blocks() {
 	$type_attr = array( 'postType' => array( 'type' => 'string', 'default' => '' ) );
 	return (array) apply_filters( 'aw_hub_blocks', array( // term-page.php adds the category and tag page blocks
-		'breadcrumb'    => array( 'Breadcrumb', 'aw_block_breadcrumb', array() ),
+		// breadcrumb: RankWeb registers animal-writes/breadcrumb (an alias of rankweb/breadcrumbs, breadcrumbs-render.php).
 		'section-head'  => array( 'Head band', 'aw_block_section_head', $type_attr ),
 		'hub-count'     => array( 'Section page count', 'aw_block_hub_count', $type_attr ),
 		'hub-visual'    => array( 'Section page pictures', 'aw_block_hub_visual', $type_attr ),
@@ -95,17 +95,6 @@ add_action(
 
 /* ---------- Band ---------- */
 
-function aw_block_breadcrumb() {
-	global $post;
-	if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $post ) { // editor preview: the trail of this page
-		$trail = '<li class="kit-crumbs-home"><a href="' . esc_url( home_url( '/' ) ) . '" aria-label="Home"><span class="kit-ico kit-ico--home" aria-hidden="true"></span></a></li>';
-		foreach ( array_reverse( get_post_ancestors( $post ) ) as $a ) {
-			$trail .= '<li><a href="' . esc_url( get_permalink( $a ) ) . '">' . esc_html( get_the_title( $a ) ) . '</a></li>';
-		}
-		return '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol>' . $trail . '<li><span aria-current="page">' . esc_html( get_the_title( $post ) ) . '</span></li></ol></nav>';
-	}
-	return function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
-}
 
 function aw_block_hub_count( $a ) {
 	return ''; // the count sits with the filters, under the band (aw_block_list_filters; owner, 20 Oct 2026)

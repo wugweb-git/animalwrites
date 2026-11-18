@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "rankweb/breadcrumbs",
+	"title": "Breadcrumbs",
+	"category": "theme",
+	"icon": "arrow-right-alt2",
+	"description": "The page's breadcrumb trail (Rank Math's trail, as RankWeb builds it), once per page, above the title. Search engines get the same trail as BreadcrumbList.",
+	"keywords": [ "breadcrumb", "trail", "navigation", "rankweb" ],
+	"textdomain": "aw-seo-extras",
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"editorScript": "file:../../build/blocks/breadcrumbs.js",
+	"render": "file:./render.php"
+}
