@@ -4,7 +4,7 @@
  * (no shortcodes), editable in the block editor (preview via ServerSideRender), used in the hub Pages and their list
  * patterns. Inside a Query Loop they read the item from the block context (postId).
  *
- * Band: breadcrumb · hub-count · hub-visual · list-filters (Kits filter bar or the Directory search bar).
+ * Band: hub-count · hub-visual · list-filters (Kits filter bar or the Directory search bar).
  * Lists: publisher · doc-date · issuer ("Issued by …" label) · doc-link (PDF) · task-icon · read-meta · place ·
  * deadline (validThrough) · opp-actions · org-mark · badges (Verified/Sponsored + sources + types) ·
  * contact (icons only when the contact exists) · org-actions · result-head (count + sort) · browse-states ·
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_hub_blocks() {
 	$type_attr = array( 'postType' => array( 'type' => 'string', 'default' => '' ) );
 	return (array) apply_filters( 'aw_hub_blocks', array( // term-page.php adds the category and tag page blocks
-		'breadcrumb'    => array( 'Breadcrumb', 'aw_block_breadcrumb', array() ),
+		// breadcrumb: RankWeb registers animal-writes/breadcrumb (an alias of rankweb/breadcrumbs, breadcrumbs-render.php).
 		'section-head'  => array( 'Head band', 'aw_block_section_head', $type_attr ),
 		'hub-count'     => array( 'Section page count', 'aw_block_hub_count', $type_attr ),
 		'hub-visual'    => array( 'Section page pictures', 'aw_block_hub_visual', $type_attr ),
@@ -95,10 +95,6 @@ add_action(
 
 /* ---------- Band ---------- */
 
-/** The trail: RankWeb's Breadcrumbs block (rankweb/breadcrumbs) is the block now; this earlier name stays for saved templates. */
-function aw_block_breadcrumb() {
-	return function_exists( 'rankweb_breadcrumbs_block' ) ? rankweb_breadcrumbs_block() : '';
-}
 
 function aw_block_hub_count( $a ) {
 	return ''; // the count sits with the filters, under the band (aw_block_list_filters; owner, 20 Oct 2026)

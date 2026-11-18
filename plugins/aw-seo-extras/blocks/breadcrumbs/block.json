@@ -13,6 +13,6 @@
 		"multiple": false,
 		"reusable": false
 	},
-	"editorScript": "file:./index.js",
+	"editorScript": "file:../../build/blocks/breadcrumbs.js",
 	"render": "file:./render.php"
 }

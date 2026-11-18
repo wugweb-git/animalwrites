@@ -3,7 +3,7 @@
   "private": true,
   "description": "RankWeb's admin screens on the Kits shell (built with @wordpress/scripts; build/ is committed because the deploy does not run npm).",
   "scripts": {
-    "build": "wp-scripts build src/index.js --output-path=build",
+    "build": "wp-scripts build index=./src/index.js blocks/breadcrumbs=./src/blocks/breadcrumbs.js --output-path=build",
     "lint:js": "wp-scripts lint-js src"
   },
   "devDependencies": {
@@ -11,8 +11,12 @@
   },
   "dependencies": {
     "@wordpress/api-fetch": "^8.1.0",
+    "@wordpress/block-editor": "^15.23.0",
+    "@wordpress/blocks": "^15.27.0",
+    "@wordpress/data": "^10.57.0",
     "@wordpress/element": "^10.1.0",
-    "@wordpress/i18n": "^7.1.0"
+    "@wordpress/i18n": "^7.1.0",
+    "@wordpress/server-side-render": "^6.33.0"
   },
   "engines": {
     "node": ">=20"
