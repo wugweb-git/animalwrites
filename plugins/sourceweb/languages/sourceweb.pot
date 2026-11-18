@@ -1,0 +1,73 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: SourceWeb 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sourceweb\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-17T00:00:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: manual\n"
+"X-Domain: sourceweb\n"
+
+#. Plugin Name of the plugin
+#: sourceweb.php
+msgid "SourceWeb"
+msgstr ""
+
+#. Description of the plugin
+#: sourceweb.php
+msgid "Decide what news and content enters your site and review it: source hosts with an allow/neutral/block status, keyword relevance (include/animal/context/exclude), and a review gate over the post types you choose."
+msgstr ""
+
+#: includes/admin.php
+msgid "Choose which content SourceWeb curates, and the keywords that decide relevance."
+msgstr ""
+
+#: includes/admin.php
+msgid "Post types to curate"
+msgstr ""
+
+#: includes/admin.php
+msgid "Relevance"
+msgstr ""
+
+#: includes/admin.php
+msgid "Filter incoming items by the keyword lists below (exclude terms always apply)."
+msgstr ""
+
+#: includes/admin.php
+msgid "Include (strong) terms"
+msgstr ""
+
+#: includes/admin.php
+msgid "One per line. Any match keeps the item."
+msgstr ""
+
+#: includes/admin.php
+msgid "Subject terms"
+msgstr ""
+
+#: includes/admin.php
+msgid "One per line. Kept only together with a context term."
+msgstr ""
+
+#: includes/admin.php
+msgid "Context terms"
+msgstr ""
+
+#: includes/admin.php
+msgid "One per line."
+msgstr ""
+
+#: includes/admin.php
+msgid "Exclude terms"
+msgstr ""
+
+#: includes/admin.php
+msgid "One per line. Any match rejects the item, always."
+msgstr ""

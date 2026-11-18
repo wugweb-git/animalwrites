@@ -1,0 +1,27 @@
+{
+	"name": "@planweb/shell",
+	"version": "1.0.0",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"description": "PlanWeb's bundled admin shell: the Kits admin shell extracted verbatim into a standalone GPL UI package, built as the namespaced script handle `planweb-shell` (window.planweb.shell). The PlanWeb plugin consumes it; it has no runtime dependency on Kits Core.",
+	"scripts": {
+		"build": "wp-scripts build src/index.js --output-path=build",
+		"lint:js": "wp-scripts lint-js src"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "32.6.0"
+	},
+	"dependencies": {
+		"@wordpress/api-fetch": "^8.1.0",
+		"@wordpress/components": "^44.0.0",
+		"@wordpress/dataviews": "^22.0.0",
+		"@wordpress/element": "^10.1.0",
+		"@wordpress/i18n": "^7.1.0",
+		"@wordpress/icons": "^20.0.0",
+		"@wordpress/media-utils": "^6.1.0",
+		"@wordpress/theme": "^4.0.0"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

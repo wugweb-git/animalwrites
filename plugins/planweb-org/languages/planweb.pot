@@ -1,0 +1,893 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: PlanWeb 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wugweb.com/\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-13T04:28:25+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: planweb\n"
+
+#. Plugin Name of the plugin
+#: planweb.php
+#: includes/admin.php:25
+#: includes/admin.php:27
+#: includes/admin.php:129
+#: includes/kits-hub.php:54
+#: includes/kits-hub.php:64
+#: includes/planweb-ui.php:144
+#: includes/switch.php:68
+#: src/index.js:890
+#: src/index.js:982
+msgid "PlanWeb"
+msgstr ""
+
+#. Description of the plugin
+#: planweb.php
+msgid "The team's calendar in WordPress: dates and content, social, email and campaign plans. Nothing is posted or sent from it. Needs Kits Core."
+msgstr ""
+
+#. Author of the plugin
+#: planweb.php
+msgid "Wugweb"
+msgstr ""
+
+#. Author URI of the plugin
+#: planweb.php
+msgid "https://wugweb.com/"
+msgstr ""
+
+#: includes/admin.php:27
+#: includes/admin.php:29
+#: includes/admin.php:142
+#: includes/help-tab.php:33
+#: includes/help-tab.php:62
+#: includes/kits-hub.php:63
+#: src/index.js:299
+msgid "Calendar"
+msgstr ""
+
+#: includes/admin.php:31
+#: src/index.js:825
+msgid "Dates"
+msgstr ""
+
+#: includes/admin.php:88
+msgid "today"
+msgstr ""
+
+#: includes/admin.php:91
+msgid "tomorrow"
+msgstr ""
+
+#. translators: %d: number of days.
+#: includes/admin.php:94
+#, php-format
+msgid "in %d day"
+msgid_plural "in %d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of days.
+#: includes/admin.php:94
+#, php-format
+msgid "%d day ago"
+msgid_plural "%d days ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/admin.php:119
+#: includes/admin.php:127
+msgid "Sorry, you are not allowed to access this page."
+msgstr ""
+
+#: includes/admin.php:130
+msgid "PlanWeb needs Kits Core (active, with its build) to show this screen."
+msgstr ""
+
+#: includes/admin.php:142
+#: includes/admin.php:284
+#: src/index.js:578
+msgid "Add entry"
+msgstr ""
+
+#: includes/admin.php:144
+#: includes/planweb-rest.php:458
+msgid "Entry saved."
+msgstr ""
+
+#: includes/admin.php:145
+#: includes/planweb-rest.php:592
+msgid "Import run."
+msgstr ""
+
+#: includes/admin.php:153
+msgid "Nothing on this calendar is posted or sent: it is the team's plan. Approved and Sent are set by an administrator."
+msgstr ""
+
+#: includes/admin.php:157
+#: includes/ui-model.php:241
+msgid "All entries"
+msgstr ""
+
+#: includes/admin.php:189
+#: includes/ui-model.php:233
+msgid "Today"
+msgstr ""
+
+#: includes/admin.php:191
+msgid "Mon"
+msgstr ""
+
+#: includes/admin.php:191
+msgid "Tue"
+msgstr ""
+
+#: includes/admin.php:191
+msgid "Wed"
+msgstr ""
+
+#: includes/admin.php:191
+msgid "Thu"
+msgstr ""
+
+#: includes/admin.php:191
+msgid "Fri"
+msgstr ""
+
+#: includes/admin.php:191
+msgid "Sat"
+msgstr ""
+
+#: includes/admin.php:191
+msgid "Sun"
+msgstr ""
+
+#: includes/admin.php:266
+#: src/index.js:447
+msgid "Edit entry"
+msgstr ""
+
+#: includes/admin.php:266
+#: src/index.js:448
+#: src/index.js:778
+msgid "Add an entry"
+msgstr ""
+
+#: includes/admin.php:271
+#: src/index.js:467
+#: src/index.js:673
+msgid "Date"
+msgstr ""
+
+#: includes/admin.php:271
+#: src/index.js:471
+msgid "Time"
+msgstr ""
+
+#: includes/admin.php:271
+msgid "Time is optional (IST)."
+msgstr ""
+
+#: includes/admin.php:272
+#: src/index.js:476
+msgid "Title"
+msgstr ""
+
+#: includes/admin.php:273
+#: src/index.js:483
+msgid "Note"
+msgstr ""
+
+#: includes/admin.php:273
+#: src/index.js:484
+msgid "No email addresses, names or phone numbers."
+msgstr ""
+
+#: includes/admin.php:274
+#: src/index.js:183
+#: src/index.js:501
+#: src/index.js:713
+#: src/index.js:807
+msgid "Type"
+msgstr ""
+
+#: includes/admin.php:275
+#: src/index.js:513
+#: src/index.js:729
+#: src/index.js:831
+msgid "Channel"
+msgstr ""
+
+#: includes/admin.php:275
+#: includes/admin.php:276
+msgid "—"
+msgstr ""
+
+#: includes/admin.php:276
+#: src/index.js:526
+#: src/index.js:734
+#: src/index.js:840
+msgid "Owner"
+msgstr ""
+
+#: includes/admin.php:277
+#: src/index.js:205
+#: src/index.js:539
+#: src/index.js:739
+#: src/index.js:816
+msgid "Status"
+msgstr ""
+
+#: includes/admin.php:278
+#: src/index.js:567
+#: src/index.js:750
+msgid "Link"
+msgstr ""
+
+#: includes/admin.php:278
+#: src/index.js:568
+msgid "A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Reddit or WhatsApp channel address."
+msgstr ""
+
+#: includes/admin.php:284
+#: src/index.js:577
+msgid "Save entry"
+msgstr ""
+
+#: includes/admin.php:286
+#: src/index.js:581
+msgid "Cancel"
+msgstr ""
+
+#: includes/admin.php:312
+#: includes/admin.php:349
+#: includes/store.php:200
+msgid "Sorry, you are not allowed to do that."
+msgstr ""
+
+#: includes/admin.php:361
+#: src/index.js:892
+#: src/index.js:1086
+msgid "Import from Dates"
+msgstr ""
+
+#: includes/admin.php:363
+#: src/index.js:1123
+msgid "Not run yet: it runs on the first admin page after PlanWeb is switched on."
+msgstr ""
+
+#. translators: 1: date and time, 2: elements in Dates, 3: entries made, 4: already there.
+#. translators: 1: date and time, 2: dates in Dates, 3: entries made, 4: already there.
+#: includes/admin.php:366
+#: src/index.js:1114
+#, php-format,js-format
+msgid "Last run %1$s: %2$d dates in Dates, %3$d entries made, %4$d already there."
+msgstr ""
+
+#. translators: 1: position in the Dates list, 2: error.
+#: includes/admin.php:369
+#: src/index.js:1132
+#, php-format,js-format
+msgid "Date %1$d was not imported: %2$s"
+msgstr ""
+
+#. translators: %s: entry IDs.
+#: includes/admin.php:373
+#: src/index.js:1142
+#, php-format,js-format
+msgid "These imported entries look as if they hold an email address or a phone number; check them: %s"
+msgstr ""
+
+#. translators: 1: same, 2: differs, 3: missing, 4: extra.
+#: includes/admin.php:378
+#: src/index.js:1153
+#, php-format,js-format
+msgid "Check now: %1$d the same, %2$d different, %3$d missing, %4$d extra."
+msgstr ""
+
+#: includes/admin.php:379
+msgid "An entry changed or moved to the Trash since the import shows as different or missing."
+msgstr ""
+
+#. translators: 1: position in the Dates list, 2: the stored value.
+#: includes/admin.php:382
+#: src/index.js:1167
+#, php-format,js-format
+msgid "Dates element %1$d is not a date and was not imported: %2$s"
+msgstr ""
+
+#: includes/admin.php:386
+#: src/index.js:1180
+msgid "Check"
+msgstr ""
+
+#: includes/admin.php:386
+#: src/index.js:1181
+msgid "In Dates"
+msgstr ""
+
+#: includes/admin.php:386
+#: src/index.js:1182
+msgid "In PlanWeb"
+msgstr ""
+
+#: includes/admin.php:395
+#: src/index.js:1094
+msgid "Run the import again"
+msgstr ""
+
+#: includes/admin.php:395
+msgid "Adds only dates not imported yet; changes nothing in Dates."
+msgstr ""
+
+#: includes/dashboard.php:19
+#: src/index.js:591
+msgid "Next 7 days"
+msgstr ""
+
+#: includes/dashboard.php:28
+msgid "Nothing in the next 7 days."
+msgstr ""
+
+#. translators: %d: number of further entries.
+#: includes/dashboard.php:40
+#, php-format
+msgid "And %d more."
+msgstr ""
+
+#: includes/dashboard.php:43
+msgid "Open the calendar"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "the month grid"
+msgstr ""
+
+#: includes/help-tab.php:34
+#: includes/planweb-ui.php:82
+#: src/index.js:184
+#: src/index.js:206
+#: src/index.js:784
+#: src/index.js:791
+msgid "Entries"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "add or edit an entry; only administrators set Approved or Sent"
+msgstr ""
+
+#: includes/help-tab.php:35
+#: includes/help-tab.php:64
+#: includes/planweb-ui.php:83
+msgid "Settings"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "PlanWeb on or off and its defaults"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:45
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:46
+msgid "The team's calendar: content, social, email, campaign and reminder entries, each with a channel, an owner and a status. Nothing in it posts or sends anything."
+msgstr ""
+
+#: includes/help-tab.php:53
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:54
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: includes/kits-hub.php:41
+msgid "PlanWeb is a Kits plugin: Kits Core is not loaded, so it is not listed under Kits."
+msgstr ""
+
+#. translators: %s: plugin version.
+#: includes/kits-hub.php:52
+#, php-format
+msgid "Active, %s"
+msgstr ""
+
+#: includes/kits-hub.php:54
+msgid "Switched off (Appearance → Kits → Modules); Appearance → Kits → Dates is in use."
+msgstr ""
+
+#. translators: %d: number of dates that do not match.
+#: includes/kits-hub.php:61
+#, php-format
+msgid "Import check: %d date does not match."
+msgid_plural "Import check: %d dates do not match."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of dates that do not match.
+#: includes/kits-hub.php:61
+msgid "Import check: every date matches."
+msgstr ""
+
+#: includes/kits-hub.php:62
+msgid "Import not run yet."
+msgstr ""
+
+#: includes/planweb-rest.php:40
+msgid "Sign in to use this."
+msgstr ""
+
+#: includes/planweb-rest.php:44
+msgid "The page has expired. Reload it and try again."
+msgstr ""
+
+#: includes/planweb-rest.php:46
+#: includes/planweb-rest.php:293
+#: includes/planweb-rest.php:440
+#: includes/planweb-rest.php:474
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: includes/planweb-rest.php:290
+#: includes/planweb-rest.php:437
+#: includes/planweb-rest.php:471
+msgid "No such entry."
+msgstr ""
+
+#: includes/planweb-rest.php:404
+msgid "All"
+msgstr ""
+
+#: includes/planweb-rest.php:408
+#: includes/ui-model.php:195
+#: src/index.js:697
+msgid "Overdue"
+msgstr ""
+
+#: includes/planweb-rest.php:413
+#: includes/ui-model.php:204
+msgid "Waiting for approval"
+msgstr ""
+
+#: includes/planweb-rest.php:477
+msgid "The Trash is turned off on this site, so the entry was kept."
+msgstr ""
+
+#: includes/planweb-rest.php:480
+msgid "The entry could not be moved to the Trash."
+msgstr ""
+
+#: includes/planweb-rest.php:485
+msgid "Entry moved to the Trash."
+msgstr ""
+
+#: includes/planweb-rest.php:528
+msgid "Types"
+msgstr ""
+
+#: includes/planweb-rest.php:529
+msgid "Channels"
+msgstr ""
+
+#: includes/planweb-rest.php:530
+msgid "Owners"
+msgstr ""
+
+#: includes/planweb-rest.php:580
+msgid "Nothing changed."
+msgstr ""
+
+#: includes/planweb-rest.php:580
+msgid "Saved. PlanWeb is on."
+msgstr ""
+
+#: includes/planweb-rest.php:580
+msgid "Saved. PlanWeb is off: Kits → Dates is back, and the entries are kept."
+msgstr ""
+
+#: includes/planweb-rest.php:603
+msgid "PlanWeb does not read it yet: the read-only feed comes in a later step."
+msgstr ""
+
+#: includes/planweb-rest.php:608
+msgid "Active"
+msgstr ""
+
+#: includes/planweb-rest.php:608
+msgid "Not active"
+msgstr ""
+
+#: includes/planweb-rest.php:610
+msgid "Scheduled newsletter sends show here once FluentCRM is active."
+msgstr ""
+
+#: includes/planweb-rest.php:614
+msgid "Social posts"
+msgstr ""
+
+#: includes/planweb-rest.php:615
+msgid "Not available"
+msgstr ""
+
+#: includes/planweb-rest.php:615
+msgid "On"
+msgstr ""
+
+#: includes/planweb-rest.php:615
+msgid "Off"
+msgstr ""
+
+#: includes/planweb-rest.php:617
+msgid "Social posts is off, so there are no social drafts to show."
+msgstr ""
+
+#: includes/planweb-rest.php:622
+#: includes/planweb-rest.php:629
+msgid "Not connected"
+msgstr ""
+
+#: includes/planweb-rest.php:624
+#: includes/planweb-rest.php:631
+msgid "Not chosen yet. Nothing is posted from PlanWeb."
+msgstr ""
+
+#: includes/planweb-ui.php:81
+msgid "Dashboard"
+msgstr ""
+
+#: includes/planweb-ui.php:145
+msgid "PlanWeb entries"
+msgstr ""
+
+#: includes/planweb-ui.php:146
+msgid "PlanWeb settings"
+msgstr ""
+
+#: includes/store.php:34
+msgid "Calendar entries"
+msgstr ""
+
+#: includes/store.php:35
+msgid "Calendar entry"
+msgstr ""
+
+#: includes/store.php:152
+msgid "Give the entry a title."
+msgstr ""
+
+#: includes/store.php:155
+msgid "Pick a date."
+msgstr ""
+
+#: includes/store.php:158
+msgid "The time must be like 09:30, or empty."
+msgstr ""
+
+#: includes/store.php:161
+msgid "Pick a type."
+msgstr ""
+
+#: includes/store.php:166
+msgid "Pick a status."
+msgstr ""
+
+#: includes/store.php:170
+msgid "Only an administrator can set Approved or Sent."
+msgstr ""
+
+#: includes/store.php:173
+msgid "Due is set by the scheduler on the day; pick Approved."
+msgstr ""
+
+#: includes/store.php:426
+msgid "Pick a value from the list."
+msgstr ""
+
+#: includes/switch.php:70
+msgid "The team's calendar as its own plugin. Nothing is posted or sent from it."
+msgstr ""
+
+#: includes/switch.php:76
+#: src/index.js:1009
+msgid "Calendar in PlanWeb"
+msgstr ""
+
+#: includes/switch.php:81
+msgid "On: Appearance → Kits → Dates moves to Plugins → PlanWeb → Calendar, and every date in Dates is copied there once (the Dates list itself is kept unchanged as a backup). Off: Appearance → Kits → Dates as before; entries are kept."
+msgstr ""
+
+#. translators: %d: number of days.
+#: includes/ui-model.php:187
+#, php-format
+msgid "Coming up in %d days"
+msgstr ""
+
+#: includes/ui-model.php:189
+msgid "Nothing planned yet"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/ui-model.php:198
+#, php-format
+msgid "Oldest from %s"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/ui-model.php:198
+msgid "Nothing past its day"
+msgstr ""
+
+#: includes/ui-model.php:206
+msgid "Drafts an administrator can approve"
+msgstr ""
+
+#: includes/ui-model.php:212
+msgid "Approved, not sent"
+msgstr ""
+
+#: includes/ui-model.php:214
+msgid "Approved or due"
+msgstr ""
+
+#: includes/ui-model.php:225
+msgid "Next date"
+msgstr ""
+
+#: includes/ui-model.php:226
+msgid "None"
+msgstr ""
+
+#: includes/ui-model.php:227
+msgid "Nothing from today on"
+msgstr ""
+
+#. translators: 1: ideas, 2: drafts, 3: sent.
+#: includes/ui-model.php:244
+#, php-format
+msgid "%1$s ideas, %2$s drafts, %3$s sent"
+msgstr ""
+
+#: includes/ui-model.php:254
+msgid "Import check"
+msgstr ""
+
+#: includes/ui-model.php:255
+msgid "Matches"
+msgstr ""
+
+#. translators: %s: number of dates.
+#: includes/ui-model.php:258
+#, php-format
+msgid "%s date differs from Dates"
+msgid_plural "%s dates differ from Dates"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of dates.
+#: includes/ui-model.php:260
+#, php-format
+msgid "%s dates the same as in Dates"
+msgstr ""
+
+#: src/index.js:92
+msgid "A count is running in the background. The numbers change when it is done."
+msgstr ""
+
+#: src/index.js:108
+msgid "Loading the counts…"
+msgstr ""
+
+#. translators: %s: date and time.
+#: src/index.js:116
+#, js-format
+msgid "Counted %s."
+msgstr ""
+
+#: src/index.js:119
+msgid "Counting for the first time…"
+msgstr ""
+
+#: src/index.js:121
+msgid "A new count for today is running."
+msgstr ""
+
+#: src/index.js:126
+msgid "Time range"
+msgstr ""
+
+#. translators: %d: number of days.
+#: src/index.js:132
+#, js-format
+msgid "Next %d days"
+msgstr ""
+
+#: src/index.js:142
+msgid "Count now"
+msgstr ""
+
+#: src/index.js:152
+msgid "PlanWeb at a glance"
+msgstr ""
+
+#. translators: %d: number of days.
+#: src/index.js:172
+#, js-format
+msgid "By type, next %d days"
+msgstr ""
+
+#: src/index.js:175
+msgid "Entries from today on, by type. Each number opens the list."
+msgstr ""
+
+#: src/index.js:181
+msgid "By type"
+msgstr ""
+
+#: src/index.js:196
+#: src/index.js:203
+msgid "By status"
+msgstr ""
+
+#: src/index.js:197
+msgid "Every entry, past and future. Approved and Sent are set by an administrator."
+msgstr ""
+
+#: src/index.js:262
+msgid "Loading the month…"
+msgstr ""
+
+#: src/index.js:300
+msgid "The month’s entries by day. An entry opens its form on Entries."
+msgstr ""
+
+#: src/index.js:450
+msgid "Nothing on this calendar is posted or sent: it is the team’s plan."
+msgstr ""
+
+#: src/index.js:472
+msgid "Optional (IST)."
+msgstr ""
+
+#: src/index.js:542
+msgid "Due is set on the day by the scheduler."
+msgstr ""
+
+#: src/index.js:546
+msgid "Approved and Sent are set by an administrator."
+msgstr ""
+
+#: src/index.js:590
+msgid "From 30 days ago"
+msgstr ""
+
+#: src/index.js:592
+msgid "Next 30 days"
+msgstr ""
+
+#: src/index.js:593
+msgid "Next 90 days"
+msgstr ""
+
+#: src/index.js:594
+msgid "Before today"
+msgstr ""
+
+#: src/index.js:595
+msgid "All dates"
+msgstr ""
+
+#: src/index.js:651
+msgid "Move this entry to the Trash?"
+msgstr ""
+
+#: src/index.js:688
+msgid "What"
+msgstr ""
+
+#: src/index.js:785
+msgid "The team’s plan. From 30 days ago by default; pick All dates for older ones."
+msgstr ""
+
+#: src/index.js:800
+msgid "Search titles and notes"
+msgstr ""
+
+#: src/index.js:810
+msgid "All types"
+msgstr ""
+
+#: src/index.js:819
+msgid "All statuses"
+msgstr ""
+
+#: src/index.js:834
+msgid "All channels"
+msgstr ""
+
+#: src/index.js:843
+msgid "All owners"
+msgstr ""
+
+#: src/index.js:862
+msgid "Edit"
+msgstr ""
+
+#: src/index.js:870
+msgid "Trash"
+msgstr ""
+
+#: src/index.js:879
+msgid "No entries match."
+msgstr ""
+
+#: src/index.js:889
+#: src/index.js:919
+#: src/index.js:925
+msgid "Connected services"
+msgstr ""
+
+#: src/index.js:891
+#: src/index.js:1031
+msgid "Lists"
+msgstr ""
+
+#: src/index.js:920
+msgid "What PlanWeb will read or work with. Nothing is posted or sent from PlanWeb."
+msgstr ""
+
+#: src/index.js:957
+msgid "Switch PlanWeb off? Kits → Dates comes back and these screens go; the entries are kept."
+msgstr ""
+
+#: src/index.js:983
+msgid "The same switch as Kits → Modules → PlanWeb."
+msgstr ""
+
+#: src/index.js:995
+msgid "Save changes"
+msgstr ""
+
+#: src/index.js:1012
+msgid "On: Kits → Dates moves to PlanWeb, and every date in Dates is copied here once (Dates itself is kept unchanged). Off: Kits → Dates as before; entries are kept."
+msgstr ""
+
+#: src/index.js:1032
+msgid "The values entries can take. They are fixed for now; renaming and adding come later."
+msgstr ""
+
+#: src/index.js:1043
+msgid "Entries using it"
+msgstr ""
+
+#: src/index.js:1087
+msgid "Every date in Dates copied here once. Dates itself is never changed."
+msgstr ""
+
+#: src/index.js:1097
+msgid "Adds only dates not imported yet."
+msgstr ""
+
+#: src/index.js:1178
+msgid "Dates that do not match"
+msgstr ""
+
+#: src/index.js:1216
+msgid "Loading the settings…"
+msgstr ""
+
+#: src/index.js:1223
+msgid "Settings groups"
+msgstr ""
+
+#: src/index.js:1246
+msgid "No such group."
+msgstr ""

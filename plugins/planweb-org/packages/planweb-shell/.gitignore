@@ -1,0 +1,4 @@
+# The shell package's own build output is an intermediate: the shipped copy lives in the
+# plugin's build/shell/ (committed, because WordPress.org installs run no build step).
+/build
+/node_modules

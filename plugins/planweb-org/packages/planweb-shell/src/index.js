@@ -1,0 +1,775 @@
+/**
+ * The admin shell: the parts every plugin screen is built from. This is the Kits admin shell, extracted verbatim into
+ * a standalone, GPL, bundled UI package that the PlanWeb WordPress.org plugin ships (no runtime dependency on Kits
+ * Core). The components and their behaviour are unchanged; only the global and script handle are namespaced so two
+ * suite plugins never clash.
+ *
+ * The pattern follows a site-tools dashboard: an app header with the plugin's icon, name and tabs; on a dashboard a
+ * row of chips (time range), a grid of tiles (one big number, one sub-line, a link) and section cards under them; on
+ * a settings screen groups as cards and connected services as rows with a status and an Edit button. The parts are
+ * WordPress's own components (Button, Notice, ToggleControl, Card, SelectControl, Spinner) in the same look (black,
+ * white and greys, one yellow accent).
+ *
+ * Built into build/shell/ as the script handle `planweb-shell`, which sets window.planweb.shell. The plugin's own
+ * build maps the import `@kits/shell` to that global (see the plugin's webpack.config.js) and lists `planweb-shell` as
+ * a dependency; planweb_shell_app() in includes/planweb-shell.php enqueues both.
+ */
+import { useEffect, useId, useRef, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import {
+	BaseControl,
+	Button as WPButton,
+	Card,
+	CardBody,
+	CardFooter,
+	CardHeader,
+	Notice as WPNotice,
+	ToggleControl,
+} from '@wordpress/components';
+import { DataList, FieldReview, RowAction } from './list';
+import { SetupFlow } from './setup';
+import { EmptyState, LoadingState, ErrorState } from './states';
+import { MiniChart, HashList, LinkedSetting, MetricPicker } from './extras';
+import { PageParts, BlockParts, Cell } from './parts';
+import { CalendarGrid } from './calendar';
+import { Select, SecretField, ConfirmButton } from './inputs';
+import { DetailPanel, MediaField, MediaThumbs, PairList } from './detail';
+import { Breadcrumbs, ChangeIn, setCrumb, useCrumb } from './crumbs';
+import './dataviews.css';
+import './shell.css';
+import './more.css';
+
+export {
+	EmptyState,
+	LoadingState,
+	ErrorState,
+	DataList,
+	FieldReview,
+	RowAction,
+	SetupFlow,
+	MiniChart,
+	HashList,
+	LinkedSetting,
+	MetricPicker,
+	PageParts,
+	BlockParts,
+	Cell,
+	CalendarGrid,
+	Select,
+	SecretField,
+	ConfirmButton,
+	DetailPanel,
+	MediaField,
+	MediaThumbs,
+	PairList,
+	Breadcrumbs,
+	ChangeIn,
+	setCrumb,
+	useCrumb,
+};
+
+const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
+
+/**
+ * The whole screen: header on top, content under it.
+ *
+ * @param {Object}  props
+ * @param {Element} props.header   An AppHeader.
+ * @param {Element} props.children The screen.
+ */
+export function AppShell( { header, children } ) {
+	return (
+		<div className="kits-shell">
+			{ header }
+			<div className="kits-shell__body">{ children }</div>
+		</div>
+	);
+}
+
+/**
+ * App header: icon, name, the plugin's tabs (a real list, aria-current on the open one) and a slot on the right.
+ *
+ * @param {Object}  props
+ * @param {string}  props.icon    Icon URL (SVG).
+ * @param {string}  props.name    Plugin name.
+ * @param {string}  props.version Version shown beside the name.
+ * @param {Array}   props.tabs    [ { slug, label, url, current } ].
+ * @param {Element} props.aside   Right-hand slot (a link back to the current screens, a Save button).
+ * @param {Array}   props.crumbs  Optional trail after the plugin name ([ { label, href } ]); by default the open tab and
+ *                                the section or item the screen names (crumbs.js).
+ */
+export function AppHeader( { icon, name, version, tabs = [], aside, crumbs } ) {
+	return (
+		<header className="kits-shell-header">
+			<Breadcrumbs name={ name } tabs={ tabs } crumbs={ crumbs } />
+			<div className="kits-shell-header__brand">
+				{ icon && (
+					<img
+						className="kits-shell-header__icon"
+						src={ icon }
+						alt=""
+						width="32"
+						height="32"
+					/>
+				) }
+				<span className="kits-shell-header__name">{ name }</span>
+				{ version && (
+					<span className="kits-shell-header__version">
+						{ version }
+					</span>
+				) }
+			</div>
+			{ tabs.length > 0 && (
+				<nav
+					className="kits-shell-header__tabs"
+					aria-label={ __( 'Screens', 'kits-core' ) }
+				>
+					<ul>
+						{ tabs.map( ( t ) => (
+							<li key={ t.slug }>
+								<a
+									href={ t.url }
+									className={ cx(
+										'kits-shell-tab',
+										t.current && 'is-current'
+									) }
+									aria-current={
+										t.current ? 'page' : undefined
+									}
+								>
+									{ t.label }
+								</a>
+							</li>
+						) ) }
+					</ul>
+				</nav>
+			) }
+			{ aside && (
+				<div className="kits-shell-header__aside">{ aside }</div>
+			) }
+		</header>
+	);
+}
+
+/**
+ * A row of chips: one choice of several (a time range), or links (a settings group list).
+ * With onChange the chips are toggle buttons (aria-pressed); with an href per chip they are links (aria-current).
+ *
+ * @param {Object}   props
+ * @param {string}   props.label    What the row chooses (read by screen readers).
+ * @param {Array}    props.chips    [ { value, label, href? } ].
+ * @param {string}   props.value    The chosen value.
+ * @param {Function} props.onChange Called with a chip's value.
+ * @param {Element}  props.after    Text after the chips (a "Counted at" line).
+ */
+export function ChipRow( { label, chips = [], value, onChange, after } ) {
+	const list = useRef( null );
+	// On a phone the chips scroll sideways: bring the chosen one into view.
+	useEffect( () => {
+		const ul = list.current;
+		const on = ul?.querySelector( '.is-on' );
+		if ( ! on || ul.scrollWidth <= ul.clientWidth ) {
+			return;
+		}
+		const left =
+			on.getBoundingClientRect().left -
+			ul.getBoundingClientRect().left +
+			ul.scrollLeft;
+		if (
+			left < ul.scrollLeft ||
+			left + on.offsetWidth > ul.scrollLeft + ul.clientWidth
+		) {
+			ul.scrollLeft = Math.max( 0, left - 16 );
+		}
+	}, [ value ] );
+	// Chips that are links are the screen's sections: the open one is the last breadcrumb.
+	const open = chips.find( ( c ) => c.href && c.value === value );
+	useCrumb(
+		open ? String( open.label ).replace( /\s*•$/, '' ) : '',
+		open?.href
+	);
+	return (
+		<div className="kits-shell-chips">
+			<ul aria-label={ label } ref={ list }>
+				{ chips.map( ( c ) => {
+					const on = c.value === value;
+					return (
+						<li key={ c.value }>
+							{ c.href ? (
+								<a
+									className={ cx(
+										'kits-shell-chip',
+										on && 'is-on'
+									) }
+									href={ c.href }
+									aria-current={ on ? 'true' : undefined }
+									onClick={
+										onChange
+											? () => onChange( c.value )
+											: undefined
+									}
+								>
+									{ c.label }
+								</a>
+							) : (
+								<button
+									type="button"
+									className={ cx(
+										'kits-shell-chip',
+										on && 'is-on'
+									) }
+									aria-pressed={ on }
+									onClick={ () => onChange?.( c.value ) }
+								>
+									{ c.label }
+								</button>
+							) }
+						</li>
+					);
+				} ) }
+			</ul>
+			{ after && <p className="kits-shell-chips__after">{ after }</p> }
+		</div>
+	);
+}
+
+/**
+ * Tiles in a grid: four across on wide screens, two on tablets, one on phones.
+ *
+ * @param {Object}  props
+ * @param {string}  props.label    The grid's name (a list for screen readers).
+ * @param {Element} props.children Tiles.
+ */
+export function TileGrid( { label, children } ) {
+	return (
+		<ul className="kits-shell-tiles" aria-label={ label }>
+			{ children }
+		</ul>
+	);
+}
+
+const toneLabel = () => ( {
+	warn: __( 'Needs attention', 'kits-core' ),
+	error: __( 'Not working', 'kits-core' ),
+} );
+
+/**
+ * One tile: a label, one big number (a link when it has one), a change badge, one sub-line.
+ *
+ * @param {Object}  props
+ * @param {string}  props.label   What is counted.
+ * @param {string}  props.value   The number or word, already formatted. null while counting.
+ * @param {string}  props.delta   A change since the chosen range ("+3 in 28 days"), or ''.
+ * @param {string}  props.sub     The one sub-line.
+ * @param {string}  props.href    Where the number goes.
+ * @param {string}  props.tone    '' | 'warn' | 'error'.
+ * @param {boolean} props.loading Show "Counting…" instead of the number.
+ * @param {string}  props.missing The plugin the number comes from, when it is not active: the tile says
+ *                                "{plugin} not active" in place of the number (or pass hide to leave the tile out).
+ * @param {boolean} props.hide    Leave the tile out when its source is missing.
+ */
+export function Tile( {
+	label,
+	value,
+	delta,
+	sub,
+	href,
+	tone = '',
+	loading,
+	missing,
+	hide,
+} ) {
+	if ( missing && hide ) {
+		return null;
+	}
+	if ( missing ) {
+		return (
+			<li className="kits-shell-tile is-missing">
+				<p className="kits-shell-tile__label">{ label }</p>
+				<p className="kits-shell-tile__value is-missing">
+					{ sprintf(
+						/* translators: %s: plugin name. */
+						__( '%s not active', 'kits-core' ),
+						missing
+					) }
+				</p>
+				{ sub && <p className="kits-shell-tile__sub">{ sub }</p> }
+			</li>
+		);
+	}
+	const tones = toneLabel();
+	const number = loading ? (
+		<span className="kits-shell-tile__counting">
+			{ __( 'Counting…', 'kits-core' ) }
+		</span>
+	) : (
+		value
+	);
+	return (
+		<li className={ cx( 'kits-shell-tile', tone && `is-${ tone }` ) }>
+			<p className="kits-shell-tile__label">
+				{ label }
+				{ tones[ tone ] && (
+					<span className="kits-shell-tile__tone">
+						{ tones[ tone ] }
+					</span>
+				) }
+			</p>
+			<p className="kits-shell-tile__value">
+				{ href && ! loading ? <a href={ href }>{ number }</a> : number }
+				{ delta && ! loading && (
+					<span className="kits-shell-tile__delta">{ delta }</span>
+				) }
+			</p>
+			{ sub && <p className="kits-shell-tile__sub">{ sub }</p> }
+		</li>
+	);
+}
+
+/**
+ * A section card under the tiles (or anywhere): a heading, an optional line and actions, the content.
+ *
+ * @param {Object}  props
+ * @param {string}  props.id          Anchor.
+ * @param {string}  props.title       Heading (H2).
+ * @param {string}  props.description One line under the heading.
+ * @param {Element} props.actions     Buttons or links on the right of the heading.
+ * @param {Object}  props.changeIn    { label, url }: the section's settings live on another screen ("Change in …").
+ * @param {Element} props.children    Content.
+ */
+export function SectionCard( {
+	id,
+	title,
+	description,
+	actions,
+	changeIn,
+	children,
+} ) {
+	return (
+		<Card className="kits-shell-card" id={ id }>
+			<CardHeader className="kits-shell-card__head" isBorderless>
+				<div>
+					<h2 className="kits-shell-card__title">{ title }</h2>
+					{ description && (
+						<p className="kits-shell-card__desc">{ description }</p>
+					) }
+					<ChangeIn to={ changeIn } />
+				</div>
+				{ actions && (
+					<div className="kits-shell-card__actions">{ actions }</div>
+				) }
+			</CardHeader>
+			<CardBody className="kits-shell-card__body">{ children }</CardBody>
+		</Card>
+	);
+}
+
+/**
+ * A settings group as a card: heading, description, the fields, and a footer (Save, Restore defaults, a message).
+ *
+ * @param {Object}  props
+ * @param {string}  props.id          Anchor (the URL keeps it: #titles).
+ * @param {string}  props.title       Heading (H2).
+ * @param {string}  props.description One line under the heading.
+ * @param {Element} props.footer      Buttons and the save message.
+ * @param {Object}  props.changeIn    { label, url }: the group's settings live on another screen ("Change in …").
+ * @param {Element} props.children    Blocks and fields.
+ */
+export function SettingsGroup( {
+	id,
+	title,
+	description,
+	footer,
+	changeIn,
+	children,
+} ) {
+	return (
+		<Card className="kits-shell-card kits-shell-group" id={ id }>
+			<CardHeader className="kits-shell-card__head" isBorderless>
+				<div>
+					<h2 className="kits-shell-card__title">{ title }</h2>
+					{ description && (
+						<p className="kits-shell-card__desc">{ description }</p>
+					) }
+					<ChangeIn to={ changeIn } />
+				</div>
+			</CardHeader>
+			<CardBody className="kits-shell-card__body">{ children }</CardBody>
+			{ footer && (
+				<CardFooter className="kits-shell-group__foot">
+					{ footer }
+				</CardFooter>
+			) }
+		</Card>
+	);
+}
+
+/**
+ * A block inside a settings group (one module): heading (H3), a line, and its fields.
+ *
+ * @param {Object}  props
+ * @param {string}  props.title       Heading.
+ * @param {string}  props.description Line.
+ * @param {string}  props.note        A second line in a quieter tone ("Off: switch it on under Modules.").
+ * @param {Object}  props.changeIn    { label, url }: the block's settings live on another screen ("Change in …").
+ * @param {Element} props.children    Fields.
+ */
+export function SettingsBlock( {
+	title,
+	description,
+	note,
+	changeIn,
+	children,
+} ) {
+	return (
+		<div className="kits-shell-block">
+			<h3 className="kits-shell-block__title">{ title }</h3>
+			{ description && (
+				<p className="kits-shell-block__desc">{ description }</p>
+			) }
+			{ note && <p className="kits-shell-block__note">{ note }</p> }
+			<ChangeIn to={ changeIn } />
+			{ children }
+		</div>
+	);
+}
+
+/**
+ * A labelled field with its help line, "Changed from the default" and a Reset link.
+ *
+ * @param {Object}   props
+ * @param {string}   props.label    Visible label.
+ * @param {string}   props.help     Help line.
+ * @param {boolean}  props.changed  Differs from the default.
+ * @param {Function} props.onReset  Puts the default back (shown only when changed).
+ * @param {Object}   props.changeIn { label, url }: the setting lives on another screen ("Change in …").
+ * @param {Function} props.render   ( id, describedBy ) => the control.
+ */
+export function Field( { label, help, changed, onReset, changeIn, render } ) {
+	const id = useId();
+	const note = ( help || changed ) && (
+		<>
+			{ help }
+			{ changed && (
+				<span className="kits-shell-field__changed">
+					{ ' ' }
+					{ __( 'Changed from the default.', 'kits-core' ) }
+				</span>
+			) }
+			{ changed && onReset && (
+				<>
+					{ ' ' }
+					<button
+						type="button"
+						className="kits-shell-link"
+						onClick={ onReset }
+					>
+						{ __( 'Reset to default', 'kits-core' ) }
+					</button>
+				</>
+			) }
+		</>
+	);
+	// BaseControl prints the help line with the id `${ id }__help`; the control is described by it only when it is there.
+	return (
+		<BaseControl
+			__nextHasNoMarginBottom
+			id={ id }
+			label={ label }
+			help={ note || undefined }
+			className="kits-shell-field"
+		>
+			{ render( id, note ? `${ id }__help` : undefined ) }
+			<ChangeIn to={ changeIn } />
+		</BaseControl>
+	);
+}
+
+/**
+ * An on/off switch with its label (a checkbox with role="switch").
+ *
+ * @param {Object}   props
+ * @param {string}   props.label    Visible label.
+ * @param {boolean}  props.checked  On.
+ * @param {Function} props.onChange Called with the new state.
+ * @param {boolean}  props.disabled Read only.
+ * @param {string}   props.help     A line under it.
+ * @param {Object}   props.changeIn { label, url }: the setting lives on another screen ("Change in …").
+ */
+export function Switch( {
+	label,
+	checked,
+	onChange,
+	disabled,
+	help,
+	changeIn,
+} ) {
+	// WordPress's ToggleControl (label, help as its description, a switch the screen reader names), in the Kits look.
+	return (
+		<div className="kits-shell-switch">
+			<ToggleControl
+				__nextHasNoMarginBottom
+				label={ label }
+				help={ help }
+				checked={ !! checked }
+				disabled={ disabled }
+				onChange={ ( v ) => onChange?.( v ) }
+			/>
+			<ChangeIn to={ changeIn } />
+		</div>
+	);
+}
+
+/**
+ * A connected service as a row: icon, name, status, a one-line summary and an Edit button that opens its details.
+ *
+ * @param {Object}  props
+ * @param {string}  props.icon      Icon URL.
+ * @param {string}  props.name      Service name.
+ * @param {string}  props.status    Status words ("Active, 1.0.282").
+ * @param {string}  props.tone      '' (connected) | 'warn' | 'error'.
+ * @param {string}  props.summary   One line.
+ * @param {string}  props.editLabel The button's words (default Edit).
+ * @param {Element} props.children  The details shown after Edit.
+ */
+export function ServiceRow( {
+	icon,
+	name,
+	status,
+	tone = '',
+	summary,
+	editLabel,
+	children,
+} ) {
+	const [ open, setOpen ] = useState( false );
+	const id = useId();
+	return (
+		<li className={ cx( 'kits-shell-service', open && 'is-open' ) }>
+			<div className="kits-shell-service__row">
+				{ icon ? (
+					<img
+						className="kits-shell-service__icon"
+						src={ icon }
+						alt=""
+						width="32"
+						height="32"
+					/>
+				) : (
+					<span
+						className="kits-shell-service__icon is-blank"
+						aria-hidden="true"
+					>
+						{ String( name || '' ).charAt( 0 ) }
+					</span>
+				) }
+				<div className="kits-shell-service__text">
+					<p className="kits-shell-service__name">{ name }</p>
+					{ summary && (
+						<p className="kits-shell-service__summary">
+							{ summary }
+						</p>
+					) }
+				</div>
+				<p
+					className={ cx(
+						'kits-shell-status',
+						tone ? `is-${ tone }` : 'is-ok'
+					) }
+				>
+					{ status }
+				</p>
+				{ children && (
+					<button
+						type="button"
+						className="kits-shell-button is-secondary"
+						aria-expanded={ open }
+						aria-controls={ id }
+						onClick={ () => setOpen( ! open ) }
+					>
+						{ open
+							? __( 'Close', 'kits-core' )
+							: editLabel || __( 'Edit', 'kits-core' ) }
+					</button>
+				) }
+			</div>
+			{ children && (
+				<div
+					className="kits-shell-service__details"
+					id={ id }
+					hidden={ ! open }
+				>
+					{ children }
+				</div>
+			) }
+		</li>
+	);
+}
+
+/**
+ * The list ServiceRows go in.
+ *
+ * @param {Object}  props
+ * @param {string}  props.label    The list's name.
+ * @param {Element} props.children ServiceRows.
+ */
+export function ServiceList( { label, children } ) {
+	return (
+		<ul className="kits-shell-services" aria-label={ label }>
+			{ children }
+		</ul>
+	);
+}
+
+/**
+ * A notice on the screen (never on other admin screens): info, success, warning or error, dismissible.
+ *
+ * @param {Object}   props
+ * @param {string}   props.tone      'info' | 'success' | 'warning' | 'error'.
+ * @param {Function} props.onDismiss Shows a Dismiss button.
+ * @param {Element}  props.children  The message.
+ */
+export function Notice( { tone = 'info', onDismiss, children } ) {
+	// WordPress's Notice (it announces itself to screen readers; errors assertively), in the Kits look.
+	return (
+		<WPNotice
+			className={ cx( 'kits-shell-notice', `is-${ tone }` ) }
+			status={ tone }
+			isDismissible={ !! onDismiss }
+			onRemove={ onDismiss }
+			politeness={ 'error' === tone ? 'assertive' : 'polite' }
+		>
+			<div className="kits-shell-notice__text">{ children }</div>
+		</WPNotice>
+	);
+}
+
+/**
+ * A button in the Kits look.
+ *
+ * @param {Object}  props
+ * @param {string}  props.variant  'primary' (black) | 'secondary' (outlined) | 'link'.
+ * @param {boolean} props.busy     Working: disabled, aria-busy.
+ * @param {boolean} props.disabled Off; busy always wins over disabled={ false }.
+ * @param {Object}  props.rest     Any other button attributes.
+ * @param {Element} props.children Words.
+ */
+export function Button( {
+	variant = 'secondary',
+	busy,
+	disabled,
+	children,
+	...rest
+} ) {
+	// WordPress's Button, in the Kits look (the kits-shell-button classes). `disabled` is taken out of rest, so
+	// disabled={ false } can never undo busy (a second click during a save). A disabled button stays focusable
+	// (accessibleWhenDisabled), so keyboard users still reach it and hear why it is off.
+	const { className, ...other } = rest;
+	return (
+		<WPButton
+			__next40pxDefaultSize
+			variant={ 'link' === variant ? 'link' : variant }
+			className={ cx(
+				'link' === variant
+					? 'kits-shell-link'
+					: cx( 'kits-shell-button', `is-${ variant }` ),
+				className
+			) }
+			{ ...other }
+			isBusy={ !! busy }
+			aria-busy={ busy || undefined }
+			disabled={ !! ( busy || disabled ) }
+			accessibleWhenDisabled
+		>
+			{ children }
+		</WPButton>
+	);
+}
+
+/**
+ * A two-column reference table (read-only), as on a dashboard's "where things are" section.
+ *
+ * @param {Object} props
+ * @param {string} props.caption Table caption (visually hidden).
+ * @param {Array}  props.head    [ first column, second column ].
+ * @param {Array}  props.rows    [ [ cell, cell ] ] (strings or elements).
+ */
+export function RefTable( { caption, head = [], rows = [] } ) {
+	return (
+		<table className="kits-shell-table">
+			<caption className="screen-reader-text">{ caption }</caption>
+			<thead>
+				<tr>
+					{ head.map( ( h ) => (
+						<th key={ h } scope="col">
+							{ h }
+						</th>
+					) ) }
+				</tr>
+			</thead>
+			<tbody>
+				{ rows.map( ( r, i ) => (
+					<tr key={ i }>
+						{ r.map( ( c, j ) =>
+							0 === j ? (
+								<th key={ j } scope="row">
+									{ c }
+								</th>
+							) : (
+								<td key={ j }>{ c }</td>
+							)
+						) }
+					</tr>
+				) ) }
+			</tbody>
+		</table>
+	);
+}
+
+const shell = {
+	AppShell,
+	AppHeader,
+	ChipRow,
+	TileGrid,
+	Tile,
+	SectionCard,
+	SettingsGroup,
+	SettingsBlock,
+	Field,
+	Switch,
+	ServiceList,
+	ServiceRow,
+	Notice,
+	EmptyState,
+	LoadingState,
+	ErrorState,
+	Button,
+	RefTable,
+	DataList,
+	FieldReview,
+	RowAction,
+	SetupFlow,
+	MiniChart,
+	HashList,
+	LinkedSetting,
+	MetricPicker,
+	PageParts,
+	BlockParts,
+	Cell,
+	CalendarGrid,
+	Select,
+	SecretField,
+	ConfirmButton,
+	DetailPanel,
+	MediaField,
+	MediaThumbs,
+	PairList,
+	Breadcrumbs,
+	ChangeIn,
+	setCrumb,
+	useCrumb,
+};
+
+window.planweb = window.planweb || {};
+window.planweb.shell = shell;
+
+export default shell;

@@ -1,0 +1,781 @@
+<?php
+/**
+ * PlanWeb's routes for its new screens (docs/calendar-plugin-plan.md §4), under planweb/v1:
+ *
+ *   GET  dashboard                 edit_planweb_entries  the tiles, from the stored counts (planweb-dashboard.php)
+ *   POST dashboard/count           edit_planweb_entries  count now, in this request (the person pressed Count now; a page view never counts)
+ *   GET  entries                   edit_planweb_entries  one page of the list: search, filters, sort, paging
+ *   POST entries                   edit_planweb_entries  add an entry (planweb_save_entry(), as the Calendar's form)
+ *   POST entries/<id>              edit_post             change an entry (the same)
+ *   POST entries/<id>/trash        delete_post           move an entry to the Trash (as the Calendar's Trash link)
+ *   GET  settings                  manage_options        the switch, the lists and the Dates import check
+ *   POST settings/switch           manage_options        the PlanWeb group: the switch (planweb_on) and "Delete this
+ *                                                        plugin's data" (delete_data), each written only when it
+ *                                                        changes; reset: true restores the group's defaults
+ *   POST import                    manage_options        run the Dates import again (planweb_import())
+ *   GET  services                  manage_options        the services the plan names, with their state
+ *   POST settings/feed             manage_options        the calendar feed's key: action new (make a new key; the old
+ *                                                        address stops working) or off (no key: no feed)
+ *   POST settings/site             manage_options        the site schedule's switch and which parts of it show (site-schedule.php)
+ *   GET  calendar.ics?key=…        the feed key          the read-only calendar feed (feed.php); no sign-in
+ *
+ * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (planweb_rest_can()). The core
+ * routes (/wp/v2/planweb-entries) stay as they are.
+ *
+ * @package planweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const PLANWEB_REST = 'planweb/v1';
+
+/**
+ * "Count now": the person pressed the button, so count in this request (71 entries: a moment) instead of waiting for
+ * WP-Cron, which only runs when the site is visited. Falls back to one background event if the count cannot run.
+ */
+function planweb_rest_count_now() {
+	$c = planweb_counts_build( 'now' );
+	return rest_ensure_response( array( 'waiting' => empty( $c ) ? planweb_counts_request() : false ) );
+}
+
+/**
+ * The permission check for a planweb/v1 route: a signed-in user, the wp_rest nonce for a browser request (an
+ * application password is allowed without it), then the capability.
+ *
+ * @param string $cap Capability.
+ * @return callable
+ */
+function planweb_rest_can( string $cap ): callable {
+	return function ( WP_REST_Request $request ) use ( $cap ) {
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'planweb' ), array( 'status' => 401 ) );
+		}
+		// The nonce from the header or the _wpnonce parameter (skipped for an application password).
+		$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
+		if ( ! $app ) {
+			$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
+			if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'planweb' ), array( 'status' => 403 ) );
+			}
+		}
+		return current_user_can( $cap ) ? true : new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
+	};
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		if ( ! planweb_on() ) {
+			return;
+		}
+		$text   = fn( bool $required = false ) => array(
+			'type'     => 'string',
+			'required' => $required,
+		);
+		$fields = array(
+			'date'     => $text( true ),
+			'time'     => $text(),
+			'title'    => $text( true ),
+			'note'     => $text(),
+			'type'     => $text( true ),
+			'channel'  => $text(),
+			'channels' => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'string' ),
+			),
+			'owner'    => $text(),
+			'status'   => $text(),
+			'link'     => $text(),
+		);
+		$routes = array(
+			'/dashboard'                 => array( 'GET', 'edit_planweb_entries', 'planweb_rest_dashboard', array() ),
+			'/dashboard/count'           => array( 'POST', 'edit_planweb_entries', 'planweb_rest_count_now', array() ),
+			'/entries'                   => array( 'GET', 'edit_planweb_entries', 'planweb_rest_entries', planweb_rest_list_params() ),
+			'/entries/(?P<id>\d+)'       => array( 'POST', 'edit_planweb_entries', 'planweb_rest_save', $fields ),
+			'/entries/(?P<id>\d+)/trash' => array( 'POST', 'edit_planweb_entries', 'planweb_rest_trash', array() ),
+			'/settings'                  => array( 'GET', 'manage_options', fn() => rest_ensure_response( planweb_settings_payload() ), array() ),
+			'/settings/switch'           => array(
+				'POST',
+				'manage_options',
+				'planweb_rest_switch',
+				array(
+					'on'          => array( 'type' => 'boolean' ),
+					'delete_data' => array( 'type' => 'boolean' ),
+					'reset'       => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+				),
+			),
+			'/import'                    => array( 'POST', 'manage_options', 'planweb_rest_import', array() ),
+			'/services'                  => array( 'GET', 'manage_options', fn() => rest_ensure_response( array( 'services' => planweb_services() ) ), array() ),
+			'/settings/site'             => array(
+				'POST',
+				'manage_options',
+				'planweb_rest_site_types',
+				array(
+					'on'    => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'types' => array(
+						'type'     => 'array',
+						'items'    => array( 'type' => 'string' ),
+						'required' => true,
+					),
+				),
+			),
+			'/settings/feed'             => array(
+				'POST',
+				'manage_options',
+				'planweb_rest_feed_key',
+				array(
+					'action' => array(
+						'type'     => 'string',
+						'enum'     => array( 'new', 'off' ),
+						'required' => true,
+					),
+				),
+			),
+		);
+		foreach ( $routes as $route => $r ) {
+			register_rest_route(
+				PLANWEB_REST,
+				$route,
+				array(
+					'methods'             => $r[0],
+					'permission_callback' => planweb_rest_can( $r[1] ),
+					'callback'            => $r[2],
+					'args'                => $r[3],
+				)
+			);
+		}
+		// One month for the Dashboard's calendar grid.
+		register_rest_route(
+			PLANWEB_REST,
+			'/month',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => planweb_rest_can( 'edit_planweb_entries' ),
+				'callback'            => 'planweb_rest_month',
+				'args'                => array(
+					'm' => array(
+						'type'    => 'string',
+						'pattern' => '^\\d{4}-(0[1-9]|1[0-2])$',
+					),
+				),
+			)
+		);
+		// One entry, for its address (Entries &edit=ID opens its form).
+		register_rest_route(
+			PLANWEB_REST,
+			'/entries/(?P<id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => planweb_rest_can( 'edit_planweb_entries' ),
+				'callback'            => 'planweb_rest_entry',
+				'args'                => array(),
+			)
+		);
+		// Adding: the same fields, no id.
+		register_rest_route(
+			PLANWEB_REST,
+			'/entries',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => planweb_rest_can( 'edit_planweb_entries' ),
+				'callback'            => 'planweb_rest_save',
+				'args'                => $fields,
+			)
+		);
+	}
+);
+
+/** The list's query parameters. */
+function planweb_rest_list_params(): array {
+	$enum = fn( array $values ) => array(
+		'type' => 'string',
+		'enum' => array_merge( array( '' ), array_map( 'strval', $values ) ),
+	);
+	return array(
+		'page'    => array(
+			'type'    => 'integer',
+			'minimum' => 1,
+			'default' => 1,
+		),
+		'search'  => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+		'type'    => $enum( array_keys( PLANWEB_TYPES ) ),
+		'channel' => $enum( array_keys( PLANWEB_CHANNELS ) ),
+		'owner'   => $enum( array_keys( PLANWEB_OWNERS ) ),
+		'status'  => $enum( array_keys( PLANWEB_STATUSES ) ),
+		'view'    => $enum( array( 'all', 'overdue', 'waiting' ) ),
+		'when'    => $enum( array_keys( PLANWEB_WINDOWS ) ),
+		'sort'    => $enum( array( 'date', 'title' ) ),
+		'dir'     => $enum( array( 'asc', 'desc' ) ),
+	);
+}
+
+/* ---------- Dashboard ---------- */
+
+/**
+ * The Dashboard: the tiles for each range from the stored counts (formatting only, nothing is counted here). Read
+ * only: opening it writes nothing. Old or missing counts are made by the hourly job, or at once by "Count now" (POST
+ * dashboard/count).
+ */
+function planweb_rest_dashboard() {
+	$c        = get_transient( PLANWEB_COUNTS );
+	$counting = ! is_array( $c ) || empty( $c['at'] );
+	$today    = wp_date( 'Y-m-d' );
+	$stale    = ! $counting && $c['day'] !== $today;
+	$c        = $counting ? planweb_count_entries( array(), $today ) : $c;
+	$url      = fn( array $args ) => planweb_ui_url( 'entries', $args );
+	$out      = array(
+		'counting' => $counting,
+		'stale'    => $stale,
+		'at'       => $counting ? 0 : (int) $c['at'],
+		'atText'   => $counting ? '' : wp_date( 'j M Y, g:i a', (int) $c['at'] ),
+		'ranges'   => PLANWEB_RANGES,
+		'tiles'    => array(),
+		'byType'   => array(),
+		'byStatus' => array(),
+		// The site's own schedule: missed in the last 30 days, and the next 30 days (read live; nothing is written).
+		'site'     => array_slice(
+			array_values(
+				array_filter(
+					planweb_site_items( planweb_add_days( $today, -30 ), planweb_add_days( $today, 29 ) ),
+					fn( $i ) => 'missed' === $i['status'] || ( $i['date'] >= $today && 'published' !== $i['status'] && 'sent' !== $i['status'] )
+				)
+			),
+			0,
+			30
+		),
+	);
+	foreach ( PLANWEB_RANGES as $r ) {
+		$out['tiles'][ $r ]  = planweb_dashboard_tiles( $c, $r, $url, 'planweb_date_label' );
+		$out['byType'][ $r ] = array();
+		foreach ( PLANWEB_TYPES as $slug => $label ) {
+			$out['byType'][ $r ][] = array(
+				'slug'  => $slug,
+				'label' => $label,
+				'count' => (int) ( $c['ahead'][ $r ]['types'][ $slug ] ?? 0 ),
+				'href'  => $url(
+					array(
+						'type' => $slug,
+						'when' => 'next' . $r,
+					)
+				),
+			);
+		}
+	}
+	foreach ( PLANWEB_STATUSES as $slug => $label ) {
+		$out['byStatus'][] = array(
+			'slug'  => $slug,
+			'label' => $label,
+			'count' => (int) ( $c['statuses'][ $slug ] ?? 0 ),
+			'href'  => $url(
+				array(
+					'status' => $slug,
+					'when'   => 'all',
+				)
+			),
+		);
+	}
+	// Raw numbers behind the "overdue vs coming up" chart (the tiles format the same figures as text).
+	$ahead = array();
+	foreach ( PLANWEB_RANGES as $r ) {
+		$ahead[ $r ] = (int) ( $c['ahead'][ $r ]['total'] ?? 0 );
+	}
+	$out['overview'] = array(
+		'overdue' => (int) ( $c['overdue']['total'] ?? 0 ),
+		'waiting' => (int) ( $c['waiting'] ?? 0 ),
+		'ready'   => (int) ( $c['ready'] ?? 0 ),
+		'ahead'   => $ahead,
+	);
+	// Throughput: entries per month by their date, the last six months through this one (oldest first), labelled here.
+	$out['throughput'] = array_map(
+		fn( $m ) => array(
+			'label' => wp_date( 'M', (int) strtotime( ( $m['ym'] ?? '1970-01' ) . '-01 12:00:00' ) ),
+			'value' => (int) ( $m['value'] ?? 0 ),
+		),
+		(array) ( $c['months'] ?? array() )
+	);
+	return rest_ensure_response( $out );
+}
+
+/* ---------- Entries ---------- */
+
+/**
+ * One entry as the list shows it.
+ *
+ * @param array  $e     planweb_entry().
+ * @param string $today Y-m-d.
+ */
+function planweb_rest_row( array $e, string $today ): array {
+	return $e + array(
+		'dateText'    => '' !== $e['date'] ? planweb_date_label( $e['date'] ) : '',
+		'whenText'    => '' !== $e['date'] ? planweb_when( $e['date'] ) : '',
+		'past'        => $e['date'] < $today,
+		'overdue'     => planweb_is_overdue( $e, $today ),
+		'typeText'    => PLANWEB_TYPES[ $e['type'] ] ?? '',
+		'channelText' => implode( ', ', array_map( fn( $s ) => PLANWEB_CHANNELS[ $s ] ?? $s, $e['channels'] ?? array() ) ),
+		'ownerText'   => PLANWEB_OWNERS[ $e['owner'] ] ?? '',
+		'statusText'  => PLANWEB_STATUSES[ $e['status'] ] ?? $e['status'],
+		'linkHost'    => '' !== $e['link'] ? (string) wp_parse_url( $e['link'], PHP_URL_HOST ) : '',
+		'canEdit'     => current_user_can( 'edit_post', $e['id'] ),
+		'canTrash'    => current_user_can( 'delete_post', $e['id'] ),
+		'oldUrl'      => planweb_url(
+			array(
+				'edit' => $e['id'],
+				'm'    => substr( $e['date'], 0, 7 ),
+			)
+		) . '#planweb-form',
+	);
+}
+
+/**
+ * GET month?m=Y-m: the month's entries (not the Trash), as the Calendar's grid shows them, each with the address
+ * that opens its form on Entries. No m: this month.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_month( WP_REST_Request $request ) {
+	$today = wp_date( 'Y-m-d' );
+	$month = preg_match( '/^\d{4}-(0[1-9]|1[0-2])$/', (string) $request['m'] ) ? (string) $request['m'] : substr( $today, 0, 7 );
+	$last  = (int) wp_date( 't', strtotime( $month . '-01 12:00:00' ) );
+	$rows  = array();
+	foreach ( planweb_entries( $month . '-01', sprintf( '%s-%02d', $month, $last ) ) as $e ) {
+		$rows[] = planweb_rest_row( $e, $today ) + array( 'editUrl' => planweb_ui_url( 'entries', array( 'edit' => $e['id'] ) ) );
+	}
+	return rest_ensure_response(
+		array(
+			'month'   => $month,
+			'today'   => $today,
+			'entries' => $rows,
+			'site'    => planweb_site_items( $month . '-01', sprintf( '%s-%02d', $month, $last ) ), // The site's own schedule.
+		)
+	);
+}
+
+/**
+ * GET entries/<id>: one entry as the list shows it. Not one in the Trash, and only for someone who may edit it.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_entry( WP_REST_Request $request ) {
+	$id = (int) ( $request->get_url_params()['id'] ?? 0 );
+	$e  = $id && 'publish' === get_post_status( $id ) ? planweb_entry( $id ) : null;
+	if ( ! $e ) {
+		return new WP_Error( 'rest_post_invalid_id', __( 'No such entry.', 'planweb' ), array( 'status' => 404 ) );
+	}
+	if ( ! current_user_can( 'edit_post', $id ) ) {
+		return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
+	}
+	return rest_ensure_response( array( 'entry' => planweb_rest_row( $e, wp_date( 'Y-m-d' ) ) ) );
+}
+
+/**
+ * One page of the list. Search covers title and note; filters, sort and paging are done in the query.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_entries( WP_REST_Request $request ) {
+	$today = wp_date( 'Y-m-d' );
+	$a     = planweb_list_args( $request->get_params(), $today );
+	$mq    = array(
+		'pw_date' => array(
+			'key'  => 'planweb_date',
+			'type' => 'DATE',
+		),
+	);
+	foreach ( array(
+		'from'   => '>=',
+		'to'     => '<=',
+		'before' => '<',
+	) as $k => $compare ) {
+		if ( '' !== $a[ $k ] ) {
+			$mq[] = array(
+				'key'     => 'planweb_date',
+				'value'   => $a[ $k ],
+				'compare' => $compare,
+				'type'    => 'DATE',
+			);
+		}
+	}
+	if ( '' !== $a['status'] ) {
+		// "Approved" also lists Due: an approved entry on its day.
+		$status = array(
+			'key'     => 'planweb_status',
+			'value'   => 'approved' === $a['status'] ? array( 'approved', 'due' ) : array( $a['status'] ),
+			'compare' => 'IN',
+		);
+		// An entry with no stored status is an idea (planweb_entry()).
+		$mq[] = 'idea' === $a['status'] ? array(
+			'relation' => 'OR',
+			$status,
+			array(
+				'key'     => 'planweb_status',
+				'compare' => 'NOT EXISTS',
+			),
+		) : $status;
+	}
+	if ( 'waiting' === $a['view'] ) {
+		$mq[] = array(
+			'key'   => 'planweb_status',
+			'value' => 'draft',
+		);
+	}
+	if ( 'overdue' === $a['view'] ) {
+		$mq[] = array(
+			'relation' => 'OR',
+			array(
+				'key'     => 'planweb_status',
+				'value'   => PLANWEB_OPEN_STATUSES,
+				'compare' => 'IN',
+			),
+			array(
+				'key'     => 'planweb_status',
+				'compare' => 'NOT EXISTS',
+			),
+		);
+	}
+	$tax = array();
+	foreach ( array(
+		'type'    => 'planweb_type',
+		'channel' => 'planweb_channel',
+		'owner'   => 'planweb_owner',
+	) as $k => $taxonomy ) {
+		if ( '' !== $a[ $k ] ) {
+			$tax[] = array(
+				'taxonomy' => $taxonomy,
+				'field'    => 'slug',
+				'terms'    => $a[ $k ],
+			);
+		}
+	}
+	$order = strtoupper( $a['dir'] );
+	$args  = array(
+		'post_type'      => PLANWEB_TYPE,
+		'post_status'    => 'publish',
+		'posts_per_page' => PLANWEB_PER_PAGE,
+		'paged'          => $a['page'],
+		'meta_query'     => $mq, // phpcs:ignore WordPress.DB.SlowDBQuery -- a few hundred entries at most.
+		'orderby'        => 'title' === $a['sort'] ? array(
+			'title'   => $order,
+			'pw_date' => 'ASC',
+		) : array(
+			'pw_date' => $order,
+			'title'   => 'ASC',
+		),
+	);
+	if ( $tax ) {
+		$args['tax_query'] = $tax; // phpcs:ignore WordPress.DB.SlowDBQuery -- a few hundred entries at most.
+	}
+	if ( '' !== $a['search'] ) {
+		$args['s'] = $a['search'];
+	}
+	$q     = new WP_Query( $args );
+	$rows  = array_values( array_filter( array_map( 'planweb_entry', $q->posts ) ) );
+	$c     = get_transient( PLANWEB_COUNTS );
+	$views = array(
+		array(
+			'value' => 'all',
+			'label' => __( 'All', 'planweb' ),
+		),
+		array(
+			'value' => 'overdue',
+			'label' => __( 'Overdue', 'planweb' ),
+			'count' => is_array( $c ) ? (int) ( $c['overdue']['total'] ?? 0 ) : null,
+		),
+		array(
+			'value' => 'waiting',
+			'label' => __( 'Waiting for approval', 'planweb' ),
+			'count' => is_array( $c ) ? (int) ( $c['waiting'] ?? 0 ) : null,
+		),
+	);
+	return rest_ensure_response(
+		array(
+			'rows'  => array_map( fn( $e ) => planweb_rest_row( $e, $today ), $rows ),
+			'total' => (int) $q->found_posts,
+			'page'  => $a['page'],
+			'pages' => max( 1, (int) $q->max_num_pages ),
+			'args'  => array_diff_key( $a, array_flip( array( 'from', 'to', 'before' ) ) ),
+			'views' => array_map( fn( $v ) => array_filter( $v, fn( $x ) => null !== $x ), $views ),
+		)
+	);
+}
+
+/**
+ * Add or change an entry through planweb_save_entry(), with the Calendar form's checks.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_save( WP_REST_Request $request ) {
+	$id = (int) ( $request->get_url_params()['id'] ?? 0 );
+	if ( $id && ( ! planweb_entry( $id ) || 'publish' !== get_post_status( $id ) ) ) {
+		return new WP_Error( 'rest_post_invalid_id', __( 'No such entry.', 'planweb' ), array( 'status' => 404 ) );
+	}
+	if ( $id && ! current_user_can( 'edit_post', $id ) ) {
+		return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
+	}
+	$stored = $id ? planweb_entry( $id ) : array();
+	$params = $request->get_params();
+	unset( $params['id'] );
+	if ( array_key_exists( 'channel', $params ) && ! array_key_exists( 'channels', $params ) ) {
+		unset( $stored['channels'] ); // A request that sends one channel (the older form) sets that one.
+	}
+	// A change keeps the stored value of every field the request leaves out.
+	$f = planweb_clean_form( array_merge( $stored, $params ) );
+	if ( '' === $f['status'] ) {
+		$f['status'] = $id ? (string) $stored['status'] : 'idea';
+	}
+	$saved = planweb_save_entry( $f, $id );
+	if ( is_wp_error( $saved ) ) {
+		$data = (array) $saved->get_error_data();
+		return new WP_Error( $saved->get_error_code(), $saved->get_error_message(), array( 'status' => (int) ( $data['status'] ?? 400 ) ) );
+	}
+	return rest_ensure_response(
+		array(
+			'entry'   => planweb_rest_row( planweb_entry( $saved ), wp_date( 'Y-m-d' ) ),
+			'message' => __( 'Entry saved.', 'planweb' ),
+		)
+	);
+}
+
+/**
+ * Move an entry to the Trash (never deleted for good).
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_trash( WP_REST_Request $request ) {
+	$id = (int) ( $request->get_url_params()['id'] ?? 0 );
+	if ( ! planweb_entry( $id ) || 'publish' !== get_post_status( $id ) ) {
+		return new WP_Error( 'rest_post_invalid_id', __( 'No such entry.', 'planweb' ), array( 'status' => 404 ) );
+	}
+	if ( ! current_user_can( 'delete_post', $id ) ) {
+		return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
+	}
+	if ( ! EMPTY_TRASH_DAYS ) {
+		return new WP_Error( 'rest_trash_not_supported', __( 'The Trash is turned off on this site, so the entry was kept.', 'planweb' ), array( 'status' => 501 ) );
+	}
+	if ( ! wp_trash_post( $id ) ) {
+		return new WP_Error( 'rest_cannot_delete', __( 'The entry could not be moved to the Trash.', 'planweb' ), array( 'status' => 500 ) );
+	}
+	return rest_ensure_response(
+		array(
+			'id'      => $id,
+			'message' => __( 'Entry moved to the Trash.', 'planweb' ),
+		)
+	);
+}
+
+/* ---------- Settings ---------- */
+
+/** The import group: the stored result and the one-for-one check now (as the Calendar's import panel). */
+function planweb_import_payload(): array {
+	$r = (array) get_option( 'planweb_import_result', array() );
+	$v = planweb_verify();
+	return array(
+		'ran'      => ! empty( $r ),
+		'atText'   => ! empty( $r['time'] ) ? wp_date( 'j M Y, g:i a', (int) $r['time'] ) : '',
+		'stored'   => (int) ( $r['stored'] ?? 0 ),
+		'created'  => (int) ( $r['created'] ?? 0 ),
+		'skipped'  => (int) ( $r['skipped'] ?? 0 ),
+		'failed'   => array_values( (array) ( $r['failed'] ?? array() ) ),
+		'personal' => array_map( 'intval', (array) ( $r['personal'] ?? array() ) ),
+		'check'    => array(
+			'same'    => (int) $v['same'],
+			'differs' => (int) $v['differs'],
+			'missing' => (int) $v['missing'],
+			'extra'   => (int) $v['extra'],
+		),
+		'invalid'  => array_values( $v['invalid'] ),
+		'odd'      => array_values(
+			array_map(
+				fn( $l ) => array(
+					'state' => $l['state'],
+					'dates' => $l['dates'] ? array_intersect_key( $l['dates'], array_flip( array( 'date', 'title', 'note' ) ) ) : null,
+					'entry' => $l['entry'] ? array_intersect_key( $l['entry'], array_flip( array( 'date', 'title', 'note' ) ) ) : null,
+				),
+				array_filter( $v['lines'], fn( $l ) => 'same' !== $l['state'] )
+			)
+		),
+	);
+}
+
+/** Every Settings group. */
+function planweb_settings_payload(): array {
+	$lists = array();
+	foreach ( array(
+		'planweb_type'    => array( __( 'Types', 'planweb' ), PLANWEB_TYPES ),
+		'planweb_channel' => array( __( 'Channels', 'planweb' ), PLANWEB_CHANNELS ),
+		'planweb_owner'   => array( __( 'Owners', 'planweb' ), PLANWEB_OWNERS ),
+	) as $tax => $l ) {
+		$used = array();
+		foreach ( (array) get_terms(
+			array(
+				'taxonomy'   => $tax,
+				'hide_empty' => false,
+			)
+		) as $t ) {
+			if ( $t instanceof WP_Term ) {
+				$used[ $t->slug ] = (int) $t->count; // Stored by WordPress; nothing is counted here.
+			}
+		}
+		$values = array();
+		foreach ( $l[1] as $slug => $label ) {
+			$values[] = array(
+				'slug'  => $slug,
+				'label' => $label,
+				'count' => $used[ $slug ] ?? 0,
+			);
+		}
+		$lists[] = array(
+			'key'    => $tax,
+			'label'  => $l[0],
+			'values' => $values,
+		);
+	}
+	return array(
+		'switch' => array(
+			'on'         => planweb_on(),
+			'deleteData' => planweb_delete_data_on(),
+		),
+		'lists'  => $lists,
+		'import' => planweb_import_payload(),
+		'feed'   => planweb_feed_payload(),
+		'site'   => planweb_site_payload(),
+	);
+}
+
+/**
+ * The PlanWeb group: the switch, written only when it changes, through the same clean-up as Kits → Modules, and
+ * "Delete this plugin's data when it is deleted". Each only when sent. reset: true is "Reset this section"
+ * (planweb_settings_reset(): the switch is left as it is).
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_switch( WP_REST_Request $request ) {
+	if ( $request['reset'] ) {
+		$saved = planweb_settings_reset();
+		return rest_ensure_response(
+			array(
+				'saved'      => $saved,
+				'on'         => planweb_on(),
+				'deleteData' => planweb_delete_data_on(),
+				'message'    => __( 'Defaults restored.', 'planweb' ),
+			)
+		);
+	}
+	$new = null === $request['on'] ? null : planweb_switch_change( (bool) $request['on'], (string) get_option( 'planweb_on', '' ) );
+	if ( null !== $new ) {
+		update_option( 'planweb_on', $new, true );
+	}
+	$data = null !== $request['delete_data'] && planweb_delete_data_save( (bool) $request['delete_data'] );
+	if ( null !== $new ) {
+		$message = planweb_on() ? __( 'Saved. PlanWeb is on.', 'planweb' ) : __( 'Saved. PlanWeb is off: Kits → Dates is back, and the entries are kept.', 'planweb' );
+	} else {
+		$message = $data ? __( 'Saved.', 'planweb' ) : __( 'Nothing changed.', 'planweb' );
+	}
+	return rest_ensure_response(
+		array(
+			'saved'      => null !== $new || $data,
+			'on'         => planweb_on(),
+			'deleteData' => planweb_delete_data_on(),
+			'message'    => $message,
+		)
+	);
+}
+
+/** Run the Dates import again (adds only dates not imported yet; Dates itself is never written). */
+function planweb_rest_import() {
+	planweb_import();
+	planweb_counts_request();
+	return rest_ensure_response(
+		array(
+			'import'  => planweb_import_payload(),
+			'message' => __( 'Import run.', 'planweb' ),
+		)
+	);
+}
+
+/* ---------- Connected services ---------- */
+
+/**
+ * The optional integrations PlanWeb reads for the site schedule. None is connected; PlanWeb posts and sends nothing.
+ */
+function planweb_services(): array {
+	$fluent = defined( 'FLUENTCRM' ) || class_exists( '\FluentCrm\App\Models\Campaign' );
+	return array(
+		array(
+			'slug'    => 'fluentcrm',
+			'name'    => 'FluentCRM',
+			'status'  => $fluent ? __( 'Active', 'planweb' ) : __( 'Not active', 'planweb' ),
+			'tone'    => $fluent ? '' : 'warn',
+			'summary' => $fluent ? __( 'Scheduled, sending and sent newsletters show in the schedule (read only; titles only).', 'planweb' ) : __( 'Scheduled newsletter sends show here once FluentCRM is active.', 'planweb' ),
+		),
+	);
+}
+
+/**
+ * POST settings/feed: make a new feed key (the old address stops working at once) or turn the feed off.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_feed_key( WP_REST_Request $request ) {
+	if ( 'off' === $request['action'] ) {
+		delete_option( PLANWEB_FEED_KEY );
+		$message = __( 'The calendar feed is off. Calendars subscribed to it stop updating.', 'planweb' );
+	} else {
+		planweb_feed_new_key();
+		$message = __( 'New key made. The old feed address no longer works: subscribe again with the new one.', 'planweb' );
+	}
+	return rest_ensure_response(
+		array(
+			'feed'    => planweb_feed_payload(),
+			'message' => $message,
+		)
+	);
+}
+
+/** The Site schedule group: every source with whether it shows. */
+function planweb_site_payload(): array {
+	$on  = planweb_site_types();
+	$out = array();
+	foreach ( planweb_site_choices() as $slug => $label ) {
+		$out[] = array(
+			'slug'  => $slug,
+			'label' => $label,
+			'on'    => in_array( $slug, $on, true ),
+			'bulk'  => in_array( $slug, PLANWEB_SITE_SKIP, true ),
+		);
+	}
+	return array(
+		'on'      => planweb_site_on(),
+		'sources' => $out,
+	);
+}
+
+/**
+ * POST settings/site: which sources of the site's schedule show.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_site_types( WP_REST_Request $request ) {
+	$switched = planweb_site_on_save( (bool) $request['on'] );
+	$saved    = planweb_site_types_save( (array) $request['types'] ) || $switched;
+	if ( $saved ) {
+		planweb_counts_request();
+	}
+	return rest_ensure_response(
+		array(
+			'site'    => planweb_site_payload(),
+			'saved'   => $saved,
+			'message' => $saved ? __( 'Saved. The Dashboard counts again in the background.', 'planweb' ) : __( 'Nothing changed.', 'planweb' ),
+		)
+	);
+}

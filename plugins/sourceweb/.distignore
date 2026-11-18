@@ -1,0 +1,5 @@
+# Files excluded from the distributed WordPress.org zip (dev-only).
+/.distignore
+/.git
+/.github
+/tests

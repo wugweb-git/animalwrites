@@ -1,0 +1,965 @@
+/* stylelint-disable no-descending-specificity, @stylistic/max-line-length -- parts are grouped by component, not by specificity; comments are prose. */
+
+/*
+ * Kits admin shell, second set of parts (docs/kits-plugin-ui.md): working list, field review, setup flow, chart,
+ * write-only list, linked setting, metric picker, the "not active" tile. Same --ks-* values as shell.css (each a Kits
+ * token, named there). Breakpoints 767/768 and 1199/1200 only.
+ */
+
+.kits-shell select,
+.kits-shell input[type="search"] {
+	min-height: var(--ks-control);
+	padding: 0 var(--ks-s3);
+	border: 1px solid var(--ks-g3);
+	border-radius: var(--ks-r-control);
+	background-color: var(--ks-white);
+	color: var(--ks-ink);
+	font: inherit;
+	max-width: 100%;
+}
+
+.kits-shell select:focus-visible,
+.kits-shell input[type="search"]:focus-visible,
+.kits-shell input[type="radio"]:focus-visible + span {
+	outline: 2px solid var(--ks-ink);
+	outline-offset: 2px;
+}
+
+.kits-shell-link.is-danger {
+	color: var(--ks-ink);
+	font-weight: 600;
+}
+
+.kits-shell-link:disabled {
+	color: var(--ks-g6);
+	cursor: not-allowed;
+	text-decoration: none;
+}
+
+/* ---------- Working list ---------- */
+
+.kits-shell-datalist {
+	display: grid;
+	gap: var(--ks-s4);
+	min-width: 0;
+}
+
+.kits-shell-views {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s2);
+}
+
+.kits-shell-view {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--ks-s2);
+	min-height: var(--ks-control);
+	padding: 0 var(--ks-s4);
+	border: 1px solid var(--ks-g3);
+	border-radius: var(--ks-r-pill);
+	background: var(--ks-white);
+	color: var(--ks-ink);
+	font: inherit;
+	cursor: pointer;
+}
+
+.kits-shell-view.is-on {
+	border-color: var(--ks-ink);
+	background: var(--ks-ink);
+	color: var(--ks-white);
+}
+
+.kits-shell-view__count {
+	min-width: 24px;
+	padding: 0 var(--ks-s2);
+	border-radius: var(--ks-r-pill);
+	background: var(--ks-g1);
+	color: var(--ks-ink);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 20px;
+	text-align: center;
+}
+
+.kits-shell-listbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--ks-s3) var(--ks-s4);
+}
+
+.kits-shell-search {
+	display: flex;
+	gap: var(--ks-s2);
+	flex: 1 1 280px;
+	min-width: 0;
+}
+
+.kits-shell-search input[type="search"] {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.kits-shell-filter {
+	display: grid;
+	gap: var(--ks-s1);
+}
+
+.kits-shell-filter label {
+	color: var(--ks-g6);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.kits-shell-bulk {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s2);
+}
+
+.kits-shell-bulk__count {
+	color: var(--ks-g6);
+}
+
+.kits-shell-list {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--ks-white);
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-r-control);
+}
+
+.kits-shell-list.is-loading tbody {
+	opacity: 0.5;
+}
+
+.kits-shell-list th,
+.kits-shell-list td {
+	padding: var(--ks-s3) var(--ks-s4);
+	border-bottom: 1px solid var(--ks-g2);
+	text-align: left;
+	vertical-align: top;
+}
+
+.kits-shell-list thead th {
+	color: var(--ks-g6);
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.kits-shell-list tbody tr:last-child > * {
+	border-bottom: 0;
+}
+
+.kits-shell-list tbody th {
+	font-weight: 600;
+}
+
+.kits-shell-list__check {
+	width: 40px;
+}
+
+.kits-shell-list input[type="checkbox"] {
+	width: 20px;
+	height: 20px;
+	margin: 0;
+	accent-color: var(--ks-ink);
+}
+
+.kits-shell-sort {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--ks-s1);
+	min-height: 24px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.kits-shell-sort__mark {
+	min-width: 1em;
+	color: var(--ks-ink);
+}
+
+.kits-shell-rowactions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s1) var(--ks-s3);
+	margin-top: var(--ks-s1);
+	font-size: 13px;
+	font-weight: 400;
+}
+
+/* A list cell with a mark before it (a source's icon, or its first letter): the shell's 32px icon tile. */
+.kits-shell-withicon {
+	display: flex;
+	gap: var(--ks-s3);
+	align-items: flex-start;
+}
+
+.kits-shell-withicon > img.kits-shell-service__icon {
+	object-fit: contain;
+	background: var(--ks-white);
+	border: 1px solid var(--ks-g2);
+}
+
+/* DataList on DataViews: the primary cell keeps its row actions on a line of their own under the title. */
+.kits-shell-datalist .dataviews-title-field {
+	flex-wrap: wrap;
+	white-space: normal;
+}
+
+.kits-shell-datalist .dataviews-title-field > .kits-shell-rowactions {
+	flex-basis: 100%;
+}
+
+/* DataViews' filter popover opens at the end of the page, outside the shell and its ThemeProvider: the same ink and
+   grey there (literal values, as --ks-* is defined on .kits-shell only). */
+body.kits-shell-screen {
+	--wp-admin-theme-color: #141414;
+	--wp-admin-theme-color--rgb: 20, 20, 20;
+	--wp-components-color-accent: #141414;
+}
+
+.components-popover .dataviews-filters__search-widget-listitem:hover,
+.components-popover .dataviews-filters__search-widget-listitem[data-active-item],
+.components-popover .dataviews-filters__search-widget-listitem:focus {
+	background-color: #f4f4f4;
+}
+
+.components-popover .dataviews-filters__selection-indicator [role="radio"][data-checked] {
+	border-color: #141414;
+	background-color: #141414;
+}
+
+/* Icon row actions (edit, delete, cancel, success, view, undo, external): ink, red or green; the label is the tooltip. */
+.kits-shell .kits-shell-iconaction.kits-shell-iconaction {
+	color: var(--ks-ink);
+}
+
+.kits-shell .kits-shell-iconaction.is-danger.is-danger {
+	color: var(--ks-danger);
+}
+
+.kits-shell .kits-shell-iconaction.is-success.is-success {
+	color: var(--ks-success);
+}
+
+.kits-shell .kits-shell-iconaction.kits-shell-iconaction:disabled,
+.kits-shell .kits-shell-iconaction.kits-shell-iconaction[aria-disabled="true"] {
+	color: var(--ks-g6);
+}
+
+.kits-shell-rowaction.is-off {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s1);
+}
+
+.kits-shell-rowaction__why {
+	color: var(--ks-g6);
+	font-size: 12px;
+}
+
+.kits-shell-pager {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: var(--ks-s2) var(--ks-s3);
+}
+
+.kits-shell-pager__count {
+	margin-right: auto !important;
+	color: var(--ks-g6);
+}
+
+/* ---------- Field review ---------- */
+
+.kits-shell-review {
+	display: grid;
+	gap: var(--ks-s4);
+}
+
+.kits-shell-review ins {
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.kits-shell-review tr.is-applied td,
+.kits-shell-review tr.is-applied th {
+	background: var(--ks-g1);
+}
+
+.kits-shell-review__empty {
+	color: var(--ks-g6);
+	font-style: italic;
+}
+
+.kits-shell-review__foot {
+	display: flex;
+	gap: var(--ks-s2);
+}
+
+/* ---------- Setup flow ---------- */
+
+.kits-shell-setup__progress {
+	color: var(--ks-g6);
+	font-weight: 600;
+}
+
+.kits-shell-steps {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s2) var(--ks-s4);
+	margin: 0;
+	padding: var(--ks-s4) var(--ks-s5) 0;
+	list-style: none;
+	counter-reset: none;
+}
+
+.kits-shell-step button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--ks-s2);
+	min-height: var(--ks-control);
+	padding: 0 var(--ks-s3) 0 var(--ks-s1);
+	border: 1px solid transparent;
+	border-radius: var(--ks-r-pill);
+	background: none;
+	color: var(--ks-g6);
+	font: inherit;
+	cursor: pointer;
+}
+
+.kits-shell-step button:disabled {
+	cursor: default;
+}
+
+.kits-shell-step__mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: 1px solid var(--ks-g3);
+	border-radius: 50%;
+	background: var(--ks-white);
+	font-weight: 600;
+}
+
+.kits-shell-step.is-done .kits-shell-step__mark {
+	border-color: var(--ks-ink);
+	color: var(--ks-ink);
+}
+
+.kits-shell-step.is-on button {
+	border-color: var(--ks-g2);
+	color: var(--ks-ink);
+	font-weight: 600;
+}
+
+.kits-shell-step.is-on .kits-shell-step__mark {
+	border-color: var(--ks-ink);
+	background: var(--ks-ink);
+	color: var(--ks-white);
+}
+
+.kits-shell-setup__foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s2) var(--ks-s3);
+}
+
+.kits-shell-setup__aside {
+	color: var(--ks-g6);
+}
+
+/* ---------- Chart ---------- */
+
+.kits-shell-chart {
+	display: grid;
+	gap: var(--ks-s2);
+	margin: 0;
+}
+
+.kits-shell-chart svg {
+	width: 100%;
+	height: 96px;
+}
+
+.kits-shell-chart rect {
+	fill: var(--ks-g3);
+}
+
+.kits-shell-chart rect.is-last {
+	fill: var(--ks-ink);
+}
+
+.kits-shell-chart__caption {
+	color: var(--ks-g6);
+	font-size: 13px;
+}
+
+/* ---------- Write-only list, linked setting, picker, missing tile ---------- */
+
+.kits-shell-hashlist {
+	display: grid;
+	gap: var(--ks-s2);
+}
+
+.kits-shell-hashlist__add {
+	display: flex;
+	gap: var(--ks-s2);
+	max-width: 480px;
+}
+
+.kits-shell-hashlist__add input {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* A failed add: black and bold, like the error notice's border (the Kits look has no red). */
+.kits-shell-hashlist .kits-shell-field__help.is-error {
+	color: var(--ks-ink);
+	font-weight: 600;
+}
+
+.kits-shell-hashlist__count {
+	font-weight: 600;
+}
+
+.kits-shell-hashlist__items li {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: var(--ks-s2);
+	max-width: 480px;
+	padding: var(--ks-s2) 0;
+	border-bottom: 1px solid var(--ks-g1);
+}
+
+.kits-shell-hashlist__note,
+.kits-shell-linked .kits-shell-field__help {
+	color: var(--ks-g6);
+}
+
+.kits-shell-linked {
+	display: grid;
+	gap: var(--ks-s1);
+}
+
+.kits-shell-linked__value {
+	font-weight: 600;
+}
+
+.kits-shell-picker {
+	position: relative;
+}
+
+.kits-shell-picker__panel {
+	position: absolute;
+	right: 0;
+	z-index: 10;
+	display: grid;
+	gap: var(--ks-s3);
+	width: 280px;
+	max-width: calc(100vw - 32px);
+	margin-top: var(--ks-s2);
+	padding: var(--ks-s4);
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-r-card);
+	background: var(--ks-white);
+	box-shadow: 0 8px 24px rgba(20, 20, 20, 0.12);
+}
+
+.kits-shell-picker fieldset {
+	display: grid;
+	gap: var(--ks-s2);
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.kits-shell-picker__opt {
+	display: flex;
+	align-items: center;
+	gap: var(--ks-s2);
+	min-height: 24px;
+}
+
+.kits-shell-picker__opt input {
+	width: 20px;
+	height: 20px;
+	margin: 0;
+	accent-color: var(--ks-ink);
+}
+
+.kits-shell-picker__foot {
+	display: flex;
+	align-items: center;
+	gap: var(--ks-s3);
+}
+
+.kits-shell-tile__value.is-missing {
+	color: var(--ks-g6);
+	font-size: 16px;
+	font-weight: 600;
+}
+
+/* ---------- Tablets and phones ---------- */
+
+@media (max-width: 767px) {
+
+	.kits-shell-listbar > * {
+		flex: 1 1 100%;
+	}
+
+	.kits-shell-filter select,
+	.kits-shell-bulk select {
+		width: 100%;
+	}
+
+	/* Each row stacks into a card; every cell says its column. */
+	.kits-shell-list,
+	.kits-shell-list tbody,
+	.kits-shell-list tr,
+	.kits-shell-list th,
+	.kits-shell-list td {
+		display: block;
+		width: 100%;
+	}
+
+	.kits-shell-list {
+		border: 0;
+		background: none;
+	}
+
+	.kits-shell-list thead {
+		display: flex;
+		border: 1px solid var(--ks-g2);
+		border-radius: var(--ks-r-control);
+		background: var(--ks-white);
+	}
+
+	.kits-shell-list thead tr {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.kits-shell-list thead th,
+	.kits-shell-list thead td {
+		width: auto;
+		border: 0;
+	}
+
+	/* Only the tick-all box and sortable headings stay in the head row. */
+	.kits-shell-list thead th:not([aria-sort]):not(:has(.kits-shell-sort)) {
+		display: none;
+	}
+
+	.kits-shell-list tbody tr {
+		position: relative;
+		margin-top: var(--ks-s3);
+		padding: var(--ks-s2) 0;
+		border: 1px solid var(--ks-g2);
+		border-radius: var(--ks-r-control);
+		background: var(--ks-white);
+	}
+
+	.kits-shell-list tbody th,
+	.kits-shell-list tbody td {
+		padding: var(--ks-s1) var(--ks-s4);
+		border: 0;
+	}
+
+	.kits-shell-list tbody td[data-label]::before {
+		content: attr(data-label);
+		display: block;
+		color: var(--ks-g6);
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	.kits-shell-list tbody .kits-shell-list__check {
+		position: absolute;
+		top: var(--ks-s2);
+		right: 0;
+		width: auto;
+	}
+
+	.kits-shell-list tbody .is-primary {
+		padding-right: 56px;
+	}
+
+	.kits-shell-pager .kits-shell-button {
+		flex: 1 1 0;
+	}
+
+	.kits-shell-steps {
+		padding: var(--ks-s4) var(--ks-s4) 0;
+	}
+
+	.kits-shell-step__label {
+		font-size: 13px;
+	}
+}
+
+/* ---------- Frame: Kits screens printed by PHP (includes/admin-kits-frame.php) ---------- */
+
+/* The line under the header. */
+.kits-shell-frame__intro {
+	color: var(--ks-g6);
+	max-width: 72ch;
+}
+
+/*
+ * A card whose body is today's markup (paragraphs, lists, WordPress form tables and buttons): the shell's resets give
+ * back the spacing that markup expects. Every value is a shell token (--ks-s2 8px, --ks-s3 12px, --ks-s5 24px).
+ */
+.kits-shell .kits-shell-prose {
+	display: block;
+	overflow-x: auto;
+}
+
+.kits-shell .kits-shell-prose p,
+.kits-shell .kits-shell-prose ul,
+.kits-shell .kits-shell-prose ol,
+.kits-shell .kits-shell-prose table,
+.kits-shell .kits-shell-prose form,
+.kits-shell .kits-shell-prose details {
+	margin: 0 0 var(--ks-s3);
+}
+
+.kits-shell .kits-shell-prose ul {
+	list-style: disc;
+	padding-left: var(--ks-s5);
+}
+
+.kits-shell .kits-shell-prose h2,
+.kits-shell .kits-shell-prose h3 {
+	margin: var(--ks-s5) 0 var(--ks-s2);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.kits-shell .kits-shell-prose > :first-child,
+.kits-shell .kits-shell-prose > div > :first-child {
+	margin-top: 0;
+}
+
+.kits-shell .kits-shell-prose .form-table {
+	margin-top: 0;
+}
+
+.kits-shell .kits-shell-prose .notice {
+	margin: 0 0 var(--ks-s3);
+}
+
+/*
+ * WordPress's own controls inside the shell (today's forms in the Kits cards, Theme Options' fields): black and greys
+ * like the shell's parts, not the admin colour scheme's blue. --ks-ink #141414 (--neutral-9), --ks-g7 #4a4a4a
+ * (--neutral-7) for hover, --ks-g3 #bababa (--neutral-3) for borders. WordPress components read --wp-admin-theme-color.
+ */
+.kits-shell {
+	--wp-admin-theme-color: #141414;
+	--wp-admin-theme-color--rgb: 20, 20, 20;
+	--wp-admin-theme-color-darker-10: #4a4a4a;
+	--wp-admin-theme-color-darker-10--rgb: 74, 74, 74;
+	--wp-admin-theme-color-darker-20: #4a4a4a;
+	--wp-admin-theme-color-darker-20--rgb: 74, 74, 74;
+}
+
+.kits-shell input[type="checkbox"],
+.kits-shell input[type="radio"] {
+	accent-color: var(--ks-ink);
+}
+
+.kits-shell input[type="checkbox"]:checked {
+	background: var(--ks-ink);
+	border-color: var(--ks-ink);
+}
+
+.kits-shell input[type="checkbox"]:checked::before {
+	content: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%23ffffff%27%2F%3E%3C%2Fsvg%3E);
+}
+
+.kits-shell input[type="radio"]:checked::before {
+	background: var(--ks-ink);
+}
+
+.kits-shell .button-primary,
+.kits-shell .button.button-primary {
+	background: var(--ks-ink);
+	border-color: var(--ks-ink);
+	color: var(--ks-white);
+}
+
+.kits-shell .button-primary:hover,
+.kits-shell .button-primary:focus {
+	background: var(--ks-g7);
+	border-color: var(--ks-g7);
+	color: var(--ks-white);
+}
+
+.kits-shell .button:not(.button-primary):not(.delete),
+.kits-shell .button-secondary {
+	border-color: var(--ks-ink);
+	color: var(--ks-ink);
+	background: var(--ks-white);
+}
+
+.kits-shell .button:not(.button-primary):not(.delete):hover {
+	background: var(--ks-g1);
+	color: var(--ks-ink);
+}
+
+.kits-shell .kits-shell-prose a:not(.button) {
+	color: var(--ks-ink);
+}
+
+/* Calendar grid (calendar.js): Monday first, today marked with the ink edge,
+   past days greyed (as the PlanWeb Calendar). Phones get the list instead. */
+.kits-shell-cal__nav {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s2);
+	margin: 0 0 var(--ks-s3);
+}
+
+.kits-shell-cal__title {
+	min-width: 10em;
+	text-align: center;
+}
+
+.kits-shell-cal__grid {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.kits-shell-cal__grid th {
+	padding: var(--ks-s2);
+	color: var(--ks-g6);
+	font-weight: 600;
+	text-align: left;
+}
+
+.kits-shell-cal__grid td {
+	padding: var(--ks-s2);
+	border: 1px solid var(--ks-g2);
+	background: var(--ks-white);
+	vertical-align: top;
+	overflow-wrap: anywhere;
+}
+
+.kits-shell-cal__grid td.is-outside {
+	background: var(--ks-g1);
+}
+
+.kits-shell-cal__grid td.is-past,
+.kits-shell-cal__list li.is-past {
+	color: var(--ks-g6);
+	background: var(--ks-g1);
+}
+
+.kits-shell-cal__grid td.is-today,
+.kits-shell-cal__list li.is-today {
+	box-shadow: inset 0 0 0 2px var(--ks-ink);
+}
+
+.kits-shell-cal__day {
+	display: block;
+	margin: 0 0 var(--ks-s1);
+	font-weight: 600;
+}
+
+.kits-shell-cal__list {
+	display: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.kits-shell-cal__list li {
+	padding: var(--ks-s3);
+	border-bottom: 1px solid var(--ks-g2);
+}
+
+@media (max-width: 767px) {
+
+	.kits-shell-cal__grid {
+		display: none;
+	}
+
+	.kits-shell-cal__list {
+		display: block;
+	}
+}
+
+/* Secret field (inputs.js): the box and its Show / Hide on one line. */
+.kits-shell-secret {
+	display: flex;
+	align-items: center;
+	gap: var(--ks-s2);
+}
+
+/* Confirm-with-count (inputs.js): asked in place, under the button's row. */
+.kits-shell-confirm {
+	padding: var(--ks-s3) var(--ks-s4);
+	border: 1px solid var(--ks-g3);
+	border-radius: var(--ks-r-control);
+	background: var(--ks-white);
+}
+
+.kits-shell-confirm.is-error {
+	border-color: var(--ks-ink);
+	box-shadow: inset var(--ks-s1) 0 0 var(--ks-ink);
+}
+
+.kits-shell-confirm p {
+	margin: 0 0 var(--ks-s2);
+}
+
+.kits-shell-confirm__foot {
+	display: flex;
+	gap: var(--ks-s2);
+}
+
+/* Detail panel (detail.js): a reading panel, label and value rows; labels beside values from 768px, stacked below. */
+.kits-shell-detail {
+	padding: var(--ks-s5);
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-r-card);
+	background: var(--ks-white);
+}
+
+.kits-shell-detail__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--ks-s3);
+}
+
+.kits-shell-detail__head h3 {
+	margin: 0;
+	font-size: 16px;
+}
+
+.kits-shell-detail__sub {
+	margin: var(--ks-s1) 0 0;
+	color: var(--ks-g6);
+}
+
+.kits-shell-detail__rows {
+	margin: var(--ks-s4) 0 0;
+}
+
+.kits-shell-detail__row {
+	display: grid;
+	grid-template-columns: minmax(120px, 200px) 1fr;
+	gap: var(--ks-s3);
+	padding: var(--ks-s2) 0;
+	border-top: 1px solid var(--ks-g2);
+}
+
+.kits-shell-detail__row dt {
+	color: var(--ks-g6);
+}
+
+.kits-shell-detail__row dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.kits-shell-detail__foot {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s2);
+	margin: var(--ks-s4) 0 0;
+}
+
+@media (max-width: 767px) {
+
+	.kits-shell-detail__row {
+		grid-template-columns: 1fr;
+		gap: var(--ks-s1);
+	}
+}
+
+/* Row view (list.js rowView): the opened row's panel, across every column. */
+.kits-shell-list tr.is-open > * {
+	border-bottom-color: transparent;
+}
+
+.kits-shell-list__view > td {
+	padding: 0 var(--ks-s3) var(--ks-s4);
+	background: var(--ks-g1);
+}
+
+/* Media (detail.js): thumbnails in a row; the picked picture beside Choose and Remove. */
+.kits-shell-thumbs {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s1);
+	vertical-align: middle;
+}
+
+.kits-shell-thumbs img,
+.kits-shell-media__preview img {
+	display: block;
+	object-fit: cover;
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-s1);
+	background: var(--ks-g1);
+}
+
+.kits-shell-thumbs__more,
+.kits-shell-media__none {
+	color: var(--ks-g6);
+}
+
+.kits-shell-media__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s3);
+}
+
+/* Pair list (detail.js): two boxes a row, Remove at the end. */
+.kits-shell-pairs {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.kits-shell-pairs__table {
+	width: 100%;
+	margin: 0 0 var(--ks-s2);
+	border-collapse: collapse;
+}
+
+.kits-shell-pairs__table th {
+	padding: 0 var(--ks-s2) var(--ks-s1) 0;
+	color: var(--ks-g6);
+	font-weight: 400;
+	text-align: left;
+}
+
+.kits-shell-pairs__table td {
+	padding: 0 var(--ks-s2) var(--ks-s2) 0;
+}
+
+.kits-shell-pairs__table input {
+	width: 100%;
+}

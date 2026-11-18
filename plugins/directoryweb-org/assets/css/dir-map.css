@@ -1,0 +1,22 @@
+/* Directory: List / Map switch, Near me and the map (directory-map.php, dir-map.js). */
+.directoryweb-dir-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2, .5rem); width: 100%; margin-top: var(--s-2, .5rem); }
+.directoryweb-near { box-sizing: border-box; width: 100%; max-width: var(--kit-width-content); margin: var(--s-3, .75rem) 0; padding: var(--kit-space-5); background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--radius-md, 8px); }
+.directoryweb-near-form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2, .5rem); }
+.directoryweb-near-or { color: var(--kit-color-muted); }
+.directoryweb-near-pin { width: 8.5em; }
+.directoryweb-near-pin, .directoryweb-near-km { min-height: var(--kit-toolbar-h); padding: 0 .75em; border: var(--kit-border-control) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--kit-color-raised); color: var(--kit-color-text); font: inherit; }
+.directoryweb-near-note { margin: var(--s-2, .5rem) 0 0; font-size: .875em; color: var(--kit-color-muted); }
+.directoryweb-near-results:not(:empty) { margin-top: var(--s-3, .75rem); }
+.directoryweb-near-head { margin: 0 0 var(--s-2, .5rem); font-weight: var(--kit-weight-strong, 600); color: var(--kit-color-ink); }
+.directoryweb-near-list { margin: 0; padding-left: 1.4em; }
+.directoryweb-near-list li { margin: 0 0 var(--s-2, .5rem); }
+.directoryweb-near-km-val { white-space: nowrap; color: var(--kit-color-muted); }
+.directoryweb-near-meta { font-size: .875em; color: var(--kit-color-muted); }
+.directoryweb-near-fallback { margin: var(--s-2, .5rem) 0 0; }
+.directoryweb-dir-map { width: 100%; margin: var(--s-3, .75rem) 0; }
+.directoryweb-dir-map-note { margin: 0 0 var(--s-2, .5rem); color: var(--kit-color-muted); }
+.directoryweb-dir-map-canvas { width: 100%; height: clamp(360px, 70vh, 640px); border: 1px solid var(--kit-color-line); border-radius: var(--radius-md, 8px); overflow: hidden; background: var(--kit-color-surface); }
+.directoryweb-map-pop-name { margin: 0 0 .25em; font-weight: var(--kit-weight-strong, 600); }
+.directoryweb-map-pop-meta, .directoryweb-map-pop-approx { margin: 0; font-size: .875em; color: var(--kit-color-muted); }
+.directoryweb-map-pop-approx { margin-top: .25em; font-style: italic; }
+@media (min-width: 768px) { .directoryweb-dir-tools { width: auto; margin-top: 0; } }

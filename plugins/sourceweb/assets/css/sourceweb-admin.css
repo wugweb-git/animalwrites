@@ -1,0 +1,113 @@
+/* SourceWeb Overview — layout only. No colour theme: it inherits WordPress admin's own inks and neutrals
+   (greyscale) so it sits inside the admin chrome rather than restyling it. Flat hairline cards, a single
+   spacing rhythm, and a clear heading hierarchy — nothing that fights the surrounding screens. */
+
+.sourceweb-section-title {
+	margin: 1.5em 0 .5em;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Stat tiles -------------------------------------------------------------- */
+
+.sourceweb-tiles {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 13em, 1fr ) );
+	gap: 16px;
+	margin: 0 0 1.5em;
+}
+
+.sourceweb-tile {
+	display: flex;
+	flex-direction: column;
+	min-height: 6.5em;
+	padding: 16px;
+	border: 1px solid #c3c4c7;
+	border-radius: 3px;
+	background: #fff;
+}
+
+.sourceweb-tile__label {
+	margin: 0;
+	font-size: 13px;
+	color: #50575e;
+}
+
+.sourceweb-tile__value {
+	margin: 6px 0 0;
+	font-size: 28px;
+	line-height: 1.15;
+	font-weight: 600;
+	color: #1d2327;
+	font-variant-numeric: tabular-nums;
+}
+
+.sourceweb-tile__delta {
+	margin: auto 0 0; /* pin to the foot so tiles align on a shared baseline */
+	padding-top: 8px;
+	font-size: 12px;
+	color: #646970;
+}
+
+/* Chart cards ------------------------------------------------------------- */
+
+.sourceweb-charts {
+	display: grid;
+	grid-template-columns: repeat( auto-fit, minmax( 22em, 1fr ) );
+	gap: 16px;
+	margin: 0 0 1.5em;
+}
+
+.sourceweb-card {
+	padding: 16px;
+	border: 1px solid #c3c4c7;
+	border-radius: 3px;
+	background: #fff;
+}
+
+.sourceweb-card h3 {
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* MiniChart --------------------------------------------------------------- */
+
+.sourceweb-minichart {
+	margin: 0;
+}
+
+.sourceweb-minichart__svg {
+	display: block;
+	width: 100%;
+	height: 120px;
+	overflow: visible;
+}
+
+.sourceweb-minichart__cap {
+	margin-top: 10px;
+	font-size: 12px;
+	line-height: 1.4;
+	color: #646970;
+}
+
+.sourceweb-minichart__label {
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.sourceweb-status {
+	padding: 1em 0;
+	color: #646970;
+}
+
+.sourceweb-screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect( 1px, 1px, 1px, 1px );
+	word-wrap: normal;
+}

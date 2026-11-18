@@ -1,0 +1,222 @@
+<?php
+/**
+ * DirectoryWeb screens' pure parts (includes/directoryweb-shape.php), without WordPress. Run by the Deploy check.
+ *
+ * Usage: php plugins/directoryweb/tests/directoryweb-tests.php
+ *
+ * @package directoryweb
+ */
+
+if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
+	exit;
+}
+
+// phpcs:disable WordPress.Security.EscapeOutput -- a command-line test runner.
+
+define( 'ABSPATH', __DIR__ . '/' );
+require dirname( __DIR__ ) . '/includes/directoryweb-shape.php';
+
+$fails = 0;
+$count = 0;
+
+/**
+ * One check.
+ *
+ * @param bool   $ok   Passed.
+ * @param string $name What was checked.
+ */
+function check( $ok, $name ) {
+	global $fails, $count;
+	++$count;
+	if ( ! $ok ) {
+		++$fails;
+		echo 'FAIL: ' . $name . "\n";
+	}
+}
+
+// Status.
+check( 'pending' === directoryweb_claim_status( array() ), 'no review is pending' );
+check( 'approved' === directoryweb_claim_status( array( 'status' => 'approved' ) ), 'approved review' );
+check( 'rejected' === directoryweb_claim_status( 'rejected' ), 'old-form status string' );
+check( 'pending' === directoryweb_claim_status( array( 'status' => 'removed' ) ), 'an unknown status reads as pending' );
+
+// The list: views, filters, sort, pages.
+$row  = fn( $st, $sent, $title, $name, $state = 0, $types = array(), $has = array() ) => array(
+	'status'        => $st,
+	'sent'          => $sent,
+	'listing_title' => $title,
+	'name'          => $name,
+	'state'         => $state,
+	'types'         => $types,
+	'has'           => $has + array(
+		'logo'   => false,
+		'photos' => false,
+		'proof'  => false,
+	),
+);
+$rows = array(
+	$row( 'pending', '2026-11-10 10:00:00', 'Paws Trust', 'Asha', 32, array( 'shelter' ), array( 'logo' => true ) ),
+	$row( 'pending', '2026-10-01 10:00:00', 'Blue Cross', 'Ravi', 29, array( 'veterinary-clinic' ) ),
+	$row( 'approved', '2026-11-05 10:00:00', 'Animal Aid', 'Meera', 32, array( 'shelter' ), array( 'proof' => true ) ),
+	$row( 'rejected', '2026-11-09 10:00:00', 'Gau Seva', 'Asha', 8 ),
+);
+$now  = strtotime( '2026-11-11 12:00:00' );
+$q    = directoryweb_claims_query( $rows, array( 'now' => $now ) );
+check( 2 === $q['total'], 'default view is the waiting claims' );
+check( 'Paws Trust' === $q['rows'][0]['listing_title'], 'newest first' );
+check( 4 === $q['counts']['all'] && 2 === $q['counts']['pending'] && 1 === $q['counts']['approved'], 'view counts' );
+$q = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'search' => 'asha',
+		'now'    => $now,
+	)
+);
+check( 2 === $q['total'], 'search by claimant, any case' );
+$rows[0]['ref'] = 'DW-C-17';
+$q              = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'search' => 'dw-c-17',
+		'now'    => $now,
+	)
+);
+check( 1 === $q['total'] && 'Paws Trust' === $q['rows'][0]['listing_title'], 'search by reference' );
+$q = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'state'  => 32,
+		'type'   => 'shelter',
+		'now'    => $now,
+	)
+);
+check( 2 === $q['total'], 'state and type filters' );
+check( 1 === $q['counts']['pending'] && 1 === $q['counts']['approved'], 'view counts follow the filters' );
+$q = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'has'    => 'proof',
+		'now'    => $now,
+	)
+);
+check( 1 === $q['total'] && 'Animal Aid' === $q['rows'][0]['listing_title'], 'sent with proof' );
+$q = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'days'   => 7,
+		'now'    => $now,
+	)
+);
+check( 3 === $q['total'], 'last 7 days' );
+$q = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'sort'   => 'listing',
+		'dir'    => 'asc',
+		'per'    => 2,
+		'page'   => 2,
+		'now'    => $now,
+	)
+);
+check( 2 === $q['pages'] && 2 === $q['page'] && 'Gau Seva' === $q['rows'][0]['listing_title'], 'sort by listing, page 2' );
+$q = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'page'   => 99,
+		'now'    => $now,
+	)
+);
+check( 1 === $q['page'], 'a page past the end shows the last page' );
+
+// A proposed phone list with a line that is not a phone number (the claim's note).
+$ok = fn( $v ) => (bool) preg_match( '/^[0-9+ ]{6,}$/', trim( (string) $v ) );
+check( directoryweb_phones_bad( "+91 98765 43210 | Office\nnot a number", $ok ), 'a bad phone line is noticed' );
+check( ! directoryweb_phones_bad( "+91 98765 43210 | Office | WhatsApp\n", $ok ), 'a good phone list passes' );
+
+// Change-log field names.
+$l = array(
+	'l_email'    => array( 'Listing email', 'directoryweb_email', 'email', true ),
+	'phones'     => array( 'Phone numbers', 'phones', 'phone', true ),
+	'l_services' => array( 'Services', 'services', 'services', true ),
+	'l_about'    => array( 'About', 'about', 'about', true ),
+);
+check( 'email' === directoryweb_enrich_field( 'l_email', $l ), 'meta field logs as its enrichment name' );
+check( 'phone' === directoryweb_enrich_field( 'phones', $l ), 'phones log as phone' );
+check( 'logo' === directoryweb_enrich_field( 'logo', $l ), 'logo' );
+check( '' === directoryweb_enrich_field( 'nope', $l ), 'unknown field' );
+
+// The Claims routes only read: nothing decides, applies or undoes a claim from the new screen.
+$rest = (string) file_get_contents( dirname( __DIR__ ) . '/includes/directoryweb-rest.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+check( false === strpos( $rest, '/decide' ) && false === strpos( $rest, '/undo' ), 'no decide or undo route' );
+check( false === strpos( $rest, 'directoryweb_claim_ff_decide' ) && false === strpos( $rest, 'directoryweb_claim_apply_field' ) && false === strpos( $rest, 'directoryweb_enrich_undo(' ), 'no claim or listing write' );
+check( 2 === preg_match_all( "/'methods'\s*=>\s*'POST'/", $rest ), 'POST only for dashboard/count and settings/claim-form' );
+
+// The claim form: an unchanged Save writes nothing; a change keeps the other forms.
+$ids = array(
+	'claim'   => 6,
+	'contact' => 4,
+);
+check( null === directoryweb_claim_form_change( $ids, 6 ), 'same form: nothing to write' );
+check( null === directoryweb_claim_form_change( $ids, 0 ), 'no form: nothing to write' );
+$n = directoryweb_claim_form_change( $ids, 9 );
+check( is_array( $n ) && 9 === $n['claim'] && 4 === $n['contact'], 'new form, other forms kept' );
+
+// Top types.
+$t = directoryweb_top_types(
+	array(
+		'a' => 1,
+		'b' => 9,
+		'c' => 5,
+		'd' => 0,
+		'e' => 2,
+	),
+	2
+);
+check( array( 'b' => 9, 'c' => 5 ) === $t['top'] && 3 === $t['others'], 'top two, the rest summed, zero left out' ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- a short expected value
+
+// Age.
+check( 3 === directoryweb_age_days( '2026-11-08 11:00:00', $now ), 'age in whole days' );
+check( 0 === directoryweb_age_days( 'not a date', $now ), 'bad date' );
+
+// Listings tab: a GET list route and a POST bulk route; the bulk route writes status/re-check but never deletes or
+// trashes, and changes only a listing the user may edit (publish also needs the cap); no phone or e-mail read.
+$lst = (string) file_get_contents( dirname( __DIR__ ) . '/includes/directoryweb-listings.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+check( 2 === substr_count( $lst, 'register_rest_route(' ) && false !== strpos( $lst, "'methods'             => 'GET'" ) && false !== strpos( $lst, "'methods'             => 'POST'" ), 'Listings: a GET list route and a POST bulk route' );
+check( ! preg_match( '/\b(wp_delete_post|wp_trash_post|wp_insert_post)\s*\(/', $lst ) && false !== strpos( $lst, "current_user_can( 'publish_posts' )" ), 'Listings: bulk never deletes, trashes or inserts; publish needs the cap' );
+check( ! preg_match( "/'directoryweb_(phone|whatsapp|emergency|email)'/", $lst ), 'Listings: no phone or e-mail is read' );
+check( false !== strpos( $lst, "current_user_can( 'edit_post', \$id )" ), 'Listings: Edit link only for who may edit the listing' );
+
+// Claims: DirectoryWeb's capability on every check (owner, 13 Nov 2026); the new screen's routes only read.
+$inc = dirname( __DIR__ ) . '/includes/';
+$cl  = '';
+foreach ( array( 'claims.php', 'claims-review.php', 'directoryweb-rest.php', 'directoryweb-ui.php' ) as $f ) {
+	$cl .= (string) file_get_contents( $inc . $f ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+}
+check( false === strpos( $cl, "'edit_aw_volunteers'" ), 'Claims: no check on edit_aw_volunteers' );
+check( 3 === substr_count( $cl, 'current_user_can( DIRECTORYWEB_CAP ) ||' ), 'Claims: the two decide handlers and the logo on DIRECTORYWEB_CAP' );
+check( 1 === substr_count( $cl, 'current_user_can( DIRECTORYWEB_CAP ) || ! check_admin_referer( \'directoryweb_claim_ff_decide_' ), 'Claims: Directory → Claims review on DIRECTORYWEB_CAP' );
+check( false !== strpos( $cl, "'directoryweb-claims'                => array( 'claims', DIRECTORYWEB_CAP )" ), 'Claims: new screen on DIRECTORYWEB_CAP' );
+check( false !== strpos( $cl, '$claims = directoryweb_rest_can( DIRECTORYWEB_CAP );' ), 'Claims: routes on DIRECTORYWEB_CAP' );
+$rest = (string) file_get_contents( $inc . 'directoryweb-rest.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+check( 2 === substr_count( $rest, "'permission_callback' => \$claims," ), 'Claims: both claims routes use the claims check' );
+check( ! preg_match( '/directoryweb_claim_apply_field|directoryweb_claim_ff_decide|update_post_meta|wp_update_post/', $rest ), 'Claims: the new screen\'s routes approve, reject or apply nothing' );
+
+// The directoryweb_claim post type itself is on DIRECTORYWEB_CAP too (owner, 14 Nov 2026).
+check( false === strpos( $cl, "'capability_type' => array( 'directoryweb_volunteer'" ), 'Claims: the post type no longer uses the volunteer capabilities' );
+check( false !== strpos( $cl, "'capabilities'    => directoryweb_claim_caps()," ), 'Claims: the post type takes directoryweb_claim_caps()' );
+if ( ! function_exists( 'directoryweb_claim_caps' ) ) {
+	preg_match( '/function directoryweb_claim_caps\(\): array \{.*?\n\}/s', (string) file_get_contents( $inc . 'claims.php' ), $m ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+	eval( $m[0] ); // phpcs:ignore Squiz.PHP.Eval.Discouraged -- the test loads one pure function from the plugin file
+}
+$cc = directoryweb_claim_caps();
+check( 'do_not_allow' === $cc['create_posts'] && 10 === count( array_filter( $cc, fn( $v ) => 'manage_directoryweb' === $v ) ), 'Claims: every claim capability is manage_directoryweb, none can be created by hand' );
+
+echo "{$count} checks, {$fails} failed\n";
+exit( $fails ? 1 : 0 );

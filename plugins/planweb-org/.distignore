@@ -1,0 +1,25 @@
+# Files excluded from the distributed plugin zip (wp dist-archive / build-zip).
+# The WordPress.org directory wants the human-readable source shipped for any minified
+# build, so src/ and packages/planweb-shell/src/ are NOT excluded (they are the source
+# of the minified build/index.js and build/shell/index.js). Only the regenerated
+# node_modules, the shell package's own build output and lockfiles are left out.
+# Has no effect on the live symlinked deploy; only shapes a built zip.
+
+/.distignore
+/.editorconfig
+/.gitattributes
+/.gitignore
+/.github
+/tests
+/src/.gitkeep
+/node_modules
+/package.json
+/package-lock.json
+/webpack.config.js
+/phpcs.xml
+/phpcs.xml.dist
+/.phpcs.xml.dist
+# Bundled shell package: ship its src/ and package.json (so the minified build/shell/index.js
+# can be rebuilt), but not its install, its own build output or its lockfile.
+/packages/planweb-shell/build
+/packages/planweb-shell/package-lock.json

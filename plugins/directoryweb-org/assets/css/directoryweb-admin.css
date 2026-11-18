@@ -1,0 +1,53 @@
+/**
+ * DirectoryWeb admin: the plugin's own screen layout, layered on top of the bundled directoryweb-shell.
+ *
+ * Layout only — widths, grid and spacing, all built from the shell's own tokens and greyscale. The shell package and
+ * its theme (colours, typography, component look) are not touched; this file only arranges the plugin's screens.
+ */
+
+/* Full-width data tables: on the screens that show a DataList (Listings, Claims), let the table use the full admin
+ * content width instead of the shell's reading cap. Other screens (Dashboard, Settings) keep the comfortable width.
+ * :has() is progressive — where it is unsupported the table simply keeps the capped width, so nothing breaks. */
+.kits-shell-screen .kits-shell__body:has( .kits-shell-datalist ) {
+	max-width: none;
+}
+
+/* Dashboard "In numbers": the overview charts as a responsive card grid, each chart on its own surface for a clearer
+ * hierarchy and consistent spacing. Greyscale only, from the shell's tokens — the same card language as the tiles. */
+.directoryweb-overview {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 260px, 1fr ) );
+	gap: var( --ks-s4 );
+	margin-top: var( --ks-s2 );
+}
+
+.directoryweb-overview__chart {
+	display: flex;
+	flex-direction: column;
+	gap: var( --ks-s3 );
+	padding: var( --ks-s4 );
+	background: var( --ks-white );
+	border: 1px solid var( --ks-g2 );
+	border-radius: var( --ks-r-card );
+}
+
+/* The chart's own figure list (the readable values beside the bars): a compact inline row, not a bullet list. */
+.directoryweb-overview__figures {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --ks-s1 ) var( --ks-s4 );
+	margin: 0;
+	padding: 0;
+	font-size: 13px;
+	color: var( --ks-g7 );
+}
+
+.directoryweb-overview__figures li {
+	list-style: none;
+	margin: 0;
+}
+
+/* Keep each MiniChart a steady height so the cards line up on a row. */
+.directoryweb-overview__chart .kits-shell-chart svg {
+	height: 56px;
+}
