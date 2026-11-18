@@ -23,6 +23,7 @@ import {
 	FieldReview,
 	LoadingState,
 	MediaThumbs,
+	MiniChart,
 	Notice,
 	PageParts,
 	RefTable,
@@ -252,6 +253,55 @@ function Dashboard() {
 					/>
 				) ) }
 			</TileGrid>
+			{ data.charts && (
+				<SectionCard
+					id="pipeline"
+					title={ __( 'Pipeline and trends', 'aw-sourcing' ) }
+					description={ __(
+						'The last 28 days of the pipeline, and 14-day daily trends. Ingested: items fetched. Reviewed: those that passed the relevance gate into the queue. Approved: published. The last bar is the most recent day.',
+						'aw-sourcing'
+					) }
+				>
+					<MiniChart
+						label={ __(
+							'Pipeline, last 28 days: ingested to reviewed to approved',
+							'aw-sourcing'
+						) }
+						points={ data.charts.funnel || [] }
+						unit={ __( 'items', 'aw-sourcing' ) }
+					/>
+					<div
+						style={ {
+							display: 'grid',
+							gridTemplateColumns:
+								'repeat(auto-fit, minmax(220px, 1fr))',
+							gap: 'var(--ks-s5, 20px)',
+						} }
+					>
+						<MiniChart
+							label={ __(
+								'Feed throughput: items fetched per day',
+								'aw-sourcing'
+							) }
+							points={ data.charts.throughput || [] }
+							unit={ __( 'items', 'aw-sourcing' ) }
+						/>
+						<MiniChart
+							label={ __(
+								'Near-duplicates folded per day',
+								'aw-sourcing'
+							) }
+							points={ data.charts.dupes || [] }
+							unit={ __( 'items', 'aw-sourcing' ) }
+						/>
+						<MiniChart
+							label={ __( 'Review-queue size', 'aw-sourcing' ) }
+							points={ data.charts.queue || [] }
+							unit={ __( 'waiting', 'aw-sourcing' ) }
+						/>
+					</div>
+				</SectionCard>
+			) }
 			{ data.runs.length > 0 && (
 				<SectionCard
 					id="runs"
@@ -4325,7 +4375,7 @@ function Suggestions( { onBack } ) {
 			news: __( 'News', 'aw-sourcing' ),
 			library: __( 'Library', 'aw-sourcing' ),
 			campaign: __( 'Campaign', 'aw-sourcing' ),
-		}[ t ] || '—' );
+		} )[ t ] || '—';
 	// The two auto-approve rules (both off by default); the owner toggles them.
 	const [ aa, setAa ] = useState( null );
 	const [ savingAa, setSavingAa ] = useState( false );
@@ -4401,10 +4451,7 @@ function Suggestions( { onBack } ) {
 					) }
 				>
 					<Switch
-						label={ __(
-							'Auto-approve by score',
-							'aw-sourcing'
-						) }
+						label={ __( 'Auto-approve by score', 'aw-sourcing' ) }
 						help={ __(
 							'Approve pushed candidates whose Score is at least the number below.',
 							'aw-sourcing'
@@ -4445,7 +4492,7 @@ function Suggestions( { onBack } ) {
 						) }
 						render={ () =>
 							[ 'news', 'library', 'campaign' ].map( ( t ) => (
-								<label
+								<span
 									key={ t }
 									style={ {
 										marginRight: '12px',
@@ -4453,6 +4500,7 @@ function Suggestions( { onBack } ) {
 									} }
 								>
 									<input
+										id={ `aa-type-${ t }` }
 										type="checkbox"
 										checked={ ( aa.types || [] ).includes(
 											t
@@ -4460,8 +4508,10 @@ function Suggestions( { onBack } ) {
 										disabled={ ! aa.on_score }
 										onChange={ () => toggleType( t ) }
 									/>{ ' ' }
-									{ typeLabel( t ) }
-								</label>
+									<label htmlFor={ `aa-type-${ t }` }>
+										{ typeLabel( t ) }
+									</label>
+								</span>
 							) )
 						}
 					/>
@@ -4534,11 +4584,11 @@ function Suggestions( { onBack } ) {
 														'aw-sourcing'
 													),
 													r.rank
-											  )
+												)
 											: __(
 													'Proven (focus keyphrase)',
 													'aw-sourcing'
-											  ) }
+												) }
 									</span>
 								) }
 								{ ! r.proven && r.rising && (
@@ -4559,7 +4609,8 @@ function Suggestions( { onBack } ) {
 					{
 						key: 'type',
 						label: __( 'Recommended type', 'aw-sourcing' ),
-						render: ( r ) => ( r.pushed ? typeLabel( r.type ) : '—' ),
+						render: ( r ) =>
+							r.pushed ? typeLabel( r.type ) : '—',
 					},
 					{
 						key: 'topic',
