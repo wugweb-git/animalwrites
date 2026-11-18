@@ -3,15 +3,18 @@
  * RankWeb PRO, phase D: custom JSON-LD, Speakable, about and mentions, and "import schema from a URL"
  * (docs/rankweb-pro-audit.md, D). Rank Math keeps a custom-schema builder for Pro; this is RankWeb's version.
  *
- * On an item of a schema post type, a "Custom schema" box (shown in both editors through the classic meta box) holds:
+ * On an item of a schema post type, a "Custom schema" box (a classic meta box; the block editor hides it) holds:
  * - a JSON-LD block: one object, a list of objects, or a { "@graph": [ … ] }. AW_Schema (class-aw-schema.php) checks it
  *   on save; a broken block is not saved and the reason is shown. Each node is given a stable @id and added to Rank
  *   Math's graph, alongside the node RankWeb already builds for the item.
  * - Speakable CSS selectors, added to the page as a SpeakableSpecification.
  * - "About" and "Mentions": names or URLs, added to the page's main node as Thing references.
- * - "Import from a URL": the page is fetched and its application/ld+json blocks are read into the JSON-LD box to adapt.
+ * - "Import from a URL": "Import and save" saves the item, fetches the page and puts its application/ld+json blocks
+ *   in the JSON-LD box, to adapt.
  * - A "Test in Google" link to the Rich Results Test for the item's address.
- * A "Dataset" button fills the box with a Dataset starter.
+ * "Fill with a Dataset template and save" saves the item with a Dataset starter in the JSON-LD box.
+ * The box sits inside the edit screen's post form, so it holds no form of its own and no action or _wpnonce field:
+ * the import and the Dataset starter run in the item's own save (save_post), behind the box's nonce.
  *
  * Module "schema-plus" (RankWeb → Settings → Modules). No scheduled job.
  *
@@ -62,7 +65,7 @@ add_action(
 			$post_type,
 			'normal',
 			'low',
-			array( '__back_compat_meta_box' => true ) // shown in the block editor too, as the Link keywords box is
+			array( '__back_compat_meta_box' => true ) // classic editor only: core hides back-compat boxes in the block editor
 		);
 	},
 	10,
@@ -82,6 +85,11 @@ function aw_schema_custom_box( WP_Post $post ): void {
 		delete_transient( 'aw_seo_schema_err_' . $id );
 		echo '<div class="notice notice-error inline"><p>' . esc_html( $err ) . '</p></div>';
 	}
+	$note = get_transient( 'rankweb_schema_note_' . $id );
+	if ( is_string( $note ) && '' !== $note ) {
+		delete_transient( 'rankweb_schema_note_' . $id );
+		echo '<div class="notice notice-success inline"><p>' . esc_html( $note ) . '</p></div>';
+	}
 	echo '<p><label for="aw-jsonld"><strong>' . esc_html__( 'JSON-LD', 'aw-seo-extras' ) . '</strong></label><br>';
 	echo '<span class="description">' . esc_html__( 'One object, a list of objects, or a { "@graph": [ … ] }. Added to the page\'s schema. Checked when you save.', 'aw-seo-extras' ) . '</span></p>';
 	echo '<textarea id="aw-jsonld" name="aw_jsonld" rows="10" class="large-text code" spellcheck="false">' . esc_textarea( (string) get_post_meta( $id, AW_SCHEMA_JSONLD_META, true ) ) . '</textarea>';
@@ -95,22 +103,18 @@ function aw_schema_custom_box( WP_Post $post ): void {
 	echo '<div style="flex:1;min-width:14em"><p><label for="aw-schema-mentions"><strong>' . esc_html__( 'Mentions', 'aw-seo-extras' ) . '</strong></label><br><span class="description">' . esc_html__( 'Names or URLs, one per line.', 'aw-seo-extras' ) . '</span></p>';
 	echo '<textarea id="aw-schema-mentions" name="aw_schema_mentions" rows="3" class="large-text code">' . esc_textarea( implode( "\n", (array) get_post_meta( $id, AW_SCHEMA_MENTIONS_META, true ) ) ) . '</textarea></div></div>';
 
-	// Import from a URL and the Dataset starter: their own small forms, so they work with no JavaScript.
-	$import = admin_url( 'admin-post.php' );
-	echo '<hr><p><strong>' . esc_html__( 'Import JSON-LD from a URL', 'aw-seo-extras' ) . '</strong> ';
-	echo '<span class="description">' . esc_html__( 'Reads the page\'s schema into the box above, to adapt. It replaces what is there; Update the item to keep it.', 'aw-seo-extras' ) . '</span></p>';
-	echo '<form method="post" action="' . esc_url( $import ) . '" style="display:flex;gap:.5em;flex-wrap:wrap;align-items:center">';
-	echo '<input type="hidden" name="action" value="aw_schema_import"><input type="hidden" name="post" value="' . esc_attr( (string) $id ) . '">';
-	wp_nonce_field( 'aw_schema_import_' . $id );
-	echo '<input type="url" name="url" class="regular-text" placeholder="https://example.org/page/" style="flex:1;min-width:16em">';
-	submit_button( __( 'Import', 'aw-seo-extras' ), 'secondary', 'submit', false );
-	echo '</form>';
-
-	echo '<form method="post" action="' . esc_url( $import ) . '" style="margin-top:.5em">';
-	echo '<input type="hidden" name="action" value="aw_schema_dataset"><input type="hidden" name="post" value="' . esc_attr( (string) $id ) . '">';
-	wp_nonce_field( 'aw_schema_dataset_' . $id );
-	submit_button( __( 'Fill with a Dataset template', 'aw-seo-extras' ), 'link', 'submit', false );
-	echo '</form>';
+	// Import from a URL and the Dataset starter. No inner form (forms cannot nest: its action and _wpnonce fields would
+	// join the post form and break Update). Both are part of the item's save instead; the buttons are plain submit
+	// buttons of the post form, with their own names.
+	echo '<hr><p><label for="rankweb-schema-import-url"><strong>' . esc_html__( 'Import JSON-LD from a URL', 'aw-seo-extras' ) . '</strong></label> ';
+	echo '<span class="description">' . esc_html__( 'Import and save reads the page\'s schema into the JSON-LD box above, replacing what is there, to adapt. Your other changes are saved with it.', 'aw-seo-extras' ) . '</span></p>';
+	echo '<div style="display:flex;gap:.5em;flex-wrap:wrap;align-items:center">';
+	echo '<input type="text" inputmode="url" id="rankweb-schema-import-url" name="rankweb_schema_import_url" class="regular-text code" spellcheck="false" placeholder="https://example.org/page/" style="flex:1;min-width:16em">';
+	submit_button( __( 'Import and save', 'aw-seo-extras' ), 'secondary', 'rankweb_schema_import', false );
+	echo '</div>';
+	echo '<p style="margin-top:.5em">';
+	submit_button( __( 'Fill with a Dataset template and save', 'aw-seo-extras' ), 'link', 'rankweb_schema_dataset', false, array( 'onclick' => "return window.confirm('" . esc_js( __( 'Replace the JSON-LD above with a Dataset template?', 'aw-seo-extras' ) ) . "');" ) );
+	echo '</p>';
 
 	if ( 'publish' === $post->post_status ) {
 		$test = 'https://search.google.com/test/rich-results?url=' . rawurlencode( (string) get_permalink( $id ) );
@@ -129,6 +133,13 @@ add_action(
 		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aw_schema_custom_nonce'] ) ), 'aw_schema_custom_' . $post_id ) || ! current_user_can( 'edit_post', (int) $post_id ) ) {
 			return;
 		}
+		// Once per item per request: another save_post handler may save the same item again (wp_update_post), and a
+		// second pass would redo the import and write the typed JSON-LD back over it.
+		static $done = array();
+		if ( isset( $done[ $post_id ] ) ) {
+			return;
+		}
+		$done[ $post_id ] = true;
 		// JSON-LD: checked, and only saved when it is good; a bad block is kept in a notice and the stored value is left.
 		$raw    = isset( $_POST['aw_jsonld'] ) ? trim( (string) wp_unslash( $_POST['aw_jsonld'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON-LD text, validated by AW_Schema::parse() below and never echoed unescaped
 		$parsed = AW_Schema::parse( $raw );
@@ -152,66 +163,65 @@ add_action(
 				delete_post_meta( $post_id, $meta );
 			}
 		}
-	}
-);
-
-/* ---------- Import from a URL, and the Dataset starter ---------- */
-
-add_action(
-	'admin_post_aw_schema_import',
-	function () {
-		$id = absint( wp_unslash( $_POST['post'] ?? 0 ) );
-		check_admin_referer( 'aw_schema_import_' . $id );
-		if ( ! $id || ! current_user_can( 'edit_post', $id ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
-		}
-		$url = esc_url_raw( wp_unslash( $_POST['url'] ?? '' ) );
-		$msg = '';
-		if ( '' === $url ) {
-			$msg = __( 'Enter a URL to import from.', 'aw-seo-extras' );
-		} else {
-			$res = wp_safe_remote_get(
-				$url,
-				array(
-					'timeout'             => 8,
-					'redirection'         => 3,
-					'limit_response_size' => 2 * MB_IN_BYTES, // cap the body; the page need only hold its JSON-LD
-
-				)
-			);
-			if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
-				$msg = __( 'The page could not be fetched.', 'aw-seo-extras' );
+		// The Dataset starter or an import (only when its own button was clicked) replaces the JSON-LD saved above.
+		if ( isset( $_POST['rankweb_schema_dataset'] ) ) {
+			update_post_meta( $post_id, AW_SCHEMA_JSONLD_META, AW_Schema::dataset_template() );
+			delete_transient( 'aw_seo_schema_err_' . $post_id ); // what was typed in the box is replaced either way
+			set_transient( 'rankweb_schema_note_' . $post_id, __( 'Dataset template filled in. Complete it and Update the item.', 'aw-seo-extras' ), 2 * MINUTE_IN_SECONDS );
+		} elseif ( isset( $_POST['rankweb_schema_import'] ) ) {
+			$url = isset( $_POST['rankweb_schema_import_url'] ) ? esc_url_raw( trim( (string) wp_unslash( $_POST['rankweb_schema_import_url'] ) ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_url_raw() is the sanitizer
+			if ( '' === $url ) {
+				rankweb_schema_error( (int) $post_id, __( 'Enter a full URL (https://…) to import from.', 'aw-seo-extras' ) );
 			} else {
-				$nodes = AW_Schema::extract_from_html( (string) wp_remote_retrieve_body( $res ) );
-				if ( ! $nodes ) {
-					$msg = __( 'No JSON-LD was found on that page.', 'aw-seo-extras' );
-				} else {
-					update_post_meta( $id, AW_SCHEMA_JSONLD_META, (string) wp_json_encode( 1 === count( $nodes ) ? $nodes[0] : array( '@graph' => $nodes ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
-					/* translators: %d: number of nodes. */
-					$msg = sprintf( _n( 'Imported %d node. Review it and Update the item.', 'Imported %d nodes. Review them and Update the item.', count( $nodes ), 'aw-seo-extras' ), count( $nodes ) );
-				}
+				rankweb_schema_import( (int) $post_id, $url );
 			}
 		}
-		set_transient( 'aw_seo_schema_err_' . $id, $msg, 2 * MINUTE_IN_SECONDS );
-		wp_safe_redirect( get_edit_post_link( $id, 'url' ) );
-		exit;
 	}
 );
 
-add_action(
-	'admin_post_aw_schema_dataset',
-	function () {
-		$id = absint( wp_unslash( $_POST['post'] ?? 0 ) );
-		check_admin_referer( 'aw_schema_dataset_' . $id );
-		if ( ! $id || ! current_user_can( 'edit_post', $id ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
-		}
-		update_post_meta( $id, AW_SCHEMA_JSONLD_META, AW_Schema::dataset_template() );
-		set_transient( 'aw_seo_schema_err_' . $id, __( 'Dataset template filled in. Complete it and Update the item.', 'aw-seo-extras' ), 2 * MINUTE_IN_SECONDS );
-		wp_safe_redirect( get_edit_post_link( $id, 'url' ) );
-		exit;
+/**
+ * Add a message to the box's error notice for an item, keeping any message already there from this save.
+ *
+ * @param int    $id  Item.
+ * @param string $msg Message.
+ */
+function rankweb_schema_error( int $id, string $msg ): void {
+	$prev = get_transient( 'aw_seo_schema_err_' . $id );
+	set_transient( 'aw_seo_schema_err_' . $id, ( is_string( $prev ) && '' !== $prev ? $prev . ' ' : '' ) . $msg, 2 * MINUTE_IN_SECONDS );
+}
+
+/* ---------- Import from a URL ---------- */
+
+/**
+ * Read a page's JSON-LD into an item's custom JSON-LD; the result is left as a notice for the box.
+ * Called from the item's save, after its nonce and edit_post checks.
+ *
+ * @param int    $id  Item.
+ * @param string $url Page to read (already passed through esc_url_raw()).
+ */
+function rankweb_schema_import( int $id, string $url ): void {
+	$res = wp_safe_remote_get(
+		$url,
+		array(
+			'timeout'             => 8,
+			'redirection'         => 3,
+			'limit_response_size' => 2 * MB_IN_BYTES, // cap the body; the page need only hold its JSON-LD
+		)
+	);
+	if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+		rankweb_schema_error( $id, __( 'The page could not be fetched.', 'aw-seo-extras' ) );
+		return;
 	}
-);
+	$nodes = AW_Schema::extract_from_html( (string) wp_remote_retrieve_body( $res ) );
+	if ( ! $nodes ) {
+		rankweb_schema_error( $id, __( 'No JSON-LD was found on that page.', 'aw-seo-extras' ) );
+		return;
+	}
+	delete_transient( 'aw_seo_schema_err_' . $id ); // what was typed in the box is replaced by the import
+	update_post_meta( $id, AW_SCHEMA_JSONLD_META, (string) wp_json_encode( 1 === count( $nodes ) ? $nodes[0] : array( '@graph' => $nodes ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+	/* translators: %d: number of nodes. */
+	set_transient( 'rankweb_schema_note_' . $id, sprintf( _n( 'Imported %d node and saved it. Review it below.', 'Imported %d nodes and saved them. Review them below.', count( $nodes ), 'aw-seo-extras' ), count( $nodes ) ), 2 * MINUTE_IN_SECONDS );
+}
 
 /* ---------- Into the graph ---------- */
 
