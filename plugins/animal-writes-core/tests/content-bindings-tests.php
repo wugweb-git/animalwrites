@@ -97,6 +97,9 @@ function get_template_directory_uri() {
 }
 function wp_register_script_module() {
 }
+function untrailingslashit( $s ) {
+	return rtrim( (string) $s, '/\\' );
+}
 function register_block_bindings_source( $name, $args ) {
 	$GLOBALS['t_sources'][ $name ] = $args;
 }
@@ -112,6 +115,9 @@ require $root . '/kits-core/includes/primitives.php';
 require $root . '/kits-core/includes/bindings.php';
 require $root . '/animal-writes-core/includes/systems.php';
 require $root . '/animal-writes-core/includes/bindings.php';
+define( 'AW_CORE_DIR', $root . '/animal-writes-core/' );
+require $root . '/kits-core/includes/scf.php';
+require $root . '/animal-writes-core/includes/scf.php';
 do_action( 'init' );
 
 $GLOBALS['t_fail'] = 0;
@@ -192,5 +198,14 @@ function aw_retention_state() {
 $GLOBALS['t_meta'][9] = array( 'aw_deadline' => '2026-12-01' );
 $dl                   = $GLOBALS['t_sources']['kits/post-field']['get_value_callback']( array( 'key' => 'deadline' ), new WP_Block( array( 'postId' => 9 ) ) );
 t_check( 'Apply by <span class="kit-date aw-date"><span class="kit-ico kit-ico--calendar" aria-hidden="true"></span><time datetime="2026-12-01">1 Dec 2026</time></span>' === $dl, 'deadline: html key keeps the date component' );
+
+// SCF bridge (admin): the same folder, save paths and group order as before the move (scf.php at 73bbc87c).
+add_filter( 'aw_scf_groups', fn( $g ) => array_merge( (array) $g, array( 'group_aw_listing' ) ) ); // as DirectoryWeb does
+add_filter( 'kits_scf_groups', fn( $g ) => array_merge( (array) $g, array( 'group_other', 'group_aw_news' ) ) );
+t_check( in_array( AW_CORE_DIR . 'acf-json', apply_filters( 'acf/settings/load_json', array() ), true ), 'SCF: our acf-json folder is loaded' );
+t_check( AW_CORE_DIR . 'acf-json' === apply_filters( 'acf/settings/save_json/key=group_aw_news', '' ), 'SCF: our groups save back to it' );
+t_check( '' === apply_filters( 'acf/settings/save_json/key=group_aw_listing', '' ), 'SCF: other plugins\' groups are not saved here' );
+t_check( array_merge( AW_SCF_GROUPS, array( 'group_aw_listing', 'group_other' ) ) === aw_scf_group_keys(), 'SCF: group keys in the same order, plugins after ours, no duplicates' );
+t_check( false === aw_scf_active() && false === kits_scf_active(), 'SCF: not active without SCF' );
 
 exit( $GLOBALS['t_fail'] );

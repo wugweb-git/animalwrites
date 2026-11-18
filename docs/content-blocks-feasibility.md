@@ -231,3 +231,277 @@ Code moves; data stays. In this PR and every later step:
    answers inside `kits-config.php`? Either way no Kits Core CPT layer.
 4. **Compat for the old names.** When the tenant goes: keep `aw_i()` / `aw_date()` / `animal-writes/field` alive in a
    Kits Core compat file (like `compat-sourcing.php`, the precedent of 17 Nov), or require every caller to switch first?
+
+---
+
+# Part II — owner additions (18 Nov 2026)
+
+Every row below is labelled **[admin]** (wp-admin screens, metaboxes, list tables, settings, the editor's own panels:
+WordPress core UI only, no Kits front-end tokens or layout rules) or **[front-end]** (what visitors see, and the
+block editor canvas that renders the same blocks: the Kits design rules apply). One side's rules are never applied
+to the other.
+
+## 11. Admin vs front-end: this PR and section 2
+
+| Item | Side |
+|---|---|
+| `kits_icon()`, `kits_date()` (primitives.php) | [front-end] |
+| `kits/post-field` source, `kits_post_fields`, empty-block rule (kits-core bindings.php) | [front-end] (the source label in the editor's Attributes panel is [admin]) |
+| SCF bridge `kits_scf_active()`, `kits_scf_json_folder()`, `kits_scf_groups()` (kits-core scf.php) | [admin] |
+| aw-core `systems.php`, `bindings.php` wrappers | [front-end] |
+| aw-core `scf.php` (field groups, value guard, SCF stays on) | [admin] |
+| `hub-blocks.php`, `item-head.php`, `sections.php`, `hubs.php`, `related.php`, `home.php`, `term-page.php`, `news-article.php`, `summary-display.php`, `near-opps.php`, `social-posts.php` card, `campaign-record.php` output | [front-end] |
+| `campaign-tools.php`: timelines, share section, sticky bar, letters | [front-end]; its campaign boxes (`aw_camp_*_box`) [admin] |
+| `content-types.php`, `press.php` / `social-posts.php` registration and intake, `edit-screens.php`, `block-states.php` (states sheet, administrators only) | [admin] |
+| `form-blocks.php` | [front-end] (the forms' entries in Fluent Forms: [admin]) |
+
+## 12. Content-type presets
+
+**The line.** A *preset* is a PHP config array that Kits Core turns into native calls. It is not a builder UI, not
+a stored type definition, and has no admin screen to make types. A site enables presets in code (a filter), or
+brings its own type from CPT UI, Pods or SCF and still uses every Kits block through bindings and Query Loop.
+
+A preset declares, and Kits Core does only this with it:
+
+| Part | Native call | Side |
+|---|---|---|
+| type | `register_post_type()` (labels, slug, supports, `show_in_rest`, `template` for the editor) | [admin] |
+| fields | `register_post_meta()` with `show_in_rest`, `type`, `single`, `sanitize_callback`, `auth_callback` | [admin] |
+| binding keys | entries on `kits_post_fields` (section B of Part I) for its fields | [front-end] |
+| terms | which **core** `category` / `post_tag` roles it uses (labels, icons). No own taxonomy (section 18) | both |
+| templates and patterns | `single-{type}.html` / `archive-{type}.html` block templates, patterns in a pattern category | [front-end] |
+| schema | a mapping key the SEO layer reads (section 13) | [front-end] (output in `<head>`) |
+
+**The presets.** "AW" presets reproduce today exactly: same slug, rewrite, supports, meta keys and terms; they only
+describe what `aw_post_types()` already registers, and are switched on only in a later stage, after a diff shows
+the registered arguments are identical.
+
+| Preset | Type slug | Status | Fields (examples) | Notes |
+|---|---|---|---|---|
+| News | `aw_news` (AW) | live | source url/name/date, key facts | re-sorted by source date (Part I, 3) |
+| Library | `aw_legal` (AW) | live | document, issuer, law date | |
+| Press (Media & PR) | `aw_press` (AW) | live | publisher, format, url | |
+| Resources | `post` (relabelled) | live | — | WordPress's own Posts |
+| Opportunities | `aw_opportunity` (AW) | live | deadline, apply url, org | |
+| Adoption | none: a page with a Query Loop of Opportunities | live | — | stays a page |
+| Campaigns | `aw_campaign` (AW) | live | dates, document, orgs, outcome, share | 4 sizes stay one component (section 14) |
+| Portfolio | `kits_portfolio` | new | client, year, role, link | |
+| Card | `kits_card` | new | image, line, link | a reusable small card (tips, facts) |
+| Infographic | `kits_infographic` | new | image, alt long description, source, data link | needs a text alternative (WCAG 1.1.1) |
+| Case study | `kits_case_study` | suggested | problem, approach, outcome, figures | |
+| Event | `kits_event` | suggested | start, end, place, online url | dates through `kits_date()` / `kits_datecard()` |
+| Team / Person | `kits_person` | suggested | role, photo, profile links | no private data |
+| Testimonial | `kits_testimonial` | suggested | quote, name, role, consent date | only with the person's consent |
+
+New type slugs use the `kits_` prefix (owner naming rule). Effort: preset loader S, each new preset S–M (fields +
+templates + pattern), AW presets M (must be byte-identical; checked by comparing `get_post_type_object()` output
+before/after). Risk: low for new types, medium for switching AW types onto presets (rewrite rules, permalinks) —
+not before the owner's word.
+
+## 13. Schema per type (contract only; RankWeb owns the output)
+
+Kits Core emits **no JSON-LD**. A preset carries a `schema` key; RankWeb reads it through one filter and puts the
+node into Rank Math's single graph (as it does today, `aw-seo-extras/includes/schema.php`), so there is never a
+second JSON-LD block.
+
+Contract (proposed, for the RankWeb track to accept or change):
+- `kits_schema_map( array $map ): array` — post type => `array( 'type' => 'Article', 'fields' => array( schema
+  property => binding key ) )`. RankWeb builds the node from the binding values (`kits_post_field_value()`), so
+  schema text is the visible text.
+- `kits_schema_node( array $node, int $post_id, string $post_type )` — last-mile change by the site.
+- Term and hub pages: `CollectionPage` + `ItemList`, as RankWeb does today.
+
+| Preset | schema.org type | Today |
+|---|---|---|
+| News | `NewsArticle` | live (RankWeb `aw_article_nodes`) |
+| Library | `Legislation` / `Article` / `DigitalDocument` by kind | live |
+| Resources | `Article` (+ `FAQPage` from the visible FAQ) | live |
+| Press | `CollectionPage` of items on /media/ | live |
+| Opportunities | unchanged: the node RankWeb builds today (`aw_opportunity_schema`) | live; not re-mapped here |
+| Campaigns | `Event` with a day and place, else `CreativeWork` | live (`aw_campaign_schema`) |
+| Portfolio | `CreativeWork` | new |
+| Card | `CreativeWork` | new |
+| Infographic | `ImageObject` (with `caption`, `isBasedOn` the data source) | new |
+| Case study | `Article` | suggested |
+| Event | `Event` | suggested |
+| Team / Person | `Person` (`worksFor` the site's Organization) | suggested |
+| Testimonial | `Review` only with a real reviewed item, else no node | suggested |
+
+Effort: contract S here; RankWeb's reader M (its track). Risk: duplicate nodes if a type also has a Rank Math
+schema template — RankWeb's existing rule (its node replaces Rank Math's default) covers it.
+
+## 14. Customisation: without code vs with code
+
+| Without code | Where | Side |
+|---|---|---|
+| Labels, menu name | a preset's labels can be overridden in Kits → Settings (stored option, core Settings API) — planned; today code | [admin] |
+| Slugs | Settings → Permalinks (core) for the base; a type's own slug stays code (it is stored in URLs) | [admin] |
+| Which fields show on the edit screen | core Preferences → Panels; SCF field group settings where SCF is on | [admin] |
+| Card variant, layout | block attributes / block styles in the editor (section 16) | [front-end] |
+| Archive layout | Site Editor: the type's `archive-*.html` template | [front-end] |
+| Patterns | Site Editor / synced patterns | [front-end] |
+| Colours, spacing, type | Styles (theme.json tokens), style variations | [front-end] |
+
+| With code (filters) | Hook |
+|---|---|
+| Enable / disable presets | `kits_presets` (planned) |
+| Field keys and values | `kits_post_fields` (this PR) |
+| Empty-field markup | `kits_post_field_empty` (this PR) |
+| Schema | `kits_schema_map`, `kits_schema_node` (section 13) |
+| SCF folders and groups | `kits_scf_json_folder()`, `kits_scf_groups` (this PR) |
+
+**Stay single sitewide components (no per-site or per-page variants):** the campaign's 4 sizes (lg, md, sm,
+share), the stacked card, the social post card, the date card. A site changes their tokens, never forks them.
+
+## 15. Plugin integrations
+
+| Plugin | Required? | Guard | Effort / risk | Side |
+|---|---|---|---|---|
+| **SCF / ACF** | **Optional, first-class.** The primary editor on animalwrites.in (13 groups in `animal-writes-core/acf-json`, 8 in DirectoryWeb). Content and bindings work without it: fields are `register_post_meta()`, bindings read native meta, never `get_field()` | `kits_scf_active()`; every `acf_*` call inside it | Bridge S (this PR), low | [admin] |
+| CPT UI / Pods | Optional | none needed: a type they register is just a post type; it opts into bindings by adding keys on `kits_post_fields` | S, low | [admin] |
+| Fluent Forms (and other form plugins) | Optional | one adapter per form plugin (the adapter approach of the DirectoryWeb track; not on this branch): class check, fall back to a mailto link | M per adapter, low | both |
+| MailWeb / newsletter | Optional | `function_exists( 'mailweb_*' )`; the newsletter block prints nothing without it | S, low | both |
+| SourceWeb (ingest) | Optional | writes posts and `aw_campaign_link`; Kits reads them like any post | none, low | [admin] |
+| RankWeb | Optional | schema contract (section 13) and breadcrumbs through filters; Kits prints none itself | S here, M in RankWeb | [front-end] |
+| InsightWeb | Optional | reads `data-*` hooks and `kit-*` classes; those are kept (Part I, 4) | none, low | [front-end] |
+| WooCommerce | Not relevant to AW (no shop). If a Kits site has it: products use Woo's own blocks; Kits layouts (section 16) can show `product` through Query Loop | `class_exists( 'WooCommerce' )` | M, medium | [front-end] |
+| Polylang / WPML | Optional | presets register strings with `__()` (labels translate); types and meta flagged translatable through their config files (`wpml-config.xml`), slugs translatable by them | M, medium (rewrite slugs per language) | both |
+| Caching (LiteSpeed, CDN) | Assumed | output is per page and cacheable; day counts recount in the browser; deploy purge stays | none, low | [front-end] |
+
+## 16. Display layouts (one set, any type, Directory included)
+
+**What exists today (checked):**
+- `--kit-carousel-item` token (82%, `auto` from 1200; `kit-tokens.css:175`, `:278`) and a registry row
+  "Carousel dots" (`kit-carousel`, status *replaced*) — no carousel component in `kit.css`.
+- Two campaign-scoped snapping rows: `.aw-camp .aw-camp-row` (`campaign-lab.css:526–528`) and the Lab rules rows
+  (`campaign.css:406–410`): flex, `overflow-x: auto`, `scroll-snap-type: x mandatory`, cards `flex: 0 0
+  var(--kit-card-min)`. No arrows, no autoplay.
+- Grid, stacked card list, bento and the social card list are in `kit.css` / `aw.css` today.
+
+**Plan: one Kits collection layer on core Query Loop.** The layouts are **block styles** on `core/post-template`
+(registered in Kits Core, CSS in `kit.css`), plus a Query Loop variation per preset that picks the card pattern.
+Any post type can use them, `aw_listing` included. No new query block.
+
+| Layout | How | Notes |
+|---|---|---|
+| Grid | existing grid layout + `--kit-card-min` | |
+| Stacked list | existing stacked card (one component) | |
+| Carousel / rail | new `is-style-kits-rail` (below) | generalises the two campaign rows |
+| Bento | `is-style-kits-bento`: three shades per bento, campaign light + campaign dark + white, plus pictures/texture (owner, 13 Nov) | |
+| Featured + list | first item lg, the rest stacked (CSS `:first-child`) | |
+| Masonry | CSS columns (no JS); reading order stays top-to-bottom per column, checked with a screen reader | low priority |
+| Tabs | **not built** — hides content behind interaction; owner's "no folds sitewide" rule. Open question | |
+| Accordions / "Show more" | **never** (owner, 13 Nov) | |
+
+**Carousel / rail rules** [front-end]:
+- CSS `scroll-snap-type: x mandatory`, `overscroll-behavior-x: contain`, native swipe on phones; cards
+  `flex: 0 0 var(--kit-carousel-item)` below 768, `var(--kit-card-min)` from 768 (`docs/card-sizes.md` line 7;
+  note: that line says 18rem, the token is 17rem in `kit-tokens.css:138` — to reconcile, owner's call).
+- Arrows: two real `<button>`s ("Previous", "Next" + the list's name), 44px (site size; WCAG 2.5.8 floor 24px),
+  shown from 768; they scroll by one card with `scrollBy` and are disabled at the ends. Optional dots are buttons too.
+- Minimal script on the Interactivity API (`kits/rail` store, `view.js` module), no jQuery, Swiper or Slick: the
+  browser does the scrolling; the script only drives the buttons and the current-item state.
+- `role="region"`, `aria-roledescription="carousel"`, `aria-label` from the section heading; each card is a list
+  item (no `aria-hidden` on off-screen cards; they stay in the tab order, and focusing one scrolls it into view —
+  focus is never left off-screen).
+- **No autoplay** by default. If a site enables it: a visible Pause button (WCAG 2.2.2), stops on hover and focus,
+  and never runs under `prefers-reduced-motion: reduce`.
+- Breakpoints 767/768 and 1199/1200 only; Inter; titles never underline; date first in the meta row; one component
+  in `kit.css`, never page-scoped.
+- The campaign rows move onto it only with a before/after check at 375/768/1280 (they are visible).
+
+**Cards** [front-end]: one card component with variants — content card, stacked, social, **listing**. Kits Core
+owns the layout and styling (`kit.css`, tokens). The listing card's fields (name, type, area, Claimed/Verified
+badges, contact buttons) come through bindings from DirectoryWeb's keys on `kits_post_fields`; DirectoryWeb decides
+which fields a listing card shows (its pattern).
+
+Effort / risk: block styles + rail CSS M, low–medium; rail script S; moving the campaign rows S but visible (owner's
+yes); listing card variant M (with DirectoryWeb). **Not built in this PR:** no existing AW layout can be
+generalised with zero visual change (the campaign rows are campaign-scoped and sized differently from a generic rail).
+
+## 17. Share: one `kits/share` block
+
+**Today:** the engine is Kits Core (`share.php`: `kits_share_html()`, `kits_share_payload()`, `kits_share_types()`,
+`kits_share_tagged_url()`, `kits_post_share_html()`, `kits_follow_html()`). The blocks are the tenant's:
+`animal-writes/share` (`aw_block_share`, `campaign-tools.php:1433`; Home pattern `home-share.php`),
+`aw_share_section()` (`:1417`), `aw_page_share_kit()` / `aw_page_share_fill()` (`:1386`, `:1445`),
+`animal-writes/item-share` (`item-head.php:405`; `single.html`, `single-aw_listing.html`),
+`animal-writes/term-share` (`term-page.php:54`; `category.html`, `tag.html`), and the campaign share box
+(`aw_camp_share_box` `:854` [admin], `aw_camp_share_meta` `:1568`). Share pictures (1080x1080) are RankWeb's
+(`aw-seo-extras` helpers.php, opengraph.php).
+
+**Plan:** one `kits/share` block (block.json, apiVersion 3) with a `context` attribute — `page` / `item` / `term`
+— and **Follow us for page shares only** (owner). Share = the page only; the native share sheet on phones
+(`navigator.share`), the links row elsewhere; one share kit. The site supplies its words, Follow accounts and the
+campaign's share pictures through filters (`kits_share_context`, `kits_share_pictures`). The three
+`animal-writes/*` names stay registered as aliases that render through `kits/share`, so templates and patterns
+render unchanged; blocks-spec 2.5 has the attributes.
+
+**Not built in this PR:** the three render paths depend on tenant functions (`aw_page_share_kit`,
+`aw_follow_accounts`, campaign meta, `aw_use_component_style`). Moving them is more than a wrapper and its output
+must be checked on Home, an item, a listing, a term page and a campaign at 375/768/1280. Effort M, risk medium
+(visible on every page type).
+
+## 18. Taxonomies: one tag and category system
+
+**Owner rule: one tag/category system per project.** Presets register **no taxonomy of their own**. They use only
+core `category` and `post_tag` and declare which terms or roles they use, with labels and icons. Term archives stay
+the core `/category/` and `/tag/` block templates.
+
+| Taxonomy | Today | Plan | Side |
+|---|---|---|---|
+| `category` (core) | on every content type (`content-types.php:84`; owner, 15 Oct) | unchanged; presets list it | both |
+| `post_tag` (core) | on all types (`tags.php:41`); one pool with Resource/Opportunity/Library labels and Directory types/services; icons in `AW_TAG_ICONS` | unchanged; a preset declares its tag roles (e.g. "Resource type: guide, research") and icons through a filter | both |
+| `aw_campaign_link` | item → campaign relation, no public page (`campaign-links.php:26`); News, Library, Resources, Press, Opportunities, Campaigns, social posts; campaign page scripts query it | **existing non-tag relation, owner to confirm**; unchanged | [admin] / data |
+| `aw_media_group` | attachments, admin only (`media-groups.php:19`, `public` false) | **existing non-tag relation, owner to confirm**; generic in shape, could move to Kits Core under the same slug later | [admin] |
+
+Front-end: term archives are `category.html` / `tag.html` (block templates); the hub filters run through Query Loop
++ `kits_filter_bar()`; term icons from the tag roles; term pages get `CollectionPage` from RankWeb (section 13);
+term sharing through `kits/share` `context: term` (section 17).
+Admin: core term screens; REST `show_in_rest` already on; core sitemaps list category and tag archives (Rank Math's
+sitemap on live).
+No term, slug or data change for the AW set.
+
+## 19. WordPress-native integration
+
+Native first; SCF, Rank Math and form adapters are layers on top.
+
+| API | Used today | Custom today | Native target | Effort / risk | Side |
+|---|---|---|---|---|---|
+| `register_post_type` / `register_taxonomy` + `show_in_rest` | yes | arguments built in `aw_content_type_args()` | presets (section 12) on the same calls | M / medium | [admin] |
+| `register_post_meta` + `show_in_rest` | yes (`meta.php`) | SCF value guard keeps formats | unchanged; presets declare meta | S / low | [admin] |
+| block.json (apiVersion 3) | `kits/hero` | 34 `animal-writes/*` blocks registered in PHP | block.json per new Kits block; old names kept | M / low | [front-end] |
+| Block Bindings API | `animal-writes/field` | — | `kits/post-field` (**this PR**) | done | [front-end] |
+| Query Loop variations | no | `[aw_related]`, item "more", partners | `kits/related`, `kits/item-more`, `kits/partners` | M / medium | [front-end] |
+| Block variations / styles | Group styles (Section, Head band) | page-scoped layout CSS | layouts as block styles (section 16) | M / low | [front-end] |
+| Patterns + pattern categories | theme patterns, synced patterns | — | one "Kits" category per preset | S / low | [front-end] |
+| Block templates / parts | yes (theme) | — | `single-{type}` / `archive-{type}` per preset | S / low | [front-end] |
+| theme.json tokens, style variations | yes | `--kit-*` tokens in CSS files | tokens stay; Styles values map to them (`blocks.php`) | — | [front-end] |
+| Interactivity API | dropdown (`kits/dropdown`) | `campaign.js`, `kit.js` handlers | rail, share, filter stores | M / low | [front-end] |
+| Core blocks first | yes | card parts as custom blocks | core blocks + bindings (blocks-spec 3.6) | M / medium | [front-end] |
+| Template hierarchy | yes | `[aw_category_hub]` | Query Loops in `category.html` | M / medium | [front-end] |
+| Core REST | yes | `aw/v1/*` routes (near-opps, social intake) | keep only where core has no route | — | both |
+| Capabilities | `manage_kits` (Kits) | some screens on `manage_options` | map per screen to core caps / `manage_kits` | S / low | [admin] |
+| Embeds / oEmbed | core embeds | YouTube privacy player in the social card | `core/embed` with `youtube-nocookie` | S / low | [front-end] |
+| Core sitemaps | Rank Math's sitemap on live | — | unchanged (Rank Math) | — | [front-end] |
+| i18n | `__()`, `.pot` per plugin | — | `wp_set_script_translations()` for each new block script | S / low | both |
+| WP-CLI | `wp aw …`, `wp kits …` | — | presets get `wp kits preset list` (read-only) | S / low | [admin] |
+| Editor panels | ServerSideRender previews | — | core components (`InspectorControls`, `PanelBody`) only | S / low | [admin] |
+
+## 20. Updated staged plan and owner questions
+
+| Stage | Work | Visible change |
+|---|---|---|
+| 2 (this PR) | icon/date, `kits/post-field`, **SCF bridge** (`kits_scf_active`, `kits_scf_json_folder`, `kits_scf_groups`; `aw_scf_*` kept) | none |
+| 3 | DirectoryWeb / SourceWeb on `kits_*` names; DirectoryWeb uses `kits_scf_json_folder()` and its listing keys on `kits_post_fields` | none |
+| 4 | Preset loader + new presets (Portfolio, Card, Infographic) on a site that wants them | new types only |
+| 5 | Layout block styles + rail; `kits/share` with aliases | yes, on the owner's yes |
+| 6 | Schema contract read by RankWeb | `<head>` only |
+| 7 | AW types onto presets (byte-identical registration) | none intended |
+
+Owner questions (added):
+5. Which new presets first: Portfolio, Card, Infographic; and are Case study, Event, Person, Testimonial wanted?
+6. Tabs: allowed anywhere, given "no folds sitewide"? (Not built until answered.)
+7. Card minimum width: `docs/card-sizes.md` says 18rem, the token is 17rem — which is right?
+8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
+9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
