@@ -22,6 +22,10 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) {
 	define( 'INSIGHTWEB_DIR', dirname( __DIR__ ) . '/' );
 }
 
+// The keyword table and its rules are InsightWeb's (moved from Kits Core, 18 Nov 2026). Loaded before the checks
+// below: SourceWeb uses them even when Search Insights is off.
+require_once INSIGHTWEB_DIR . 'includes/keywords.php';
+
 // Kits Core (loaded by Animal Writes Core on live) and Rank Math are needed, as for RankWeb's Search Insights module
 // (owner, 11 Nov 2026: checked here, not with a Requires Plugins header).
 $aw_si_missing = array_keys(
@@ -46,20 +50,6 @@ if ( $aw_si_missing ) {
 	return;
 }
 unset( $aw_si_missing );
-
-// The keyword table and its helpers are Kits Core's (Animal Writes Core's from 25 Oct, Kits Core's from 12 Nov 2026):
-// without them, Search Insights stays off.
-if ( ! function_exists( 'aw_kw_install' ) ) {
-	add_action(
-		'admin_notices',
-		function () {
-			if ( current_user_can( 'manage_options' ) ) {
-				wp_admin_notice( esc_html__( 'Search Insights needs Kits Core (the keyword table lives there). It is off until Kits Core is active.', 'insightweb' ), array( 'type' => 'warning' ) );
-			}
-		}
-	);
-	return;
-}
 
 if ( ! function_exists( 'insightweb_caps_grant' ) ) { // Loaded by insightweb.php; here for RankWeb's bridge.
 	require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php';

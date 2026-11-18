@@ -10,8 +10,8 @@
  * - Campaigns go out through wp_mail (the site's mailbox, kits-core) under the daily cap in mail-cap.php.
  *
  * FluentCRM is where people are kept (owner, 17 Oct 2026):
- * - Every Contact form entry finds or creates the sender's contact and adds a note (aw_crm_entry_note, called from
- *   forms-fluentforms.php). A contact made this way is "transactional" (never sent the newsletter); an existing contact
+ * - Every Contact form entry finds or creates the sender's contact and adds a note (mailweb_fcrm_entry_note, called from
+ *   Kits Core forms/fluentforms.php). A contact made this way is "transactional" (never sent the newsletter); an existing contact
  *   keeps its status. Tag "Contact form".
  * - Volunteers are contacts tagged "Volunteer", with their volunteer details in custom fields (group "Volunteer").
  *   FluentCRM is the one volunteers table (owner, 24 Oct 2026): sign-ups write here only; the site's volunteers table
@@ -21,22 +21,25 @@
  * Setup (sends nothing): `wp aw crm-setup`. The one-time `wp aw crm-import`, `wp aw crm-move` and `wp aw vol-to-crm`
  * ran and were removed with the site's own forms (owner, 25 Oct 2026; see git history).
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core `includes/fluentcrm.php` (18 Nov 2026); options, meta keys, tags, hooks and
+ * slugs are unchanged, and the old function names still work (back-compat wrappers).
+ *
+ * @package mailweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CRM_LIST = 'newsletter';
+const MAILWEB_FCRM_LIST = 'newsletter';
 
 /**
  * Block list (owner, 1 Nov 2026): addresses deleted from FluentCRM as junk that must never come back as contacts.
- * SHA-256 of the lowercased, trimmed address, so the code holds no copy of it. Checked by aw_crm_subscribe(),
- * aw_crm_contact_for(), Mailweb's inbox sync and the Fluent Forms → FluentCRM feed (below).
+ * SHA-256 of the lowercased, trimmed address, so the code holds no copy of it. Checked by mailweb_fcrm_subscribe(),
+ * mailweb_fcrm_contact_for(), Mailweb's inbox sync and the Fluent Forms → FluentCRM feed (below).
  * Add a hash with: php -r 'echo hash("sha256","name@example.com");'
  */
-const AW_CRM_BLOCKED_EMAILS = array(
+const MAILWEB_FCRM_BLOCKED_EMAILS = array(
 	'8b600ae0de9fda16c7aea7c0daf03ee9ef9d54c8b7861a9da0f140555a206d15',
 	'c5d30eda4914993eaabded86416e212400abdc3a0f15eb05b7d85ec0defbc445',
 	'1f88974f397859a9d3d4030c7cb7a87dde909e4960014743ad4cf518b9911dcd',
@@ -47,15 +50,15 @@ const AW_CRM_BLOCKED_EMAILS = array(
 );
 
 /** Whether an email address is on the block list. */
-function aw_crm_blocked( $email ) {
+function mailweb_fcrm_blocked( $email ) {
 	$email = strtolower( trim( (string) $email ) );
-	return '' !== $email && in_array( hash( 'sha256', $email ), (array) apply_filters( 'aw_crm_blocked_emails', AW_CRM_BLOCKED_EMAILS ), true );
+	return '' !== $email && in_array( hash( 'sha256', $email ), (array) apply_filters( 'aw_crm_blocked_emails', MAILWEB_FCRM_BLOCKED_EMAILS ), true );
 }
 
 add_filter(
 	'mailweb_crm_skip_email',
 	function ( $skip, $email ) {
-		return $skip || aw_crm_blocked( $email );
+		return $skip || mailweb_fcrm_blocked( $email );
 	},
 	10,
 	2
@@ -72,7 +75,7 @@ add_action(
 		if ( ! is_email( $email ) ) {
 			$email = (string) ( is_array( $form_data ) ? ( $form_data[ $email ] ?? '' ) : '' );
 		}
-		if ( ! aw_crm_blocked( $email ) ) {
+		if ( ! mailweb_fcrm_blocked( $email ) ) {
 			return;
 		}
 		global $wp_filter;
@@ -95,24 +98,24 @@ add_action(
 	2
 );
 
-function aw_crm_on() {
+function mailweb_fcrm_on() {
 	return function_exists( 'FluentCrmApi' );
 }
 
 /** The Newsletter list ID (created on first use). */
-function aw_crm_list_id() {
-	if ( ! aw_crm_on() ) {
+function mailweb_fcrm_list_id() {
+	if ( ! mailweb_fcrm_on() ) {
 		return 0;
 	}
-	$list = FluentCrmApi( 'lists' )->getInstance()->where( 'slug', AW_CRM_LIST )->first();
+	$list = FluentCrmApi( 'lists' )->getInstance()->where( 'slug', MAILWEB_FCRM_LIST )->first();
 	if ( ! $list ) {
-		$list = FluentCrmApi( 'lists' )->getInstance()->create( array( 'title' => 'Newsletter', 'slug' => AW_CRM_LIST ) );
+		$list = FluentCrmApi( 'lists' )->getInstance()->create( array( 'title' => 'Newsletter', 'slug' => MAILWEB_FCRM_LIST ) );
 	}
 	return $list ? (int) $list->id : 0;
 }
 
 /** Tag titles shown in FluentCRM (slug => title); any other tag is titled by its slug. */
-const AW_CRM_TAG_TITLES = array(
+const MAILWEB_FCRM_TAG_TITLES = array(
 	'volunteer'           => 'Volunteer',
 	'emailed-us'          => 'Emailed us',
 	'contact-form'        => 'Contact form',
@@ -133,11 +136,11 @@ const AW_CRM_TAG_TITLES = array(
 );
 
 /** Tag IDs for slugs (created if missing). */
-function aw_crm_tag_ids( $slugs ) {
+function mailweb_fcrm_tag_ids( $slugs ) {
 	$ids = array();
 	foreach ( (array) $slugs as $slug ) {
 		$tag = FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $slug )->first();
-		$tag = $tag ? $tag : FluentCrmApi( 'tags' )->getInstance()->create( array( 'title' => AW_CRM_TAG_TITLES[ $slug ] ?? $slug, 'slug' => $slug ) );
+		$tag = $tag ? $tag : FluentCrmApi( 'tags' )->getInstance()->create( array( 'title' => MAILWEB_FCRM_TAG_TITLES[ $slug ] ?? $slug, 'slug' => $slug ) );
 		$ids[] = (int) $tag->id;
 	}
 	return $ids;
@@ -153,10 +156,10 @@ function aw_crm_tag_ids( $slugs ) {
  * @param array  $tags  Tag slugs.
  * @return int Contact ID, or 0.
  */
-function aw_crm_subscribe( $email, $name = '', $extra = array(), $tags = array() ) {
+function mailweb_fcrm_subscribe( $email, $name = '', $extra = array(), $tags = array() ) {
 	$email = strtolower( trim( (string) $email ) );
-	$list  = aw_crm_list_id();
-	if ( ! $list || ! is_email( $email ) || aw_crm_blocked( $email ) ) {
+	$list  = mailweb_fcrm_list_id();
+	if ( ! $list || ! is_email( $email ) || mailweb_fcrm_blocked( $email ) ) {
 		return 0;
 	}
 	$parts = preg_split( '/\s+/', trim( (string) $name ), 2 );
@@ -174,7 +177,7 @@ function aw_crm_subscribe( $email, $name = '', $extra = array(), $tags = array()
 		$data['status'] = $have->status;
 	}
 	if ( $tags ) {
-		$data['tags'] = aw_crm_tag_ids( $tags );
+		$data['tags'] = mailweb_fcrm_tag_ids( $tags );
 	}
 	$c = FluentCrmApi( 'contacts' )->createOrUpdate( $data );
 	return $c ? (int) $c->id : 0;
@@ -185,19 +188,19 @@ function aw_crm_subscribe( $email, $name = '', $extra = array(), $tags = array()
 /**
  * A sender who left "Email me updates" unticked: on the Newsletter list all the same, with everything the form's
  * FluentCRM link would have saved (the link itself runs only when the box is ticked). The box is recorded as 1/0
- * (aw_crm_nl_box()); no form changes a contact's status (owner, 1 Nov 2026).
+ * (mailweb_fcrm_nl_box()); no form changes a contact's status (owner, 1 Nov 2026).
  *
- * @param object $c    FluentCRM contact (aw_crm_contact_for()).
+ * @param object $c    FluentCRM contact (mailweb_fcrm_contact_for()).
  * @param int    $form Fluent Forms form ID.
  * @param array  $data The submission.
  */
-function aw_crm_unticked( $c, $form, $data ) {
+function mailweb_fcrm_unticked( $c, $form, $data ) {
 	global $wpdb;
-	$list = aw_crm_list_id();
+	$list = mailweb_fcrm_list_id();
 	if ( $list ) {
 		$c->attachLists( array( $list ) );
 	}
-	$skip  = aw_crm_tag_ids( array( 'newsletter' ) );
+	$skip  = mailweb_fcrm_tag_ids( array( 'newsletter' ) );
 	$feeds = (array) $wpdb->get_col( $wpdb->prepare( "SELECT value FROM {$wpdb->prefix}fluentform_form_meta WHERE form_id = %d AND meta_key = 'fluentcrm_feeds'", (int) $form ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$value = function ( $tpl ) use ( $data ) { // {inputs.name} → the sent value (a list joined with commas)
 		return trim( (string) preg_replace_callback( '/\{inputs\.([a-z0-9_]+)\}/i', fn( $m ) => is_array( $data[ $m[1] ] ?? '' ) ? implode( ', ', array_map( 'strval', $data[ $m[1] ] ) ) : (string) ( $data[ $m[1] ] ?? '' ), (string) $tpl ) );
@@ -236,7 +239,7 @@ function aw_crm_unticked( $c, $form, $data ) {
  * A claim on the claimant's contact (owner, 31 Oct 2026: capture all info): the listing, role, phone, WhatsApp, "Show my
  * name", the reference and a link to the entry.
  */
-function aw_crm_claim_note( $c, $entry, $data, $form, $ref ) {
+function mailweb_fcrm_claim_note( $c, $entry, $data, $form, $ref ) {
 	if ( ! $c ) {
 		return 0;
 	}
@@ -247,9 +250,9 @@ function aw_crm_claim_note( $c, $entry, $data, $form, $ref ) {
 		'Role'                 => defined( 'AW_CLAIM_ROLES' ) ? ( AW_CLAIM_ROLES[ (string) ( $data['role'] ?? '' ) ] ?? (string) ( $data['role'] ?? '' ) ) : (string) ( $data['role'] ?? '' ),
 		'Phone'                => (string) ( $data['phone'] ?? '' ),
 		'WhatsApp'             => (string) ( $data['whatsapp'] ?? '' ),
-		'OK on WhatsApp'       => '' !== (string) ( $data['whatsapp'] ?? '' ) ? ( aw_ff_ticked( $data, 'wa_optin' ) ? '1 (yes)' : '0 (no)' ) : '',
+		'OK on WhatsApp'       => '' !== (string) ( $data['whatsapp'] ?? '' ) ? ( kits_ff_ticked( $data, 'wa_optin' ) ? '1 (yes)' : '0 (no)' ) : '',
 		'Show name on listing' => 'yes' === (string) ( $data['show_on_listing'] ?? '' ) ? 'Yes' : 'No',
-		'Email me updates'     => aw_ff_ticked( $data, 'nl_optin' ) ? '1 (yes)' : '0 (no)',
+		'Email me updates'     => kits_ff_ticked( $data, 'nl_optin' ) ? '1 (yes)' : '0 (no)',
 	);
 	$html = '';
 	foreach ( $rows as $k => $v ) {
@@ -276,15 +279,15 @@ function aw_crm_claim_note( $c, $entry, $data, $form, $ref ) {
  * @param string $source Where the contact came from.
  * @return object|null FluentCRM contact.
  */
-function aw_crm_contact_for( $email, $name, $tags, $source ) {
+function mailweb_fcrm_contact_for( $email, $name, $tags, $source ) {
 	$email = strtolower( trim( (string) $email ) );
-	if ( ! aw_crm_on() || ! is_email( $email ) || aw_crm_blocked( $email ) || str_ends_with( $email, '@animalwrites.in' ) || preg_match( '/^(mailer-daemon|postmaster|no-?reply)@/i', $email ) ) {
+	if ( ! mailweb_fcrm_on() || ! is_email( $email ) || mailweb_fcrm_blocked( $email ) || str_ends_with( $email, '@animalwrites.in' ) || preg_match( '/^(mailer-daemon|postmaster|no-?reply)@/i', $email ) ) {
 		return null;
 	}
 	if ( function_exists( 'mailweb_crm_upsert' ) ) {
 		$c = mailweb_crm_upsert( $email, $name, $source ); // MailWeb's copy of the step below (one place to change)
 		if ( $c && $tags ) {
-			$c->attachTags( aw_crm_tag_ids( $tags ) );
+			$c->attachTags( mailweb_fcrm_tag_ids( $tags ) );
 		}
 		return $c;
 	}
@@ -301,13 +304,13 @@ function aw_crm_contact_for( $email, $name, $tags, $source ) {
 		$c = FluentCrmApi( 'contacts' )->createOrUpdate( $data );
 	}
 	if ( $c && $tags ) {
-		$c->attachTags( aw_crm_tag_ids( $tags ) );
+		$c->attachTags( mailweb_fcrm_tag_ids( $tags ) );
 	}
 	return $c ? $c : null;
 }
 
 /** Reply-To for an email to a person: always support@, the address for all mail with people (owner, 31 Oct 2026). */
-function aw_crm_reply_to( $email = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- kept for callers
+function mailweb_fcrm_reply_to( $email = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- kept for callers
 	return 'support@animalwrites.in';
 }
 
@@ -323,7 +326,7 @@ add_filter(
 			return $headers;
 		}
 		$headers   = array_values( array_filter( (array) $headers, fn( $h ) => ! preg_match( '/^(Reply-To|List-Unsubscribe(-Post)?)\s*:/i', (string) $h ) ) );
-		$headers[] = 'Reply-To: Animal Writes <' . aw_crm_reply_to( $subscriber ? $subscriber->email : '' ) . '>';
+		$headers[] = 'Reply-To: Animal Writes <' . mailweb_fcrm_reply_to( $subscriber ? $subscriber->email : '' ) . '>';
 		$headers[] = 'X-AW-Priority: 0';
 		return $headers;
 	},
@@ -336,7 +339,7 @@ add_action(
 	'mailweb_flush',
 	function () {
 		global $wpdb;
-		if ( ! aw_crm_on() ) {
+		if ( ! mailweb_fcrm_on() ) {
 			return;
 		}
 		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT e.subscriber_id FROM {$wpdb->prefix}fc_campaign_emails e JOIN {$wpdb->prefix}fc_campaigns c ON c.id = e.campaign_id WHERE c.type = 'custom_email_campaign' AND e.status IN ('pending','scheduled') AND e.scheduled_at <= %s LIMIT 20", current_time( 'mysql' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -352,8 +355,8 @@ add_action(
 
 /* ---------- Volunteers: tag "Volunteer" and their details in custom fields ---------- */
 
-/** Custom fields (group "Volunteer"): slug => array( label, type ). Mirrors the volunteers table (volunteers-db.php). */
-const AW_CRM_VOL_FIELDS = array(
+/** Custom fields (group "Volunteer"): slug => array( label, type ). Mirrors the volunteers table (volunteers.php). */
+const MAILWEB_FCRM_VOL_FIELDS = array(
 	'vol_help'            => array( 'Volunteer: how they would like to help', 'text' ),
 	'vol_state'           => array( 'Volunteer: state', 'text' ),
 	'vol_district'        => array( 'Volunteer: district', 'text' ),
@@ -387,7 +390,7 @@ const AW_CRM_VOL_FIELDS = array(
 );
 
 /** Custom fields (group "Forms"): the newsletter box on the last form a contact sent (owner, 21 Oct 2026). */
-const AW_CRM_FORM_FIELDS = array(
+const MAILWEB_FCRM_FORM_FIELDS = array(
 	'nl_box_last'      => array( 'Newsletter box (last form): 1 or 0', 'text' ),
 	'nl_box_form'      => array( 'Newsletter box (last form): which form', 'text' ),
 	'nl_box_consent'   => array( 'Newsletter box (last form): consent wording', 'text' ),
@@ -404,7 +407,7 @@ const AW_CRM_FORM_FIELDS = array(
 /* ---------- The volunteer update link: /update/?t=<signed token> (owner, 21 Oct 2026) ---------- */
 
 /** Days an update link works. */
-const AW_UPDATE_LINK_DAYS = 30;
+const MAILWEB_FCRM_UPDATE_LINK_DAYS = 30;
 
 /**
  * A contact's update link: signed with the site's own secret (HMAC), for that one contact and their email, 30 days.
@@ -412,8 +415,8 @@ const AW_UPDATE_LINK_DAYS = 30;
  *
  * @param object $c FluentCRM contact.
  */
-function aw_update_link( $c ) {
-	$exp = time() + AW_UPDATE_LINK_DAYS * DAY_IN_SECONDS;
+function mailweb_fcrm_update_link( $c ) {
+	$exp = time() + MAILWEB_FCRM_UPDATE_LINK_DAYS * DAY_IN_SECONDS;
 	$sig = substr( hash_hmac( 'sha256', (int) $c->id . '|' . $exp . '|' . strtolower( (string) $c->email ), wp_salt( 'auth' ) ), 0, 32 );
 	return add_query_arg( 't', (int) $c->id . '.' . $exp . '.' . $sig, home_url( '/update/' ) );
 }
@@ -424,8 +427,8 @@ function aw_update_link( $c ) {
  * @param string $token The t value.
  * @return object|string FluentCRM contact, or 'expired' | 'invalid'.
  */
-function aw_update_link_contact( $token ) {
-	if ( ! aw_crm_on() || ! preg_match( '/^(\d+)\.(\d+)\.([a-f0-9]{32})$/', (string) $token, $m ) ) {
+function mailweb_fcrm_update_link_contact( $token ) {
+	if ( ! mailweb_fcrm_on() || ! preg_match( '/^(\d+)\.(\d+)\.([a-f0-9]{32})$/', (string) $token, $m ) ) {
 		return 'invalid';
 	}
 	$c   = \FluentCrm\App\Models\Subscriber::find( (int) $m[1] );
@@ -440,12 +443,12 @@ function aw_update_link_contact( $token ) {
 add_action(
 	'init',
 	function () {
-		if ( aw_crm_on() ) {
+		if ( mailweb_fcrm_on() ) {
 			FluentCrmApi( 'extender' )->addSmartCode(
 				'aw',
 				'Animal Writes',
 				array( 'update_link' => 'Volunteer update link (30 days)' ),
-				fn( $code, $key, $default, $subscriber ) => 'update_link' === $key && $subscriber ? aw_update_link( $subscriber ) : $default,
+				fn( $code, $key, $default, $subscriber ) => 'update_link' === $key && $subscriber ? mailweb_fcrm_update_link( $subscriber ) : $default,
 				array( 'level' => 'credential' ) // like the unsubscribe link: only in an email to that contact
 			);
 		}
@@ -453,11 +456,11 @@ add_action(
 );
 
 /** Add the volunteer fields and their group to FluentCRM's custom fields (keeps any others). */
-function aw_crm_fields_setup() {
+function mailweb_fcrm_fields_setup() {
 	$fields = (array) fluentcrm_get_option( 'contact_custom_fields', array() );
 	$have   = wp_list_pluck( $fields, 'slug' );
 	$added  = 0;
-	foreach ( array( 'Volunteer' => AW_CRM_VOL_FIELDS, 'Forms' => AW_CRM_FORM_FIELDS ) as $group => $list ) {
+	foreach ( array( 'Volunteer' => MAILWEB_FCRM_VOL_FIELDS, 'Forms' => MAILWEB_FCRM_FORM_FIELDS ) as $group => $list ) {
 		foreach ( $list as $slug => $f ) {
 			if ( ! in_array( $slug, $have, true ) ) {
 				$fields[] = array( 'slug' => $slug, 'label' => $f[0], 'type' => $f[1], 'group' => $group );
@@ -493,9 +496,9 @@ function aw_crm_fields_setup() {
  * @param string $form    Form name.
  * @param string $consent Consent wording version.
  */
-function aw_crm_nl_box( $c, $ticked, $form, $consent ) {
+function mailweb_fcrm_nl_box( $c, $ticked, $form, $consent ) {
 	if ( $c ) {
-		aw_crm_fields_setup();
+		mailweb_fcrm_fields_setup();
 		$c->syncCustomFieldValues( array( 'nl_box_last' => $ticked ? '1' : '0', 'nl_box_form' => (string) $form, 'nl_box_consent' => '' !== (string) $consent ? (string) $consent : 'none' ), false );
 	}
 }
@@ -510,7 +513,7 @@ function aw_crm_nl_box( $c, $ticked, $form, $consent ) {
  * @param int    $form   Form ID.
  * @param string $ref    Reference (AW-<serial>).
  */
-function aw_crm_entry_note( $c, $entry, $data, $form, $ref ) {
+function mailweb_fcrm_entry_note( $c, $entry, $data, $form, $ref ) {
 	if ( ! $c ) {
 		return 0;
 	}
@@ -541,16 +544,16 @@ function aw_crm_entry_note( $c, $entry, $data, $form, $ref ) {
  *
  * @return int Contact ID, or 0.
  */
-function aw_crm_campaign_signer( $email, $name, $city, $slug, $box, $whatsapp, $wa_optin, $ref, $consent ) {
-	if ( ! aw_crm_on() ) {
+function mailweb_fcrm_campaign_signer( $email, $name, $city, $slug, $box, $whatsapp, $wa_optin, $ref, $consent ) {
+	if ( ! mailweb_fcrm_on() ) {
 		return 0;
 	}
-	$id = aw_crm_subscribe( $email, $name, array( 'city' => $city, 'source' => 'site:campaign:' . $slug ), array( 'newsletter', 'volunteer', 'campaign-' . $slug ) );
+	$id = mailweb_fcrm_subscribe( $email, $name, array( 'city' => $city, 'source' => 'site:campaign:' . $slug ), array( 'newsletter', 'volunteer', 'campaign-' . $slug ) );
 	$c  = $id ? \FluentCrm\App\Models\Subscriber::find( $id ) : null;
 	if ( ! $c ) {
 		return 0;
 	}
-	aw_crm_nl_box( $c, $box, 'Campaign letter', $consent );
+	mailweb_fcrm_nl_box( $c, $box, 'Campaign letter', $consent );
 	// One Mobile field (owner, 12 Nov 2026): it is the contact's phone; their WhatsApp only when "On WhatsApp" is ticked.
 	if ( '' !== (string) $whatsapp && '' === (string) $c->phone ) {
 		$c->phone = (string) $whatsapp;
@@ -567,7 +570,7 @@ add_action(
 	'fluentcrm_subscriber_status_to_unsubscribed',
 	function ( $subscriber ) {
 		global $wpdb;
-		$wpdb->update( aw_nl_table(), array( 'status' => 'unsubscribed', 'updated_at' => current_time( 'mysql', true ) ), array( 'email' => strtolower( (string) $subscriber->email ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->update( mailweb_nl_table(), array( 'status' => 'unsubscribed', 'updated_at' => current_time( 'mysql', true ) ), array( 'email' => strtolower( (string) $subscriber->email ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 );
 
@@ -590,7 +593,7 @@ add_filter(
 add_action(
 	'admin_enqueue_scripts',
 	function ( $hook ) {
-		if ( 'toplevel_page_fluentcrm-admin' !== $hook || ! aw_crm_on() || ! wp_style_is( 'fluentcrm_app_global', 'enqueued' ) ) {
+		if ( 'toplevel_page_fluentcrm-admin' !== $hook || ! mailweb_fcrm_on() || ! wp_style_is( 'fluentcrm_app_global', 'enqueued' ) ) {
 			return;
 		}
 		wp_add_inline_style(
@@ -614,7 +617,7 @@ add_action(
  */
 
 /** A campaign's slug as its utm_campaign: a duplicate's "-1793715277" ending dropped. */
-function aw_crm_utm_campaign( $slug ) {
+function mailweb_fcrm_utm_campaign( $slug ) {
 	$slug = sanitize_title( (string) $slug );
 	return '' !== $slug ? (string) preg_replace( '/-\d{9,}$/', '', $slug ) : 'newsletter';
 }
@@ -629,7 +632,7 @@ add_action(
 		$campaign->utm_status   = 1;
 		$campaign->utm_source   = 'newsletter';
 		$campaign->utm_medium   = 'email';
-		$campaign->utm_campaign = aw_crm_utm_campaign( $campaign->slug );
+		$campaign->utm_campaign = mailweb_fcrm_utm_campaign( $campaign->slug );
 		$campaign->save();
 	}
 );
@@ -652,7 +655,7 @@ add_action(
 					array(
 						'utm_source'   => 'newsletter',
 						'utm_medium'   => 'email',
-						'utm_campaign' => aw_crm_utm_campaign( $slug ),
+						'utm_campaign' => mailweb_fcrm_utm_campaign( $slug ),
 					),
 					$to
 				);
@@ -671,7 +674,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw crm-setup',
 		function () {
-			if ( ! aw_crm_on() ) {
+			if ( ! mailweb_fcrm_on() ) {
 				WP_CLI::error( 'FluentCRM is not active.' );
 			}
 			$all = (array) get_option( 'fluentcrm-global-settings', array() );
@@ -684,15 +687,106 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$biz['business_name']    = 'Animal Writes';
 			$all['business_settings'] = $biz;
 			update_option( 'fluentcrm-global-settings', $all );
-			foreach ( AW_CRM_TAG_TITLES as $slug => $title ) { // the tags' visible names
+			foreach ( MAILWEB_FCRM_TAG_TITLES as $slug => $title ) { // the tags' visible names
 				$tag = FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $slug )->first();
 				if ( $tag && $tag->title !== $title ) {
 					$tag->title = $title;
 					$tag->save();
 				}
 			}
-			aw_crm_tag_ids( array_keys( AW_CRM_TAG_TITLES ) );
-			WP_CLI::success( 'List ' . aw_crm_list_id() . ', tag ' . implode( ',', aw_crm_tag_ids( array( 'volunteer-1.0' ) ) ) . ', volunteer fields added ' . aw_crm_fields_setup() );
+			mailweb_fcrm_tag_ids( array_keys( MAILWEB_FCRM_TAG_TITLES ) );
+			WP_CLI::success( 'List ' . mailweb_fcrm_list_id() . ', tag ' . implode( ',', mailweb_fcrm_tag_ids( array( 'volunteer-1.0' ) ) ) . ', volunteer fields added ' . mailweb_fcrm_fields_setup() );
 		}
 	);
 }
+
+/* ---------- After each site form's FluentCRM link (from Animal Writes Core forms-fluentforms.php) ---------- */
+
+/*
+ * After each form's FluentCRM link (it runs at priority 10, only when "Email me updates" is ticked): what a link cannot
+ * do. A link only makes "subscribed" contacts and cannot add a note, so: every Contact, Claim and Volunteer sender
+ * (and the /update/ link, which uses the Volunteer form) becomes a contact (tags contact-form, claimant, volunteer),
+ * the message or the claim as a note, and the newsletter box as 1/0. The box is only recorded as 1/0; no form changes
+ * a contact's status (owner, 1 Nov 2026). Unticked senders are on the Newsletter list all the same, with everything
+ * the link would have saved (mailweb_fcrm_unticked()). A Contact send
+ * with the reason Remove my data never reaches FluentCRM (owner, 31 Oct 2026),
+ * whatever is ticked; its entry is kept like any other. The per-connection count is Kits Core's (forms/fluentforms.php).
+ */
+add_action(
+	'fluentform/submission_inserted',
+	function ( $entry_id, $data, $form ) {
+		$key = function_exists( 'kits_ff_key' ) ? kits_ff_key( $form ) : '';
+		if ( ! $key ) {
+			return;
+		}
+		if ( ! in_array( $key, array( 'contact', 'claim', 'volunteer' ), true ) || ! mailweb_fcrm_on() ) {
+			return;
+		}
+		if ( 'contact' === $key && 'remove' === (string) ( $data['about'] ?? '' ) ) {
+			return; // Remove my data (owner, 31 Oct 2026): the entry is kept, but the sender never becomes or changes a FluentCRM contact (the form's FluentCRM link has the same condition)
+		}
+		$email = strtolower( trim( (string) ( $data['email'] ?? '' ) ) );
+		$name  = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
+		$tags  = array( 'contact' => array( 'contact-form' ), 'claim' => array( 'claimant' ), 'volunteer' => array( 'volunteer' ) )[ $key ];
+		$c     = mailweb_fcrm_contact_for( $email, $name, $tags, array( 'contact' => 'contact-form', 'claim' => 'claim', 'volunteer' => 'volunteer-form' )[ $key ] );
+		if ( ! $c ) {
+			return;
+		}
+		if ( ! kits_ff_ticked( $data, 'nl_optin' ) ) {
+			mailweb_fcrm_unticked( $c, (int) $form->id, $data );
+		}
+		mailweb_fcrm_nl_box( $c, kits_ff_ticked( $data, 'nl_optin' ), KITS_FF_FORMS[ $key ]['title'], (string) ( $data['consent_version'] ?? '' ) );
+		if ( 'volunteer' === $key ) { // the LGD picker's values (a link only maps Fluent Forms' own fields): names, not slugs
+			$st = ! empty( $data['state'] ) && function_exists( 'aw_place_by_slug' ) ? aw_place_by_slug( sanitize_title( (string) $data['state'] ) ) : null;
+			$di = ! empty( $data['district'] ) && function_exists( 'aw_place_by_slug' ) ? aw_place_by_slug( sanitize_title( (string) $data['district'] ) ) : null;
+			// and the ticks as 1/0: an unticked box sends nothing, so the link leaves the field blank
+			$c->syncCustomFieldValues(
+				array_filter( array( 'vol_state' => $st ? $st->name : '', 'vol_district' => $di ? $di->name : '', 'vol_pincode' => preg_replace( '/\D/', '', (string) ( $data['pincode'] ?? '' ) ) ) )
+				+ array(
+					'vol_wa_optin'      => kits_ff_ticked( $data, 'wa_optin' ) ? '1' : '0',
+					'vol_org_show'      => kits_ff_ticked( $data, 'org_show' ) ? '1' : '0',
+					// helper profile (owner, 13 Nov 2026; helpers-public.php): both ticks, as 1/0, and the form-B answers
+					'vol_helper_public' => kits_ff_ticked( $data, 'helper_public' ) ? '1' : '0',
+					'vol_verify_ok'     => kits_ff_ticked( $data, 'verify_ok' ) ? '1' : '0',
+					'vol_vehicle'       => sanitize_text_field( implode( ', ', (array) ( $data['vehicle'] ?? array() ) ) ),
+					'vol_can_do'        => sanitize_text_field( implode( ', ', (array) ( $data['can_do'] ?? array() ) ) ),
+					'vol_animals_ok'    => sanitize_text_field( implode( ', ', (array) ( $data['animals_ok'] ?? array() ) ) ),
+				),
+				false
+			);
+			if ( kits_ff_ticked( $data, 'helper_public' ) && kits_ff_ticked( $data, 'verify_ok' ) ) { // waits in FluentCRM until the owner swaps helper-pending for helper-approved
+				try {
+					if ( ! $c->tags()->where( 'slug', 'helper-approved' )->exists() ) {
+						$c->attachTags( mailweb_fcrm_tag_ids( array( 'helper-pending' ) ) );
+					}
+				} catch ( \Throwable $e ) { // never let a tag problem stop the sign-up
+					error_log( 'aw helpers: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				}
+			}
+		}
+		if ( 'contact' === $key ) {
+			mailweb_fcrm_entry_note( $c, $entry_id, $data, (int) $form->id, kits_ff_ref( $key, $entry_id ) );
+		}
+		$ph = trim( sanitize_text_field( (string) ( $data['phone'] ?? '' ) ) ); // the Mobile (required since 12 Nov 2026) into the contact's own phone field, when it has none
+		$ph = '' !== $ph ? kits_ff_phone_store( $ph ) : '';
+		$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
+		$wa = '' !== $wa ? kits_ff_phone_store( $wa ) : ( kits_ff_ticked( $data, 'wa_optin' ) ? $ph : '' ); // ticked "On WhatsApp": the Mobile
+		if ( 'volunteer' === $key && '' !== $wa ) {
+			$c->syncCustomFieldValues( array( 'vol_whatsapp' => $wa ), false );
+		}
+		if ( '' !== $ph && '' === (string) $c->phone ) {
+			$c->phone = $ph;
+			$c->save();
+		}
+		if ( 'claim' === $key ) {
+			mailweb_fcrm_claim_note( $c, $entry_id, $data, (int) $form->id, kits_ff_ref( $key, $entry_id ) );
+		}
+		if ( in_array( $key, array( 'contact', 'claim' ), true ) ) { // Claim asks for WhatsApp too (found 21 Oct 2026: not copied)
+			if ( '' !== $wa || '' !== $ph ) { // as the link maps them, also for a sender who left the newsletter unticked (the link does not run)
+				$c->syncCustomFieldValues( array_filter( array( 'whatsapp' => $wa ) ) + array( 'wa_optin' => kits_ff_ticked( $data, 'wa_optin' ) ? '1' : '0' ), false );
+			}
+		}
+	},
+	20,
+	3
+);

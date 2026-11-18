@@ -23,7 +23,7 @@ function kits_frame_screens(): array {
 	return array(
 		KITS_MENU       => KITS_CAP,
 		'kits-settings' => 'manage_options',
-		'kits-tools'    => 'edit_theme_options',
+		'kits-tools'    => 'manage_options',
 		'kits-help'     => KITS_CAP,
 	);
 }

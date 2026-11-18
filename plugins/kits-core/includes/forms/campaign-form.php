@@ -14,26 +14,29 @@
  * send already saved). Kept 180 days.
  * wp aw raw-export writes it as CSV.
  *
- * @package AnimalWritesCore
+ * Moved from Animal Writes Core `includes/campaign-form.php` (18 Nov 2026); options, meta keys, tags, hooks and
+ * slugs are unchanged, and the old function names still work (back-compat wrappers).
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CF_OPTION   = 'aw_ff_campaign_form';
-const AW_RAW_DB      = '1';
-const AW_RAW_DAYS    = 180;
-const AW_CF_RL_LIMIT = 30; // sends an hour from one connection (colleges and offices share one)
+const KITS_CF_OPTION   = 'aw_ff_campaign_form';
+const KITS_RAW_DB      = '1';
+const KITS_RAW_DAYS    = 180;
+const KITS_CF_RL_LIMIT = 30; // sends an hour from one connection (colleges and offices share one)
 
 /** The Campaign form's Fluent Forms ID, or 0. */
-function aw_cf_id() {
-	return defined( 'FLUENTFORM' ) ? (int) get_option( AW_CF_OPTION, 0 ) : 0;
+function kits_cf_id() {
+	return defined( 'FLUENTFORM' ) ? (int) get_option( KITS_CF_OPTION, 0 ) : 0;
 }
 
 /* ---------- The raw copy ---------- */
 
-function aw_raw_table() {
+function kits_raw_table() {
 	global $wpdb;
 	return $wpdb->prefix . 'aw_form_raw';
 }
@@ -41,13 +44,13 @@ function aw_raw_table() {
 add_action(
 	'init',
 	function () {
-		if ( AW_RAW_DB === get_option( 'aw_form_raw_db' ) ) {
+		if ( KITS_RAW_DB === get_option( 'aw_form_raw_db' ) ) {
 			return;
 		}
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta(
-			'CREATE TABLE ' . aw_raw_table() . " (
+			'CREATE TABLE ' . kits_raw_table() . " (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			received_at datetime NOT NULL,
 			kind varchar(20) NOT NULL DEFAULT '',
@@ -61,18 +64,18 @@ add_action(
 			KEY received (received_at)
 			) {$wpdb->get_charset_collate()};"
 		);
-		update_option( 'aw_form_raw_db', AW_RAW_DB, false );
+		update_option( 'aw_form_raw_db', KITS_RAW_DB, false );
 	},
 	5
 );
 
 /** Copies one send as it arrived; returns the row ID (0 when the table is not there). */
-function aw_raw_save( $kind, $form_id, $data ) {
+function kits_raw_save( $kind, $form_id, $data ) {
 	global $wpdb;
 	$data = (array) $data;
 	unset( $data['altcha'] ); // the bot check's answer: long and of no use later
 	$ok = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		aw_raw_table(),
+		kits_raw_table(),
 		array(
 			'received_at' => current_time( 'mysql', true ),
 			'kind'        => substr( (string) $kind, 0, 20 ),
@@ -84,23 +87,23 @@ function aw_raw_save( $kind, $form_id, $data ) {
 	return $ok ? (int) $wpdb->insert_id : 0;
 }
 
-function aw_raw_mark( $id, $status, $entry_id = 0 ) {
+function kits_raw_mark( $id, $status, $entry_id = 0 ) {
 	global $wpdb;
 	if ( $id ) {
-		$wpdb->update( aw_raw_table(), array( 'status' => $status, 'entry_id' => (int) $entry_id ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->update( kits_raw_table(), array( 'status' => $status, 'entry_id' => (int) $entry_id ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 }
 
 // Every Fluent Forms send, before Fluent Forms looks at it (its own handler runs at priority 10).
 $GLOBALS['aw_raw_id'] = 0;
-foreach ( array( 'wp_ajax_nopriv_fluentform_submit', 'wp_ajax_fluentform_submit' ) as $aw_hook ) {
+foreach ( array( 'wp_ajax_nopriv_fluentform_submit', 'wp_ajax_fluentform_submit' ) as $kits_cf_hook ) {
 	add_action(
-		$aw_hook,
+		$kits_cf_hook,
 		function () {
 			$data = array();
 			parse_str( (string) wp_unslash( $_POST['data'] ?? '' ), $data ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- copied as sent, read only by admins
-			$form = (int) ( $_POST['form_id'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
-			$GLOBALS['aw_raw_id'] = aw_raw_save( $form && $form === aw_cf_id() ? 'campaign' : 'form', $form, $data );
+			$form = absint( wp_unslash( $_POST['form_id'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only, to label the copy
+			$GLOBALS['aw_raw_id'] = kits_raw_save( $form && $form === kits_cf_id() ? 'campaign' : 'form', $form, $data );
 		},
 		1
 	);
@@ -108,7 +111,7 @@ foreach ( array( 'wp_ajax_nopriv_fluentform_submit', 'wp_ajax_fluentform_submit'
 add_action(
 	'fluentform/submission_inserted',
 	function ( $entry_id ) {
-		aw_raw_mark( $GLOBALS['aw_raw_id'] ?? 0, 'saved', $entry_id );
+		kits_raw_mark( $GLOBALS['aw_raw_id'] ?? 0, 'saved', $entry_id );
 	},
 	1
 );
@@ -126,20 +129,20 @@ add_action(
 	'aw_raw_prune',
 	function () {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE received_at < %s', aw_raw_table(), gmdate( 'Y-m-d H:i:s', time() - AW_RAW_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE received_at < %s', kits_raw_table(), gmdate( 'Y-m-d H:i:s', time() - KITS_RAW_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 );
 
 /* ---------- The Campaign form ---------- */
 
 /** The campaign a send names, when it is published and open; else 0. */
-function aw_cf_campaign( $data ) {
+function kits_cf_campaign( $data ) {
 	$id = function_exists( 'aw_camp_id' ) ? aw_camp_id( (int) ( $data['campaign_id'] ?? 0 ) ) : 0;
 	return $id && 'publish' === get_post_status( $id ) && aw_camp_is_open( $id ) ? $id : 0;
 }
 
 /** The ALTCHA answer of a Campaign form send: in the form data, or in the raw post when Fluent Forms left it out (it is not a form field, so it is not kept with the entry). */
-function aw_cf_altcha( $data ) {
+function kits_cf_altcha( $data ) {
 	if ( isset( $data['altcha'] ) && is_scalar( $data['altcha'] ) ) {
 		return (string) $data['altcha'];
 	}
@@ -149,8 +152,8 @@ function aw_cf_altcha( $data ) {
 }
 
 /** Fluent Forms' answer for a send already saved (a retry after a lost answer): the same reference, no new entry. */
-function aw_cf_done( $ref ) {
-	aw_raw_mark( $GLOBALS['aw_raw_id'] ?? 0, 'duplicate' );
+function kits_cf_done( $ref ) {
+	kits_raw_mark( $GLOBALS['aw_raw_id'] ?? 0, 'duplicate' );
 	wp_send_json(
 		array(
 			'insert_id' => 0,
@@ -163,23 +166,23 @@ function aw_cf_done( $ref ) {
 add_filter(
 	'fluentform/validation_errors',
 	function ( $errors, $data, $form ) {
-		if ( (int) $form->id !== aw_cf_id() || ! aw_cf_id() ) {
+		if ( (int) $form->id !== kits_cf_id() || ! kits_cf_id() ) {
 			return $errors;
 		}
 		$send = function_exists( 'aw_cl_send_id' ) ? aw_cl_send_id( $data['send_id'] ?? '' ) : '';
 		$ref  = $send ? get_transient( 'aw_cl_s_' . $send ) : '';
 		if ( $ref ) {
-			aw_cf_done( $ref );
+			kits_cf_done( $ref );
 		}
-		if ( ! aw_cf_campaign( $data ) ) {
+		if ( ! kits_cf_campaign( $data ) ) {
 			$errors['campaign_id'] = array( 'aw' => 'This campaign is closed.' );
 		}
 		$rl = 'aw_rl_aw_campaign_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! $errors && (int) get_transient( $rl ) >= AW_CF_RL_LIMIT ) {
+		if ( ! $errors && (int) get_transient( $rl ) >= KITS_CF_RL_LIMIT ) {
 			$errors['aw_form'] = array( 'aw' => 'Too many tries. Wait a minute, then try again.' );
 		}
 		// The bot check (ALTCHA, audit item 4), checked and used up only when everything else is right.
-		if ( ! $errors && ! aw_cl_human( $send, aw_cf_altcha( $data ) ) ) {
+		if ( ! $errors && ! aw_cl_human( $send, kits_cf_altcha( $data ) ) ) {
 			$errors['altcha'] = array( 'aw' => 'Couldn\'t verify you\'re not a bot. Try again.' );
 		}
 		return $errors;
@@ -189,17 +192,17 @@ add_filter(
 );
 
 /** The yes/no boxes on the site's forms: an unticked box sends nothing, so the entry says 0 (owner, 21 Oct 2026). */
-const AW_FF_BOXES = array( 'nl_optin', 'wa_optin', 'org_assoc', 'org_show', 'consent' );
+const KITS_FF_BOXES = array( 'nl_optin', 'wa_optin', 'org_assoc', 'org_show', 'consent' );
 
 add_filter(
 	'fluentform/insert_response_data',
 	function ( $data, $form_id ) {
-		if ( ! ( function_exists( 'aw_ff_key' ) && aw_ff_key( $form_id ) ) && (int) $form_id !== aw_cf_id() ) {
+		if ( ! ( function_exists( 'kits_ff_key' ) && kits_ff_key( $form_id ) ) && (int) $form_id !== kits_cf_id() ) {
 			return $data;
 		}
 		$form   = \FluentForm\App\Models\Form::find( (int) $form_id );
 		$fields = $form ? (string) $form->form_fields : '';
-		foreach ( AW_FF_BOXES as $box ) {
+		foreach ( KITS_FF_BOXES as $box ) {
 			if ( false !== strpos( $fields, '"name":"' . $box . '"' ) && ( empty( $data[ $box ] ) || array( '' ) === (array) $data[ $box ] ) ) {
 				$data[ $box ] = '0';
 			}
@@ -215,10 +218,10 @@ add_filter(
 add_filter(
 	'fluentform/insert_response_data',
 	function ( $data, $form_id ) {
-		if ( (int) $form_id !== aw_cf_id() || ! aw_cf_id() ) {
+		if ( (int) $form_id !== kits_cf_id() || ! kits_cf_id() ) {
 			return $data;
 		}
-		$id                     = aw_cf_campaign( $data );
+		$id                     = kits_cf_campaign( $data );
 		$grounds                = aw_cl_grounds( $data['grounds'] ?? '' );
 		$labels                 = aw_cl_ground_labels( $id );
 		$data['campaign_id']    = (string) $id;
@@ -250,7 +253,7 @@ add_filter(
 add_action(
 	'fluentform/submission_inserted',
 	function ( $entry_id, $data, $form ) {
-		if ( (int) $form->id !== aw_cf_id() || ! aw_cf_id() ) {
+		if ( (int) $form->id !== kits_cf_id() || ! kits_cf_id() ) {
 			return;
 		}
 		$rl = 'aw_rl_aw_campaign_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
@@ -259,11 +262,11 @@ add_action(
 		if ( ! $id ) {
 			return;
 		}
-		$box  = function_exists( 'aw_ff_ticked' ) ? aw_ff_ticked( $data, 'nl_optin' ) : ! empty( $data['nl_optin'] );
-		$wa   = function_exists( 'aw_ff_ticked' ) ? aw_ff_ticked( $data, 'wa_optin' ) : ! empty( $data['wa_optin'] );
+		$box  = function_exists( 'kits_ff_ticked' ) ? kits_ff_ticked( $data, 'nl_optin' ) : ! empty( $data['nl_optin'] );
+		$wa   = function_exists( 'kits_ff_ticked' ) ? kits_ff_ticked( $data, 'wa_optin' ) : ! empty( $data['wa_optin'] );
 		$tel  = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
 		$tel  = '' !== $tel && function_exists( 'kits_clean_phone' ) && kits_clean_phone( $tel ) ? kits_clean_phone( $tel ) : substr( $tel, 0, 20 );
-		$c_id = aw_crm_campaign_signer( (string) ( $data['email'] ?? '' ), sanitize_text_field( (string) ( $data['name'] ?? '' ) ), (string) ( $data['city'] ?? '' ), (string) $data['campaign'], $box, $tel, $wa, (string) ( $data['ref'] ?? '' ), (string) ( $data['consent_version'] ?? AW_CL_CONSENT ) );
+		$c_id = ! function_exists( 'mailweb_fcrm_campaign_signer' ) ? 0 : mailweb_fcrm_campaign_signer( (string) ( $data['email'] ?? '' ), sanitize_text_field( (string) ( $data['name'] ?? '' ) ), (string) ( $data['city'] ?? '' ), (string) $data['campaign'], $box, $tel, $wa, (string) ( $data['ref'] ?? '' ), (string) ( $data['consent_version'] ?? AW_CL_CONSENT ) );
 		$c    = $c_id ? \FluentCrm\App\Models\Subscriber::find( $c_id ) : null;
 		if ( $c ) {
 			$c->syncCustomFieldValues(
@@ -277,7 +280,7 @@ add_action(
 				false
 			);
 			if ( '' !== trim( (string) ( $data['own'] ?? '' ) ) ) { // wrote their own line: tagged, so FluentCRM can list them (owner, 26 Oct 2026)
-				$c->attachTags( aw_crm_tag_ids( array( 'campaign-own-line' ) ) );
+				$c->attachTags( mailweb_fcrm_tag_ids( array( 'campaign-own-line' ) ) );
 			}
 		}
 		aw_cl_record_letter(
@@ -312,7 +315,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$where[] = $wpdb->prepare( "$k = %s", $assoc[ $k ] ); // phpcs:ignore WordPress.DB.PreparedSQL
 				}
 			}
-			$rows = $wpdb->get_results( 'SELECT * FROM ' . aw_raw_table() . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY id', ARRAY_A ); // phpcs:ignore
+			$rows = $wpdb->get_results( 'SELECT * FROM ' . kits_raw_table() . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY id', ARRAY_A ); // phpcs:ignore
 			$out  = fopen( 'php://stdout', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 			fputcsv( $out, array( 'id', 'received_at', 'kind', 'form_id', 'email', 'status', 'entry_id', 'payload' ) );
 			foreach ( $rows as $r ) {

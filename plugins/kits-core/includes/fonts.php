@@ -7,7 +7,7 @@
  *   device's Arial resized to Inter's width and line height (measured from inter-latin.woff2: 107.48% wide, ascent
  *   90.14%, descent 22.44%), only for the characters Inter has, so a line does not rewrap when Inter swaps in. Wide
  *   screens (1200px and up) also preload the body font so it is there for the first paint; phones do not, so it never
- *   competes with their main picture. Kits → Theme Options → Utility → Performance → Font preload: "all" preloads it on every screen, "off" not at
+ *   competes with their main picture. Kits → Settings → Performance → Font preload: "all" preloads it on every screen, "off" not at
  *   all; the file is the body font's first file in Styles (else the theme's assets/fonts/inter/inter-latin.woff2).
  * - Inter is served once (Kits → Settings → Performance → One copy of Inter). The theme's variable file (weights 100 to 900,
  *   font-display: swap) covers every upright weight; the Font Library copy of Inter also declares each weight as a
@@ -64,8 +64,10 @@ add_action(
 				if ( 'off' !== $mode && '' !== $font ) { // No file, no preload.
 					echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin' . ( 'all' === $mode ? '' : ' media="(min-width: 1200px)"' ) . '>' . "\n";
 				}
-				// The id the page has always had for this face (aw-inter-fallback).
-				echo '<style id="aw-inter-fallback">@font-face{font-family:"Inter Fallback";src:local("Arial"),local("ArialMT");size-adjust:107.48%;ascent-override:90.14%;descent-override:22.44%;line-gap-override:0%;unicode-range:U+0000,U+0020-007E,U+00A0-00AC,U+00AE-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+2002,U+2009,U+200B,U+2013-2014,U+2018-201A,U+201C-201E,U+2022,U+2026,U+2032-2033,U+2039-203A,U+2044,U+20AC,U+2122,U+2191,U+2193,U+2212,U+FEFF}</style>' . "\n";
+				// The fallback face, printed with the page's styles (wp_print_styles, wp_head at 8: this runs at 2).
+				wp_register_style( 'kits-inter-fallback', false, array(), KITS_CORE_LOADED ); // No file: the rule below only.
+				wp_enqueue_style( 'kits-inter-fallback' );
+				wp_add_inline_style( 'kits-inter-fallback', '@font-face{font-family:"Inter Fallback";src:local("Arial"),local("ArialMT");size-adjust:107.48%;ascent-override:90.14%;descent-override:22.44%;line-gap-override:0%;unicode-range:U+0000,U+0020-007E,U+00A0-00AC,U+00AE-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+2002,U+2009,U+200B,U+2013-2014,U+2018-201A,U+201C-201E,U+2022,U+2026,U+2032-2033,U+2039-203A,U+2044,U+20AC,U+2122,U+2191,U+2193,U+2212,U+FEFF}' );
 			},
 			2
 		);

@@ -13,7 +13,7 @@
  * the FluentCRM links, the email settings); metas not in the file (view counts and the like) are left alone. Before
  * anything is written the form as it was is saved to ~/backups/forms-before-<date>/<id>.json.
  * FluentCRM links name their list and tags by slug in the files (portable between sites); import turns them into this
- * site's IDs (a missing tag is made with its title from AW_CRM_TAG_TITLES), export turns IDs back into slugs.
+ * site's IDs (a missing tag is made with its title from MAILWEB_FCRM_TAG_TITLES), export turns IDs back into slugs.
  *
  * @package animal-writes
  */
@@ -43,7 +43,7 @@ $crm_feed = function ( $json, $to_ids ) {
 		if ( $to_ids && ! ctype_digit( (string) $x ) ) {
 			$row = $model->where( 'slug', $x )->first();
 			if ( ! $row && 'tag' === $kind ) {
-				$row = $tags->create( array( 'slug' => $x, 'title' => defined( 'AW_CRM_TAG_TITLES' ) ? ( AW_CRM_TAG_TITLES[ $x ] ?? $x ) : $x ) );
+				$row = $tags->create( array( 'slug' => $x, 'title' => defined( 'MAILWEB_FCRM_TAG_TITLES' ) ? ( MAILWEB_FCRM_TAG_TITLES[ $x ] ?? $x ) : $x ) );
 			}
 			return $row ? (string) $row->id : $x;
 		}

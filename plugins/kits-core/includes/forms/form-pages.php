@@ -13,7 +13,10 @@
  * - /thank-you/?form=<name>[&listing=<ID>]: where every form goes when it is sent (contact, volunteer,
  *   newsletter, claim, report), with the form's own success message and links back. noindex, not in the sitemap.
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core `includes/form-blocks.php` (18 Nov 2026); options, meta keys, tags, hooks and
+ * slugs are unchanged, and the old function names still work (back-compat wrappers).
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Where a volunteer sign-up comes from (S6.6). */
-function aw_volunteer_source() {
+function kits_volunteer_source() {
 	if ( is_front_page() ) {
 		return 'home';
 	}
@@ -40,49 +43,25 @@ function aw_volunteer_source() {
 }
 
 /** The volunteer block: the form behind "Register as a volunteer", or open (the /volunteer/ page). */
-function aw_block_volunteer( $a ) {
+function kits_block_volunteer( $a ) {
 	static $done = false; // one volunteer form per page
 	if ( $done ) {
 		return '';
 	}
 	$done = true;
-	$form = aw_volunteer_form( aw_volunteer_source() );
+	$form = kits_volunteer_form( kits_volunteer_source() );
 	if ( '' === $form ) { // no form (Fluent Forms off): no empty "Register as a volunteer" button either
 		return '';
 	}
-	aw_use_component_style( 'aw-volunteer' ); // #volunteer and its disclosure
+	kits_ff_style( 'aw-volunteer' ); // #volunteer and its disclosure
 	if ( ! empty( $a['open'] ) ) {
 		return '<div class="aw-volunteer" id="volunteer">' . $form . '</div>';
 	}
 	return kits_disclosure( 'volunteer', 'Register as a volunteer', $form );
 }
 
-/* ---------- Directory profile card (S7) ---------- */
-
-/** "Is this your organisation?" with Claim (two steps); shown only while the listing is not claimed (listing-template.php). */
-function aw_block_listing_help( $a, $id ) {
-	$listing = get_post( $id );
-	if ( ! $listing || 'aw_listing' !== $listing->post_type ) {
-		return '';
-	}
-	aw_use_component_style( 'aw-listing' ); // aw-listing-help, aw-claim-link (also on the Kits states sheet)
-	$verified = (bool) get_post_meta( $id, 'aw_verified', true );
-	return '<section class="aw-listing-help" aria-labelledby="aw-listing-help-h"><h2 id="aw-listing-help-h" class="has-x-large-font-size">Is this your organisation?</h2>'
-		. ( $verified ? '' : '<p>This listing comes from public records and hasn\'t been confirmed.</p>' )
-		. '<div class="aw-listing-help-actions">'
-		. '<a class="kit-btn aw-claim-link" href="' . esc_url( aw_claim_url( $id ) ) . '" rel="nofollow">Claim this listing</a>' // Report a mistake is in the Sources block
-		. '</div></section>';
-}
-
-/* ---------- Claim and Report pages (owner, 10 Oct 2026) ---------- */
-
-/** /claim/?listing=<ID>. */
-function aw_claim_url( $id ) {
-	return add_query_arg( 'listing', (int) $id, home_url( '/claim/' ) );
-}
-
 /** The listing fields a "Suggest an update" link can name (the Contact form's Field). */
-const AW_CORRECTION_FIELDS = array( 'picture', 'about', 'phone', 'email', 'address', 'hours' );
+const KITS_CORRECTION_FIELDS = array( 'picture', 'about', 'phone', 'email', 'address', 'hours' );
 
 /**
  * Report a mistake and Suggest an update link to the Contact form (owner, 12 Nov 2026: no Report a mistake reason in the
@@ -90,104 +69,32 @@ const AW_CORRECTION_FIELDS = array( 'picture', 'about', 'phone', 'email', 'addre
  * field. The form fills the Message box from the link and saves the item's ID and path in the hidden fields report_item
  * and report_path (reports.php). Escape the result once, where it is printed.
  */
-function aw_report_url( $id, $field = '' ) {
-	$field = in_array( $field, AW_CORRECTION_FIELDS, true ) ? $field : '';
+function kits_report_url( $id, $field = '' ) {
+	$field = in_array( $field, KITS_CORRECTION_FIELDS, true ) ? $field : '';
 	return add_query_arg( array_filter( array( 'about' => 'general', 'item' => (int) $id, 'field' => $field ) ), home_url( '/contact/' ) );
 }
 // /report/ and /remove-my-data/ are Rank Math redirects to the Contact reasons; Rank Math keeps the query string, so
 // /report/?item=<ID> and the older /report/?listing=<ID> still name the item (reports.php reads both).
-
-/** The published listing a form page is about (?listing=), or null. */
-function aw_form_page_listing() {
-	$listing = get_post( absint( wp_unslash( $_GET['listing'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	return $listing && 'aw_listing' === $listing->post_type && 'publish' === $listing->post_status ? $listing : null;
-}
-
 /** Which item the page is about: its name (linked back to it) and, for a listing, its place; otherwise its type. */
-function aw_form_page_for( $listing ) {
-	aw_use_component_style( 'aw-forms' ); // aw-form-for
-	$place = 'aw_listing' !== $listing->post_type ? ( AW_REPORT_TYPES[ $listing->post_type ] ?? '' ) : ( function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $listing->ID ) ) ) ) : '' );
+function kits_form_page_for( $listing ) {
+	kits_ff_style( 'aw-forms' ); // aw-form-for
+	$place = 'aw_listing' !== $listing->post_type ? ( KITS_REPORT_TYPES[ $listing->post_type ] ?? '' ) : ( function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $listing->ID ) ) ) ) : '' );
 	return '<p class="aw-form-for"><a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( get_the_title( $listing ) ) . '</a>'
 		. ( '' !== $place ? '<span>' . esc_html( $place ) . '</span>' : '' ) . '</p>';
 }
 
-/**
- * /claim/ opened on its own (owner, 12 Oct 2026: a page to register a claim): find your organisation by name, then claim it.
- * Results link to /claim/?listing=ID, which shows the claim form. Not listed yet → add it through the Contact form.
- */
-function aw_claim_finder() {
-	$q    = sanitize_text_field( wp_unslash( $_GET['org'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$html = '<form class="kit-form aw-claim-find" method="get" action="' . esc_url( home_url( '/claim/' ) ) . '" role="search">'
-		. '<p class="kit-field"><label for="aw-claim-org">Organisation name</label><input id="aw-claim-org" type="search" name="org" value="' . esc_attr( $q ) . '" required minlength="3" autocomplete="organization"></p>'
-		. '<p><button class="kit-btn" type="submit">Find your organisation</button></p></form>';
-	if ( mb_strlen( $q ) >= 3 ) {
-		$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 's' => $q, 'numberposts' => 20, 'fields' => 'ids', 'orderby' => 'relevance' ) );
-		if ( $ids ) {
-			$html .= '<ul class="aw-claim-results">';
-			foreach ( $ids as $id ) {
-				$place = function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $id ) ) ) ) : '';
-				$html .= '<li><a href="' . esc_url( add_query_arg( 'listing', $id, home_url( '/claim/' ) ) ) . '"><strong>' . esc_html( get_the_title( $id ) ) . '</strong>' . ( $place ? ' <span class="aw-place">' . kits_icon( 'directory' ) . esc_html( $place ) . '</span>' : '' ) . '</a></li>';
-			}
-			$html .= '</ul>';
-		} else {
-			$html .= '<p role="status">No listing matches “' . esc_html( $q ) . '”.</p>';
-		}
-	}
-	return $html . '<p><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Not listed yet? Add your organisation</a></p>';
-}
-
-/**
- * /claim/?listing=<ID>: the listing's own head band (owner, 31 Oct 2026): breadcrumbs … › {Listing} › Claim (the trail
- * is aw-seo-extras' breadcrumbs.php), its name, logo, types and place, then the intro. Without a listing: "Claim a listing".
- */
-function aw_claim_head_band() {
-	$listing = aw_form_page_listing();
-	$crumbs  = function_exists( 'rankweb_breadcrumbs_claim' ) ? rankweb_breadcrumbs_claim() : '';
-	if ( ! $listing ) {
-		return aw_head_band( array( 'crumbs' => $crumbs, 'title' => 'Claim a listing', 'title_class' => 'wp-block-post-title' ) );
-	}
-	$id   = $listing->ID;
-	$meta = '';
-	foreach ( array_slice( function_exists( 'aw_item_type_terms' ) ? aw_item_type_terms( $id ) : array(), 0, 3 ) as $t ) { // as on the listing page: at most 3 types
-		$meta .= aw_item_chip( $t );
-	}
-	foreach ( function_exists( 'aw_item_places' ) ? aw_item_places( $id ) : array() as $p ) {
-		$st    = 'district' === $p->kind && function_exists( 'aw_place_state' ) ? aw_place_state( $p->state ) : null;
-		$meta .= '<a class="aw-item-place" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
-	}
-	$logo = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'thumbnail', array( 'class' => 'aw-claim-logo', 'alt' => '', 'loading' => 'eager' ) ) : '';
-	return aw_head_band(
-		array(
-			'crumbs'      => $crumbs,
-			'title'       => wp_strip_all_tags( get_the_title( $listing ) ),
-			'title_class' => 'wp-block-post-title',
-			'icon'        => $logo,
-			'note'        => ( '' !== $meta ? '<div class="aw-item-meta aw-claim-meta">' . $meta . '</div>' : '' )
-				. '<p class="kit-section-desc">People looking for help find you here. Claim your listing to correct your phone, email, services and logo, so they reach the right place. Free, checked by hand, usually within 4 to 5 days.</p>',
-		)
-	);
-}
-
-add_shortcode(
-	'aw_claim_page',
-	function () {
-		$listing = aw_form_page_listing();
-		aw_use_component_style( 'aw-listing' ); // aw-claim-find, aw-claim-results, aw-claim-form
-		return '<div class="aw-form-page" id="claim">' . ( $listing ? aw_claim_form( $listing ) : aw_claim_finder() ) . '</div>'; // the listing is named in the head band
-	}
-);
 add_shortcode(
 	'aw_report_page',
 	function () {
-		$item = aw_report_item( absint( wp_unslash( $_GET['item'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="aw-form-page" id="report">' . ( $item ? aw_form_page_for( $item ) : '' ) . aw_report_form( $item, sanitize_key( wp_unslash( $_GET['reason'] ?? '' ) ) ) . '</div>'; // phpcs:ignore WordPress.Security.NonceVerification
+		$item = kits_report_item( absint( wp_unslash( $_GET['item'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		return '<div class="aw-form-page" id="report">' . ( $item ? kits_form_page_for( $item ) : '' ) . kits_report_form( $item, sanitize_key( wp_unslash( $_GET['reason'] ?? '' ) ) ) . '</div>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}
 );
 
 /* ---------- Thank-you page ---------- */
 
 /** Forms that land on /thank-you/: ?form= => [analytics name, success heading, line] (each form's own success message). */
-function aw_thanks_forms() {
+function kits_ff_thanks_forms() {
 	return array(
 		'contact'     => array( 'contact', 'Message sent.', '' ),
 		'volunteer'   => array( 'volunteer', 'Thank you for signing up.', 'We will contact you when there is work in your area. You can ask us to delete your details at any time.' ),
@@ -197,8 +104,8 @@ function aw_thanks_forms() {
 }
 
 /** The thank-you page's head (owner, 31 Oct 2026): the form's success heading as the H1 and its line as the description; null for no known form. */
-function aw_thanks_head() {
-	$forms = aw_thanks_forms();
+function kits_ff_thanks_head() {
+	$forms = kits_ff_thanks_forms();
 	$form  = function_exists( 'kits_thanks_form' ) ? kits_thanks_form() : '';
 	if ( ! isset( $forms[ $form ] ) ) {
 		return null;
@@ -210,15 +117,15 @@ function aw_thanks_head() {
 add_shortcode(
 	'aw_thank_you',
 	function () {
-		aw_use_component_style( 'aw-hubs' ); // aw-thanks-links
+		kits_ff_style( 'aw-hubs' ); // aw-thanks-links
 		$form  = kits_thanks_form();
-		$forms = aw_thanks_forms();
+		$forms = kits_ff_thanks_forms();
 		$links = '';
 		if ( ! isset( $forms[ $form ] ) ) {
 			return '<p class="aw-thanks-links"><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/' ) ) . '">Home</a></p>';
 		}
 		if ( 'claim' === $form ) {
-			$listing = aw_form_page_listing();
+			$listing = function_exists( 'directoryweb_form_page_listing' ) ? directoryweb_form_page_listing() : null;
 			$links  .= $listing ? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( 'Back to ' . get_the_title( $listing ) ) . '</a>' : '';
 		} else {
 			$links .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/' ) ) . '">Home</a>';
@@ -234,9 +141,9 @@ add_shortcode(
 			? '<section class="aw-thanks-more"><h2 class="has-large-font-size">Choose your topics (optional)</h2><div class="kit-form aw-form-ff aw-newsletter-full-form" data-kit-form="newsletter_full">' . do_shortcode( '[fluentform id="' . $full . '"]' ) . '</div></section>'
 			: '';
 		if ( '' !== $more ) {
-			aw_use_component_style( 'aw-forms' ); // the full newsletter form carries aw-form-ff
+			kits_ff_style( 'aw-forms' ); // the full newsletter form carries aw-form-ff
 		}
-		// The heading and its line are the head band (aw_thanks_head()); the page keeps the analytics marker only.
+		// The heading and its line are the head band (kits_ff_thanks_head()); the page keeps the analytics marker only.
 		return '<div class="aw-thanks" data-kit-thanks="' . esc_attr( $forms[ $form ][0] ) . '" hidden></div>' . $more
 			. ( $links ? '<p class="aw-thanks-links">' . $links . '</p>' : '' );
 	}
@@ -290,7 +197,7 @@ add_filter(
 		if ( false !== strpos( $c, 'aw-take-part-card--claim' ) && is_singular( 'aw_listing' ) && ! get_post_meta( get_queried_object_id(), 'aw_verified', true ) ) {
 			return '';
 		}
-		aw_use_component_style( 'aw-single' ); // aw-take-part, aw-take-part-card
+		kits_ff_style( 'aw-single' ); // aw-take-part, aw-take-part-card
 		return $html;
 	},
 	10,

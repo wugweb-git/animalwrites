@@ -1,18 +1,29 @@
 <?php
 /**
- * Volunteer sign-up: the Fluent Forms form "Volunteer sign-up" (forms-fluentforms.php), the only form since 25 Oct 2026
+ * Volunteer sign-up: the Fluent Forms form "Volunteer sign-up" (Kits Core forms/fluentforms.php), the only form since 25 Oct 2026
  * (owner: the site's own form and its handler were removed). Each sign-up is a FluentCRM contact tagged Volunteer, by
  * the form's own FluentCRM link (owner, 24 Oct 2026: FluentCRM is the one volunteers table). The site's volunteers
- * table is a read-only backup (volunteers-db.php); the aw_volunteer post type stays registered for its old items.
+ * table is a read-only backup (volunteers.php); the aw_volunteer post type stays registered for its old items.
  *
- * @package animal-writes-core
+ * Volunteers table: the 1.0 campaign volunteers and the 2.0 sign-ups up to 24 Oct 2026, kept as a read-only backup.
+ *
+ * FluentCRM is the one volunteers table (owner, 24 Oct 2026): sign-ups write there only (volunteers.php) and the
+ * readers use it. Nothing writes to {prefix}aw_volunteers any more; its rows were copied into FluentCRM once with
+ * `wp aw vol-to-crm` (removed 25 Oct 2026, see git history). Nothing creates or upgrades the table any more (owner,
+ * 25 Oct 2026). It has no admin screen (owner,
+ * 25 Oct 2026); read it with WP-CLI.
+ *
+ * Moved from Animal Writes Core `includes/volunteers.php` and `volunteers-db.php` (18 Nov 2026); options, meta keys, tags, hooks and
+ * slugs are unchanged, and the old function names still work (back-compat wrappers).
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_VOL_ROLES = array(
+const KITS_VOL_ROLES = array(
 	'coordinate' => 'Coordinate volunteers in my city',
 	'letters'    => 'Write and post letters, and get others to',
 	'rescue'     => 'Rescue, foster or transport animals',
@@ -50,13 +61,13 @@ add_action(
 	}
 );
 
-/** The volunteer form (the block in form-blocks.php): the Fluent Forms form. $source: the page it is on (S6.6). */
-function aw_volunteer_form( $source = '' ) {
-	return aw_ff_form( 'volunteer', array( 'source' => $source ) );
+/** The volunteer form (the block in Kits Core forms/form-pages.php): the Fluent Forms form. $source: the page it is on (S6.6). */
+function kits_volunteer_form( $source = '' ) {
+	return kits_ff_form( 'volunteer', array( 'source' => $source ) );
 }
 
-/** A sign-up's values from submitted data (already unslashed); aw_ff_errors() checks the place fields with them. */
-function aw_volunteer_values( $in ) {
+/** A sign-up's values from submitted data (already unslashed); kits_ff_errors() checks the place fields with them. */
+function kits_volunteer_values( $in ) {
 	$roles = $in['roles'] ?? array();
 	return array(
 		'name'     => trim( sanitize_text_field( (string) ( $in['name'] ?? '' ) ) ),
@@ -67,12 +78,12 @@ function aw_volunteer_values( $in ) {
 		'district' => sanitize_title( (string) ( $in['district'] ?? '' ) ),
 		'consent'  => empty( $in['consent'] ) ? '' : '1',
 		'updates'  => ! empty( $in['nl_optin'] ), // the updates box as sent (recorded only; volunteers join either way)
-		'roles'    => array_values( array_intersect( array_keys( AW_VOL_ROLES ), array_map( 'sanitize_key', (array) $roles ) ) ),
+		'roles'    => array_values( array_intersect( array_keys( KITS_VOL_ROLES ), array_map( 'sanitize_key', (array) $roles ) ) ),
 	);
 }
 
 /** Server rules for a sign-up: field => message. */
-function aw_volunteer_errors( $v ) {
+function kits_volunteer_errors( $v ) {
 	list( $rules, $msgs ) = kits_dict_rules( array( 'name' => 'name', 'email' => 'email', 'phone' => 'phone', 'pincode' => 'pincode', 'state' => 'state', 'consent' => 'consent' ), array( 'name', 'email', 'state', 'consent' ) );
 	$msgs['consent']['required'] = 'Tick the box to agree';
 	$errors = kits_form_validate( $rules, $v, array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone', 'pincode' => 'PIN code', 'state' => 'State', 'consent' => 'Agreement' ), $msgs );
@@ -91,24 +102,24 @@ function aw_volunteer_errors( $v ) {
 	return $errors;
 }
 
-/* ---------- The update link's page: /update/?t=<token> (owner, 21 Oct 2026; the link: aw_update_link()) ---------- */
+/* ---------- The update link's page: /update/?t=<token> (owner, 21 Oct 2026; the link: mailweb_fcrm_update_link()) ---------- */
 
 /** [aw_volunteer_update]: the Volunteer form filled in from their FluentCRM contact, or why the link does not work. */
 add_shortcode(
 	'aw_volunteer_update',
 	function () {
-		$c = function_exists( 'aw_update_link_contact' ) ? aw_update_link_contact( sanitize_text_field( wp_unslash( $_GET['t'] ?? '' ) ) ) : 'invalid'; // phpcs:ignore WordPress.Security.NonceVerification
+		$c = function_exists( 'mailweb_fcrm_update_link_contact' ) ? mailweb_fcrm_update_link_contact( sanitize_text_field( wp_unslash( $_GET['t'] ?? '' ) ) ) : 'invalid'; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! is_object( $c ) ) {
 			return '<p>' . esc_html( 'expired' === $c ? 'This link has expired. Ask us for a new one at contact@animalwrites.in.' : 'This link does not work. Check that it is complete, or ask us for a new one at contact@animalwrites.in.' ) . '</p>';
 		}
-		return aw_ff_id( 'volunteer' ) ? '<p>Check your details and change what is different. Sending the form updates them.</p>' . aw_ff_form( 'volunteer', array( 'vol_contact' => $c ) ) : '<p>This form is not available right now.</p>' . aw_ff_missing( 'Volunteer sign-up', 'wp aw ff-form volunteer <form ID>' );
+		return kits_ff_id( 'volunteer' ) ? '<p>Check your details and change what is different. Sending the form updates them.</p>' . kits_ff_form( 'volunteer', array( 'vol_contact' => $c ) ) : '<p>This form is not available right now.</p>' . kits_ff_missing( 'Volunteer sign-up', 'wp aw ff-form volunteer <form ID>' );
 	}
 );
 
-/** The Volunteer form's fields, filled in from the update link's contact (forms-fluentforms.php calls this). */
-function aw_ff_update_values( $data, $form ) {
-	$c = function_exists( 'aw_ff_ctx' ) ? aw_ff_ctx( 'vol_contact' ) : null;
-	if ( ! $c || 'volunteer' !== aw_ff_key( $form ) ) {
+/** The Volunteer form's fields, filled in from the update link's contact (Kits Core forms/fluentforms.php calls this). */
+function kits_ff_update_values( $data, $form ) {
+	$c = function_exists( 'kits_ff_ctx' ) ? kits_ff_ctx( 'vol_contact' ) : null;
+	if ( ! $c || 'volunteer' !== kits_ff_key( $form ) ) {
 		return $data;
 	}
 	$f    = (array) $c->custom_fields();
@@ -211,6 +222,28 @@ add_filter(
 		}
 		$pic = '<figure class="aw-vol-side-photo">' . get_the_post_thumbnail( get_queried_object_id(), 'large', array( 'loading' => 'lazy' ) ) . '</figure>';
 		return (string) preg_replace( '/^(\s*<aside\b[^>]*>)/', '$1' . $pic, $html, 1 );
+	},
+	10,
+	2
+);
+
+/* ---------- The volunteers table (from volunteers.php) ---------- */
+const KITS_VOL_CAP = 'edit_aw_volunteers';
+
+/** Table name. */
+function kits_vol_table() {
+	global $wpdb;
+	return $wpdb->prefix . 'aw_volunteers';
+}
+
+// The old post-based screen is replaced by the table.
+add_filter(
+	'register_post_type_args',
+	function ( $args, $type ) {
+		if ( 'aw_volunteer' === $type ) {
+			$args['show_ui'] = false;
+		}
+		return $args;
 	},
 	10,
 	2

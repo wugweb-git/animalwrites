@@ -35,12 +35,14 @@ const DIRECTORYWEB_SERVICES = array(
 );
 
 /**
- * The Directory's tag slugs, from the sourcing lists (Kits Core's kits_sources_config(), section aw_listing).
+ * The Directory's tag slugs, from the sourcing lists (option aw_sources, section aw_listing): SourceWeb's
+ * sourceweb_sources_config() while SourceWeb is loaded (it seeds the option), else the option as stored.
  *
  * @return string[]
  */
 function directoryweb_section_tags(): array {
-	$c = function_exists( 'kits_sources_config' ) ? kits_sources_config() : array();
+	$c = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : get_option( 'aw_sources' );
+	$c = is_array( $c ) ? $c : array();
 	return array_values( (array) ( $c['sections'][ directoryweb_post_type() ]['tags'] ?? array() ) );
 }
 

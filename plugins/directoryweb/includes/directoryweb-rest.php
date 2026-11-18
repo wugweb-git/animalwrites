@@ -997,7 +997,7 @@ function directoryweb_rest_save_claim_form( WP_REST_Request $request ) {
 	if ( $id && ! isset( directoryweb_ff_forms()[ $id ] ) ) {
 		return new WP_Error( 'rest_invalid_param', __( 'No such form.', 'directoryweb' ), array( 'status' => 400 ) );
 	}
-	$opt   = defined( 'AW_FF_OPTION' ) ? AW_FF_OPTION : 'aw_ff_forms';
+	$opt   = defined( 'KITS_FF_OPTION' ) ? KITS_FF_OPTION : 'aw_ff_forms';
 	$ids   = directoryweb_claim_form_change( (array) get_option( $opt, array() ), $id );
 	$saved = null !== $ids;
 	if ( $saved ) {

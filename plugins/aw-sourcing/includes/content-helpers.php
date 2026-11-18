@@ -33,13 +33,13 @@ const SOURCEWEB_LEGAL_KINDS = array(
 const SOURCEWEB_CRON_STALE = 30 * MINUTE_IN_SECONDS;
 
 /**
- * Tag slugs a section uses (the sourcing lists, Kits Core's kits_sources_config()).
+ * Tag slugs a section uses (the sourcing lists, sourceweb_sources_config()).
  *
  * @param string $type Post type.
  * @return string[]
  */
 function sourceweb_section_tags( $type ): array {
-	$c = kits_sources_config();
+	$c = sourceweb_sources_config();
 	return array_values( (array) ( $c['sections'][ $type ]['tags'] ?? array() ) );
 }
 
@@ -50,7 +50,7 @@ function sourceweb_section_tags( $type ): array {
  * @return string[]
  */
 function sourceweb_section_categories( $type ): array {
-	$c    = kits_sources_config();
+	$c    = sourceweb_sources_config();
 	$cats = array_values( (array) ( $c['sections'][ $type ]['categories'] ?? array() ) );
 	return $cats ? $cats : (array) get_terms(
 		array(
@@ -70,7 +70,7 @@ function sourceweb_post_types(): array {
 	if ( function_exists( 'aw_post_types' ) ) {
 		return array_keys( aw_post_types() );
 	}
-	return array_keys( (array) kits_sources_config()['sections'] );
+	return array_keys( (array) sourceweb_sources_config()['sections'] );
 }
 
 /**

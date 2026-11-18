@@ -71,7 +71,7 @@ return array(
 			'format' => 'text',
 		),
 		'kits_testimonial_consent' => array(
-			'label'   => __( 'Consent date (YYYY-MM-DD)', 'kits-core' ),
+			'label'   => __( 'Consent date (DD-MM-YY)', 'kits-core' ),
 			'format'  => 'date',
 			'private' => true,
 		),

@@ -2,9 +2,10 @@
 /**
  * Names and site icons of the referring sources (Top referrers, AI referrals, the Pages columns).
  *
- * The icon comes from the publishers' icons (aw_favicon_url() in Kits Core) when the host is a known publisher, else
- * from option aw_si_ref_icons (host => attachment ID, 0 = tried and none found). That option fills on Kits Core's hourly
- * aw_fetch_favicons event, five hosts a run: Google's favicon service, then the host's /favicon.ico, saved once into
+ * The icon comes from the publishers' icons (aw_favicon_url() in SourceWeb) when the host is a known publisher, else
+ * from option aw_si_ref_icons (host => attachment ID, 0 = tried and none found). That option fills on the hourly
+ * aw_fetch_favicons event (SourceWeb's publisher icons run on it too; InsightWeb books it as well, so it runs without
+ * SourceWeb), five hosts a run: Google's favicon service, then the host's /favicon.ico, saved once into
  * the Media Library as "Favicon: host". Nothing is fetched while a page is drawn; until then a core dashicon shows.
  *
  * @package insightweb
@@ -186,7 +187,18 @@ function aw_si_ref_icons_wanted(): array {
 	return array_keys( $want );
 }
 
-// Kits Core's hourly favicon run: also fetch the icons of the referring sites (five a run at most).
+// The hourly favicon run, also booked here so the referrer icons fill without SourceWeb (the same event, booked once:
+// whoever comes first books it; SourceWeb's deactivation takes it off and this books it again on the next request).
+add_action(
+	'init',
+	function () {
+		if ( ! wp_next_scheduled( 'aw_fetch_favicons' ) ) {
+			wp_schedule_event( time() + 60, 'hourly', 'aw_fetch_favicons' );
+		}
+	}
+);
+
+// On the hourly favicon run: also fetch the icons of the referring sites (five a run at most).
 add_action(
 	'aw_fetch_favicons',
 	function () {

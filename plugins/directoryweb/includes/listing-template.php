@@ -80,7 +80,7 @@ function aw_listing_parts( $parts ) {
  */
 function aw_listing_na( $id, $field = '' ) {
 	return '<span class="aw-facts-na">' . esc_html__( 'Data not yet available', 'directoryweb' ) . '</span>'
-		. ( function_exists( 'aw_report_url' ) ? ' <a class="aw-facts-suggest" href="' . esc_url( aw_report_url( $id, $field ) ) . '" rel="nofollow">' . esc_html__( 'Suggest an update', 'directoryweb' ) . '</a>' : '' );
+		. ( function_exists( 'kits_report_url' ) ? ' <a class="aw-facts-suggest" href="' . esc_url( kits_report_url( $id, $field ) ) . '" rel="nofollow">' . esc_html__( 'Suggest an update', 'directoryweb' ) . '</a>' : '' );
 }
 
 /** "valid until <date>", or "expired <date>" in the warning colour once the date has passed (today, India). */

@@ -1,7 +1,7 @@
 <?php
 /**
  * Kits' own capability, manage_kits. It opens the Kits menu, Home and Help. Theme Options and Settings keep
- * manage_options (they save through options.php and /wp/v2/settings); Tools keeps edit_theme_options.
+ * manage_options (they save through options.php and /wp/v2/settings); Tools too (its import, reset and undo write those options).
  *
  * Nobody loses access:
  * - Granted to administrator and to every role that holds manage_options, on activation and once on the first admin
