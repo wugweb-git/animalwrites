@@ -39,6 +39,8 @@ function rankweb_faq_data_ready( $type ) {
 	if ( isset( $ready[ $type ] ) ) {
 		return $ready[ $type ];
 	}
+	// Every function outside this file and faq.php that a group's answers, question and hidden callbacks call, directly
+	// or through the helpers here. A new call in an answer builder goes in its group's list too.
 	$needs          = array(
 		'aw_listing' => array( 'aw_lf', 'aw_date', 'aw_listing_phones', 'aw_tel_url', 'aw_listing_hours', 'aw_listing_location_text', 'aw_listing_place', 'aw_listing_rel', 'aw_listing_service_names', 'aw_listing_type_services', 'aw_listing_type_slugs', 'aw_listing_types', 'aw_item_place', 'aw_place_count', 'aw_place_counts', 'aw_place_state', 'aw_directory_url', 'aw_unverified_list', 'aw_unverified_norm', 'kits_preview_only_ids', 'kits_term_url' ),
 		'aw_legal'   => array( 'aw_legal_kinds', 'aw_item_issuer', 'aw_date' ),

@@ -23,8 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( function_exists( 'rankweb_breadcrumbs' ) ) {
-	return; // Loaded already (by RankWeb, or by Animal Writes Core from another path).
+if ( function_exists( 'rankweb_breadcrumbs' ) || function_exists( 'aw_breadcrumbs' ) ) {
+	return; // Loaded already (by RankWeb, or by Animal Writes Core from another path), or an older Core still shows its own trail: one trail per page.
 }
 
 /**
