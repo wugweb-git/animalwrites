@@ -741,7 +741,11 @@ function Services() {
  * [A] admin. The service keys (insightweb/v1/keys): each key's state only, never its value. A new value replaces the
  * saved one, an empty box keeps it, "Remove" clears it; a key set in wp-config.php cannot be changed here.
  */
-function Keys() {
+/**
+ * @param {Object}   props
+ * @param {Function} props.onDirty ( slug, unsaved ) when that changes.
+ */
+function Keys( { onDirty } ) {
 	const [ list, setList ] = useState( null );
 	const [ error, setError ] = useState( '' );
 	const [ values, setValues ] = useState( {} );
@@ -755,17 +759,21 @@ function Keys() {
 			.catch( ( e ) => setError( errText( e ) ) );
 	};
 	useEffect( load, [] );
+	const cleared = Object.keys( clear ).filter( ( k ) => clear[ k ] );
+	// A ticked Remove wins, so a value typed for that key is not sent.
+	const typed = Object.fromEntries(
+		Object.entries( values ).filter(
+			( [ k, v ] ) => '' !== v.trim() && ! clear[ k ]
+		)
+	);
+	const dirty = Object.keys( typed ).length > 0 || cleared.length > 0;
+	useEffect( () => onDirty( KEYS, dirty ), [ dirty, onDirty ] );
 	if ( error ) {
 		return <ErrorState message={ error } onRetry={ load } />;
 	}
 	if ( ! list ) {
 		return <LoadingState />;
 	}
-	const typed = Object.fromEntries(
-		Object.entries( values ).filter( ( [ , v ] ) => '' !== v.trim() )
-	);
-	const cleared = Object.keys( clear ).filter( ( k ) => clear[ k ] );
-	const dirty = Object.keys( typed ).length > 0 || cleared.length > 0;
 	const save = () => {
 		setBusy( true );
 		setMsg( null );
@@ -824,7 +832,9 @@ function Keys() {
 							isSet={ '' !== k.where }
 							stateText={ k.state }
 							value={ values[ k.name ] ?? '' }
-							disabled={ 'config' === k.where }
+							disabled={
+								'config' === k.where || !! clear[ k.name ]
+							}
 							onChange={ ( v ) =>
 								setValues( ( o ) => ( {
 									...o,
@@ -956,7 +966,11 @@ function Settings() {
 				onChange={ setOpen }
 			/>
 			{ SERVICES === open && <Services /> }
-			{ KEYS === open && app.admin && <Keys /> }
+			{ app.admin && (
+				<div hidden={ KEYS !== open }>
+					<Keys onDirty={ markDirty } />
+				</div>
+			) }
 			{ MORE === open && (
 				<SectionCard
 					id={ MORE }

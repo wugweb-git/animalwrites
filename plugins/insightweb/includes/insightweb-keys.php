@@ -134,7 +134,7 @@ function insightweb_keys_sanitize( $value ): array {
 		if ( in_array( $name, $clear, true ) ) {
 			continue;
 		}
-		$in = $value[ $name ] ?? '';
+		$in = 'config' === insightweb_key_where( $name ) ? '' : ( $value[ $name ] ?? '' ); // wp-config.php wins: nothing typed is kept for it.
 		$v  = is_scalar( $in ) ? mb_substr( (string) preg_replace( '/\s+/', '', sanitize_text_field( (string) $in ) ), 0, 512 ) : '';
 		if ( '' !== $v ) {
 			$out[ $name ] = $v;
@@ -231,8 +231,12 @@ function insightweb_rest_save_keys( WP_REST_Request $request ): WP_REST_Response
 			$in[ (string) $name ] = $value;
 		}
 	}
-	$in['__clear'] = array_values( array_intersect( array_map( 'strval', (array) $request->get_param( 'clear' ) ), $known ) );
-	$changed       = update_option( INSIGHTWEB_KEYS_OPTION, $in, false );
+	$clear   = array_values( array_intersect( array_map( 'strval', (array) $request->get_param( 'clear' ) ), $known ) );
+	$changed = false;
+	if ( $clear || array_filter( $in, fn( $v ) => '' !== trim( $v ) ) ) { // Nothing typed or ticked: nothing to write.
+		$in['__clear'] = $clear;
+		$changed       = update_option( INSIGHTWEB_KEYS_OPTION, $in, false );
+	}
 	return rest_ensure_response(
 		insightweb_keys_payload() + array(
 			'message' => $changed ? __( 'Keys saved.', 'insightweb' ) : __( 'Nothing changed.', 'insightweb' ),
