@@ -63,7 +63,7 @@ add_action(
 		if ( '' === $css ) {
 			return;
 		}
-		foreach ( array( apply_filters( 'kits_style_tokens_handle', 'kit-tokens' ), 'global-styles' ) as $handle ) {
+		foreach ( array( apply_filters( 'kits_style_tokens_handle', 'kits-tokens' ), 'global-styles' ) as $handle ) {
 			if ( wp_style_is( $handle, 'enqueued' ) ) {
 				wp_add_inline_style( $handle, $css );
 				return;
