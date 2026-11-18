@@ -40,34 +40,6 @@ function kits_field_dict() {
 }
 
 /**
- * A field from the dictionary, with this form's changes (name, label, required, options, value, hint, messages…).
- *
- * @param string $form Form key.
- * @param string $key  Dictionary key.
- * @param array  $over Changes for this form.
- * @return string
- */
-function kits_dict_field( $form, $key, $over = array() ) {
-	$d     = kits_field_dict()[ $key ] ?? array();
-	$attrs = array_merge( (array) ( $d['attrs'] ?? array() ), isset( $d['placeholder'] ) ? array( 'placeholder' => $d['placeholder'] ) : array(), (array) ( $over['attrs'] ?? array() ) );
-	$msgs  = array_merge( (array) ( $d['messages'] ?? array() ), (array) ( $over['messages'] ?? array() ) );
-	unset( $over['attrs'], $over['messages'] );
-	$f = array_merge(
-		array(
-			'name'     => $key,
-			'label'    => $d['label'] ?? ucfirst( $key ),
-			'type'     => $d['type'] ?? 'text',
-			'icon'     => $d['icon'] ?? '',
-			'required' => ! empty( $d['required'] ),
-		),
-		$over
-	);
-	$f['attrs']    = $attrs;
-	$f['messages'] = $msgs;
-	return aw_field( $form, $f );
-}
-
-/**
  * Server rules and messages for a set of fields: [field => dictionary key], with the required ones listed.
  *
  * @return array{0: array, 1: array} rules, messages.

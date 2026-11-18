@@ -78,5 +78,6 @@ foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 
 delete_site_transient( 'kits_update_release' );
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
+wp_unschedule_hook( 'aw_fetch_favicons' ); // the hourly favicon run (attribution.php)
 
 delete_option( 'kits_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.
