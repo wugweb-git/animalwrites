@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Register the Media group taxonomy for attachments. */
 function aw_media_group_register() {
 	register_taxonomy(
-		'kits_media_group',
+		KITS_MEDIA_GROUP,
 		'attachment',
 		array(
 			'labels'               => array(
@@ -95,13 +95,13 @@ function aw_media_group_for( $title, $file, $mime, $parent_type ) {
  * @param int $attachment_id Attachment ID.
  */
 function aw_media_group_assign( $attachment_id ) {
-	if ( wp_get_object_terms( $attachment_id, 'kits_media_group', array( 'fields' => 'ids' ) ) ) {
+	if ( wp_get_object_terms( $attachment_id, KITS_MEDIA_GROUP, array( 'fields' => 'ids' ) ) ) {
 		return;
 	}
 	$post   = get_post( $attachment_id );
 	$file   = (string) get_attached_file( $attachment_id );
 	$parent = ( $post && $post->post_parent ) ? (string) get_post_type( $post->post_parent ) : '';
 	$name   = aw_media_group_for( $post ? $post->post_title : '', basename( $file ), $post ? $post->post_mime_type : '', $parent );
-	wp_set_object_terms( $attachment_id, $name, 'kits_media_group' );
+	wp_set_object_terms( $attachment_id, $name, KITS_MEDIA_GROUP );
 }
 add_action( 'add_attachment', 'aw_media_group_assign', 20 );

@@ -7,9 +7,11 @@
  * Each term's meta aw_campaign_page holds its campaign's post ID; the old tag addresses (/tag/campaign-...) 301 to it.
  *
  * Used by: the Media & PR Campaign filter (systems.php), related items (related.php), the campaign record schema
- * (aw-seo-extras schema.php), campaign pages' query lists ("taxQuery":{"kits_campaign_link":[id]}; blocks saved
- * before 18 Nov 2026 name aw_campaign_link, mapped by taxonomy-rename.php; systems.php restores them), and the
- * stock-photo rule (cc0-images.php). Renamed from aw_campaign_link on 18 Nov 2026 (taxonomy-rename.php).
+ * (aw-seo-extras schema.php), campaign pages' query lists ("taxQuery":{"<name>":[id]}, systems.php restores them),
+ * and the stock-photo rule (cc0-images.php).
+ *
+ * Name: KITS_CAMPAIGN_LINK, aw_campaign_link until the rename on Tools → Taxonomy rename, kits_campaign_link after it
+ * (owner, 18 Nov 2026; taxonomy-rename.php). Query Loops saved under either name keep working.
  *
  * @package animal-writes-core
  */
@@ -18,7 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const KITS_CAMPAIGN_LINK       = 'kits_campaign_link';
 const KITS_CAMPAIGN_LINK_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_press', 'aw_opportunity', 'aw_campaign' );
 
 add_action(

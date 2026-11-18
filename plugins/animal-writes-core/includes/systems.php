@@ -98,7 +98,7 @@ const AW_LIST_FILTERS = array(
 	'post'           => array( array( 'tag', 'resource-kind', 'Type' ), array( 'category_name', 'category', 'Category' ) ), // resource-kind: the Resource type, plus "Sponsored" (a label) when an item has it
 	'aw_opportunity' => array( array( 'tag', 'post_tag', 'Type' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
 	'aw_campaign'    => array( array( 'category_name', 'category', 'Category' ) ),
-	'aw_press'       => array( array( 'format', 'press-format', 'Format' ), array( 'campaign', 'kits_campaign_link', 'Campaign' ) ), // Articles · Videos · Social posts; Campaign: the item's campaign link (owner, 17 and 20 Oct 2026)
+	'aw_press'       => array( array( 'format', 'press-format', 'Format' ), array( 'campaign', KITS_CAMPAIGN_LINK, 'Campaign' ) ), // Articles · Videos · Social posts; Campaign: the item's campaign link (owner, 17 and 20 Oct 2026)
 );
 /** Issuer values that are courts (shown darker on Library cards). */
 const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );

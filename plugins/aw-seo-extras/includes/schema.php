@@ -710,7 +710,7 @@ function aw_campaign_record_schema( $id ) {
 	$about = array( array( '@id' => (string) ( $own['@id'] ?? $url . '#campaign' ) ) );
 	$tags  = function_exists( 'aw_campaign_links' ) ? wp_list_pluck( aw_campaign_links( $id ), 'term_id' ) : array(); // the campaign's own link (campaign-links.php)
 	if ( $tags && function_exists( 'aw_article_nodes' ) ) {
-		$docs = get_posts( array( 'post_type' => 'aw_legal', 'post_status' => 'publish', 'numberposts' => 20, 'tax_query' => array( array( 'taxonomy' => 'kits_campaign_link', 'terms' => array( (int) $tags[0] ) ) ), 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$docs = get_posts( array( 'post_type' => 'aw_legal', 'post_status' => 'publish', 'numberposts' => 20, 'tax_query' => array( array( 'taxonomy' => ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : '' ), 'terms' => array( (int) $tags[0] ) ) ), 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		foreach ( $docs as $d ) {
 			$n = aw_article_nodes( $d );
 			if ( ! empty( $n[0]['@id'] ) ) {

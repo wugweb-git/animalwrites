@@ -1580,8 +1580,8 @@ function sourceweb_rest_rules_sections() {
 	foreach ( aw_rules_tag_rules() as $slug => $r ) {
 		$slug = (string) $slug;
 		$term = get_term_by( 'slug', $slug, 'post_tag' );
-		if ( ! $term && 0 === strpos( $slug, 'campaign-' ) && taxonomy_exists( 'kits_campaign_link' ) ) {
-			$term = get_term_by( 'slug', $slug, 'kits_campaign_link' );
+		if ( ! $term && 0 === strpos( $slug, 'campaign-' ) && taxonomy_exists( ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : '' ) ) ) {
+			$term = get_term_by( 'slug', $slug, ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : '' ) );
 		}
 		$in = array();
 		foreach ( $secs as $t => $sec ) {
