@@ -22,7 +22,7 @@
  * Routes (the workers' user, as aw/v1/search-insights): POST aw/v1/social/intake, GET aw/v1/social/campaigns.
  * Contract: docs/plugin-map.md ("Social posts routes").
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -74,9 +74,15 @@ add_action(
 );
 
 add_action(
-	'admin_menu',
-	fn() => add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
-	aw_core_menu_priority( 'aw-modules' ) // order: aw_core_screens() (admin-home.php)
+	'plugins_loaded', // the menu position reads the site's screens (kits_site_screens), which Animal Writes Core registers after Kits Core has loaded this file
+	function () {
+		add_action(
+			'admin_menu',
+			fn() => add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
+			aw_core_menu_priority( 'aw-modules' ) // order: aw_core_screens() (admin-home.php)
+		);
+	},
+	20
 );
 
 /** Section text. */
@@ -102,7 +108,7 @@ function aw_social_settings_field( $args ) {
 /** The Modules screen (Settings API, core markup). */
 function aw_modules_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'animal-writes-core' ), 403 );
+		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'kits-core' ), 403 );
 	}
 	echo '<div class="wrap"><h1>' . esc_html( 'Modules' ) . '</h1>';
 	aw_core_screen_nav( 'aw-modules' );
@@ -1134,7 +1140,7 @@ function aw_social_embed_script() {
 	}
 	$on = true;
 	wp_enqueue_style( 'wp-block-embed' ); // core's embed frame (16:9) for the YouTube player
-	wp_register_script( 'aw-social-embed', false, array(), AW_CORE_VERSION, true );
+	wp_register_script( 'aw-social-embed', false, array(), KITS_CORE_LOADED, true );
 	wp_enqueue_script( 'aw-social-embed' );
 	wp_add_inline_script(
 		'aw-social-embed',

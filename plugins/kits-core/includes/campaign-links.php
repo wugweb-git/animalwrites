@@ -13,7 +13,7 @@
  * Name: KITS_CAMPAIGN_LINK, aw_campaign_link until the rename on Tools → Taxonomy rename, kits_campaign_link after it
  * (owner, 18 Nov 2026; taxonomy-rename.php). Query Loops saved under either name keep working.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

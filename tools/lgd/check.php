@@ -7,7 +7,7 @@
 global $wpdb;
 $rows = $wpdb->get_results( "SELECT pm.post_id id, pm.meta_key k, pm.meta_value v, p.post_title t, p.post_type pt FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id AND p.post_status <> 'trash' WHERE pm.meta_key IN ('aw_state_code','aw_district_code')" );
 $old  = array();
-$bak  = aw_private_dir() . '/locations-backup-2026-10-08.json';
+$bak  = kits_private_dir() . '/locations-backup-2026-10-08.json';
 foreach ( (array) ( json_decode( (string) @file_get_contents( $bak ), true )['terms'] ?? array() ) as $t ) {
 	$old[ (int) $t['term_id'] ] = $t['name'];
 }

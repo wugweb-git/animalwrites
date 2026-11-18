@@ -52,7 +52,6 @@ require_once AW_CORE_DIR . 'includes/deploy-status.php'; // /aw/v1/deploy-status
 require_once AW_CORE_DIR . 'includes/keep-modified.php'; // technical saves keep the modified date (1 Nov 2026)
 // The content types, hubs, blocks, tags, meta, SCF, bindings, related and the rest of the content layer load from the theme's site
 // layer (themes/kits-by-wugweb/assets/site/content/, loaded by assets/site/site.php); the taxonomy rename is Kits Core's.
-require_once AW_CORE_DIR . 'includes/campaign-links.php';
 // DirectoryWeb (the Directory: listings, places, claims, map, Find help, and its admin). Loaded from the sibling plugin
 // folder when it is not active on its own, here, where the Directory files were loaded before (the Directory is used by
 // the files below). If the folder is missing, one notice says so; the Directory pieces that follow need it.
@@ -70,27 +69,15 @@ if ( ! defined( 'DIRECTORYWEB_LOADED' ) ) {
 		);
 	}
 }
-require_once AW_CORE_DIR . 'includes/issuers.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/media-compat.php'; // old aw_ names of the media functions that moved to Kits Core, RankWeb and SourceWeb (18 Nov 2026)
-require_once AW_CORE_DIR . 'includes/campaigns.php';
-require_once AW_CORE_DIR . 'includes/campaign-tools.php';
-require_once AW_CORE_DIR . 'includes/campaign-short.php'; // /lab, /diwali...: a campaign's short link, 301 to its page
-require_once AW_CORE_DIR . 'includes/campaign-letters.php';
-require_once AW_CORE_DIR . 'includes/campaign-record.php';
-require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
-require_once AW_CORE_DIR . 'includes/item-head.php';
 require_once AW_CORE_DIR . 'includes/research-citation.php';
 require_once AW_CORE_DIR . 'includes/not-found.php';
-require_once AW_CORE_DIR . 'includes/press.php';
-require_once AW_CORE_DIR . 'includes/social-posts.php'; // Social posts (aw_social, under News): off by default, Kits → Modules (owner, 2 Nov 2026)
 require_once AW_CORE_DIR . 'includes/uninstall-setting.php'; // Kits → Modules → Animal Writes Core data (the rest of Modules is Kits Core's)
-require_once AW_CORE_DIR . 'includes/home.php'; // Home: sections in the theme template, hero, FAQ section
-require_once AW_CORE_DIR . 'includes/team-dates.php';
 require_once AW_CORE_DIR . 'includes/dashboard-activity.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
 require_once AW_CORE_DIR . 'includes/error-count.php';

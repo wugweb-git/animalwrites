@@ -98,14 +98,14 @@ These no longer crash without aw-core, but stop working:
    `j M Y`, "19 Nov 2026") moved from aw-core's `systems.php` to the theme's site layer
    (`themes/kits-by-wugweb/assets/site/site.php`), so it stays on this site and never ships in a distributed theme.
    The `AW_DATE_FORMAT` constant is still defined there and in aw-core, for aw-core's own callers.
-3. **Claims:** the Fluent Forms claim form and review (`forms-fluentforms.php`), the private upload folder
-   (`aw_private_dir`, `campaigns.php`) and the FluentCRM tag (`fluentcrm.php`).
-4. **Issuers** (`issuers.php`): the Library issuer label written by SourceWeb's ingest and read by auto-review.
+3. **Claims:** done 19 Nov 2026 (section 5): the claim form and review and the FluentCRM tag had already moved
+   (Kits Core `forms/`, MailWeb); the private upload folder is now Kits Core's `kits_private_dir()`.
+4. **Issuers** (`issuers.php`): done 19 Nov 2026, now SourceWeb's `includes/issuers.php` (section 5).
 5. **Cron health and Run now** (`cron-health.php`: `aw_dispatch_workflow`, `aw_cron_last`), **picture downloads**
    (`cc0-images.php`: `aw_source_download`), **research credits** (`research-citation.php`) and the **PHP error
    report** (`error-count.php`), read by SourceWeb and InsightWeb.
-6. **Find help and item heads** (`item-head.php`: `aw_item_kind`, `aw_item_here`, `aw_item_date_ts`), campaign roles
-   (`model.php`), press (`press.php`).
+6. **Find help and item heads** (`item-head.php`), press (`press.php`): done 19 Nov 2026 (section 5). Campaign roles
+   (`model.php`) are still aw-core's (content types session).
 7. **Loading.** aw-core loads Kits Core, DirectoryWeb, SourceWeb and InsightWeb from the deploy folder. On live all of
    them are also active in Plugins, so deleting aw-core leaves them running. Check this again just before the delete.
 8. Callers outside these four plugins (`tools/`, MailWeb, PlanWeb) are listed in `docs/aw-core-callers.md` and are
@@ -231,6 +231,50 @@ the same `init` priority, the content layer's callbacks now run after the plugin
   slugs and law names, so they sit in the site layer until RankWeb has settings for them.
 - **Files nobody owns:** `plugins/animal-writes-core/assets/css/*` (campaign sheets, read by `block-states.php`),
   `assets/js/aw-analytics*.js`, `data/`, `languages/` and `uninstall.php` (which mentions `aw_law_mentions` as a string).
+## 5. Campaign, press, social, Home, item heads, claims, issuers, team dates (19 Nov 2026)
+
+Owner, 18 Nov 2026: nothing stays in aw-core. This part moves 13 files out of `plugins/animal-writes-core/includes/`.
+**Every file moved whole and unchanged in behaviour**: function, constant, block, shortcode, post-type, taxonomy, meta,
+option, cron, route and slug names are the same (`aw_campaign`, `aw_campaign_link`, `aw_press`, `aw_social`, `aw_issuer`,
+`aw_team_dates` ...), so no data, URL or schedule changes and no caller needed a new name. The `aw_` function names
+(`aw_camp_state()`, `aw_press_list()` ...) were **not** renamed in this change: about 400 call sites in six plugins, the
+theme, `edit-screen-map.json` (callbacks by name) and the tools use them, and a rename with no WordPress to run is the
+riskier half. Renaming them to `kits_` / plugin-slug names is a mechanical follow-up once aw-core is gone (no aliases
+are needed for that, since nothing outside calls them through aw-core any more). Aliases left by this change: none.
+Text domains in the moved files are now the new home's (`kits-core`, `kits-by-wugweb`, `aw-sourcing`, `planweb`).
+
+### Home table
+
+| aw-core file | Contents | Callers outside the file (audit) | New home |
+|---|---|---|---|
+| `campaigns.php` | `aw_private_dir()`; shortcode `[aw_countdown]` | `aw_private_dir`: Kits Core forms/fluentforms.php (4), DirectoryWeb claims (6, all behind `function_exists`), `tools/lgd/check.php` | `aw_private_dir()` is Kits Core `kits_private_dir()` (`includes/private-dir.php`); all callers switched. The countdown shortcode is the theme's site layer (`assets/site/includes/campaigns.php`) |
+| `campaign-tools.php` | campaign state/window helpers (`aw_camp_*`), the campaign boxes and share section, side card, timeline, follow accounts, asset enqueues | Kits Core (`aw_camp_id`, `aw_camp_is_open` in the campaign form, `aw_follow_accounts` in site options), RankWeb schema (`aw_camp_state`, guarded), aw-core `hub-blocks.php`, `kits-config.php`, theme templates (`aw_camp_dates_timeline`, `aw_steps_dateline`, `aw_home_hero_is_campaign`), `edit-screen-map.json` (box callbacks) | theme site layer `assets/site/includes/campaign-tools.php` (this site's campaign design and copy) |
+| `campaign-record.php` | the record fold, metrics, `[aw_campaign_metric]`, motif and marks styles | `aw_camp_record_box` (Kits Core admin layer, edit-screen map) | theme site layer `assets/site/includes/campaign-record.php` |
+| `home.php` | Home hero, Lab/SC/content blocks, guide and library picks | none outside the file (hooked on `aw_hub_blocks` and `query_loop_block_query_vars`) | theme site layer `assets/site/includes/home.php` |
+| `item-head.php` | the item page's meta row, sources, tags, share, more-groups, card media; `aw_primary_category` | DirectoryWeb listing template and Find help (all behind `function_exists`), RankWeb (guarded; `aw_item_date_ts` in `faq-data.php` is not, front end only), aw-core `hub-blocks.php`, `law-links.php` | theme site layer `assets/site/includes/item-head.php`. `aw_whole_sentences()` (a text rule SourceWeb's ingest and rewrite use) left it for SourceWeb: `sourceweb_whole_sentences()` in `content-helpers.php`; both callers switched, no alias |
+| `campaign-links.php` | taxonomy `aw_campaign_link` behind `KITS_CAMPAIGN_LINK`, `aw_campaign_links()`, `aw_set_campaign_links()`, news lines | RankWeb schema/faq-data (guarded), SourceWeb ingest, aw-core `hub-blocks.php`, `related.php` | Kits Core `includes/campaign-links.php` |
+| `campaign-short.php` | short links (/lab, /diwali) 301 to the campaign page; `aw_campaign_short` meta rules | aw-core `meta.php` (`aw_camp_short_clean`) | Kits Core `includes/campaign-short.php` |
+| `campaign-letters.php` | the letter tool's statistics table, report page, dashboard widget, CSV | Kits Core campaign form (`aw_cl_*`) | Kits Core `includes/campaign-letters.php` |
+| `press.php` | CPT `aw_press`, coverage fetch/sideload, `aw_press_list()`, `aw_press_ingest()` | SourceWeb ingest, RankWeb schema, DirectoryWeb (`aw_press_site_logo`), aw-core `hub-blocks.php`, `systems.php`, `tools/content` | Kits Core `includes/press.php` |
+| `social-posts.php` | CPT `aw_social`, module switch `aw_social_on`/`aw_social_show`, REST intake, cards, block | PlanWeb, SourceWeb settings (`aw_social_on`), aw-core `uninstall.php`, `tools/` | Kits Core `includes/social-posts.php` |
+| `sponsored-blocks.php` (+ `assets/js/sponsored-blocks.js`) | `animal-writes/sponsored-item` and `-banner` blocks | aw-core `block-states.php` (render callbacks by name) | Kits Core `includes/sponsored-blocks.php`, `assets/js/sponsored-blocks.js` |
+| `issuers.php` | issuer names, `aw_item_issuer()`, `aw_set_issuer()`, `aw_issuer_short()`, editor box | SourceWeb ingest and auto-review (guarded), RankWeb schema, Kits Core cards, aw-core `faq-data.php`, `hub-blocks.php` | SourceWeb `includes/issuers.php` |
+| `team-dates.php` | the team calendar fallback: option `aw_team_dates`, Kits → Dates | PlanWeb (11), Kits Core (`aw_team_dates_moved`, `aw_team_date_label`), aw-core `admin-config.php`, `uninstall.php`, `tools/` | PlanWeb `includes/team-dates.php` |
+| `assets/css/` campaign files, `assets/js/campaign*.js` | `campaign.css`, `campaign-lab.css`, `aw-camp-*.css`, `aw-share.css`, `campaign-record*.css`, `campaign.js`, `campaign-lab.js` | the moved enqueue code; aw-core `block-states.php` (Kits demo page, switched); `tools/ci/contrast_check.py` (path switched) | theme site layer `assets/site/campaign/css`, `.../js` (not `css/aw*.css`, so no `.min` pairs); CI baselines re-keyed to the new paths |
+
+Claims: the Fluent Forms claim form and review (`forms-fluentforms.php`) and the FluentCRM tag (`fluentcrm.php`) are no
+longer in aw-core (Kits Core `forms/`, MailWeb `fluentcrm-compat.php`, DirectoryWeb `claim-page.php`). Only the private
+folder was left. It went to Kits Core, not DirectoryWeb, because Kits Core's claim form already writes the logo there and
+DirectoryWeb requires Kits Core, not the other way round. Folder name (`uploads/aw-private`) unchanged.
+
+**Load order.** The theme's site layer loads after every plugin, so the moved Home/campaign/item-head hooks register
+after aw-core's own at the same priority; none of them depends on an aw-core hook running first (checked: the `init`
+ones register post meta, the rest are render, enqueue and filter hooks). Kits Core loads before aw-core, so
+`KITS_CAMPAIGN_LINK_TYPES`, `AW_PRESS_GROUPS` and the rest are defined earlier than before. The theme's site layer is
+needed for the campaign pages, Home and the item pages (it is this site's design; a distributed theme leaves it out, and
+the plugins that call into it are already behind `function_exists`).
+
+**Not moved, not mine.** Nothing unowned found in `includes/`.
 
 ## How it was checked
 

@@ -10,7 +10,7 @@
  * the publisher's logo (apple-touch-icon or favicon, fetched once per site) is used. Owner input is never overwritten.
  * Cards: one external link each, newest first, undated last. No article text is copied.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

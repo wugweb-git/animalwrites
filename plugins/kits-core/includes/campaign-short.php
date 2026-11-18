@@ -10,7 +10,7 @@
  * rules, so nothing to flush. The field (Letters and share box, campaign-tools.php) refuses a slug that clashes with a
  * page, a rewrite base or another campaign's short link.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

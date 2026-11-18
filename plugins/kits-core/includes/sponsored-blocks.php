@@ -6,7 +6,7 @@
  * - animal-writes/sponsored-banner: picture, heading, text and link set by the editor.
  * The editor also gets the "System" pattern category (content repeated across pages: synced patterns).
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -63,7 +63,7 @@ function aw_block_sponsored_banner( $a ) {
 add_action(
 	'init',
 	function () {
-		wp_register_script( 'aw-sponsored-blocks', plugins_url( 'assets/js/sponsored-blocks.js', AW_CORE_DIR . 'animal-writes-core.php' ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-server-side-render' ), (string) filemtime( AW_CORE_DIR . 'assets/js/sponsored-blocks.js' ), true );
+		wp_register_script( 'aw-sponsored-blocks', plugins_url( 'assets/js/sponsored-blocks.js', KITS_CORE_DIR . 'kits-core.php' ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-server-side-render' ), (string) filemtime( KITS_CORE_DIR . 'assets/js/sponsored-blocks.js' ), true );
 		$common = array(
 			'api_version'           => 3,
 			'category'              => 'kits-sponsored',

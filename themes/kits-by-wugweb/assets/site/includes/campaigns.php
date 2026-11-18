@@ -1,28 +1,16 @@
 <?php
 /**
- * Campaign kit: countdown, and the private upload folder used by listing claims.
+ * Campaign kit: the countdown shortcode. (The private upload folder for listing claims is Kits Core's kits_private_dir(), includes/private-dir.php.)
  * (The proof-of-posting receipts and live counts were removed on 8 Oct 2026; they had no entries.)
  *
  * Shortcode:
  *   [aw_countdown date="2026-11-29" label="Posting day"]   on a campaign page, date may be left out: the close date is used
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-/** Private folder (blocked from the web), used for claim logos. */
-function aw_private_dir() {
-	$up  = wp_upload_dir();
-	$dir = trailingslashit( $up['basedir'] ) . 'aw-private';
-	if ( ! is_dir( $dir ) ) {
-		wp_mkdir_p( $dir );
-		file_put_contents( $dir . '/.htaccess', "Require all denied\nDeny from all\n" ); // phpcs:ignore
-		file_put_contents( $dir . '/index.html', '' ); // phpcs:ignore
-	}
-	return $dir;
 }
 
 /* ---------- Countdown ---------- */

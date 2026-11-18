@@ -48,6 +48,8 @@ if ( ! defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) && defined( 'AW_CORE_DIR' ) && is
 }
 // The host and publisher helpers first, before the check: Animal Writes Core calls aw_host() and aw_publishers().
 require_once __DIR__ . '/includes/sourcing-basics.php';
+// The issuer label too (no dependency): Animal Writes Core's Library item box and card chips call aw_issuer_short() and aw_issuer_box().
+require_once __DIR__ . '/includes/issuers.php';
 // Without them, load nothing and say so.
 if ( ! defined( 'KITS_CORE_LOADED' ) || ! defined( 'DIRECTORYWEB_LOADED' ) || ! defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) ) {
 	add_action(
