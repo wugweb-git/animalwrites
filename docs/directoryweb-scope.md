@@ -3,7 +3,7 @@
 **Goal.** Retire the `animal-writes-core` tenant plugin piece by piece. This document covers the Directory piece:
 - what of the Directory is still in Core, what it depends on and what depends on it;
 - how DirectoryWeb (`plugins/directoryweb`, text domain `directoryweb`) becomes a **generic directory engine** that
-  Animal Writes, MusicLinkd, iKan and other sites configure through a **preset**;
+  any site configures: one generic preset, `directoryweb-default`, plus that site's own settings;
 - how the move happens without touching data.
 
 **Checked against** `origin/wordpress-dev` at `73bbc87c` (18 Nov 2026). Every `file:line` was read on that commit, or
@@ -14,8 +14,10 @@ on this branch where marked "(branch)". Paths:
 - `sw/` = `plugins/aw-sourcing/includes/` (SourceWeb)
 
 **Principles (owner rules).**
-1. **Generic engine, site presets.** No animal-welfare knowledge in the engine. Animal Writes is the `aw` preset, which
-   reproduces today exactly.
+1. **Generic engine, one preset.** No animal-welfare knowledge in the engine. DirectoryWeb ships ONE generic preset,
+   `directoryweb-default`. This site runs it with its configured data prefix and settings, which reproduce today exactly.
+   **The data prefix stays `aw_` on this site; code and preset names never use `aw`.** Stored names (`aw_*` meta keys,
+   the `aw_listing` post type slug, options) are data and do not change (§12).
 2. **WordPress-native first.** Plugins (SCF, Rank Math, Fluent Forms, FluentCRM, SourceWeb) are layers on top, each
    optional, and DirectoryWeb runs without any of them.
 3. **Admin and front-end never mix.** Every row below is labelled **[A]** (wp-admin: core UI only, i.e. WP_List_Table,
@@ -123,7 +125,7 @@ After the move every caller keeps working: the `aw_*` names stay as wrappers in 
 
 An **entry** (one post of the directory post type) has:
 
-| Part | Generic meaning | `aw` preset today |
+| Part | Generic meaning | This site today (default preset, `aw_` data prefix) |
 |---|---|---|
 | Entry types | Which kind of entry (several allowed), from the preset | core tags in the "type" role (`aw_listing_type_slugs()`, `core/tags.php:111-113`) |
 | Field groups | Named groups of fields; each field has a key, a data type, a rule and visibility (public / team only) | the 48 keys plus the SCF list fields, grouped like the 8 SCF groups |
@@ -135,32 +137,32 @@ An **entry** (one post of the directory post type) has:
 | Provenance | Source per value, with URL and date | `aw_data_sources`, `aw_source_*`, the enrichment log |
 | Visibility rules | **Never publish field X for entry Y or value V** | the never-publish phone list (one rule of this kind) |
 
-**Site config** (preset values; fixed in code on this site until stage 5): the post type slug, field prefix, labels,
+**Site config** (settings on top of the preset; fixed in code on this site until stage 5): the post type slug, field prefix, labels,
 permalinks (`directory`, `directory/org`), place data file. The seam is already on the branch:
 `directoryweb_post_type()` → `aw_listing` and `directoryweb_meta_prefix()` → `aw_` (`dw/listing-meta.php:19-31`).
 
 **Generalised privacy rule.** `directoryweb_never_publish( $field, $value, $entry_id )`: a list of rules, each one a
 field (or `*`) with an entry ID (or `*`) and a value hash (or `*`). Today's phone list is the rule set
 `{ field: phones, entry: *, value: <sha256> }`. It is checked on every write path (forms, enrichment, imports, admin
-save) and on every read for display, REST and schema. The `aw` preset seeds it from `DIRECTORYWEB_NEVER_PUBLISH_PHONES`.
+save) and on every read for display, REST and schema. On this site it is seeded from `DIRECTORYWEB_NEVER_PUBLISH_PHONES`.
 Stage 3; where the rules are stored is open question Q5 (A).
 
-### 3.2 Presets
+### 3.2 The preset and site settings
 
-A preset is a PHP array (later also JSON): `{ slug, labels, post_type, prefix, permalinks, types, fields, groups,
-taxonomy_roles, places, schema_map, privacy, forms_map, crm_map }`. A site picks one with a filter or the DirectoryWeb
-Settings screen (A). The engine reads only the preset; templates, schema, forms and enrichment read fields through it.
+DirectoryWeb ships **one** preset, `directoryweb-default`: a PHP array (later also JSON) `{ slug, labels, post_type,
+prefix, permalinks, types, fields, groups, taxonomy_roles, places, schema_map, privacy, forms_map, crm_map }` with
+generic defaults (`directoryweb_` prefix, `directoryweb_listing` type, as in the .org edition). A site overrides values
+through a filter or the DirectoryWeb Settings screen (A). The engine reads only the resulting config; templates, schema,
+forms and enrichment read fields through it.
 
-- **`aw` (Animal Writes):** exactly today's keys, terms, URLs, SCF groups and schema rules (`rw/schema.php:54-90`:
-  NGO, VeterinaryCare, AnimalShelter, GovernmentOffice by type tag). It is generated from what is in the code now, so
-  nothing changes on live.
-- **MusicLinkd (illustration only):** entries such as artists, venues, labels or studios; a schema map such as
-  MusicGroup / Person / MusicVenue / Organization; perhaps events. **Domain details are not guessed**; see Q8.
-- **iKan (illustration only):** nothing is known about its domain; see Q9.
+**This site** runs `directoryweb-default` with its settings: data prefix `aw_`, post type `aw_listing`, today's keys,
+terms, URLs, SCF groups and schema rules (`rw/schema.php:54-90`: NGO, VeterinaryCare, AnimalShelter, GovernmentOffice by
+type tag). The settings are generated from what is in the code now, so nothing changes on live. Another site (for
+example a music or a services directory) runs the same preset with its own settings.
 
 ### 3.3 Integrations read the preset
 
-| Integration | Reads from the preset | Side |
+| Integration | Reads from the config (preset + site settings) | Side |
 |---|---|---|
 | RankWeb schema | `schema_map` (type role term → schema.org type), field → property map | F |
 | Theme rendering | field groups and labels through Block Bindings (`directoryweb/field`) | F |
@@ -187,11 +189,11 @@ says which core terms play which **role**. Places stay data (the LGD file plus m
 - Term pages and term share are session D's (`core/term-page.php`).
 
 **Plan (stage 3):**
-- **Roles.** The preset declares `taxonomy_roles = { type: [slugs], service: [slugs], section: category }`. The `aw`
-  preset lists today's slugs (from `AW_TAG_ICONS` / `aw_service_slugs()`), so there is no term, slug or URL change.
+- **Roles.** The preset declares `taxonomy_roles = { type: [slugs], service: [slugs], section: category }`. This site's
+  settings list today's slugs (from `AW_TAG_ICONS` / `aw_service_slugs()`), so there is no term, slug or URL change.
   Grouping by term meta (`register_term_meta( 'post_tag', 'directoryweb_role', … )`, native, `show_in_rest`) would let a
   new site add terms without code. Whether to add it is open question Q6 (A).
-- **Icons** move to the preset (`aw` = `AW_TAG_ICONS` as is).
+- **Icons** move to the config (this site: `AW_TAG_ICONS` as is).
 - **Admin [A]:** core term screens (Tags, Categories) and the core tag/category boxes on the edit screen. A role column
   or filter on the Tags screen uses core list-table hooks only. No custom term UI.
 - **Front-end [F]:**
@@ -417,32 +419,36 @@ The profile becomes a plugin block template (`register_block_template`, WP 6.7+)
 `DIRECTORYWEB_LIST_FIELDS`, `DIRECTORYWEB_NEVER_PUBLISH_PHONES`, the `directoryweb_never_publish_phones` filter
 (`includes/core-lite.php:12-38`, `:116-261`, `:388`), `directoryweb_register_meta` (`includes/standalone.php:56`) and
 `directoryweb_scf_active` (`includes/listing-profile.php:66`). This PR uses **the same names and signatures**, so the
-editions converge on the engine. The .org edition is effectively a "generic" preset with prefix `directoryweb_`.
+editions converge on the engine. The .org edition is `directoryweb-default` with its own defaults (prefix `directoryweb_`).
 Nothing changes on the `org-editions` branch.
 
 ---
 
-## 10. Use cases across products
+## 10. Use cases across sites
 
-| Need | Animal Writes (`aw`) | MusicLinkd | iKan | Generic model covers it? |
-|---|---|---|---|---|
-| Several types per entry | org types (NGO, vet, shelter, helpline…) | e.g. artist/venue (to confirm, Q8) | ? (Q9) | yes (type role) |
-| Services / offerings | services list | ? | ? | yes (service role) |
-| Place hierarchy from a data file | LGD state/district (India) | ? (city? country?) | ? | yes if the preset ships its place file; **not** if a product needs free-form or global places (Q8/Q9) |
-| Entry without address/point | helplines, feeders | e.g. online-only artists | ? | yes (location optional) |
-| Contact lists | phones (+WhatsApp), emails, links, hours | ? | ? | yes |
-| Claim by the entry's owner | yes, Fluent Forms | ? | ? | yes (forms contract) |
-| Government verification | Verified (AWBI, Darpan, 12A/80G) | likely no | ? | yes as "verification sources" from the preset; AWBI/Darpan specifics are `aw` preset code |
-| Source per value | yes | ? | ? | yes |
-| Privacy takedowns | phone list | ? | ? | yes (generalised rule) |
-| Relations | campaigns, Opportunities, News "Featured in" | e.g. releases, events? | ? | **partly**: relations to other post types are site content models (Core's `model.php` today); the engine offers a generic "related entries" field, site-specific relations stay in the site's plugin |
-| Events / dates on entries | no | possibly | ? | **does not fit yet**: needs an event model or a link to an events plugin (Q8) |
-| A person as an entry | individual feeders (Q2) | artists | ? | yes if `Person` is a schema type in the preset |
-| National entries with no place | 1962 and similar (Q3) | ? | ? | yes with a "national" place value |
+"Another site" means any other directory on the same engine, for example a music or a services directory. Its details
+are not guessed here.
+
+| Need | This site today | Another site (e.g. a music or a services directory) | Generic model covers it? |
+|---|---|---|---|
+| Several types per entry | org types (NGO, vet, shelter, helpline…) | its own types | yes (type role over core tags) |
+| Services / offerings | services list | its own offerings | yes (service role) |
+| Place hierarchy from a data file | LGD state/district (India) | a city/country list, or none | yes if the site ships its place file; **not** for free-form or global places without a data file |
+| Entry without address/point | helplines, feeders | e.g. online-only entries | yes (location optional) |
+| Contact lists | phones (+WhatsApp), emails, links, hours | same kinds | yes |
+| Claim by the entry's owner | yes, Fluent Forms | any form provider | yes (forms contract + adapters) |
+| Official verification | Verified (AWBI, Darpan, 12A/80G) | a different register, or none | yes as "verification sources" in config; the register checks themselves are site modules |
+| Source per value | yes | yes | yes |
+| Privacy takedowns | phone list | any field | yes (generalised rule) |
+| Relations | campaigns, Opportunities, News "Featured in" | its own content | **partly**: the engine offers a generic "related entries" field; site-specific relations stay in the site's own plugin |
+| Events / dates on entries | no | possibly | **does not fit yet**: needs an event model or a link to an events plugin |
+| A person as an entry | individual feeders (Q2) | possibly | yes if `Person` is a schema type in the config |
+| National entries with no place | 1962 and similar (Q3) | possibly | yes with a "national" place value |
 
 Does **not** fit the generic model as it stands: AWBI/Darpan-specific checks (`dw/gov-verified.php`), LGD/India Post PIN
 lookup (`dw/places.php:494`), district helplines (`dw/district-helplines.php`), "Find help near you" place detection in
-text (`dw/find-help.php`). These become `aw` preset modules, loaded only by that preset.
+text (`dw/find-help.php`). These become optional India modules (places, PIN lookup, government registers), switched on
+in this site's settings, never part of the preset.
 
 ---
 
@@ -464,6 +470,8 @@ This PR's changes by side:
 ## 12. DB safety
 
 - Code moves, data does not. No migration, no key renamed, no new stored option.
+- **The data prefix stays `aw_` on this site; code and preset names never use `aw`.** The preset is `directoryweb-default`;
+  `aw_` appears only as this site's configured data prefix and in the stored names below.
 - `aw_*` meta keys, `aw_listing`, SCF field keys (`field_aw_listing_*`), terms, slugs, URLs, options and the `aw_daily`
   hook stay.
 - Registration is identical per key (type, description, single, REST, auth, sanitising). `aw_meta_schema()` still returns
@@ -481,9 +489,9 @@ This PR's changes by side:
 1. **Scope** (this document). ✔
 2. **This PR: the safe engine split.** The listing data model in `dw/listing-meta.php`, `data-sources.php` moved, the
    re-verification job, the SCF gate fallback chain, the config seam. Follow-up once PR #139 is merged: acf-json
-   registration through `kits_scf_json_folder()` (§6). The `aw` preset is implicit: today's values, in code.
+   registration through `kits_scf_json_folder()` (§6). This site's settings are implicit: today's values, in code.
 3. **Preset and contracts.**
-   - The preset array (`aw` generated from today's code);
+   - the `directoryweb-default` preset array, and this site's settings generated from today's code;
    - own post type arguments (with session D);
    - taxonomy roles over core tags/categories;
    - generalised privacy rules;
@@ -494,7 +502,7 @@ This PR's changes by side:
 4. **Front-end without Core's theme layer [F].** block.json for the listing blocks, the `directoryweb/field` bindings
    source, plugin block templates, a Query Loop variation, and the Kits layout plus listing card (with session D).
    Render-compare live pages before and after.
-5. **Multi-preset [A+F].** The preset picker in Settings, the prefix/slug filters, a generic preset for the .org
+5. **Other sites [A+F].** Site settings in the Settings screen, the prefix/slug filters, the default preset for the .org
    edition, the other form/CRM adapters, the privacy exporter/eraser, the Abilities API.
 6. **Core out.** Drop Core's wrappers once SourceWeb, RankWeb, the import tools and the theme call `directoryweb_*`;
    own daily event; DirectoryWeb runs without Core.
@@ -512,7 +520,7 @@ This PR's changes by side:
 | A+F | Plugin Check pulls all of Core in | inline `phpcs:ignore` only where the Deploy check reports pre-existing ERROR rows |
 | — | Sessions B/D edit Core at the same time | this PR touches only `meta.php`, `cron.php`, `data-sources.php` (removed), one line of `animal-writes-core.php`, `data/edit-screen-map.json` |
 | F | Stage 4 changes markup | render-compare on live pages, one template at a time |
-| A+F | Presets drift from live | the `aw` preset is generated from today's code and checked by a parity test like this PR's |
+| A+F | Site settings drift from live | this site's settings are generated from today's code and checked by a parity test like this PR's |
 
 ## 15. Open questions for the owner
 
@@ -521,10 +529,7 @@ This PR's changes by side:
 | Q1 | A+F | May DirectoryWeb own the listing type's arguments (stage 3), so `content-types.php` (session D) no longer lists `aw_listing`? |
 | Q2 | F | Individual feeders: a person entry (no organisation, no address), or out of scope? |
 | Q3 | F | National helplines (1962 and similar) with no state/district: entries with a "national" place, or only the helplines page? |
-| Q4 | A | Is a DirectoryWeb running without Core a goal on this site, or only for the .org edition and other products? |
+| Q4 | A | Is a DirectoryWeb running without Core a goal on this site, or only for the .org edition and other sites? |
 | Q5 | A | Privacy rules (takedown hashes): in code as now, or in an owner-only Settings field? |
-| Q6 | A | Term roles: keep slug lists in the preset, or add a `directoryweb_role` term meta (native, `register_term_meta`) so a new site groups its own tags? |
+| Q6 | A | Term roles: keep slug lists in the site settings, or add a `directoryweb_role` term meta (native, `register_term_meta`) so a new site groups its own tags? |
 | Q7 | F | The "Submit a new listing" intent: a public form on this site, or only claim and report? |
-| Q8 | A+F | MusicLinkd: which entry types (artists, venues, labels, studios, teachers…)? Is a person an entry? Places: city, country, global? Contact fields? Claims and verification (what counts as verified)? Events and releases: entries, relations, or another plugin? schema.org types? Which forms and CRM? |
-| Q9 | A+F | iKan: what is it a directory of? The same list of questions as Q8. |
-| Q10 | A | Which form and CRM providers do MusicLinkd and iKan use, so the first new adapters are the right ones? |
