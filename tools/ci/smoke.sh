@@ -12,6 +12,8 @@ define( 'WP_DEBUG_LOG', '/tmp/wp-debug.log' );
 define( 'WP_DEBUG_DISPLAY', false );
 define( 'DISALLOW_FILE_EDIT', true );
 PHP
+# A failing step with --quiet printed nothing (exit 255 = a PHP fatal): show the debug log's tail on any error.
+trap 'echo "--- tail of /tmp/wp-debug.log"; tail -n 30 /tmp/wp-debug.log 2>/dev/null || true' ERR
 wp core install --url=http://127.0.0.1:8080 --title="Animal Writes" --admin_user=ci --admin_password=ci-only --admin_email=ci@example.invalid --skip-email --quiet
 for p in "$REPO"/plugins/*/; do ln -s "$p" "wp-content/plugins/$(basename "$p")"; done
 for t in "$REPO"/themes/*/; do ln -s "$t" "wp-content/themes/$(basename "$t")"; done
