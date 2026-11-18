@@ -19,6 +19,9 @@ wp rewrite structure '/%postname%/' --quiet
 # Kits by Wugweb alone, as on the live site: Animal Writes Core serves the Animal Writes theme parts (includes/theme-parts*.php).
 wp theme activate kits-by-wugweb --quiet
 wp plugin activate animal-writes-core --quiet
+# Kits Core active on its own too, as on the live site (Core also loads it; it must not load twice). DirectoryWeb's
+# header names it (Requires Plugins: kits-core), so WordPress refuses to activate DirectoryWeb without it.
+wp plugin activate kits-core --quiet
 # DirectoryWeb: Core already loads it from the sibling folder; activating it on its own must not load it twice.
 wp plugin activate directoryweb --quiet
 # Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).

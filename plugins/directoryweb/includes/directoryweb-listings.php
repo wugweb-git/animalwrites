@@ -174,7 +174,7 @@ function directoryweb_rest_listings( WP_REST_Request $r ) {
 		$q['meta_query'] = $meta; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- a filtered admin list, 20 a page
 	}
 	$type = sanitize_title( (string) $r['type'] );
-	if ( '' !== $type && in_array( $type, aw_listing_type_slugs(), true ) ) {
+	if ( '' !== $type && in_array( $type, directoryweb_listing_type_slugs(), true ) ) {
 		$q['tag'] = $type;
 	}
 	$words = trim( sanitize_text_field( (string) $r['search'] ) );
@@ -226,7 +226,7 @@ function directoryweb_rest_listings( WP_REST_Request $r ) {
 			'label' => __( 'Every type', 'directoryweb' ),
 		),
 	);
-	foreach ( aw_listing_type_slugs() as $slug ) {
+	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		$name    = function_exists( 'aw_listing_type_name' ) ? aw_listing_type_name( $slug ) : '';
 		$types[] = array(
 			'value' => $slug,
@@ -433,8 +433,8 @@ function directoryweb_listing_row( WP_Post $p ): array {
 		'title'    => html_entity_decode( get_the_title( $id ), ENT_QUOTES, 'UTF-8' ),
 		'status'   => (string) ( $statuses[ $p->post_status ] ?? $p->post_status ),
 		'live'     => 'publish' === $p->post_status,
-		'types'    => implode( ', ', wp_list_pluck( function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array(), 'name' ) ),
-		'services' => implode( ', ', function_exists( 'aw_listing_service_names' ) ? aw_listing_service_names( $id ) : array() ),
+		'types'    => implode( ', ', wp_list_pluck( directoryweb_listing_types( $id ), 'name' ) ),
+		'services' => implode( ', ', directoryweb_listing_service_names( $id ) ),
 		'place'    => implode( ', ', array_filter( array( $district->name ?? '', $state->name ?? '' ) ) ),
 		'area'     => (string) get_post_meta( $id, 'aw_area', true ),
 		'website'  => preg_match( '#^https?://#', $web ) ? esc_url_raw( $web ) : '',

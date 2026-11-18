@@ -1,0 +1,93 @@
+{
+    "key": "group_kits_case_study",
+    "title": "Case studies",
+    "fields": [
+        {
+            "key": "field_kits_case_study_problem",
+            "label": "Problem",
+            "name": "kits_case_study_problem",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 4,
+            "new_lines": ""
+        },
+        {
+            "key": "field_kits_case_study_approach",
+            "label": "Approach",
+            "name": "kits_case_study_approach",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 4,
+            "new_lines": ""
+        },
+        {
+            "key": "field_kits_case_study_outcome",
+            "label": "Outcome",
+            "name": "kits_case_study_outcome",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 4,
+            "new_lines": ""
+        },
+        {
+            "key": "field_kits_case_study_figures",
+            "label": "Figures",
+            "name": "kits_case_study_figures",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 4,
+            "new_lines": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "kits_case_study"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Kits Core preset kits-case-study: its fields (registered with register_post_meta(); this group is only the editing layer).",
+    "show_in_rest": 0,
+    "modified": 1795478400
+}

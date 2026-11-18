@@ -27,6 +27,40 @@ const AW_DIR_MAP_LIB = 'assets/vendor/maplibre-gl-4.7.1/'; // MapLibre GL, serve
 const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
+ * A district's centre [lat, lng] by LGD district code, from this plugin's data/district-centroids.json (OpenStreetMap
+ * Nominatim, 20 Oct 2026). The same as Core's aw_district_centroid(), which read this file too.
+ *
+ * @param int|string $code LGD district code.
+ * @return array|null
+ */
+function directoryweb_district_centroid( $code ) {
+	static $c = null;
+	if ( null === $c ) {
+		$f = DIRECTORYWEB_DIR . 'data/district-centroids.json';
+		$c = is_readable( $f ) ? (array) json_decode( (string) file_get_contents( $f ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	}
+	return $c[ (string) (int) $code ] ?? null;
+}
+
+/**
+ * Distance in km between two districts' centres; null when either is not known.
+ *
+ * @param int|string $a LGD district code.
+ * @param int|string $b LGD district code.
+ * @return float|null
+ */
+function directoryweb_district_km( $a, $b ) {
+	$p = directoryweb_district_centroid( $a );
+	$q = directoryweb_district_centroid( $b );
+	if ( ! $p || ! $q ) {
+		return null;
+	}
+	$r = M_PI / 180;
+	$h = sin( ( $q[0] - $p[0] ) * $r / 2 ) ** 2 + cos( $p[0] * $r ) * cos( $q[0] * $r ) * sin( ( $q[1] - $p[1] ) * $r / 2 ) ** 2;
+	return 12742 * asin( min( 1, sqrt( $h ) ) );
+}
+
+/**
  * Every published listing as a compact row, cached: [id, lat|null, lng|null, approx 0/1, primary type slug, name,
  * district name, path, state codes, district codes, tag slugs, claimed 0/1 (aw_verified), precision (own, address,
  * locality, pin, district), Verified 0/1 (government documents)].
@@ -40,7 +74,7 @@ function aw_dir_points_all() {
 	$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'title', 'order' => 'ASC' ) );
 	update_meta_cache( 'post', $ids );
 	update_object_term_cache( $ids, 'aw_listing' );
-	$type_slugs = aw_listing_type_slugs();
+	$type_slugs = directoryweb_listing_type_slugs();
 	foreach ( $ids as $id ) {
 		$pt                 = function_exists( 'aw_geo_point' ) ? aw_geo_point( $id ) : null;
 		list( $st, $dt )    = aw_item_codes( $id );
@@ -125,7 +159,7 @@ function aw_dir_point_out( $row, $km = null ) {
 /** Type names by slug, for popups and the Near me list. */
 function aw_dir_type_names() {
 	$out = array();
-	foreach ( aw_listing_type_slugs() as $slug ) {
+	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		$t            = get_term_by( 'slug', $slug, 'post_tag' );
 		$out[ $slug ] = $t ? $t->name : $slug;
 	}
@@ -196,7 +230,7 @@ function aw_dir_near( WP_REST_Request $r ) {
 			return new WP_Error( 'aw_pin', 'Enter a 6-digit PIN code.', array( 'status' => 400 ) );
 		}
 		$found = function_exists( 'aw_pin_lookup' ) ? aw_pin_lookup( $pin ) : 'unavailable';
-		$cent  = is_array( $found ) && ! empty( $found['district'] ) ? aw_district_centroid( (int) $found['district'] ) : null;
+		$cent  = is_array( $found ) && ! empty( $found['district'] ) ? directoryweb_district_centroid( (int) $found['district'] ) : null;
 		if ( ! $cent ) {
 			return new WP_Error( 'aw_pin', 'That PIN code was not found.', array( 'status' => 404 ) );
 		}
@@ -212,7 +246,7 @@ function aw_dir_near( WP_REST_Request $r ) {
 	} else {
 		foreach ( aw_place_states() as $s ) {
 			foreach ( aw_place_districts( $s->code ) as $dist ) {
-				$c = aw_district_centroid( $dist->code );
+				$c = directoryweb_district_centroid( $dist->code );
 				if ( $c ) {
 					$d = aw_geo_km( $lat, $lng, $c[0], $c[1] );
 					if ( ! $best || $d < $best[0] ) {
@@ -291,8 +325,9 @@ function aw_dir_tools_html() {
 /** The panels the toolbar opens, under it: Near me and the map (hidden until asked for). */
 function aw_dir_panels_html() {
 	$icons = ''; // one icon per type; dir-map.js reads each one's picture (--i) for the map's markers
-	foreach ( aw_listing_type_slugs() as $slug ) {
-		$icons .= aw_type_icon( $slug );
+	foreach ( directoryweb_listing_type_slugs() as $slug ) {
+		directoryweb_use_style( 'aw-type-icons' ); // the type pictures (aw-type-icons.css)
+		$icons .= kits_icon( 'type-' . $slug, 'kit-ico--type' ); // as Core's aw_type_icon(): kit-ico--type keeps its 1em size, spacing and the text colour
 	}
 	return '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
 		. '<form class="aw-near-form"><button type="button" class="kit-btn aw-near-locate">Use my location</button>'

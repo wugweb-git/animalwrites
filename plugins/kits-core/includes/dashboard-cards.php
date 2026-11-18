@@ -97,24 +97,33 @@ function kits_dash_bars( array $values, string $label, bool $table = false ): st
 
 // The styles, once, on the Dashboard only.
 add_action(
-	'admin_head-index.php',
-	function () {
-		?>
-<style id="aw-dash-cards">
-.aw-dash-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9em),1fr));gap:8px;margin:0 0 12px;padding:0;list-style:none}
-.aw-dash-card{min-width:0;margin:0;padding:12px;border:1px solid #c3c4c7;border-radius:4px;background:#fff;display:flex;flex-direction:column;gap:2px}
-.aw-dash-label{color:#50575e;font-size:13px;overflow-wrap:anywhere}
-.aw-dash-value{color:#1d2327;font-size:24px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
-.aw-dash-delta{font-size:13px}
-.aw-dash-delta--up{color:#007017}
-.aw-dash-delta--down{color:#b32d2e}
-.aw-dash-delta--flat{color:#50575e}
-.aw-dash-chart{margin:0 0 12px}
-.aw-dash-chart svg{display:block;width:100%;height:auto;max-height:120px;fill:#2271b1;overflow:visible}
-.aw-dash-chart line{stroke:#c3c4c7;stroke-width:1}
-.aw-dash-chart text{fill:#50575e;font-size:10px}
-.aw-dash-chart figcaption{margin-top:4px}
-</style>
-		<?php
+	'admin_enqueue_scripts',
+	function ( $hook ) {
+		if ( 'index.php' !== $hook ) {
+			return;
+		}
+		wp_register_style( 'kits-dash-cards', false, array(), KITS_CORE_LOADED ); // No file: the rules below only.
+		wp_enqueue_style( 'kits-dash-cards' );
+		wp_add_inline_style(
+			'kits-dash-cards',
+			implode(
+				"\n",
+				array(
+				'.aw-dash-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9em),1fr));gap:8px;margin:0 0 12px;padding:0;list-style:none}',
+				'.aw-dash-card{min-width:0;margin:0;padding:12px;border:1px solid #c3c4c7;border-radius:4px;background:#fff;display:flex;flex-direction:column;gap:2px}',
+				'.aw-dash-label{color:#50575e;font-size:13px;overflow-wrap:anywhere}',
+				'.aw-dash-value{color:#1d2327;font-size:24px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}',
+				'.aw-dash-delta{font-size:13px}',
+				'.aw-dash-delta--up{color:#007017}',
+				'.aw-dash-delta--down{color:#b32d2e}',
+				'.aw-dash-delta--flat{color:#50575e}',
+				'.aw-dash-chart{margin:0 0 12px}',
+				'.aw-dash-chart svg{display:block;width:100%;height:auto;max-height:120px;fill:#2271b1;overflow:visible}',
+				'.aw-dash-chart line{stroke:#c3c4c7;stroke-width:1}',
+				'.aw-dash-chart text{fill:#50575e;font-size:10px}',
+				'.aw-dash-chart figcaption{margin-top:4px}',
+				)
+			)
+		);
 	}
 );

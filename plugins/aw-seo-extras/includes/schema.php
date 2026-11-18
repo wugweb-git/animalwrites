@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string '' when the number has no digits.
  */
 function aw_seo_e164( $raw ) {
-	$d = function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $raw ) : preg_replace( '/\D+/', '', (string) $raw );
+	$d = function_exists( 'directoryweb_normalise_phone' ) ? directoryweb_normalise_phone( $raw ) : preg_replace( '/\D+/', '', (string) $raw );
 	if ( '' === $d ) {
 		return '';
 	}
@@ -52,6 +52,9 @@ function aw_seo_e164( $raw ) {
  * @return array
  */
 function aw_listing_schema( $id ) {
+	if ( ! function_exists( 'aw_listing_place' ) || ! function_exists( 'aw_listing_sources' ) ) { // DirectoryWeb is off
+		return array();
+	}
 	list( $state, $district ) = aw_listing_place( $id );
 	$m    = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
 	// schema.org type by listing type; a listing with several types gets several (@type as a list).
@@ -85,10 +88,10 @@ function aw_listing_schema( $id ) {
 	$org   = array(
 		'@type'       => 1 === count( $stype ) ? $stype[0] : $stype,
 		'@id'         => get_permalink( $id ) . '#organization',
-		'name'        => aw_seo_plain( get_post_field( 'post_title', $id ) ), // no "Private:" prefix
+		'name'        => rankweb_plain_text( get_post_field( 'post_title', $id ) ), // no "Private:" prefix
 		'url'         => $site ? $site : get_permalink( $id ),                 // the organisation's own site when known
 		'mainEntityOfPage' => get_permalink( $id ),                           // this profile
-		'description' => aw_seo_plain( get_the_excerpt( $id ) ),
+		'description' => rankweb_plain_text( get_the_excerpt( $id ) ),
 	);
 	$logo = aw_schema_safe_url( (string) get_the_post_thumbnail_url( $id, 'medium' ) );
 	if ( $logo ) {
@@ -111,7 +114,7 @@ function aw_listing_schema( $id ) {
 	}
 	// Phone numbers from the list: every number as telephone (one, or a list), and each number marked WhatsApp as a
 	// WhatsApp contact point.
-	$phones = function_exists( 'aw_listing_phones' ) ? aw_listing_phones( $id ) : array();
+	$phones = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $id ) : array();
 	$tels   = array_values( array_unique( array_filter( array_map( 'aw_seo_e164', wp_list_pluck( $phones, 'number' ) ) ) ) );
 	if ( $tels ) {
 		$org['telephone'] = 1 === count( $tels ) ? $tels[0] : $tels;
@@ -151,12 +154,12 @@ function aw_listing_schema( $id ) {
 		$org['knowsLanguage'] = array_values( array_filter( array_map( 'trim', explode( ',', $m( 'aw_languages' ) ) ) ) );
 	}
 	// Opening hours by day, from the list.
-	$spec = function_exists( 'aw_listing_hours' ) ? aw_hours_rows_spec( aw_listing_hours( $id ) ) : array();
+	$spec = function_exists( 'directoryweb_hours_rows_spec' ) ? directoryweb_hours_rows_spec( directoryweb_listing_hours( $id ) ) : array();
 	if ( $spec ) {
 		$org['openingHoursSpecification'] = $spec;
 	}
 
-	$svc = function_exists( 'aw_listing_service_names' ) ? aw_listing_service_names( $id ) : array();
+	$svc = function_exists( 'directoryweb_listing_service_names' ) ? directoryweb_listing_service_names( $id ) : array();
 	if ( $svc ) {
 		$org['knowsAbout'] = array_values( $svc ); // the fixed services list
 	} elseif ( $m( 'aw_services' ) ) {
@@ -190,7 +193,7 @@ function aw_listing_schema( $id ) {
 	if ( $acts ) {
 		$org['potentialAction'] = 1 === count( $acts ) ? $acts[0] : $acts;
 	}
-	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();
+	$types = function_exists( 'directoryweb_listing_types' ) ? directoryweb_listing_types( $id ) : array();
 	if ( $types ) {
 		$org['keywords'] = implode( ', ', array_filter( array_merge( wp_list_pluck( $types, 'name' ), array( $m( 'aw_g_category' ) ) ) ) ); // additionalType must be a URL; the type names (and Google's category) go here
 	}
@@ -299,14 +302,14 @@ function aw_publisher_schema() {
 				'name'          => '' !== $name ? $name : get_bloginfo( 'name' ),
 				'alternateName' => AW_SITE_ALT_NAMES,
 				'url'           => home_url( '/' ),
-				'description'   => aw_seo_plain( $desc ),
+				'description'   => rankweb_plain_text( $desc ),
 				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
 				'email'         => $email,
 				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email, 'url' => home_url( '/contact/' ), 'areaServed' => 'IN', 'availableLanguage' => array( 'en', 'hi' ) ),
 				'address'       => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ), // the country only: no public street address or phone (owner, 3 Nov 2026)
 				'foundingDate'  => '2025-11', // the first campaign, India Writes for Its Community Dogs (November 2025)
 				'areaServed'    => array( '@type' => 'Country', 'name' => 'India', 'identifier' => 'IN' ),
-				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'aw_seo_plain', $about ) ) : null,
+				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'rankweb_plain_text', $about ) ) : null,
 				'sameAs'        => aw_publisher_profiles(),
 			),
 			$pages
@@ -388,7 +391,7 @@ function aw_schema_categories( $id ) {
 	if ( ! $names || is_wp_error( $names ) ) {
 		return null;
 	}
-	return array_map( fn( $n ) => array( '@type' => 'Thing', 'name' => aw_seo_plain( $n ) ), array_values( $names ) );
+	return array_map( fn( $n ) => array( '@type' => 'Thing', 'name' => rankweb_plain_text( $n ) ), array_values( $names ) );
 }
 
 /** The item's place (district and state, when stored) as a Place, or null. */
@@ -423,7 +426,7 @@ function aw_schema_pdf( $id ) {
 /** The issuing body of a Library item (court, ministry, board) as a GovernmentOrganization, or null. */
 function aw_schema_issuer( $id ) {
 	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
-	return $iss ? array( '@type' => 'GovernmentOrganization', 'name' => aw_seo_plain( $iss->name ) ) : null;
+	return $iss ? array( '@type' => 'GovernmentOrganization', 'name' => rankweb_plain_text( $iss->name ) ) : null;
 }
 
 /**
@@ -444,11 +447,11 @@ function aw_schema_issuer( $id ) {
 function aw_article_nodes( $id ) {
 	$type     = get_post_type( $id );
 	$url      = get_permalink( $id );
-	$title    = aw_seo_plain( get_the_title( $id ) );
+	$title    = rankweb_plain_text( get_the_title( $id ) );
 	$kind     = 'aw_legal' === $type && function_exists( 'aw_legal_kinds' ) ? ( aw_legal_kinds( $id )[0] ?? null ) : null; // the Library type tag (never a label such as a campaign tag)
 	$ks       = $kind ? $kind->slug : '';
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
-	$src_name = aw_seo_plain( (string) get_post_meta( $id, 'aw_source_name', true ) );
+	$src_name = rankweb_plain_text( (string) get_post_meta( $id, 'aw_source_name', true ) );
 	$src_date = aw_schema_date( (string) get_post_meta( $id, 'aw_source_date', true ) );
 	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true ); // crisis guides: the date they were last checked
 	$issuer   = 'aw_legal' === $type ? aw_schema_issuer( $id ) : null;
@@ -457,7 +460,7 @@ function aw_article_nodes( $id ) {
 	$base     = array(
 		'mainEntityOfPage' => $url,
 		'url'              => $url,
-		'description'      => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
+		'description'      => function_exists( 'aw_text' ) ? rankweb_plain_text( aw_text( $id, 40 ) ) : '',
 		'datePublished'    => get_the_date( 'c', $id ),
 		'dateModified'     => $reviewed ? aw_schema_date( $reviewed ) : get_the_modified_date( 'c', $id ),
 		'inLanguage'       => 'en-IN',
@@ -482,7 +485,7 @@ function aw_article_nodes( $id ) {
 		$also = array();
 		foreach ( (array) get_post_meta( $id, 'aw_also_reported', true ) as $r ) {
 			if ( is_array( $r ) && ! empty( $r['url'] ) ) { // later reports of the same event
-				$also[] = array_filter( array( '@type' => 'CreativeWork', 'genre' => 'News report', 'url' => (string) $r['url'], 'publisher' => empty( $r['name'] ) ? null : array( '@type' => 'NewsMediaOrganization', 'name' => aw_seo_plain( $r['name'] ) ) ) );
+				$also[] = array_filter( array( '@type' => 'CreativeWork', 'genre' => 'News report', 'url' => (string) $r['url'], 'publisher' => empty( $r['name'] ) ? null : array( '@type' => 'NewsMediaOrganization', 'name' => rankweb_plain_text( $r['name'] ) ) ) );
 			}
 		}
 		if ( $also ) {
@@ -502,7 +505,7 @@ function aw_article_nodes( $id ) {
 				'@type'                   => 'Legislation',
 				'@id'                     => $url . '#legislation',
 				'name'                    => $title,
-				'legislationType'         => aw_seo_plain( $kind->name ),
+				'legislationType'         => rankweb_plain_text( $kind->name ),
 				'legislationJurisdiction' => 'IN',
 			),
 			$base
@@ -513,7 +516,7 @@ function aw_article_nodes( $id ) {
 		$number = trim( (string) get_post_meta( $id, 'aw_legal_number', true ) );
 		$force  = (string) get_post_meta( $id, 'aw_legal_force', true );
 		if ( '' !== $number ) {
-			$node['legislationIdentifier'] = aw_seo_plain( $number );
+			$node['legislationIdentifier'] = rankweb_plain_text( $number );
 		}
 		if ( in_array( $force, array( 'InForce', 'NotInForce', 'PartiallyInForce' ), true ) ) {
 			$node['legislationLegalForce'] = 'https://schema.org/' . $force;
@@ -524,12 +527,12 @@ function aw_article_nodes( $id ) {
 		$nodes[]                    = $node;
 	} elseif ( 'aw_legal' === $type && 'template' === $ks ) {
 		$nodes[] = array_merge(
-			array( '@type' => 'DigitalDocument', '@id' => $url . '#document', 'name' => $title, 'genre' => aw_seo_plain( $kind->name ), 'encodingFormat' => 'text/html' ),
+			array( '@type' => 'DigitalDocument', '@id' => $url . '#document', 'name' => $title, 'genre' => rankweb_plain_text( $kind->name ), 'encodingFormat' => 'text/html' ),
 			$base,
 			array( 'author' => $us, 'publisher' => $us )
 		);
 	} elseif ( 'aw_legal' === $type ) {
-		$court = $issuer && function_exists( 'aw_item_issuer' ) && in_array( aw_item_issuer( $id )->slug, AW_COURT_ISSUERS, true );
+		$court = $issuer && function_exists( 'aw_item_issuer' ) && defined( 'AW_COURT_ISSUERS' ) && in_array( aw_item_issuer( $id )->slug, AW_COURT_ISSUERS, true );
 		$doc   = array_filter(
 			array(
 				'@type'         => 'CreativeWork',
@@ -555,7 +558,7 @@ function aw_article_nodes( $id ) {
 			$article['genre'] = 'Press release';
 		} else {
 			$doc['@type']     = 'DigitalDocument'; // a circular, advisory or other government document
-			$doc['genre']     = $kind ? aw_seo_plain( $kind->name ) : null;
+			$doc['genre']     = $kind ? rankweb_plain_text( $kind->name ) : null;
 			$article['genre'] = $doc['genre'];
 		}
 		$article['isBasedOn'] = array_filter( $doc );
@@ -609,13 +612,13 @@ function aw_campaign_schema( $id ) {
 	$org     = function_exists( 'aw_campaign_organiser' ) ? aw_campaign_organiser( $id ) : (int) get_post_meta( $id, 'aw_organisation', true );
 	$org     = $org ? $org : (int) get_post_meta( $id, 'aw_organiser', true ); // the older key, read when aw_organisation is empty
 	$image   = aw_schema_safe_url( (string) get_the_post_thumbnail_url( $id, 'large' ) );
-	$by      = $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => aw_seo_plain( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) );
+	$by      = $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => rankweb_plain_text( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) );
 	$day     = (string) get_post_meta( $id, 'aw_event_date', true );
-	$place   = aw_seo_plain( (string) get_post_meta( $id, 'aw_event_place', true ) );
+	$place   = rankweb_plain_text( (string) get_post_meta( $id, 'aw_event_place', true ) );
 	$common  = array(
 		'url'         => get_permalink( $id ),
-		'name'        => aw_seo_plain( get_the_title( $id ) ),
-		'description' => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
+		'name'        => rankweb_plain_text( get_the_title( $id ) ),
+		'description' => function_exists( 'aw_text' ) ? rankweb_plain_text( aw_text( $id, 40 ) ) : '',
 		'inLanguage'  => 'en-IN',
 		'image'       => $image ? array( $image ) : null,
 		'about'       => aw_schema_categories( $id ),
@@ -663,7 +666,7 @@ function aw_campaign_schema( $id ) {
 function aw_campaign_list_nodes( $id ) {
 	$html  = (string) get_post_field( 'post_content', $id );
 	$url   = get_permalink( $id );
-	$plain = fn( $h ) => aw_seo_plain( trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( preg_replace( '/\[[^\]]*\]/', '', $h ) ) ) ) );
+	$plain = fn( $h ) => rankweb_plain_text( trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( preg_replace( '/\[[^\]]*\]/', '', $h ) ) ) ) );
 	$nodes = array();
 	$items = array();
 	if ( preg_match_all( '#<div (?:id="([^"]+)" )?class="wp-block-group aw-camp-card">(.*?)</div>\s*<!-- /wp:group -->#s', $html, $cards, PREG_SET_ORDER ) ) {
@@ -723,10 +726,10 @@ function aw_campaign_record_schema( $id ) {
 		array(
 			'@type'            => 'Article',
 			'@id'              => $url . '#article',
-			'headline'         => aw_seo_plain( get_the_title( $id ) ),
+			'headline'         => rankweb_plain_text( get_the_title( $id ) ),
 			'url'              => $url,
 			'mainEntityOfPage' => array( '@id' => $url . '#webpage' ),
-			'description'      => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
+			'description'      => function_exists( 'aw_text' ) ? rankweb_plain_text( aw_text( $id, 40 ) ) : '',
 			'inLanguage'       => 'en-IN',
 			'image'            => $image ? array( $image ) : null,
 			'datePublished'    => get_the_date( 'c', $id ),
@@ -831,12 +834,12 @@ function aw_job_schema( $id ) {
 	$data = array(
 		'@type'              => 'JobPosting',
 		'@id'                => get_permalink( $id ) . '#job',
-		'title'              => aw_seo_plain( get_the_title( $id ) ),
+		'title'              => rankweb_plain_text( get_the_title( $id ) ),
 		'description'        => trim( preg_replace( '/\n{3,}/', "\n\n", wp_kses_post( $desc ) ) ),
 		'datePosted'         => get_the_date( 'c', $id ),
 		'url'                => get_permalink( $id ),
 		'employmentType'     => $emp ? ( 1 === count( $emp ) ? $emp[0] : $emp ) : null,
-		'hiringOrganization' => array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $org ), 'sameAs' => $org_site, 'url' => $org_id ? get_permalink( $org_id ) : null, 'logo' => $logo ) ),
+		'hiringOrganization' => array_filter( array( '@type' => 'Organization', 'name' => rankweb_plain_text( $org ), 'sameAs' => $org_site, 'url' => $org_id ? get_permalink( $org_id ) : null, 'logo' => $logo ) ),
 		'validThrough'       => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline . 'T23:59:59+05:30' : null,
 	);
 	if ( $remote ) {
@@ -971,12 +974,12 @@ function aw_opportunity_schema( $id ) {
 	$org_id = $org_id && 'publish' === get_post_status( $org_id ) ? $org_id : 0;
 	$name   = (string) get_post_meta( $id, 'aw_org_name', true );
 	$name   = $name ? $name : ( $org_id ? get_post_field( 'post_title', $org_id ) : '' );
-	$org    = $name ? array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $name ), 'url' => $org_id ? get_permalink( $org_id ) : (string) get_post_meta( $id, 'aw_website', true ) ) ) : null;
-	$desc   = function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 60 ) ) : '';
+	$org    = $name ? array_filter( array( '@type' => 'Organization', 'name' => rankweb_plain_text( $name ), 'url' => $org_id ? get_permalink( $org_id ) : (string) get_post_meta( $id, 'aw_website', true ) ) ) : null;
+	$desc   = function_exists( 'aw_text' ) ? rankweb_plain_text( aw_text( $id, 60 ) ) : '';
 	$common = array(
 		'@id'         => get_permalink( $id ) . '#' . $kind,
-		'name'        => aw_seo_plain( get_the_title( $id ) ),
-		'description' => '' !== $desc ? $desc : aw_seo_plain( (string) get_post_field( 'post_excerpt', $id ) ),
+		'name'        => rankweb_plain_text( get_the_title( $id ) ),
+		'description' => '' !== $desc ? $desc : rankweb_plain_text( (string) get_post_field( 'post_excerpt', $id ) ),
 		'url'         => get_permalink( $id ),
 		'inLanguage'  => 'en-IN',
 	);
@@ -1038,14 +1041,14 @@ function aw_categories_schema() {
 	$url   = get_permalink();
 	$items = array();
 	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $i => $t ) {
-		$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => aw_seo_term_url( $t ), 'name' => aw_seo_plain( $t->name ) );
+		$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => aw_seo_term_url( $t ), 'name' => rankweb_plain_text( $t->name ) );
 	}
 	return array(
 		array(
 			'@type'       => 'CollectionPage',
 			'@id'         => $url . '#page',
 			'url'         => $url,
-			'name'        => aw_seo_plain( get_the_title() ),
+			'name'        => rankweb_plain_text( get_the_title() ),
 			'description' => aw_seo_description(),
 			'inLanguage'  => 'en-IN',
 			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
@@ -1085,16 +1088,16 @@ function aw_schema_nodes() {
 			'@type'      => 'ContactPage',
 			'@id'        => get_permalink() . '#page',
 			'url'        => get_permalink(),
-			'name'       => aw_seo_plain( get_the_title() ),
+			'name'       => rankweb_plain_text( get_the_title() ),
 			'inLanguage' => 'en-IN',
 			'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
 			'mainEntity' => array( '@id' => home_url( '/#organization' ) ), // the publisher node carries the email and contact point
 		);
 	} elseif ( is_page( 'about' ) ) {
-		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => aw_seo_plain( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
+		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => rankweb_plain_text( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
 	} elseif ( is_page( 'categories' ) ) {
 		$nodes = array_merge( $nodes, aw_categories_schema() );
-	} elseif ( is_page( array( 'press-coverage', 'media' ) ) && function_exists( 'aw_press_schema' ) ) {
+	} elseif ( is_page( array( 'press-coverage', 'media' ) ) && function_exists( 'aw_press_schema' ) && function_exists( 'aw_press_list' ) ) { // the press list (Animal Writes Core)
 		$nodes[] = aw_press_schema();
 	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
 		$nodes = array_merge( $nodes, aw_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)
@@ -1132,17 +1135,17 @@ function aw_category_schema_nodes() {
 			'@type'    => 'ListItem',
 			'position' => $start + $i + 1,
 			'url'      => get_permalink( $p ),
-			'name'     => aw_seo_plain( get_the_title( $p ) ), // a plain summary list (as the hubs): a typed stub with only a name and url reads as an incomplete Article
+			'name'     => rankweb_plain_text( get_the_title( $p ) ), // a plain summary list (as the hubs): a typed stub with only a name and url reads as an incomplete Article
 		);
 	}
-	$desc  = aw_seo_plain( aw_seo_description() );
+	$desc  = rankweb_plain_text( aw_seo_description() );
 	$nodes = array(
 		array_filter(
 			array(
 				'@type'       => 'CollectionPage',
 				'@id'         => $url . '#page',
 				'url'         => $url,
-				'name'        => aw_seo_plain( $term->name ),
+				'name'        => rankweb_plain_text( $term->name ),
 				'description' => '' !== $desc ? $desc : wp_strip_all_tags( term_description( $term ) ),
 				'inLanguage'  => 'en-IN',
 				'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
@@ -1196,7 +1199,7 @@ function aw_page_lists_schema_nodes( $page_id ) {
 				'@type'    => 'ListItem',
 				'position' => count( $items ) + 1,
 				'url'      => get_permalink( $p ),
-				'name'     => aw_seo_plain( get_the_title( $p ) ), // plain summary list, as the hubs
+				'name'     => rankweb_plain_text( get_the_title( $p ) ), // plain summary list, as the hubs
 			);
 		}
 	}
@@ -1206,7 +1209,7 @@ function aw_page_lists_schema_nodes( $page_id ) {
 				'@type'       => 'CollectionPage',
 				'@id'         => $url . '#page',
 				'url'         => $url,
-				'name'        => aw_seo_plain( get_the_title( $page_id ) ),
+				'name'        => rankweb_plain_text( get_the_title( $page_id ) ),
 				'description' => aw_seo_description(),
 				'inLanguage'  => 'en-IN',
 				'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
@@ -1230,6 +1233,9 @@ function aw_hub_schema_nodes() {
 	static $nodes = null;
 	if ( null !== $nodes ) {
 		return $nodes;
+	}
+	if ( ! function_exists( 'aw_hub_type' ) || ! function_exists( 'aw_hub_posts' ) || ! defined( 'AW_HUBS' ) ) { // the hubs (Animal Writes Core) are not loaded
+		return $nodes = array();
 	}
 	$type = aw_hub_type();
 	if ( ! $type || is_404() || 'aw_press' === $type ) {
@@ -1277,19 +1283,19 @@ function aw_hub_schema_build( $type, $url, $view ) {
 		if ( aw_is_noindex_item( $p->ID ) || in_array( (int) $p->ID, aw_seo_preview_ids(), true ) ) {
 			continue; // not indexed (or preview only), so not listed
 		}
-		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
+		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => rankweb_plain_text( get_the_title( $p ) ) );
 	}
 	$name  = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
 	$name  = $view && 'aw_listing' !== $type ? $view['name'] . ' – ' . get_the_title( get_queried_object_id() ) : $name; // "Wildlife – News"
 	if ( ! $items ) { // an empty list: the collection page alone
-		return array( array( '@type' => 'CollectionPage', '@id' => $url . '#page', 'url' => $url, 'name' => aw_seo_plain( $name ), 'description' => aw_seo_description(), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'publisher' => array( '@id' => home_url( '/#organization' ) ) ) );
+		return array( array( '@type' => 'CollectionPage', '@id' => $url . '#page', 'url' => $url, 'name' => rankweb_plain_text( $name ), 'description' => aw_seo_description(), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'publisher' => array( '@id' => home_url( '/#organization' ) ) ) );
 	}
 	return array(
 		array(
 			'@type'       => 'CollectionPage',
 			'@id'         => $url . '#page',
 			'url'         => $url,
-			'name'        => aw_seo_plain( $name ),
+			'name'        => rankweb_plain_text( $name ),
 			'description' => aw_seo_description(),
 			'inLanguage'  => 'en-IN',
 			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
@@ -1326,9 +1332,9 @@ function aw_press_schema() {
 			'item'     => array_filter(
 				array(
 					'@type'         => 'Article', // coverage of Animal Writes, at the outlet's address
-					'headline'      => aw_seo_plain( get_the_title( $p ) ),
+					'headline'      => rankweb_plain_text( get_the_title( $p ) ),
 					'about'         => array( '@id' => home_url( '/#organization' ) ),
-					'name'          => aw_seo_plain( get_the_title( $p ) ),
+					'name'          => rankweb_plain_text( get_the_title( $p ) ),
 					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
 					'datePublished' => aw_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ),
 					'publisher'     => get_post_meta( $p->ID, 'aw_press_publisher', true ) ? array( '@type' => 'Organization', 'name' => (string) get_post_meta( $p->ID, 'aw_press_publisher', true ) ) : null,
@@ -1341,8 +1347,8 @@ function aw_press_schema() {
 		'@type'       => 'CollectionPage',
 		'@id'         => get_permalink() . '#page',
 		'url'         => get_permalink(),
-		'name'        => aw_seo_plain( get_the_title() ),
-		'description' => aw_seo_plain( aw_seo_description() ),
+		'name'        => rankweb_plain_text( get_the_title() ),
+		'description' => rankweb_plain_text( aw_seo_description() ),
 		'inLanguage'  => 'en-IN',
 		'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 		'mainEntity'  => array( '@type' => 'ItemList', 'itemListElement' => $list ),
@@ -1416,7 +1422,7 @@ add_filter(
 			}
 		}
 		if ( isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) && empty( $data['WebPage']['description'] ) ) {
-			$desc = aw_seo_plain( aw_seo_description() ); // the page's own search description, so a quote of the page has its summary
+			$desc = rankweb_plain_text( aw_seo_description() ); // the page's own search description, so a quote of the page has its summary
 			if ( '' !== $desc ) {
 				$data['WebPage']['description'] = $desc;
 			}
@@ -1509,8 +1515,8 @@ add_filter(
 					'@type'              => 'WebPage',
 					'@id'                => $link . '#webpage',
 					'url'                => $link,
-					'name'               => aw_seo_plain( wp_get_document_title() ),
-					'description'        => aw_seo_plain( aw_seo_description() ),
+					'name'               => rankweb_plain_text( wp_get_document_title() ),
+					'description'        => rankweb_plain_text( aw_seo_description() ),
 					'inLanguage'         => 'en-IN',
 					'isPartOf'           => array( '@id' => home_url( '/#website' ) ),
 					'primaryImageOfPage' => array( '@id' => $url ),

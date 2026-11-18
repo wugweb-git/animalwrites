@@ -37,6 +37,10 @@ function aw_seo_dir_data() {
 	if ( null !== $data ) {
 		return $data;
 	}
+	if ( ! function_exists( 'aw_place_counts' ) || ! function_exists( 'directoryweb_listing_type_slugs' ) ) { // DirectoryWeb is off: no counts
+		$data = array( 'v' => 3, 'at' => 0, 's' => array(), 'd' => array(), 'in' => array() );
+		return $data;
+	}
 	$at   = (int) ( aw_place_counts()['at'] ?? 0 );
 	$data = get_transient( 'aw_seo_dir_data' );
 	if ( is_array( $data ) && ( $data['at'] ?? -1 ) === $at && 3 === ( $data['v'] ?? 0 ) ) {
@@ -46,7 +50,7 @@ function aw_seo_dir_data() {
 	$ids  = aw_seo_preview_ids();
 	// Preview-only items are left out (integers).
 	$rows = $wpdb->get_results( "SELECT p.ID id, MAX(CASE WHEN pm.meta_key = 'aw_state_code' THEN pm.meta_value END) st, MAX(CASE WHEN pm.meta_key = 'aw_district_code' THEN pm.meta_value END) dt, MAX(CASE WHEN pm.meta_key = 'aw_phones' AND CAST(pm.meta_value AS UNSIGNED) > 0 THEN 1 ELSE 0 END) ph, MAX(CASE WHEN pm.meta_key = 'aw_source_name' AND TRIM(pm.meta_value) <> '' AND pm.meta_value NOT LIKE '%google%' AND pm.meta_value <> 'AWBI ABC list' AND pm.meta_value NOT LIKE '%Darpan%' AND pm.meta_value NOT LIKE '%data.gov.in%' AND pm.meta_value NOT LIKE 'People For Animals%' AND pm.meta_value NOT LIKE '%adopt-a-pet%' AND pm.meta_value NOT LIKE 'AWBP Trust%' AND pm.meta_value NOT LIKE '%dogsindia%' THEN 1 ELSE 0 END) gov FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key IN ('aw_state_code', 'aw_district_code', 'aw_phones', 'aw_source_name') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" . ( $ids ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : '' ) . ' GROUP BY p.ID', ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
-	$tax  = $wpdb->get_results( "SELECT r.object_id id, t.slug FROM {$wpdb->term_relationships} r JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = r.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('" . implode( "','", array_map( 'esc_sql', aw_listing_type_slugs() ) ) . "') JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed SQL; the listing types and ids are the plugin's own, cast or escaped
+	$tax  = $wpdb->get_results( "SELECT r.object_id id, t.slug FROM {$wpdb->term_relationships} r JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = r.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('" . implode( "','", array_map( 'esc_sql', directoryweb_listing_type_slugs() ) ) . "') JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed SQL; the listing types and ids are the plugin's own, cast or escaped
 	$types = array();
 	foreach ( $tax as $t ) {
 		$types[ (int) $t['id'] ][] = $t['slug'];
@@ -129,6 +133,9 @@ function aw_seo_dir_count( $place, $key = '*' ) {
  */
 function aw_seo_dir_children( $place, $key = '*' ) {
 	$out = array();
+	if ( ! function_exists( 'aw_place_states' ) ) { // DirectoryWeb is off
+		return $out;
+	}
 	foreach ( $place ? aw_place_districts( $place->code ) : aw_place_states() as $p ) {
 		$n = aw_seo_dir_count( $p, $key );
 		if ( $n ) {
@@ -245,7 +252,7 @@ function aw_seo_dir_view() {
 		'place' => $place,
 		'state' => $place ? aw_place_parent_state( $place ) : null,
 		'type'  => $type,
-		'n'     => (int) aw_hub_total( 'aw_listing' ),
+		'n'     => function_exists( 'aw_hub_total' ) ? (int) aw_hub_total( 'aw_listing' ) : 0,
 		'other' => $other,
 	);
 	return $v;
@@ -630,6 +637,9 @@ add_action( 'save_post', fn() => delete_transient( 'aw_seo_category_counts' ) );
  * @return array
  */
 function aw_seo_category_parts( $term, $help = true ) {
+	if ( ! function_exists( 'aw_hub_url' ) ) { // the hubs (Animal Writes Core) are not loaded
+		return array();
+	}
 	$c     = aw_seo_category_counts()[ $term->term_id ] ?? array();
 	$words = array(
 		'aw_news'        => array( 'news story', 'news stories', 'aw_news' ),
@@ -680,7 +690,7 @@ function aw_seo_category_description( $term ) {
 		return '';
 	}
 	list( $items, $dir ) = aw_seo_category_split( $parts );
-	$lead  = aw_seo_plain( $term->name ) . ' in India on Animal Writes: ';
+	$lead  = rankweb_plain_text( $term->name ) . ' in India on Animal Writes: ';
 	$room  = AW_SEO_DESC_MAX - mb_strlen( aw_seo_page_suffix() );
 	$cands = array();
 	for ( $d = count( $dir ); $d >= 0; $d-- ) {
@@ -785,7 +795,7 @@ function aw_seo_term_title( $term ) {
 function aw_seo_term_title_rule( $term ) {
 	// Only tails that say what the page really lists, and no separator but the " – " before the brand (owner, 15 Oct
 	// 2026: no filler such as ": News" added to reach a length, no colons or commas, no promise of phone numbers). New terms should still get a written title in AW_SEO_TERM_TITLES.
-	$what  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : aw_seo_plain( $term->name ) . ' in India';
+	$what  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : rankweb_plain_text( $term->name ) . ' in India';
 	$types = array();
 	foreach ( array( 'aw_listing', 'aw_legal', 'aw_news', 'post', 'aw_opportunity' ) as $pt ) {
 		$q = new WP_Query( array( 'post_type' => $pt, 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => true, 'tax_query' => array( array( 'taxonomy' => $term->taxonomy, 'terms' => $term->term_id ) ) ) );
@@ -794,7 +804,7 @@ function aw_seo_term_title_rule( $term ) {
 		}
 	}
 	$tries = array();
-	$name  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : aw_seo_plain( $term->name );
+	$name  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : rankweb_plain_text( $term->name );
 	if ( in_array( 'aw_listing', $types, true ) ) {
 		$tries = array( $what . ' by State and District', $what . ' by District', str_replace( ' in India', ' across India', $what ) );
 	} elseif ( array( 'aw_legal' ) === $types ) {
@@ -844,10 +854,10 @@ function aw_seo_tag_plural( $term ) {
 	if ( isset( $fixed[ $term->slug ] ) ) {
 		return $fixed[ $term->slug ];
 	}
-	if ( function_exists( 'aw_service_slugs' ) && in_array( $term->slug, aw_service_slugs(), true ) ) {
+	if ( function_exists( 'directoryweb_service_slugs' ) && in_array( $term->slug, directoryweb_service_slugs(), true ) ) {
 		return 'Animal Welfare Organisations Offering ' . aw_seo_title_case( mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) );
 	}
-	if ( function_exists( 'aw_listing_type_slugs' ) && in_array( $term->slug, aw_listing_type_slugs(), true ) ) {
+	if ( function_exists( 'directoryweb_listing_type_slugs' ) && in_array( $term->slug, directoryweb_listing_type_slugs(), true ) ) {
 		return aw_seo_title_case( aw_seo_type_plural( $term->slug ) );
 	}
 	$words = explode( ' ', trim( $term->name ) );
@@ -870,7 +880,7 @@ function aw_seo_sentence_case( $text ) {
 function aw_seo_tag_description( $term ) {
 	$n    = (int) $term->count;
 	$sec  = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
-	$svc  = function_exists( 'aw_service_slugs' ) && in_array( $term->slug, aw_service_slugs(), true );
+	$svc  = function_exists( 'directoryweb_service_slugs' ) && in_array( $term->slug, directoryweb_service_slugs(), true );
 	if ( 1 === $n ) {
 		$what = $svc ? 'animal welfare organisation offering ' . aw_seo_sentence_case( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) : aw_seo_sentence_case( $term->name );
 	} else {
@@ -970,7 +980,7 @@ function aw_seo_tag_keyword( $term ) {
 	$name   = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^\p{L}\p{N} -]+/u', ' ', mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) ) ) );
 	$plural = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^\p{L}\p{N} -]+/u', ' ', mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_tag_plural( $term ) ) ) ) ) );
 	$sec    = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
-	if ( function_exists( 'aw_service_slugs' ) && in_array( $term->slug, aw_service_slugs(), true ) ) {
+	if ( function_exists( 'directoryweb_service_slugs' ) && in_array( $term->slug, directoryweb_service_slugs(), true ) ) {
 		return 0 === strpos( $name, 'animal' ) ? $name : 'animal ' . $name; // "animal rescue"
 	}
 	if ( 'aw_listing' === $sec ) {

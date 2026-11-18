@@ -84,7 +84,7 @@ function aw_relay_resolve( $host ) {
  */
 function aw_relay_ca_bundle() {
 	$text = (string) file_get_contents( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-	foreach ( (array) glob( AW_CORE_DIR . 'data/certs/*.pem' ) as $pem ) {
+	foreach ( (array) glob( AW_SOURCING_DIR . 'data/certs/*.pem' ) as $pem ) {
 		$text .= "\n" . file_get_contents( $pem ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 	}
 	$path = trailingslashit( get_temp_dir() ) . 'aw-relay-ca-' . substr( md5( $text ), 0, 12 ) . '.pem';

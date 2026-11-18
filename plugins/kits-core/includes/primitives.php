@@ -375,7 +375,7 @@ function kits_fold_now( $kind ) {
 	$js = 'sheet' === $kind
 		? 'if(matchMedia("(max-width: 767px)").matches){d.classList.add("is-sheet");d.removeAttribute("open");}'
 		: 'if(matchMedia("(max-width: "+(parseInt(d.getAttribute("data-kit-fold"),10)||1199)+"px)").matches&&!d.hasAttribute("data-kit-keep-open")){d.open=false;}';
-	return '<script>(function(d){if(d&&window.matchMedia){' . $js . '}})(document.currentScript&&document.currentScript.previousElementSibling);</script>';
+	return wp_get_inline_script_tag( '(function(d){if(d&&window.matchMedia){' . $js . '}})(document.currentScript&&document.currentScript.previousElementSibling);' );
 }
 
 /**

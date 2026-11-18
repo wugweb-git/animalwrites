@@ -299,7 +299,7 @@ function aw_place_counts() {
 			$c[ $k ][ (int) $r->code ] = (int) $r->n;
 		}
 	}
-	$slugs = aw_listing_type_slugs(); // the listing types (not the services)
+	$slugs = directoryweb_listing_type_slugs(); // the listing types (not the services)
 	$rows = $wpdb->get_results( "SELECT pm.meta_value code, t.slug type, MAX(p.post_modified_gmt) modified, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = 'aw_district_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('" . implode( "','", array_map( 'esc_sql', $slugs ) ) . "') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" . ( $pids ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', $pids ) ) . ')' : '' ) . ' GROUP BY pm.meta_value, t.slug', ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- listing types escaped, preview-only ids integers
 	foreach ( $rows as $r ) {
 		$c['pairs'][] = array( (int) $r['code'], $r['type'], $r['modified'], (int) $r['n'] );

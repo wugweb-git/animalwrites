@@ -403,7 +403,7 @@ function kits_settings_transfer_url(): string {
 add_action(
 	'rest_api_init',
 	function () {
-		$can = fn() => current_user_can( 'edit_theme_options' );
+		$can = fn() => current_user_can( 'manage_options' ); // The import writes options whose own screens need manage_options.
 		register_rest_route(
 			'kits/v1',
 			'/settings',

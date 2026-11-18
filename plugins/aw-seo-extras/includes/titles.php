@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Whether a post is a section hub Page (a list, not an item). */
 function aw_seo_is_hub_page( $post ) {
 	$post = get_post( $post );
-	if ( ! $post || 'page' !== $post->post_type || $post->post_parent ) {
+	if ( ! $post || 'page' !== $post->post_type || $post->post_parent || ! defined( 'AW_HUBS' ) ) { // AW_HUBS: Animal Writes Core's hubs
 		return false;
 	}
 	foreach ( AW_HUBS as $h ) {
@@ -82,20 +82,20 @@ function aw_seo_item_title_rules( $post ) {
 		return aw_seo_resource_title( $post ); // Library and Resources (helpers.php)
 	}
 	if ( 'aw_news' === $post->post_type ) {
-		return aw_seo_headline_title( aw_seo_unseparate( aw_seo_plain( $post->post_title ), aw_seo_plain( (string) get_post_meta( $post->ID, 'aw_source_name', true ) ) ) );
+		return aw_seo_headline_title( aw_seo_unseparate( rankweb_plain_text( $post->post_title ), rankweb_plain_text( (string) get_post_meta( $post->ID, 'aw_source_name', true ) ) ) );
 	}
 	if ( 'aw_listing' === $post->post_type ) {
 		$name = aw_seo_listing_name( $post->ID );
 		return mb_strlen( aw_seo_branded( $name ) ) <= 60 ? aw_seo_branded( $name ) : $name; // over 60: no site name (Google shows it beside the result); the name is never cut (owner, 15 Oct 2026)
 	}
 	if ( 'aw_opportunity' === $post->post_type ) {
-		$t = aw_seo_unseparate( aw_seo_plain( wptexturize( $post->post_title ) ) );
+		$t = aw_seo_unseparate( rankweb_plain_text( wptexturize( $post->post_title ) ) );
 		return mb_strlen( aw_seo_branded( $t ) ) <= 60 ? aw_seo_branded( $t ) : $t; // over 60: no site name; the role and organisation are never cut (owner, 15 Oct 2026)
 	}
 	if ( 'page' === $post->post_type && 'about' === $post->post_name && ! $post->post_parent ) {
 		return 'About Animal Writes';
 	}
-	return aw_seo_branded( aw_seo_plain( wptexturize( $post->post_title ) ) ); // as WordPress's own document title
+	return aw_seo_branded( rankweb_plain_text( wptexturize( $post->post_title ) ) ); // as WordPress's own document title
 }
 
 /**
@@ -116,9 +116,9 @@ function aw_seo_item_description( $post ) {
 		}
 		$awbi = aw_seo_awbi_description( $post->ID, $desc );
 		$desc = '' !== $awbi ? $awbi : $desc;
-	} elseif ( 'aw_legal' === $post->post_type && mb_strlen( aw_seo_plain( $desc ) ) < 60 ) { // a one-line note: the intro says more
+	} elseif ( 'aw_legal' === $post->post_type && mb_strlen( rankweb_plain_text( $desc ) ) < 60 ) { // a one-line note: the intro says more
 		$better = aw_seo_intro( $post );
-		$desc   = mb_strlen( aw_seo_plain( $better ) ) >= 60 ? $better : $desc;
+		$desc   = mb_strlen( rankweb_plain_text( $better ) ) >= 60 ? $better : $desc;
 	}
 	if ( '' === trim( (string) $desc ) ) {
 		$desc = get_bloginfo( 'description' );
@@ -174,7 +174,7 @@ function aw_seo_fill_post( $post_id ) {
 
 /** A listing's focus keyword: its name, plain, without a trailing place or bracketed abbreviation clutter. */
 function aw_seo_listing_keyword( $post ) {
-	$name = aw_seo_plain( get_post_field( 'post_title', $post ) );
+	$name = rankweb_plain_text( get_post_field( 'post_title', $post ) );
 	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', $name ); // organisation names keep their hyphens
 	return trim( str_replace( array( '"', '“', '”' ), '', $name ) );
 }
@@ -242,7 +242,7 @@ function aw_seo_var_title( $var_args = '', $args = null ) {
 	$post  = aw_seo_var_post( $args );
 	$title = $post ? aw_seo_item_title( $post ) : '';
 	if ( '' === $title ) {
-		$own   = $post ? trim( aw_seo_plain( wptexturize( $post->post_title ) ) ) : '';
+		$own   = $post ? trim( rankweb_plain_text( wptexturize( $post->post_title ) ) ) : '';
 		$title = '' !== $own ? aw_seo_branded( $own ) : get_bloginfo( 'name' );
 	}
 	return $title;
@@ -292,7 +292,7 @@ function aw_seo_list_title() {
 		return '';
 	}
 	$hub = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
-	if ( 'aw_listing' === $hub ) {
+	if ( 'aw_listing' === $hub && function_exists( 'aw_current_place' ) ) { // the Directory's titles need DirectoryWeb
 		$place = aw_current_place();
 		$typed = aw_seo_dir_title(); // district × type pages and lists filtered by type (programmatic.php)
 		if ( '' !== $typed ) {
@@ -414,6 +414,9 @@ function aw_seo_building_title( $set = null ) {
  */
 function aw_seo_sync_hubs() {
 	$out = array();
+	if ( ! defined( 'AW_HUBS' ) ) { // the hubs (Animal Writes Core) are not loaded
+		return $out;
+	}
 	foreach ( AW_HUBS as $h ) {
 		$page = get_page_by_path( $h[0] );
 		if ( ! $page || 'publish' !== $page->post_status ) {
@@ -521,7 +524,7 @@ function aw_seo_list_description() {
 	$built = 'aw_listing' === $hub ? aw_seo_dir_description() : ''; // places, district × type pages, lists filtered by type (programmatic.php)
 	if ( '' !== $built ) {
 		$desc = $built;
-	} elseif ( 'aw_listing' === $hub && ! is_404() ) {
+	} elseif ( 'aw_listing' === $hub && ! is_404() && function_exists( 'aw_current_place' ) ) {
 		$place = aw_current_place();
 		$slug  = (string) get_query_var( 'aw_type_slug' );
 		$n     = number_format_i18n( aw_hub_total( 'aw_listing' ) );
@@ -542,7 +545,7 @@ function aw_seo_list_description() {
 		} else {
 			$desc = sprintf( '%1$s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
 		}
-	} elseif ( isset( AW_HUB_DESCRIPTIONS[ $hub ] ) ) {
+	} elseif ( isset( AW_HUB_DESCRIPTIONS[ $hub ] ) && 'aw_listing' !== $hub ) { // the Directory's has a count to fill in (above)
 		$desc = AW_HUB_DESCRIPTIONS[ $hub ];
 	} elseif ( in_array( $hub, array( 'aw_news', 'aw_legal', 'post' ), true ) ) {
 		$desc = aw_seo_hub_intro_description( $hub );
@@ -594,7 +597,7 @@ add_filter(
 		if ( ! $id ) {
 			return $desc;
 		}
-		$name = aw_seo_plain( get_the_title( $id ) );
+		$name = rankweb_plain_text( get_the_title( $id ) );
 		return aw_seo_cut( 'Claim ' . $name . ' in the Animal Writes Directory: send changes to its phone, WhatsApp, email, website, area, services or logo for review.', 160 );
 	},
 	30

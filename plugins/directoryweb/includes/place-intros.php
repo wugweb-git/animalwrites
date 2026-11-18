@@ -126,7 +126,7 @@ function aw_place_intro_store( $key, array $entry ): bool {
 
 /** The place whose page shows its intro on this request (page 1, no type, service, name, Claimed or Verified filter), or null. */
 function aw_place_intro_place() {
-	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_tags() || ! empty( $_GET['q'] ) || ! empty( $_GET['verified'] ) || ! empty( $_GET['gov'] ) || aw_hub_page() > 1 ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read only: is the list filtered
+	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_tags() || ! empty( $_GET['q'] ) || ! empty( $_GET['verified'] ) || ! empty( $_GET['gov'] ) || (int) get_query_var( 'paged' ) > 1 ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read only: is the list filtered (paged > 1: page 2 on, as Core's aw_hub_page())
 		return null;
 	}
 	return aw_current_place();
@@ -233,7 +233,7 @@ function aw_place_intros_list(): void {
 		);
 	}
 	echo '<h2>' . esc_html__( 'Intros on the site', 'directoryweb' ) . '</h2>';
-	aw_core_simple_table(
+	kits_simple_table(
 		'aw-place-intros',
 		array(
 			'place'   => __( 'Place', 'directoryweb' ),

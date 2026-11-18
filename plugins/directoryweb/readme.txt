@@ -38,11 +38,12 @@ DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
 
 = Works with =
 
-* Animal Writes Core (it loads DirectoryWeb and supplies the site's content types). RankWeb reads the Directory for titles, schema and the sitemap; SourceWeb adds listings and keeps the change log.
+* Kits Core (required: the admin shell, list tables, icons and dates).
+* Animal Writes Core (while it is active it loads DirectoryWeb and supplies the site's content types, among them the listing type). RankWeb reads the Directory for titles, schema and the sitemap; SourceWeb adds listings and keeps the change log.
 
 == Installation ==
 
-1. Animal Writes Core loads DirectoryWeb from the plugins folder, so the Directory works before the plugin is activated on its own.
+1. Activate Kits Core first. While Animal Writes Core is active it loads DirectoryWeb from the plugins folder, so the Directory works before the plugin is activated on its own.
 2. Activate DirectoryWeb under Plugins to own the Directory's rewrite rules and capability.
 
 == Changelog ==

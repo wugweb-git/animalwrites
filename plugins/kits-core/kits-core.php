@@ -47,10 +47,18 @@ require_once KITS_CORE_DIR . 'includes/plugin-info.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';
+// The site's forms on Fluent Forms: the custom fields, checks and look, the form and thank-you pages, Report a mistake,
+// the volunteer form, the Campaign form with the raw copy of every send, and the Dashboard box (moved from Animal Writes
+// Core, 18 Nov 2026). compat.php keeps the old function names working.
+foreach ( array( 'fluentforms', 'form-pages', 'reports', 'volunteers', 'campaign-form', 'dashboard-forms', 'compat' ) as $kits_forms_file ) {
+	require_once KITS_CORE_DIR . 'includes/forms/' . $kits_forms_file . '.php';
+}
+unset( $kits_forms_file );
 require_once KITS_CORE_DIR . 'includes/primitives.php';
 require_once KITS_CORE_DIR . 'includes/scf.php'; // SCF/ACF bridge (admin): Local JSON folders and the field group registry
 require_once KITS_CORE_DIR . 'includes/bindings.php'; // Block Bindings source kits/post-field; sites register keys on kits_post_fields
 require_once KITS_CORE_DIR . 'includes/presets.php'; // Content-type presets (kits-portfolio … kits-testimonial), each off until switched on in Kits → Settings
+require_once KITS_CORE_DIR . 'includes/presets-scf.php'; // SCF field groups (Local JSON, acf-json/) for the switched-on presets
 require_once KITS_CORE_DIR . 'includes/blocks.php';
 require_once KITS_CORE_DIR . 'includes/demo.php';
 require_once KITS_CORE_DIR . 'includes/system-screen.php';
@@ -64,11 +72,8 @@ require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
 require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined stylesheets (the Kits theme's core files, the component files per kind of page)
 require_once KITS_CORE_DIR . 'includes/preview.php';
-require_once KITS_CORE_DIR . 'includes/sourcing.php';
-require_once KITS_CORE_DIR . 'includes/sources-config.php'; // the sourcing lists (option aw_sources)
-require_once KITS_CORE_DIR . 'includes/keyword-table.php'; // the keyword table SourceWeb, InsightWeb and RankWeb share (with keyword-model.php)
-require_once KITS_CORE_DIR . 'includes/attribution.php';
-require_once KITS_CORE_DIR . 'includes/compat-sourcing.php'; // aw_ -> kits_ back-compat shims for the sourcing/attribution helpers the tenant and siblings still call
+// The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
+// InsightWeb's (moved out on 18 Nov 2026 with the same names, option, tables, shortcode and scheduled event).
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
@@ -85,12 +90,17 @@ require_once KITS_CORE_DIR . 'includes/button-hover.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
+require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert (moved from Animal Writes Core, 18 Nov 2026)
+require_once KITS_CORE_DIR . 'includes/error-pages.php'; // the branded 500 and 503 drop-ins copied from dropins/ into wp-content (moved from Animal Writes Core, 18 Nov 2026)
 
 // Switched off: its scheduled jobs come off too (they are booked again on the next request after it is switched back on).
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		wp_unschedule_hook( 'aw_fetch_favicons' );
-		wp_unschedule_hook( 'kits_spot_map_daily' );
+		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
+		// While it is off the rules may be rebuilt without the preset types and consent items may be published:
+		// rebuild the rules and recheck consent when it is back on (includes/presets.php).
+		delete_option( 'kits_presets_rewrite' );
+		delete_option( 'kits_presets_consent' );
 	}
 );
