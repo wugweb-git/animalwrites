@@ -57,6 +57,7 @@ EXCLUDE = [
     "package.json", "package-lock.json",
     "*.DS_Store", ".DS_Store",
     "tokens/*",                # token sources; theme.json + kit-tokens.css are the shipped output
+    "assets/site", "assets/site/*",  # the site's own CSS (kits_site_component_style); never in a distributed zip
 ]
 
 # The admin-app JS sources (src/, compiled into build/). wp.org requires the source of every

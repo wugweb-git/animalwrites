@@ -61,8 +61,8 @@ function aw_theme_parts_path( string $file ): string {
  * printed, they made 37 joined files in one day; the larger page-type files (aw-home, aw-type-icons, aw-single, aw-lists,
  * aw-directory, aw-listing, aw-forms) still decide which file a page gets. All their rules are scoped to their own
  * component classes, and they were all in aw.css on every page before phase 2. aw.css itself was retired on
- * 18 Nov 2026: its site-wide rules are in the Kits theme's kits.css, the rules only Animal Writes uses are the
- * styles.css of the Animal Writes style variation (styles/animal-writes.json), kept in the site's global styles.
+ * 18 Nov 2026: its site-wide rules are in the Kits theme's kits.css, the rules only Animal Writes uses are in the
+ * theme's site file (assets/site/site.css), which the theme joins first, before these files.
  *
  * One file per kind of page (11 Nov 2026): Kits keys the joined file on the kind of page (front, page, page-{template},
  * single-{type}, term-{taxonomy}, search, 404...), not on the exact list, and the Directory views are their own kind
@@ -196,8 +196,8 @@ function aw_theme_parts_uri( string $file ): string {
 
 /**
  * Stylesheets the editors show: tokens, then every component file (sources, not minified). Under the child theme
- * only the component files: the child's add_editor_style() gives tokens. The editors get kits.css from the Kits
- * theme and the variation's styles.css from the global styles.
+ * only the component files: the child's add_editor_style() gives tokens. The editors get kits.css and the site file
+ * (assets/site/site.css) from the Kits theme.
  */
 function aw_editor_style_files(): array {
 	$parts = array_column( aw_component_style_files(), 'file' );

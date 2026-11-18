@@ -37,7 +37,7 @@ import pathlib
 import re
 import sys
 
-from theme_copies import is_copy, variation_css  # generated .min files are skipped; their sources are read
+from theme_copies import is_copy  # generated .min files are skipped; their sources are read
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "tools/ci/theme_rules_baseline.txt"
@@ -231,10 +231,9 @@ TYPE_OK = re.compile(r"^\s*(var\(--kit-(type-[\w-]+|h[1-6]-size)(,[^()]*)?\)|inh
 
 def findings():
     out = []
-    sources = [(str(f.relative_to(ROOT)), f.read_text(errors="ignore")) for f in sorted(css_files())]
-    sources += [(str(f.relative_to(ROOT)), css) for f, css in variation_css()]  # a style variation's styles.css
-    for rel, text in sources:
-        parsed = rules(text)
+    for f in sorted(css_files()):
+        rel = str(f.relative_to(ROOT))
+        parsed = rules(f.read_text(errors="ignore"))
         calm = {sel for sel, body, line, ctx in parsed if "reduced-motion: reduce" in ctx.replace("(", " ").replace("  ", " ")
                 and any(k == "scroll-behavior" and v.startswith("auto") for k, v in decls(body))}
         for sel, body, line, ctx in parsed:

@@ -465,6 +465,9 @@ joined() { href=$(grep -oE "<link[^>]*id=['\"]kits-parts-css['\"][^>]*>" "$1" | 
 if joined /tmp/home.html home; then
   # aw.css was retired (18 Nov 2026): the joined file holds the component files only.
   if grep -qF '/* aw-components */' /tmp/joined-home.css; then echo "FAIL joined file on / still has aw.css"; FAIL=1; else echo "ok   joined file on / has no aw.css"; fi
+  # The theme's site file (assets/site/site.css) joins first; its wordmark url() is rewritten to the theme's site folder.
+  has "joined file on / has the site CSS" /tmp/joined-home.css '/* kits-site */'
+  has "joined site CSS points at the theme's site folder" /tmp/joined-home.css '/wp-content/themes/kits-by-wugweb/assets/site/'
 else
   echo "FAIL no joined component file on /"; FAIL=1
 fi

@@ -10,9 +10,7 @@ is missing, or when a font folder appears there: Kits by Wugweb declares Inter i
 The other checks import is_copy() and theme_file() from here:
 - is_copy() is true for the generated .min.css files (tools/ci/css_min.py writes aw*.min.css in the plugin's folder and
   kit-tokens/kit/kit-primitives.min.css in Kits; MIN_FILES), so the checks read their sources instead;
-- theme_file(rel) is the plugin's file;
-- variation_css() gives the CSS of each Kits style variation (themes/*/styles/*.json, styles.css): the site CSS that
-  only Animal Writes uses lives there (aw.css was retired on 18 Nov 2026), so the CSS checks read it too.
+- theme_file(rel) is the plugin's file.
 
 The plugin's styles/animal-writes.json must equal the Kits theme's (the same variation; the plugin copy goes with
 animal-writes-core).
@@ -49,15 +47,6 @@ MIN_FILES = {dst.resolve() for _, dst in _min_pairs()}
 def is_copy(path):
     """True for a generated .min.css next to its source (tools/ci/css_min.py; the source is read instead)."""
     return pathlib.Path(path).resolve() in MIN_FILES
-
-
-def variation_css():
-    """(path, css) for each Kits style variation with a styles.css: themes/*/styles/*.json."""
-    import json
-    for f in sorted((ROOT / "themes").glob("*/styles/*.json")):
-        css = (json.loads(f.read_text()).get("styles") or {}).get("css") or ""
-        if css.strip():
-            yield f, css
 
 
 def theme_file(rel):
