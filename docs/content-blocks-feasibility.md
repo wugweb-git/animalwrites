@@ -299,7 +299,7 @@ after a diff shows the registered arguments are identical.
 
 New type slugs use the `kits_` prefix (owner naming rule). Effort: preset loader S, each new preset S–M (fields +
 templates + pattern), this site's enabled presets M (must be byte-identical; checked by comparing `get_post_type_object()` output
-before/after). Risk: low for new types, medium for switching AW types onto presets (rewrite rules, permalinks) —
+before/after). Risk: low for new types, medium for switching this site's existing types onto presets (rewrite rules, permalinks) —
 not before the owner's word.
 
 ## 13. Schema per type (contract only; RankWeb owns the output)
