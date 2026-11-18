@@ -52,7 +52,9 @@ add_action(
 					'type'          => $t,
 					'single'        => true,
 					'show_in_rest'  => true,
-					'auth_callback' => fn() => current_user_can( 'edit_posts' ),
+					'auth_callback' => fn( $allowed, $key, $post_id ) => current_user_can( 'edit_post', $post_id ),
+					'sanitize_callback' => 'integer' === $t ? 'absint' : null, // the string keys hold stored JSON and states: left as written
+
 				)
 			);
 		}

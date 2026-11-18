@@ -566,6 +566,9 @@ function kits_ff_keep_upload( $token ) {
 /** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (AW-12, AW-C-3 …). */
 function kits_ff_ref( $key, $entry_id ) {
 	$prefix = array( 'contact' => 'AW-', 'volunteer' => 'AW-V-', 'claim' => 'AW-C-', 'report' => 'AW-R-' );
+	if ( ! class_exists( '\FluentForm\App\Models\Submission' ) ) {
+		return ''; // Fluent Forms is off: no serial number to give
+	}
 	$serial = (int) \FluentForm\App\Models\Submission::where( 'id', (int) $entry_id )->value( 'serial_number' );
 	return $serial ? ( $prefix[ $key ] ?? 'AW-' ) . $serial : '';
 }

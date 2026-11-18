@@ -32,6 +32,43 @@ function aw_post_types() {
 }
 
 /**
+ * The full label set for a content type, so wp-admin says "No news items found", not "No posts found".
+ *
+ * @param string $singular Singular name.
+ * @param string $plural   Plural name.
+ * @return array<string,string>
+ */
+function aw_content_type_labels( string $singular, string $plural ): array {
+	$one = strtolower( $singular );
+	$all = strtolower( $plural );
+	return array(
+		'name'                  => $plural,
+		'singular_name'         => $singular,
+		'menu_name'             => $plural,
+		'name_admin_bar'        => $singular,
+		'all_items'             => 'All ' . $plural,
+		'add_new'               => 'Add New',
+		'add_new_item'          => sprintf( 'Add %s', $singular ),
+		'edit_item'             => sprintf( 'Edit %s', $singular ),
+		'new_item'              => sprintf( 'New %s', $singular ),
+		'view_item'             => sprintf( 'View %s', $singular ),
+		'view_items'            => sprintf( 'View %s', $plural ),
+		'search_items'          => sprintf( 'Search %s', $plural ),
+		'not_found'             => sprintf( 'No %s found.', $all ),
+		'not_found_in_trash'    => sprintf( 'No %s found in Trash.', $all ),
+		'archives'              => sprintf( '%s archives', $singular ),
+		'attributes'            => sprintf( '%s attributes', $singular ),
+		'insert_into_item'      => sprintf( 'Insert into %s', $one ),
+		'uploaded_to_this_item' => sprintf( 'Uploaded to this %s', $one ),
+		'filter_items_list'     => sprintf( 'Filter %s list', $all ),
+		'items_list_navigation' => sprintf( '%s list navigation', $plural ),
+		'items_list'            => sprintf( '%s list', $plural ),
+		'item_published'        => sprintf( '%s published.', $singular ),
+		'item_updated'          => sprintf( '%s updated.', $singular ),
+	);
+}
+
+/**
  * The arguments of one pillar post type (never 'post': WordPress's own). One function builds them, so a type registered
  * by a plugin (DirectoryWeb registers aw_listing) gets exactly what the loop below would give it.
  *
@@ -49,13 +86,7 @@ function aw_content_type_args( string $type ): array {
 	}
 
 	return array(
-		'labels'       => array(
-			'name'          => $plural,
-			'singular_name' => $singular,
-			'menu_name'     => $plural,
-			'add_new_item'  => sprintf( 'Add %s', $singular ),
-			'edit_item'     => sprintf( 'Edit %s', $singular ),
-		),
+		'labels'       => aw_content_type_labels( $singular, $plural ),
 		'public'       => true,
 		'show_in_rest' => true,
 		'has_archive'  => $slug,

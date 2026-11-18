@@ -41,7 +41,7 @@ return array(
 			'item_scheduled'           => __( 'Infographic scheduled.', 'kits-core' ),
 			'item_updated'             => __( 'Infographic updated.', 'kits-core' ),
 			'item_link'                => __( 'Infographic link', 'kits-core' ),
-			'item_link_description'    => __( 'A link to a infographic.', 'kits-core' ),
+			'item_link_description'    => __( 'A link to an infographic.', 'kits-core' ),
 		),
 		'rewrite'   => array(
 			'slug'       => 'infographics',

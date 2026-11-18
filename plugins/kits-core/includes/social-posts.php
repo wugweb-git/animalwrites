@@ -243,7 +243,7 @@ function aw_social_terms_clean( $v ): string {
 add_action(
 	'init',
 	function () {
-		$auth = fn() => current_user_can( 'edit_posts' );
+		$auth = fn( $allowed, $key, $post_id ) => current_user_can( 'edit_post', $post_id );
 		foreach ( aw_social_keys() as $key => $def ) {
 			register_post_meta(
 				AW_SOCIAL_TYPE,

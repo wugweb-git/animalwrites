@@ -113,7 +113,7 @@ function aw_item_date_ts( $id ) {
 /** "Dated" date of a Library item, shown after its publication date in the meta row (Y-m-d; empty for none). */
 add_action(
 	'init',
-	fn() => register_post_meta( 'aw_legal', 'aw_legal_dated', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Dated (the document\'s own date, when it differs from the publication date): Y-m-d', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => fn() => current_user_can( 'edit_posts' ) ) )
+	fn() => register_post_meta( 'aw_legal', 'aw_legal_dated', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Dated (the document\'s own date, when it differs from the publication date): Y-m-d', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => fn( $allowed, $key, $post_id ) => current_user_can( 'edit_post', $post_id ) ) )
 );
 
 /* ---------- 3. Meta row ---------- */

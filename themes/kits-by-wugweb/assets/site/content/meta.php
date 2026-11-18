@@ -146,8 +146,8 @@ function aw_register_meta() {
 				'description'   => $description,
 				'single'        => true,
 				'show_in_rest'  => true,
-				'auth_callback' => function () {
-					return current_user_can( 'edit_posts' );
+				'auth_callback' => function ( $allowed, $key, $post_id ) {
+					return current_user_can( 'edit_post', $post_id );
 				},
 			);
 			if ( 'string' === $type ) {

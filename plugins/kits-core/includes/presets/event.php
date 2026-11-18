@@ -41,7 +41,7 @@ return array(
 			'item_scheduled'           => __( 'Event scheduled.', 'kits-core' ),
 			'item_updated'             => __( 'Event updated.', 'kits-core' ),
 			'item_link'                => __( 'Event link', 'kits-core' ),
-			'item_link_description'    => __( 'A link to a event.', 'kits-core' ),
+			'item_link_description'    => __( 'A link to an event.', 'kits-core' ),
 		),
 		'rewrite'   => array(
 			'slug'       => 'events',

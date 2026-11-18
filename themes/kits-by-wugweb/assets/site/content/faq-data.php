@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'init',
 	function () {
-		$auth = fn() => current_user_can( 'edit_posts' );
+		$auth = fn( $allowed, $key, $post_id ) => current_user_can( 'edit_post', $post_id );
 		register_post_meta( 'aw_legal', 'aw_short_name', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Short name, as people search it (PCA Act 1960)', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
 		// The Hindi version link is no longer edited or asked about (owner, 1 Nov 2026); stored values are kept.
 		register_post_meta( 'aw_legal', 'aw_file_hi_url', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Hindi version (link to the official Hindi text)', 'sanitize_callback' => 'esc_url_raw', 'auth_callback' => $auth ) );
