@@ -400,8 +400,8 @@ Any post type can use them, `aw_listing` included. No new query block.
 
 **Carousel / rail rules** [front-end]:
 - CSS `scroll-snap-type: x mandatory`, `overscroll-behavior-x: contain`, native swipe on phones; cards
-  `flex: 0 0 var(--kit-carousel-item)` below 768, `var(--kit-card-min)` from 768 (`docs/card-sizes.md` line 7;
-  note: that line says 18rem, the token is 17rem in `kit-tokens.css:138` — to reconcile, owner's call).
+  `flex: 0 0 var(--kit-carousel-item)` below 768, `var(--kit-card-min)` from 768 (`docs/card-sizes.md` line 7:
+  17rem, the Kits token in `kit-tokens.css:138`; owner, 18 Nov).
 - Arrows: two real `<button>`s ("Previous", "Next" + the list's name), 44px (site size; WCAG 2.5.8 floor 24px),
   shown from 768; they scroll by one card with `scrollBy` and are disabled at the ends. Optional dots are buttons too.
 - Minimal script on the Interactivity API (`kits/rail` store, `view.js` module), no jQuery, Swiper or Slick: the
@@ -532,11 +532,11 @@ Not moved, renamed or deleted here. Final: Kits Core, kept dormant; when the mon
 Owner questions (added):
 5. Which new presets first: `kits-portfolio`, `kits-card`, `kits-infographic`; and are `kits-case-study`, `kits-event`, `kits-person`, `kits-testimonial` wanted?
 6. Tabs: allowed anywhere, given "no folds sitewide"? (Not built until answered.)
-7. Card minimum width: `docs/card-sizes.md` says 18rem, the token is 17rem — which is right?
+7. Card minimum width: answered 18 Nov, **17rem** (the Kits token). The aw-core override is removed in this PR.
 8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
 9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
 10. Sponsored blocks: confirm they stay dormant until the monetisation plan (section 21).
-11. Card minimum width (see 7) is left unchanged in both places until the owner decides.
+11. Card minimum width: answered, 17rem (see 7).
 
 Owner answers (18 Nov 2026):
 - **Old names (question 4):** replace aw with kits, no compat file. Callers in this PR now use `kits_icon()`,
@@ -570,6 +570,56 @@ home owns them under the same names.
 switched off only when nothing outside it calls into it. Before it is deleted, the "Delete this plugin's data" box
 must be unticked (d).
 
+### Final home per part
+
+Destinations, one per row: **Kits Core**, **RankWeb**, **DirectoryWeb**, **SourceWeb**, **MailWeb**, **PlanWeb**,
+**Kits theme**, **Site settings** (options, preset settings, global styles, SCF groups, Site Editor templates, page
+content) or **Native**, where a WordPress core API or feature does the job and no plugin code is kept for it. The
+Native column names the core part each row relies on.
+
+| Part (today in animal-writes-core) | Destination | Native (core API or feature used) |
+|---|---|---|
+| CPT rows `aw_news`, `aw_legal`, `aw_campaign`, `aw_opportunity`, `aw_press`, `aw_social` (`content-types.php`, `press.php`, `social-posts.php`) | Kits Core presets; slugs and labels in Site settings | `register_post_type()` |
+| `post` relabelled as Resources | Kits Core `kits-resource`; labels in Site settings | core Posts, `register_post_type_args` |
+| Private records `aw_report`, `aw_volunteer` | Kits Core private-record presets | `register_post_type()` (`public` false) |
+| Private record `aw_message` | MailWeb | — |
+| Meta keys (`meta.php`) | **Native**, declared by each preset | `register_post_meta()` with `show_in_rest`, `sanitize_callback`, `auth_callback` |
+| Taxonomy `aw_campaign_link` | Kits Core (`kits-campaign`) | `register_taxonomy()` |
+| Taxonomy `aw_media_group` | Kits Core | `register_taxonomy()` on attachments, Media Library |
+| Hub list filters (`AW_LIST_FILTERS`, `systems.php`) | Kits Core `kits/collection-filter`; values in Site settings | core `category` / `post_tag`, `query_loop_block_query_vars` |
+| Hub pages (`hubs.php`) | **Native** Query Loop in page content + Kits Core filter | core Query Loop block |
+| `aw_i()` / `aw_date()` | Kits Core (`kits_icon`, `kits_date`), done here | `date_i18n()` / `get_option( 'date_format' )` |
+| Binding source and keys (`bindings.php`) | Kits Core `kits/post-field` (done here); listing keys → DirectoryWeb | Block Bindings API |
+| 34 `animal-writes/*` blocks (`hub-blocks.php`) | Kits Core loader, same names; listing blocks → DirectoryWeb | `register_block_type()`, ServerSideRender |
+| Item head rows (`item-head.php`) | Kits Core + Kits theme patterns | core Post Date, Post Terms, Post Featured Image blocks |
+| `[aw_section_head]` (`sections.php`) | **Native**, retired (no live use) | core Group and Heading blocks |
+| Form pages (`form-blocks.php`), report form (`reports.php`) | Kits Core forms; claim → DirectoryWeb | — (Fluent Forms block in page content) |
+| Campaign rules, letters, sticky bar (`campaign-tools.php`) | Kits Core `kits-campaign`, `kits/countdown`, `kits/sticky-cta`, `kits/letter` | post meta |
+| Campaign figures (`campaign-record.php`) | Kits Core `kits/metric` | post meta |
+| Social post card (`social-posts.php`) | Kits Core (with the `kit-social-*` rename) | — |
+| Related groups (`related.php`) | Kits Core `kits/related` variation | core Query Loop block |
+| Media & PR og: fetch (`press.php`) | SourceWeb | `wp_safe_remote_get()` |
+| Home "near you" (`near-opps.php`) | Kits Core | REST API (`register_rest_route()`), Query Loop |
+| Home and term pages (`home.php`, `term-page.php`) | Kits theme patterns + Site settings (page content) | block templates, patterns |
+| Key facts, summary display (`news-article.php`, `summary-display.php`) | Kits Core `kits-news` | — |
+| Block states demo (`block-states.php`) | Kits Core demo | — |
+| Content model and relations (`model.php`) | Kits Core (preset relations); category → listing types → DirectoryWeb | post meta |
+| Team dates (`team-dates.php`, option `aw_team_dates`) | PlanWeb | — |
+| Old `/topic/` redirects (`category-moves.php`) | RankWeb | `wp_safe_redirect()` |
+| Acts and Rules links (`law-links.php`), entity links (`entity-links.php`) | RankWeb | `render_block` filter |
+| Issuer label (`issuers.php`) | Kits Core `kits-library`; issuer list in Site settings | post meta |
+| Research credit line / schema (`research-citation.php`) | Kits Core `kits-library` / RankWeb | — |
+| Closing expired Opportunities (`retention.php`) | Kits Core state on `kits-opportunity`; noindex → RankWeb | **wp-cron** (`wp_schedule_event()`) |
+| Category and tag photos (`category-images.php`) | Kits Core term image | `register_term_meta()`, Media Library |
+| Sponsored blocks (`sponsored-blocks.php`) | Kits Core, dormant | — |
+| SCF field groups (13) and value guard (`scf.php`) | Site settings (groups, same keys); guard → Kits Core SCF bridge | — |
+| Brand token values (`tokens.css`) | Site settings (style variation `styles/animal-writes.json`, active global styles) | Global Styles / `theme.json` |
+| `aw.css` and component sheets | Kits theme `kit.css` (generic) or the style variation's CSS (AW only) | — |
+| AW templates, parts, patterns, `theme.json` | Kits theme (generic) or Site settings (Site Editor templates, synced patterns) | block templates, `wp_template` / `wp_template_part`, `wp_block` |
+| Settings screens for the options in (d) | the new owner's screen | Settings API |
+| MailWeb config (`mailweb-aw.php`) | MailWeb, with its values in Site settings | — |
+| FAQ data, breadcrumbs (`faq-data.php`, `breadcrumbs.php`) | RankWeb | — |
+
 ### (a) Callers in other plugins that must switch first
 
 The full list, per function and file, is in `docs/aw-core-callers.md`: 482 calls to 150-odd animal-writes-core
@@ -600,7 +650,7 @@ plugin vanished, these 19 token overrides would fall back to the Kits defaults w
 
 | Token | Live (aw-core) | Kits default |
 |---|---|---|
-| `--kit-card-min` | 18rem (`docs/card-sizes.md`) | 17rem. **Owner deciding** which live keeps |
+| `--kit-card-min` | 18rem until this PR | 17rem. **Owner, 18 Nov: 17rem**; this PR drops the override (cards about 16px narrower in grids) |
 | `--kit-card-min-width` | `min(100%, var(--kit-card-min))` | auto |
 | `--kit-card-stacked-gap` | `clamp(space-3, 5vw, space-5)` | space-5 |
 | `--kit-card-stacked-media` / `-max` / `-flex` / `-min` | `clamp(thumb-min, 30%, thumb-max)` / none / `0 1 auto` / thumb-min | 40% / 40% / none / auto |
