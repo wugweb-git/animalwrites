@@ -699,7 +699,7 @@ function Services() {
 			id={ `insightweb-group-${ SERVICES }` }
 			title={ __( 'Connected services', 'insightweb' ) }
 			description={ __(
-				'Where the figures come from. Search Insights only reads them. Keys stay in Kits → Keys and are never shown.',
+				'Where the figures come from. Search Insights only reads them. Keys are set on Settings → Keys and are never shown.',
 				'insightweb'
 			) }
 		>

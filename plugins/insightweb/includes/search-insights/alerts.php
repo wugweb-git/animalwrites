@@ -1,7 +1,7 @@
 <?php
 /**
  * Google Alerts → Links (3 Nov 2026): the owner creates up to two alerts (Google Alerts → Deliver to: RSS feed) and pastes
- * each feed address on Animal Writes → Keys. Daily at 08:10 IST each feed is read and every item is a Links row of type
+ * each feed address on InsightWeb → Settings → Keys. Daily at 08:10 IST each feed is read and every item is a Links row of type
  * "Mention": the page that mentions us (Google's redirect removed), its title as the anchor, source "Google Alerts",
  * linked page = our home page (a mention, not necessarily a link). The owner's type and hidden flag are never changed.
  *
@@ -14,18 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_SI_ALERTS_CRON = 'aw_si_alerts';
 const AW_SI_ALERTS_KEYS = array( 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' );
-
-add_filter(
-	'aw_keys',
-	function ( $keys ) {
-		$by = __( 'Search Insights', 'insightweb' );
-		foreach ( AW_SI_ALERTS_KEYS as $i => $name ) {
-			/* translators: %d: 1 or 2. */
-			$keys[ $name ] = array( sprintf( __( 'Google Alerts feed %d (RSS address)', 'insightweb' ), $i + 1 ), __( 'google.com/alerts → create an alert → Show options → Deliver to: RSS feed → copy the feed address (https://www.google.com/alerts/feeds/…).', 'insightweb' ), $by );
-		}
-		return $keys;
-	}
-);
 
 /** The feed addresses that are set and look like Google Alerts feeds. */
 function aw_si_alerts_feeds(): array {

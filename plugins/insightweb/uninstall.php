@@ -28,6 +28,8 @@
  * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
  * every table below (transients are caches and are not kept).
  * RankWeb's aw_seo_settings is kept whole in the backup. If the backup cannot be written, nothing is deleted.
+ * The service keys (option insightweb_keys) are deleted but never written to the backup file: they are secrets, pasted
+ * again (or set in wp-config.php) after a reinstall, as Kits Core does with its ALTCHA key.
  *
  * Never deleted: the keyword tables {prefix}aw_si_keywords and {prefix}aw_si_kw_map (Kits Core's, they hold the
  * owner's Sourcing, Press and Tracked keywords), posts, users, Site Kit's and Rank Math's data, and any other plugin's
@@ -48,10 +50,19 @@ global $wpdb;
 
 $insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'aw_si_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) );
 
+// The service keys go out of the database before the backup reads the insightweb_… options, so no key value reaches
+// the file; they are put back as they were if the backup fails (nothing is deleted then).
+$insightweb_keys = get_option( 'insightweb_keys', null );
+delete_option( 'insightweb_keys' );
+
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! insightweb_uninstall_backup( 'insightweb', __DIR__ . '/insightweb.php', array( 'aw_seo_settings' ), array( 'aw_si_', 'insightweb_' ), $insightweb_tables ) ) {
+	if ( null !== $insightweb_keys ) {
+		add_option( 'insightweb_keys', $insightweb_keys, '', false );
+	}
 	return; // No backup, no delete (the reason is in the error log).
 }
+unset( $insightweb_keys );
 
 foreach ( $insightweb_tables as $insightweb_table ) {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $insightweb_table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.

@@ -528,11 +528,11 @@ function insightweb_run_state( string $src ): array {
 	return array( $ok ? __( 'Working', 'insightweb' ) : __( 'Not run yet', 'insightweb' ), '', $line );
 }
 
-/** Connected services: Site Kit's Search Console, GA4 and PageSpeed, then the services with a key in Kits → Keys. */
+/** Connected services: Site Kit's Search Console, GA4 and PageSpeed, then the services with a key on Settings → Keys. */
 function insightweb_services(): array {
 	$sitekit = class_exists( '\Google\Site_Kit\Plugin' );
 	$sk_url  = add_query_arg( 'page', 'googlesitekit-settings', admin_url( 'admin.php' ) );
-	$keys    = current_user_can( 'manage_options' ) ? admin_url( 'admin.php?page=aw-keys' ) : '';
+	$keys    = current_user_can( 'manage_options' ) ? aw_si_url( 'settings' ) : '';
 	$run     = aw_si_url( 'settings' );
 	$out     = array();
 	$module  = function ( string $slug, string $src, string $name, string $prop ) use ( $sitekit, $sk_url, $run ) {
@@ -591,7 +591,7 @@ function insightweb_services(): array {
 		$links = array();
 		if ( $keys ) {
 			$links[] = array(
-				'label' => __( 'Kits → Keys', 'insightweb' ),
+				'label' => __( 'Settings → Keys', 'insightweb' ),
 				'url'   => $keys,
 			);
 		}

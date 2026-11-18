@@ -372,9 +372,9 @@ function aw_si_mini_table( array $rows, array $cols ): void {
 
 /** Overview box: what is not set up yet (the Google Alerts feeds), and where to set it. */
 function aw_si_box_setup(): void {
-	echo '<p>' . esc_html__( 'Google Alerts feeds are not set, so mentions of Animal Writes on the web are not read. Create an alert at google.com/alerts, choose Deliver to: RSS feed, and paste the feed address under Animal Writes → Keys. This box goes once a feed is set.', 'insightweb' ) . '</p>';
+	echo '<p>' . esc_html__( 'Google Alerts feeds are not set, so mentions of Animal Writes on the web are not read. Create an alert at google.com/alerts, choose Deliver to: RSS feed, and paste the feed address under Settings → Keys. This box goes once a feed is set.', 'insightweb' ) . '</p>';
 	if ( current_user_can( 'manage_options' ) ) {
-		echo '<p><a class="button" href="' . esc_url( admin_url( 'admin.php?page=aw-keys' ) ) . '">' . esc_html__( 'Animal Writes → Keys', 'insightweb' ) . '</a></p>';
+		echo '<p><a class="button" href="' . esc_url( aw_si_url( 'settings' ) ) . '">' . esc_html__( 'Settings → Keys', 'insightweb' ) . '</a></p>';
 	}
 }
 
@@ -952,7 +952,7 @@ function aw_si_clarity_devices_txt( $devices ): string {
 /** The line shown when Clarity has nothing to show: no token, or no data yet. */
 function aw_si_clarity_empty_line(): string {
 	if ( ! function_exists( 'aw_si_clarity_on' ) || ! aw_si_clarity_on() ) {
-		return __( 'No Clarity token: add it under Animal Writes → Keys.', 'insightweb' );
+		return __( 'No Clarity token: add it under Settings → Keys.', 'insightweb' );
 	}
 	return __( 'No Clarity data yet; it imports daily at 06:30.', 'insightweb' );
 }
@@ -1067,16 +1067,7 @@ function aw_si_settings_tab(): void {
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'insightweb' ) . '</th><td><p>' . esc_html( sprintf( /* translators: 1: days of daily figures stored, 2: the same. */ __( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until %1$d days are stored), keyword roles from Rank Math and Sourcing, then priorities; at 07:15 IST Discover and Google News; from 07:40 IST URL Inspection (up to 2,000 pages a day, not indexed and never checked first). Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Daily at 08:10 IST: Google Alerts feeds (once set on Keys). Sundays at 06:00 IST: PageSpeed (lab scores and Chrome users\' figures) for the key pages and every campaign page, a few at a time. Mondays at 06:45 IST: Bing crawl figures; at 08:45 IST crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than %2$d days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set); once a month Bing search volumes for the top keywords. Searches on the site are counted as they happen.', 'insightweb' ), aw_si_keep_days(), aw_si_keep_days() ) ) . '</p></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'insightweb' ) . '</th><td><ul>';
-	foreach ( array( 'AW_CLARITY_TOKEN' => __( 'Clarity', 'insightweb' ), 'AW_BING_WEBMASTER_KEY' => __( 'Bing Webmaster', 'insightweb' ), 'AW_PSI_KEY' => __( 'PageSpeed (optional)', 'insightweb' ) ) as $const => $label ) {
-		$set = '' !== aw_si_key( $const );
-		echo '<li><span class="dashicons dashicons-' . ( $set ? 'yes-alt' : 'minus' ) . '" aria-hidden="true"></span> ' . esc_html( $label . ': ' . ( $set ? __( 'set', 'insightweb' ) : __( 'not set', 'insightweb' ) ) ) . '</li>';
-	}
-	echo '</ul>';
-	if ( function_exists( 'aw_key' ) && current_user_can( 'manage_options' ) ) {
-		echo '<p><a class="button" href="' . esc_url( admin_url( 'admin.php?page=aw-keys' ) ) . '">' . esc_html__( 'Animal Writes → Keys', 'insightweb' ) . '</a></p>';
-	}
-	echo '<p class="description">' . esc_html__( 'Keys are set under Animal Writes → Keys (or as wp-config.php constants, which win); their values are never shown.', 'insightweb' ) . '</p></td></tr>';
+	insightweb_keys_settings_row(); // InsightWeb's own keys (includes/insightweb-keys.php).
 	echo '<tr><th scope="row">' . esc_html__( 'Keyword map seed', 'insightweb' ) . '</th><td><p>';
 	echo $seeded
 		/* translators: %s: date. */

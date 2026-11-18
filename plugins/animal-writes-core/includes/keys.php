@@ -7,6 +7,11 @@
  * Plugins add their keys with the aw_keys filter (name => [label, where to find it, who uses it]) and read them with
  * aw_key( 'NAME' ). The AI provider keys stay where they are (owner's rule: AI keys are the owner's alone).
  *
+ * Being retired (owner, 18 Nov 2026; docs/keys-per-plugin.md): each plugin keeps its own keys on its own settings
+ * screen. During the move aw_key() is a wrapper: a plugin that owns a key answers through the kits_service_key filter
+ * (its own reader, which still falls back to the value saved here), so a key copied to its plugin is read from there.
+ * This screen stays until every key shows "set" in its plugin; then this file, the screen and the option go.
+ *
  * @package animal-writes-core
  */
 
@@ -22,7 +27,18 @@ function aw_keys_list(): array {
 }
 
 /**
- * A key's value: the wp-config.php constant if set, else the one saved under Kits → Keys, else ''.
+ * A key's value saved under Kits → Keys, else ''.
+ *
+ * @param string $name Constant name.
+ */
+function aw_key_saved( string $name ): string {
+	$saved = get_option( AW_KEYS_OPTION, array() );
+	return is_array( $saved ) ? (string) ( $saved[ $name ] ?? '' ) : '';
+}
+
+/**
+ * A key's value: the wp-config.php constant if set, else what the plugin that owns it answers (kits_service_key: its
+ * own setting, then the value saved here), else the one saved under Kits → Keys, else ''.
  *
  * @param string $name Constant name, e.g. AW_BING_WEBMASTER_KEY.
  */
@@ -30,12 +46,12 @@ function aw_key( string $name ): string {
 	if ( defined( $name ) && '' !== (string) constant( $name ) ) {
 		return (string) constant( $name );
 	}
-	$saved = get_option( AW_KEYS_OPTION, array() );
-	return is_array( $saved ) ? (string) ( $saved[ $name ] ?? '' ) : '';
+	$owned = apply_filters( 'kits_service_key', null, $name );
+	return is_string( $owned ) ? $owned : aw_key_saved( $name );
 }
 
 /**
- * Where a key is set: config, admin or ''.
+ * Where a key is set: config, plugin (the owning plugin's own setting, which is used), admin (here) or ''.
  *
  * @param string $name Constant name.
  */
@@ -43,7 +59,11 @@ function aw_key_where( string $name ): string {
 	if ( defined( $name ) && '' !== (string) constant( $name ) ) {
 		return 'config';
 	}
-	return '' !== aw_key( $name ) ? 'admin' : '';
+	$used = aw_key( $name );
+	if ( '' !== $used && aw_key_saved( $name ) !== $used ) {
+		return 'plugin';
+	}
+	return '' !== $used ? 'admin' : '';
 }
 
 add_action(
@@ -76,10 +96,14 @@ function aw_keys_screen(): void {
 	echo '<table class="form-table" role="presentation"><tbody>';
 	foreach ( $list as $name => $k ) {
 		$where = aw_key_where( $name );
-		$state = 'config' === $where ? 'Set in wp-config.php (that one is used).' : ( 'admin' === $where ? 'Set here.' : 'Not set.' );
+		$state = array(
+			'config' => 'Set in wp-config.php (that one is used).',
+			'plugin' => 'Set in the plugin\'s own settings (that one is used).',
+			'admin'  => 'Set here.',
+		)[ $where ] ?? 'Not set.';
 		echo '<tr><th scope="row"><label for="aw-key-' . esc_attr( $name ) . '">' . esc_html( (string) $k[0] ) . '</label><br><code>' . esc_html( $name ) . '</code></th><td>';
 		echo '<p><span class="dashicons dashicons-' . ( $where ? 'yes-alt' : 'minus' ) . '" aria-hidden="true"></span> ' . esc_html( $state ) . '</p>';
-		if ( 'config' !== $where ) {
+		if ( 'config' !== $where && 'plugin' !== $where ) {
 			echo '<input type="password" class="regular-text" id="aw-key-' . esc_attr( $name ) . '" name="keys[' . esc_attr( $name ) . ']" value="" autocomplete="new-password" spellcheck="false" placeholder="' . esc_attr( 'admin' === $where ? 'Saved: leave empty to keep it' : 'Paste the key' ) . '">';
 			if ( 'admin' === $where ) {
 				echo ' <label><input type="checkbox" name="clear[]" value="' . esc_attr( $name ) . '"> Remove</label>';
