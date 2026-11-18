@@ -37,20 +37,20 @@ add_filter(
 	}
 );
 
-// Stop SCF being deactivated (bulk action, WP-CLI, any caller) unless Animal Writes core is deactivated first or in
-// the same request: the plugins list is in name order, so core comes before SCF in a bulk deactivation.
+// Stop SCF being deactivated (bulk action, WP-CLI, any caller) unless Kits Core is deactivated first or in
+// the same request: the plugins list is in name order, so kits-core comes before SCF in a bulk deactivation.
 add_action(
 	'deactivate_plugin',
 	function ( $plugin ) {
 		static $core_off = false;
-		if ( 'animal-writes-core/animal-writes-core.php' === $plugin ) {
+		if ( 'kits-core/kits-core.php' === $plugin ) {
 			$core_off = true;
 			return;
 		}
 		if ( AW_SCF_PLUGIN === $plugin && ! $core_off ) {
 			wp_die(
-				esc_html__( 'Secure Custom Fields stays on while Animal Writes core is on: the edit screens use it. Deactivate Animal Writes core first.', 'animal-writes-core' ),
-				esc_html__( 'Secure Custom Fields stays on', 'animal-writes-core' ),
+				esc_html__( 'Secure Custom Fields stays on while Kits Core is on: the edit screens use it. Deactivate Kits Core first.', 'kits-core' ),
+				esc_html__( 'Secure Custom Fields stays on', 'kits-core' ),
 				array(
 					'response'  => 403,
 					'back_link' => true,
