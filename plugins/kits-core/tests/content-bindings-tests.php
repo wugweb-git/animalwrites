@@ -120,7 +120,7 @@ require $root . '/kits-core/includes/taxonomy-rename.php'; // KITS_CAMPAIGN_LINK
 require $root . '/animal-writes-core/includes/systems.php';
 $site = dirname( $root ) . '/themes/kits-by-wugweb/assets/site/'; // the site layer: the content files moved here from animal-writes-core on 19 Nov 2026
 function kits_site_path( $f ) {
-	return dirname( __DIR__, 2 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $f, '/' );
+	return dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $f, '/' );
 }
 require $site . 'content/bindings.php';
 define( 'AW_CORE_DIR', $root . '/animal-writes-core/' );

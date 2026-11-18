@@ -101,6 +101,11 @@ add_action( 'init', 'aw_register_content_types' );
 const AW_RESOURCES_PERMALINK = '/resources/%postname%/';
 
 add_filter( 'option_permalink_structure', fn( $s ) => '' === (string) $s ? $s : AW_RESOURCES_PERMALINK );
+// WP_Rewrite is built before the theme loads and reads permalink_structure (and front) once; this file now loads at theme time, so
+// read it again with the filter in place (as when aw-core, a plugin, added the filter first).
+if ( isset( $GLOBALS['wp_rewrite'] ) && $GLOBALS['wp_rewrite'] instanceof WP_Rewrite ) {
+	$GLOBALS['wp_rewrite']->init();
+}
 
 /** Posts relabelled as Resources in WP Admin; same supports and icon the Resources type had. */
 function aw_resources_post_args( $args, $type ) {

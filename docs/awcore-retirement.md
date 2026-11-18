@@ -203,6 +203,8 @@ the DirectoryWeb `listing-meta-tests.php` follow the new paths.
 - `hub-blocks.php`: script address and version from the site layer (was `AW_CORE_DIR`, `AW_CORE_VERSION`).
 - `block-states.php`: the demo page's campaign sheets still come from aw-core's `assets/css/` (the campaigns session's
   files); the code returns if `AW_CORE_DIR` is not defined.
+- `content-types.php`: after adding the `option_permalink_structure` filter it calls `$wp_rewrite->init()`, because WordPress builds
+  `WP_Rewrite` before the theme loads and reads the permalink structure only once.
 - `related.php`: the fallback path of DirectoryWeb's centroid file is `WP_PLUGIN_DIR`, not `__DIR__`.
 - `animal-writes-core.php`: the 25 `require_once` lines are gone.
 
