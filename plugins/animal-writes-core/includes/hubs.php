@@ -436,7 +436,7 @@ function aw_hub_item( $type ) {
 <!-- wp:group {"className":"aw-org-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-org-body"><!-- wp:post-title {"level":2,"isLink":true,"className":"aw-org-name"} /-->
 
-<!-- wp:paragraph {"className":"aw-org-meta kit-ico--directory","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"area"}}}}} -->
+<!-- wp:paragraph {"className":"aw-org-meta kit-ico--directory","metadata":{"bindings":{"content":{"source":"kits/post-field","args":{"key":"area"}}}}} -->
 <p class="aw-org-meta kit-ico--directory"></p>
 <!-- /wp:paragraph -->
 

@@ -49,6 +49,8 @@ require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';
 require_once KITS_CORE_DIR . 'includes/primitives.php';
+require_once KITS_CORE_DIR . 'includes/scf.php'; // SCF/ACF bridge (admin): Local JSON folders and the field group registry
+require_once KITS_CORE_DIR . 'includes/bindings.php'; // Block Bindings source kits/post-field; sites register keys on kits_post_fields
 require_once KITS_CORE_DIR . 'includes/blocks.php';
 require_once KITS_CORE_DIR . 'includes/demo.php';
 require_once KITS_CORE_DIR . 'includes/system-screen.php';

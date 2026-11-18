@@ -2,7 +2,7 @@
 
 The front-end plan for the owner's custom-blocks decision of 11 Nov 2026. It goes with the Kits admin rebuild of the same day (Home, Theme Options, Settings, Plugins, Tools, Help; Theme Options → Socials is the one source for social links).
 
-This is a spec only. Nothing here is built. The owner reviews it first; each phase below is built on its own branch and pull request, and each content change on live waits for its own yes.
+**Approved by the owner, 18 Nov 2026.** Each phase below is built on its own branch and pull request, and each content change on live waits for its own yes.
 
 ## The decision
 
@@ -413,7 +413,7 @@ One entry each. "Owner" is who builds and keeps it.
 - **Migration**: page 61 (Contact) content, on the owner's yes. Footer and schema `sameAs` already read the same accounts and are not touched.
 
 ### 3.6 Source row, item meta, tags, title, category, attributes → core post blocks with Block Bindings (Kits theme)
-- **What**: core Post Title, Post Terms (category, tags, place), Post Date; Paragraph, Image and Button bound to a source `kits/post-field` (Kits theme) with keys registered by `kits_post_fields` (Animal Writes answers: source name, source address, source logo, place, deadline, law date, read time). The existing `animal-writes/field` source stays for content that already uses it.
+- **What**: core Post Title, Post Terms (category, tags, place), Post Date; Paragraph, Image and Button bound to a source `kits/post-field` (Kits Core, `includes/bindings.php`, built 18 Nov 2026) with keys registered by `kits_post_fields` (Animal Writes answers: source name, source address, source logo, place, deadline, law date, read time). The existing `animal-writes/field` source stays for content that already uses it.
 - **Replaces**: `[aw_source_row]`, `animal-writes/item-meta`, `item-sources`, `item-tags`, `read-meta`, `law-date`, `place`.
 - **Migration**: templates `single.html`, `single-aw_listing.html` (file change); `read-meta` in the five synced list patterns (8934, 8936, 8938, 8940, 8946), Home 57 and campaigns 13848, 23202, 23225 (content, owner's yes; campaign 8 stays frozen). The `render_block_core/post-date`, `post-terms` and `post-title` filters in `display.php`, `tags.php`, `breadcrumbs.php` and `pages.php` keep shaping these blocks.
 

@@ -4,7 +4,7 @@ Limits every list card keeps, set in `plugins/animal-writes-core/theme/assets/cs
 
 | Limit | Value | Property |
 |---|---|---|
-| Card, minimum width | 18rem (288px, fits a 320px screen) | `--kit-card-min` |
+| Card, minimum width | 17rem (272px, fits a 320px screen; owner, 18 Nov 2026) | `--kit-card-min` (Kits default, `kit-tokens.css`) |
 | Card width | none: a card fills its grid cell; the grid (columns, gap) sets the width | n/a |
 | Stacked picture | 4.5rem to 15rem (72 to 240px); wide stacked cards 30% of the card inside those limits | `--kit-thumb-min`, `--kit-thumb-max` |
 | Block card picture (picture above text), maximum height | 22.5rem (360px) | `--kit-card-media-max` |

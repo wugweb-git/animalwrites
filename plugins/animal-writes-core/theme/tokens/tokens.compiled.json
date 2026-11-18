@@ -145,11 +145,6 @@
       "md": ".875rem",
       "lg": ".875rem"
     },
-    "card-min": {
-      "sm": "18rem",
-      "md": "18rem",
-      "lg": "18rem"
-    },
     "card-media-max": {
       "sm": "22.5rem",
       "md": "22.5rem",

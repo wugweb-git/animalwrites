@@ -76,15 +76,15 @@ function aw_enrich_profile_extras( $id ) {
 		if ( $m( 'aw_ig_posts' ) ) {
 			$bits[] = number_format_i18n( (int) $m( 'aw_ig_posts' ) ) . ' posts';
 		}
-		$sig[] = '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( 'instagram' ) . '</span>On Instagram</dt><dd>' . esc_html( implode( ' · ', $bits ) ) . ( $m( 'aw_last_post' ) ? ( $bits ? ' · ' : '' ) . 'latest post ' . aw_date( $m( 'aw_last_post' ) ) : '' ) . '</dd></div>';
+		$sig[] = '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . kits_icon( 'instagram' ) . '</span>On Instagram</dt><dd>' . esc_html( implode( ' · ', $bits ) ) . ( $m( 'aw_last_post' ) ? ( $bits ? ' · ' : '' ) . 'latest post ' . kits_date( $m( 'aw_last_post' ) ) : '' ) . '</dd></div>';
 	}
 	$news = aw_enrich_news_mentions( $id );
 	if ( $news ) {
 		$li = '';
 		foreach ( $news as $nid ) {
-			$li .= '<li><a href="' . esc_url( get_permalink( $nid ) ) . '">' . esc_html( get_the_title( $nid ) ) . '</a> ' . aw_date( get_the_date( 'Y-m-d', $nid ) ) . '</li>';
+			$li .= '<li><a href="' . esc_url( get_permalink( $nid ) ) . '">' . esc_html( get_the_title( $nid ) ) . '</a> ' . kits_date( get_the_date( 'Y-m-d', $nid ) ) . '</li>';
 		}
-		$sig[] = '<div class="aw-org-fact aw-org-fact--wide"><dt><span class="aw-org-fact-ico">' . aw_i( 'news' ) . '</span>In the news</dt><dd><ul class="aw-org-news">' . $li . '</ul></dd></div>';
+		$sig[] = '<div class="aw-org-fact aw-org-fact--wide"><dt><span class="aw-org-fact-ico">' . kits_icon( 'news' ) . '</span>In the news</dt><dd><ul class="aw-org-news">' . $li . '</ul></dd></div>';
 	}
 	if ( $sig ) {
 		$out .= '<h2 class="aw-profile-h">Activity</h2><dl class="aw-org-facts">' . implode( '', $sig ) . '</dl>';
@@ -205,15 +205,15 @@ function aw_glive_html( $d ) {
 		$rows[] = array( 'phone', 'Phone', '<a href="' . esc_url( aw_tel_url( $d['phone'] ) ) . '" data-act="phone">' . esc_html( $d['phone'] ) . '</a>' );
 	}
 	if ( $d['review'] ) {
-		$rows[] = array( 'calendar', 'Latest review', aw_date( $d['review'] ) );
+		$rows[] = array( 'calendar', 'Latest review', kits_date( $d['review'] ) );
 	}
 	if ( ! $rows ) {
 		return '';
 	}
 	$facts = '';
 	foreach ( $rows as $r ) {
-		$facts .= '<div class="aw-org-fact' . ( 'Hours' === $r[1] ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . aw_i( $r[0] ) . '</span>' . esc_html( $r[1] ) . '</dt><dd>' . $r[2] . '</dd></div>';
+		$facts .= '<div class="aw-org-fact' . ( 'Hours' === $r[1] ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . kits_icon( $r[0] ) . '</span>' . esc_html( $r[1] ) . '</dt><dd>' . $r[2] . '</dd></div>';
 	}
-	$attr = '<p class="aw-glive-attr">' . ( $d['maps'] ? '<a href="' . esc_url( $d['maps'] ) . '" rel="noopener nofollow" target="_blank">View on Google Maps</a> · ' : '' ) . 'Live from Google Maps, ' . aw_date( (int) $d['fetched'] ) . '</p>';
+	$attr = '<p class="aw-glive-attr">' . ( $d['maps'] ? '<a href="' . esc_url( $d['maps'] ) . '" rel="noopener nofollow" target="_blank">View on Google Maps</a> · ' : '' ) . 'Live from Google Maps, ' . kits_date( (int) $d['fetched'] ) . '</p>';
 	return '<section class="aw-glive" aria-label="Live from Google Maps"><h2 class="aw-profile-h">On Google Maps</h2><dl class="aw-org-facts">' . $facts . '</dl>' . $attr . '</section>';
 }

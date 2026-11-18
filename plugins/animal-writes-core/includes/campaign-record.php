@@ -61,8 +61,8 @@ add_action(
 
 /** A date as the site shows dates (calendar icon), through the theme's helper when it is there. */
 function aw_camp_record_date( $day ) {
-	if ( function_exists( 'aw_date' ) ) {
-		return aw_date( $day );
+	if ( function_exists( 'kits_date' ) ) {
+		return kits_date( $day );
 	}
 	$ts = strtotime( $day . ' 12:00:00 Asia/Kolkata' );
 	return $ts ? '<span class="kit-date aw-date"><span class="kit-ico kit-ico--calendar" aria-hidden="true"></span><time datetime="' . esc_attr( $day ) . '">' . esc_html( wp_date( 'j M Y', $ts ) ) . '</time></span>' : '';

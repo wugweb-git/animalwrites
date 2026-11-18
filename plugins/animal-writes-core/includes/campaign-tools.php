@@ -366,7 +366,7 @@ add_shortcode(
 	</div>
 	<div class="aw-letter-out">
 		<p class="aw-letter-head"><span class="aw-letter-step">3</span>Check and send</p>
-		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo kits_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <span><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></span></label></div>
@@ -376,11 +376,11 @@ add_shortcode(
 		<p class="kit-form-status aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
-			<button type="button" class="wp-element-button kit-btn" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button kit-btn" data-route="gmail"><?php echo kits_icon( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?>Send with Gmail</button>
-			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-route="mailto"><?php echo kits_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?>Email app</button>
-			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-route="copy"><?php echo kits_icon( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?>Copy letter</button>
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
@@ -390,7 +390,7 @@ add_shortcode(
 			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-confirm="no">Not yet</button>
 		</div>
 		<div class="kit-form-done aw-letter-thanks" hidden tabindex="-1">
-			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<p class="aw-letter-thanks-head"><?php echo kits_icon( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
 			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>
 			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
@@ -420,7 +420,7 @@ add_shortcode(
 	</fieldset>
 	<fieldset class="kit-step aw-letter-out" data-step="3">
 		<legend class="aw-letter-head"><span class="kit-step-count">Step 3 of 3</span><span class="aw-letter-step" aria-hidden="true">3</span><span class="kit-step-title">Check and send</span></legend>
-		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo kits_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
 		<p class="aw-letter-field"><label for="aw-letter-wa">Mobile <span class="aw-letter-hint">(optional)</span></label>
@@ -429,11 +429,11 @@ add_shortcode(
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
-			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button" data-route="gmail"><?php echo kits_icon( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?>Send with Gmail</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo kits_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?>Email app</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo kits_icon( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?>Copy letter</button>
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
@@ -443,7 +443,7 @@ add_shortcode(
 			<button type="button" class="wp-element-button aw-letter-alt" data-confirm="no">Not yet</button>
 		</div>
 		<div class="aw-letter-thanks" hidden tabindex="-1">
-			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<p class="aw-letter-thanks-head"><?php echo kits_icon( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_icon() returns a trusted inline SVG icon.
 ?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
 			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>
 			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
@@ -501,7 +501,7 @@ add_shortcode(
 		}
 		$at    = $id ? (int) get_post_meta( $id, 'aw_campaign_sent_at', true ) : 0; // the last "Yes, I sent it"
 		$stale = $id ? (int) get_post_meta( $id, 'aw_campaign_metric_stale', true ) : 0;
-		$asof  = $at && time() - $at > ( $stale ? $stale : 1 ) * DAY_IN_SECONDS ? ' <span class="aw-camp-count-asof">as of ' . aw_date( $at ) . '</span>' : '';
+		$asof  = $at && time() - $at > ( $stale ? $stale : 1 ) * DAY_IN_SECONDS ? ' <span class="aw-camp-count-asof">as of ' . kits_date( $at ) . '</span>' : '';
 		return '<p class="aw-camp-count"><strong>' . esc_html( number_format_i18n( $n ) ) . '</strong> ' . esc_html( $a['label'] ) . $asof . '</p>';
 	}
 );
@@ -525,7 +525,7 @@ add_shortcode(
 				continue;
 			}
 			$logo = get_the_post_thumbnail( $pid, 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) );
-			$out .= '<li><a href="' . esc_url( get_permalink( $pid ) ) . '">' . ( $logo ? $logo : aw_i( 'directory' ) ) . '<span>' . esc_html( get_the_title( $pid ) ) . '</span></a></li>';
+			$out .= '<li><a href="' . esc_url( get_permalink( $pid ) ) . '">' . ( $logo ? $logo : kits_icon( 'directory' ) ) . '<span>' . esc_html( get_the_title( $pid ) ) . '</span></a></li>';
 		}
 		return $out ? '<div class="aw-camp-partners"><h2>' . esc_html( $a['title'] ) . '</h2><ul>' . $out . '</ul></div>' : '';
 	}
@@ -552,7 +552,7 @@ add_shortcode(
 		if ( '' === (string) $label ) {
 			return '';
 		}
-		return '<p class="aw-camp-status">Outcome: ' . esc_html( $label ) . ( $asof ? '. As of ' . aw_date( $asof ) : '' ) . '</p>';
+		return '<p class="aw-camp-status">Outcome: ' . esc_html( $label ) . ( $asof ? '. As of ' . kits_date( $asof ) : '' ) . '</p>';
 	}
 );
 
@@ -600,7 +600,7 @@ add_shortcode(
 			$out  = '<section class="aw-camp aw-camp-band aw-camp-band--closed' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '>';
 			$out .= '<p class="aw-camp-band-kicker">Latest campaign</p>';
 			$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
-			$out .= '<p>' . ( $day ? 'Objections closed on ' . aw_date( $day ) . '. ' : '' ) . 'See what happens next and read the rules.</p>';
+			$out .= '<p>' . ( $day ? 'Objections closed on ' . kits_date( $day ) . '. ' : '' ) . 'See what happens next and read the rules.</p>';
 			$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#next' ) . '">What happens next</a></p>';
 			return $out . '</section>';
 		}
@@ -617,7 +617,7 @@ add_shortcode(
 			for ( $i = 0; $i < $total; $i++ ) {
 				$window .= '<li' . ( $i < $today ? ' class="is-past"' : ( $i === $today ? ' class="is-today"' : '' ) ) . '></li>';
 			}
-			$window .= '</ol><p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open_ts ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>';
+			$window .= '</ol><p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . kits_date( $open_ts ) . '</span><span class="kit-meta-item">Last day ' . kits_date( $day ) . '</span></p>';
 		}
 		// The artwork is the band's background; the text sits on its plain left side (owner, 19 Oct 2026). Phones get
 		// their own crop of it.
@@ -693,7 +693,7 @@ add_action(
 		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/' . $js, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/' . $js ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		if ( is_singular( 'aw_campaign' ) && function_exists( 'kits_share_payload' ) ) { // the letter tool's share row (campaign.js): the page's one share payload, as the share bar's
 			$p = kits_share_payload( (string) get_permalink( $id ), html_entity_decode( get_the_title( $id ), ENT_QUOTES ), (string) get_post_field( 'post_name', $id ), array( 'post_id' => $id ) );
-			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => $p['url'], 'short' => $p['url'], 'title' => $p['title'], 'text' => $p['text'], 'hashtags' => implode( ',', $p['hashtags'] ), 'hash' => $p['hash'], 'image' => $p['image'], 'slug' => get_post_field( 'post_name', $id ), 'close' => aw_date( get_post_meta( $id, 'aw_campaign_close', true ) ), 'closed' => aw_camp_close_ts( $id ) && time() >= aw_camp_close_ts( $id ) ) ) . ';', 'before' );
+			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => $p['url'], 'short' => $p['url'], 'title' => $p['title'], 'text' => $p['text'], 'hashtags' => implode( ',', $p['hashtags'] ), 'hash' => $p['hash'], 'image' => $p['image'], 'slug' => get_post_field( 'post_name', $id ), 'close' => kits_date( get_post_meta( $id, 'aw_campaign_close', true ) ), 'closed' => aw_camp_close_ts( $id ) && time() >= aw_camp_close_ts( $id ) ) ) . ';', 'before' );
 		}
 	}
 );
@@ -977,7 +977,7 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 		$btns = '<div class="aw-side-camp-btns"><a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url . '#context' ) . '">' . esc_html__( 'What happens next', 'animal-writes-core' ) . '</a>'
 			. '<a class="kit-btn kit-btn--secondary aw-side-camp-btn" href="' . esc_url( $url . '#newsletter' ) . '">' . esc_html__( 'Get the decision first', 'animal-writes-core' ) . '</a></div>';
 	} else {
-		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . aw_i( 'clock' ) . esc_html( $left ) . '</span>' : '' );
+		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . kits_icon( 'clock' ) . esc_html( $left ) . '</span>' : '' );
 		$btns = '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'animal-writes-core' ) . '</a>';
 	}
 	$class = 'kit-card aw-side-camp' . ( '' !== $theme ? ' aw-camp aw-camp--' . $theme : '' ) . ( $wait ? ' aw-side-camp--wait' : '' );

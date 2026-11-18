@@ -355,11 +355,11 @@ H2 + one-line lead on the left; one CTA on the right (`.aw-link-cta`: pill, ink 
 ### Tile (`.aw-tile` in `.aw-tiles`)
 Icon in a kraft square (turns marigold on hover) + H4 title + one-line description + arrow. Raised surface, border, `elevation-1`; hover lifts to `elevation-2`. Grid: 1 / 2 / 3 columns. Used for the section index; reusable for any set of links.
 
-### Icons (`.kit-ico .kit-ico--name`, printed by `aw_i( 'name' )`)
-One icon system: `kit-ico` in Kits' kit.css, each icon a CSS mask on one `<span>` that takes the text colour; `aw_i()` (animal-writes-core systems.php) prints it. Size with `--kit-ico-size` (default 1.25em) or the `--kit-icon-*` tokens, never a width in a component.
+### Icons (`.kit-ico .kit-ico--name`, printed by `kits_icon( 'name' )`)
+One icon system: `kit-ico` in Kits' kit.css, each icon a CSS mask on one `<span>` that takes the text colour; `kits_icon()` (Kits Core primitives.php; since 18 Nov 2026, `aw_i()` in animal-writes-core is a wrapper for it) prints it. Size with `--kit-ico-size` (default 1.25em) or the `--kit-icon-*` tokens, never a width in a component.
 - **External links:** the arrow comes only from `.kit-link-ext` (kit.js marks every off-site text link and adds the screen-reader note; markup may set the class itself, as the Elsewhere links do). No hand-added arrow after a link. One exception: an off-site card title (press items) prints `kit-ico--arrow-up-right`, because a card title's link carries the whole-card layer and `.kit-link-ext` draws no arrow there.
 - **Close and remove:** `kit-ico--x`, never a typed "×" (active filter chips). `kit-ico--x-brand` is the X (Twitter) logo.
-- **Dates:** the `aw_date` calendar icon always stays.
+- **Dates:** the calendar icon of the date component (`kits_date()`, wrapped by `aw_date()`) always stays.
 - **Listing and Library types:** `kit-ico--type-{slug}` (Library `kit-ico--type-lib-{slug}`), printed by `aw_type_icon()` as `aw_i( 'type-' . $slug, 'kit-ico--type' )`. The masks live in aw-type-icons.css (a component file, loaded only where a type icon prints; each SVG once, types with the same picture share a rule). The modifier `.kit-ico.kit-ico--type` keeps the size they always had: `--kit-ico-size: 1em`, `.35em` before the label, `vertical-align: -0.14em`, the text colour. Checked 14 Nov 2026: of the contextual `.kit-ico` rules, only `.kit-tag .kit-ico` and `.kit-chip .kit-ico` (both 1em) reach a type icon in its real markup; none sets a colour, `display` or transform on one. The Directory map reads each type's `--i` for its markers (dir-map.js).
 
 Lucide line icons (ISC licence) as CSS masks, so each is one `<span>` that takes the text colour: arrow-right, arrow-up-right, directory, legal, news, knowledge, research, opportunities, campaign, resources, helpline, mail, phone, search, instagram, facebook, x. Always `aria-hidden="true"` next to visible text or an `aria-label`.

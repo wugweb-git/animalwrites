@@ -256,7 +256,7 @@ function aw_block_law_date( $a, $id ) {
 		return '';
 	}
 	$d = (string) get_post_meta( $id, 'aw_source_date', true );
-	$date = $d ? aw_date( $d . ' 12:00:00' ) : ( preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? aw_date( $ym[0] . '-01-01 12:00:00', 'Y' ) : '' );
+	$date = $d ? kits_date( $d . ' 12:00:00' ) : ( preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? kits_date( $ym[0] . '-01-01 12:00:00', 'Y' ) : '' );
 	return '' !== $date ? '<span class="kit-meta-item">' . $date . '</span>' : '';
 }
 
@@ -287,7 +287,7 @@ function aw_block_place( $a, $id ) {
 	if ( $p ) {
 		aw_use_component_style( 'aw-meta' ); // aw-place
 	}
-	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
+	return $p ? '<span class="aw-place kit-meta-item">' . kits_icon( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
 }
 
 /** The place for the opportunity line: in a list for one state ("near you"), that state's district or the state; else the first place. */
@@ -304,7 +304,7 @@ function aw_opp_line_place( $id ) {
 	if ( $p ) {
 		aw_use_component_style( 'aw-meta' ); // aw-place
 	}
-	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
+	return $p ? '<span class="aw-place kit-meta-item">' . kits_icon( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
 }
 
 function aw_block_opp_actions( $a, $id ) {
@@ -359,7 +359,7 @@ function aw_block_badges( $a, $id ) {
  */
 function aw_type_icon( $slug ) {
 	aw_use_component_style( 'aw-type-icons' );
-	return aw_i( 'type-' . $slug, 'kit-ico--type' ); // kit-ico--type keeps its 1em size, spacing and the text colour
+	return kits_icon( 'type-' . $slug, 'kit-ico--type' ); // kit-ico--type keeps its 1em size, spacing and the text colour
 }
 
 // Tag labels carry their icon wherever WordPress prints them (tags.php, term_links-post_tag).
@@ -373,14 +373,14 @@ function aw_block_contact( $a, $id ) {
 	if ( ! $phone && ! $email ) { // the website arrow is not shown on cards (owner, 12 Oct 2026)
 		return '';
 	}
-	return '<p class="aw-org-contact">' . ( $phone ? aw_i( 'phone' ) . '<span class="screen-reader-text">Phone</span>' : '' ) . ( $email ? aw_i( 'mail' ) . '<span class="screen-reader-text">Email</span>' : '' ) . '' . '</p>';
+	return '<p class="aw-org-contact">' . ( $phone ? kits_icon( 'phone' ) . '<span class="screen-reader-text">Phone</span>' : '' ) . ( $email ? kits_icon( 'mail' ) . '<span class="screen-reader-text">Email</span>' : '' ) . '' . '</p>';
 }
 
 function aw_block_org_actions( $a, $id ) {
 	$phone = function_exists( 'aw_listing_first_phone' ) ? aw_listing_first_phone( $id ) : '';
 	aw_use_component_style( 'aw-directory' ); // aw-org-actions, aw-org-go, and the aw-org row around them
 	return '<div class="aw-org-actions">' // no Call button on cards (owner, 12 Oct 2026)
-		. '<a class="aw-org-go" href="' . esc_url( get_permalink( $id ) ) . '" aria-label="' . esc_attr( 'View ' . get_the_title( $id ) ) . '">' . aw_i( 'arrow-right' ) . '</a></div>';
+		. '<a class="aw-org-go" href="' . esc_url( get_permalink( $id ) ) . '" aria-label="' . esc_attr( 'View ' . get_the_title( $id ) ) . '">' . kits_icon( 'arrow-right' ) . '</a></div>';
 }
 
 /**
@@ -459,7 +459,7 @@ add_filter(
 		$p->set_attribute( 'aria-label', aw_seo_plain( get_the_title( $id ) ) . ' (opens in a new tab)' ); // the note is not part of the heading text
 		$html = $p->get_updated_html();
 		$end  = strpos( $html, '</a>' );
-		return false === $end ? $html : substr_replace( $html, ' ' . aw_i( 'arrow-up-right' ), $end, 0 );
+		return false === $end ? $html : substr_replace( $html, ' ' . kits_icon( 'arrow-up-right' ), $end, 0 );
 	},
 	10,
 	3
@@ -491,7 +491,7 @@ add_filter(
 			return $html;
 		}
 		$end = strrpos( $html, '</h' );
-		$tag = ' <span class="kit-tag kit-tag--warning aw-closed-mark" title="' . esc_attr( 'Google Maps shows this place as permanently closed (' . aw_date( $on ) . '). We are checking.' ) . '">Reported closed</span>';
+		$tag = ' <span class="kit-tag kit-tag--warning aw-closed-mark" title="' . esc_attr( 'Google Maps shows this place as permanently closed (' . kits_date( $on ) . '). We are checking.' ) . '">Reported closed</span>';
 		return false === $end ? $html . $tag : substr_replace( $html, $tag, $end, 0 );
 	},
 	27,
@@ -501,7 +501,7 @@ add_filter(
 /** The Verified mark on a listing's name, on cards and on the profile (owner, 12 Oct 2026). */
 function aw_verified_mark() {
 	// aw_verified is set only when a claim is approved, so the mark means "claimed" (owner, 31 Oct 2026).
-	return ' <span class="aw-verified-mark" title="Claimed by the organisation and checked by Animal Writes">' . aw_i( 'badge-check' ) . '<span class="screen-reader-text">Claimed by the organisation and checked by Animal Writes</span></span>';
+	return ' <span class="aw-verified-mark" title="Claimed by the organisation and checked by Animal Writes">' . kits_icon( 'badge-check' ) . '<span class="screen-reader-text">Claimed by the organisation and checked by Animal Writes</span></span>';
 }
 add_filter(
 	'render_block_core/post-title',
@@ -567,12 +567,12 @@ function aw_card_meta( $id ) {
 	$diff = time() - $ts;
 	/* translators: %s: time difference, e.g. 3 hours. */
 	$when  = ( $diff >= 0 && $diff < 7 * DAY_IN_SECONDS ) ? ( $diff < 2 * MINUTE_IN_SECONDS ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) ) ) : wp_date( AW_DATE_FORMAT, $ts );
-	$out   = '<span class="kit-meta-item kit-date aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
+	$out   = '<span class="kit-meta-item kit-date aw-date">' . kits_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
 	$place = in_array( get_post_type( $id ), array( 'aw_legal', 'aw_opportunity' ), true ) && function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
 	if ( 'aw_opportunity' === get_post_type( $id ) && function_exists( 'aw_opp_line_place' ) ) {
-		$out .= str_replace( aw_i( 'directory' ), aw_i( 'map-pin' ), aw_opp_line_place( $id ) );
+		$out .= str_replace( kits_icon( 'directory' ), kits_icon( 'map-pin' ), aw_opp_line_place( $id ) );
 	} elseif ( $place ) {
-		$out .= '<span class="kit-meta-item">' . aw_i( 'map-pin' ) . esc_html( $place->name ) . '</span>';
+		$out .= '<span class="kit-meta-item">' . kits_icon( 'map-pin' ) . esc_html( $place->name ) . '</span>';
 	}
 	return '<p class="kit-card-meta kit-meta-row">' . $out . '</p>';
 }
@@ -654,7 +654,7 @@ function aw_card_campaign( $id ) {
 function aw_card_campaign_label( $id ) {
 	return ''; // hidden for now (owner, 21 Oct 2026)
 	$c = aw_card_campaign( $id ); // phpcs:ignore Squiz.PHP.NonExecutableCode
-	return $c ? '<span class="kit-tag kit-card-label kit-card-label--icon" role="img" aria-label="' . esc_attr( 'Campaign: ' . $c[0] ) . '" title="' . esc_attr( $c[0] ) . '" style="' . esc_attr( '--kit-card-label-bg:' . $c[1] . ';--kit-card-label-fg:' . $c[2] ) . '">' . aw_i( 'megaphone' ) . '</span>' : '';
+	return $c ? '<span class="kit-tag kit-card-label kit-card-label--icon" role="img" aria-label="' . esc_attr( 'Campaign: ' . $c[0] ) . '" title="' . esc_attr( $c[0] ) . '" style="' . esc_attr( '--kit-card-label-bg:' . $c[1] . ';--kit-card-label-fg:' . $c[2] ) . '">' . kits_icon( 'megaphone' ) . '</span>' : '';
 }
 
 /**
@@ -680,7 +680,7 @@ function aw_card_chips( $id, $state = 'block-md' ) {
 	} elseif ( 'aw_press' === $type ) { // a press item's format, except the generic "Article"
 		$fmt = (string) get_post_meta( $id, 'aw_press_format', true );
 		if ( $fmt && 'article' !== $fmt ) {
-			$chips[] = '<span class="kit-tag kit-tag--type">' . ( 'videos' === aw_press_group( $fmt ) ? aw_i( 'youtube' ) : '' ) . '<span class="kit-tag-text">' . esc_html( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) . '</span></span>';
+			$chips[] = '<span class="kit-tag kit-tag--type">' . ( 'videos' === aw_press_group( $fmt ) ? kits_icon( 'youtube' ) : '' ) . '<span class="kit-tag-text">' . esc_html( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) . '</span></span>';
 		}
 	}
 	$cat = function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;

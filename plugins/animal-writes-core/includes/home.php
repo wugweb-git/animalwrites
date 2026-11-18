@@ -134,7 +134,7 @@ function aw_block_home_hero() {
 		$out .= '<p>Labs could approve most animal experiments themselves. Objections closed on 5 Nov; the final rules are not out yet.</p>';
 		$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Last day" past_label="Last day was"]' ) : ''; // $day is Y-m-d (checked above)
 		if ( $open && $day ) {
-			$out .= '<p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>'; // aw_date() escapes
+			$out .= '<p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . kits_date( $open ) . '</span><span class="kit-meta-item">Last day ' . kits_date( $day ) . '</span></p>'; // kits_date() escapes
 		}
 	}
 	$closed = $day && current_time( 'Y-m-d' ) > $day; // after the close day the main button follows the campaign (owner's wording, 13 Nov 2026)

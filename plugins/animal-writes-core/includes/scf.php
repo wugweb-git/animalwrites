@@ -20,9 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** True when SCF (or ACF) is active and loads our field groups. */
+/** True when SCF (or ACF) is active. Use kits_scf_active(); this one goes once DirectoryWeb (listing-profile.php) has switched. */
 function aw_scf_active() {
-	return function_exists( 'acf_add_local_field_group' );
+	return kits_scf_active();
 }
 
 /** SCF's plugin file (plugins screen and WP-CLI name it so). */
@@ -63,25 +63,20 @@ add_action(
 /** Our field groups (keys of the files in acf-json/). The Directory's eight listing groups are DirectoryWeb's (its own acf-json/); it adds them through aw_scf_group_keys(). */
 const AW_SCF_GROUPS = array( 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource', 'group_aw_social', 'group_aw_campaign_social' );
 
-add_filter(
-	'acf/settings/load_json',
-	function ( $paths ) {
-		$paths[] = AW_CORE_DIR . 'acf-json';
-		return $paths;
-	}
-);
-foreach ( AW_SCF_GROUPS as $aw_scf_group ) {
-	add_filter( 'acf/settings/save_json/key=' . $aw_scf_group, fn() => AW_CORE_DIR . 'acf-json' );
-}
-unset( $aw_scf_group );
+// Our acf-json/ folder, through Kits Core's bridge (kits-core/includes/scf.php): read, and our groups saved back to it.
+kits_scf_json_folder( AW_CORE_DIR . 'acf-json', AW_SCF_GROUPS );
+
+// Our groups first, then what plugins add through the older aw_scf_groups filter (DirectoryWeb), then kits_scf_groups.
+add_filter( 'kits_scf_groups', fn( $groups ) => array_merge( AW_SCF_GROUPS, (array) apply_filters( 'aw_scf_groups', array() ), (array) $groups ), 5 );
 
 /**
- * Every field group of ours, Core's and the plugins' (DirectoryWeb adds its listing groups through the aw_scf_groups filter).
+ * Every field group of ours, Core's and the plugins' (DirectoryWeb adds its listing groups through the aw_scf_groups
+ * filter). Kits Core's kits_scf_groups(); this name stays for its callers.
  *
  * @return string[]
  */
 function aw_scf_group_keys(): array {
-	return array_values( array_unique( array_merge( AW_SCF_GROUPS, (array) apply_filters( 'aw_scf_groups', array() ) ) ) );
+	return kits_scf_groups();
 }
 
 /** Is this one of our fields (top level or inside one of our repeaters)? */
