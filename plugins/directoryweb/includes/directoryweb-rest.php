@@ -946,7 +946,7 @@ function directoryweb_settings_payload(): array {
 				directoryweb_fact( __( 'Verified sources', 'directoryweb' ), defined( 'AW_GOV_SOURCES' ) ? implode( ', ', AW_GOV_SOURCES ) : '' ),
 				directoryweb_fact( __( 'Verified', 'directoryweb' ), get_option( 'aw_gov_verified_live' ) ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), $where( 'wp aw gov-verify' ) ),
 				/* translators: %s: number. */
-				directoryweb_fact( __( 'Phone numbers never published', 'directoryweb' ), defined( 'AW_NEVER_PUBLISH_PHONES' ) ? sprintf( __( '%s kept as fingerprints only', 'directoryweb' ), $num( count( AW_NEVER_PUBLISH_PHONES ) ) ) : '' ),
+				directoryweb_fact( __( 'Phone numbers never published', 'directoryweb' ), sprintf( __( '%s kept as fingerprints only', 'directoryweb' ), $num( count( (array) apply_filters( 'directoryweb_never_publish_phones', (array) apply_filters( 'aw_never_publish_phones', DIRECTORYWEB_NEVER_PUBLISH_PHONES ) ) ) ) ) ),
 			),
 		),
 		array(

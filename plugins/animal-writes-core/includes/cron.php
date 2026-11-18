@@ -1,6 +1,7 @@
 <?php
 /**
- * Daily housekeeping: flag listings due for re-verification.
+ * Daily housekeeping: the aw_daily event (its jobs hook onto it: DirectoryWeb's re-verification, thumbs.php) and the
+ * LiteSpeed crawler window.
  *
  * WP-Cron runs on traffic; on the live server add a real cron hitting wp-cron.php.
  *
@@ -41,48 +42,16 @@ function aw_cron_unschedule() {
 }
 
 /**
- * Run daily tasks.
+ * The daily re-verification flags are DirectoryWeb's now (directoryweb_flag_reverify, on this same aw_daily event).
+ * The old name stays for anyone who calls it directly.
  */
-function aw_daily() {
-	$today = current_time( 'Y-m-d' );
-
-	// Flag stale verifications.
-	$cutoff = gmdate( 'Y-m-d', strtotime( $today . ' -' . (int) AW_REVERIFY_DAYS . ' days' ) );
-	$stale  = get_posts(
-		array(
-			'post_type'      => 'aw_listing',
-			'post_status'    => 'publish',
-			'fields'         => 'ids',
-			'posts_per_page' => -1,
-			'meta_query'     => array(
-				'relation' => 'AND',
-				array( 'key' => 'aw_verified', 'value' => '1' ),
-				array( 'key' => 'aw_verified_on', 'value' => $cutoff, 'compare' => '<', 'type' => 'DATE' ),
-			),
-		)
-	);
-	foreach ( $stale as $id ) {
-		update_post_meta( $id, 'aw_needs_reverify', true );
-	}
-
-	// AWBI recognition past its "valid until": the listing needs re-checking (badge and trust line say so).
-	$lapsed = get_posts(
-		array(
-			'post_type'      => 'aw_listing',
-			'post_status'    => 'publish',
-			'fields'         => 'ids',
-			'posts_per_page' => -1,
-			'meta_query'     => array(
-				array( 'key' => 'aw_awbi_valid', 'value' => $today, 'compare' => '<', 'type' => 'DATE' ),
-			),
-		)
-	);
-	foreach ( $lapsed as $id ) {
-		update_post_meta( $id, 'aw_needs_reverify', true );
+if ( ! function_exists( 'aw_daily' ) ) {
+	function aw_daily() {
+		if ( function_exists( 'directoryweb_flag_reverify' ) ) {
+			directoryweb_flag_reverify();
+		}
 	}
 }
-
-add_action( 'aw_daily', 'aw_daily' );
 
 /**
  * LiteSpeed cache warmer: only between 02:00 and 05:00 India time (owner, 17 Oct 2026).

@@ -39,6 +39,7 @@ function directoryweb_activate(): void {
 	}
 	directoryweb_register_listing_type();
 	aw_directory_rewrites();
+	directoryweb_register_meta();
 	if ( function_exists( 'aw_register_meta' ) ) {
 		aw_register_meta();
 	}

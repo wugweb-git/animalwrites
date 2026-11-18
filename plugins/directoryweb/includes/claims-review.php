@@ -69,7 +69,7 @@ function aw_claim_ff_id() {
 /** A listing's opening hours as one line, as the form shows them ("Mon 09:00–18:00, Sun closed"). */
 function aw_claim_hours_text( $lid ) {
 	$out = array();
-	foreach ( aw_listing_hours( $lid ) as $r ) {
+	foreach ( directoryweb_listing_hours( $lid ) as $r ) {
 		$out[] = substr( $r['day'], 0, 3 ) . ' ' . ( $r['closed'] ? 'closed' : $r['open'] . '–' . $r['close'] );
 	}
 	return implode( ', ', $out );
@@ -107,7 +107,7 @@ function aw_claim_now( $lid, $key, $public = true ) {
 	}
 	switch ( $def[1] ) {
 		case 'phones':
-			return implode( "\n", array_map( fn( $r ) => aw_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), aw_listing_phones( $lid ) ) );
+			return implode( "\n", array_map( fn( $r ) => aw_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), directoryweb_listing_phones( $lid ) ) );
 		case 'hours':
 			return aw_claim_hours_text( $lid );
 		case 'services':
@@ -143,7 +143,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 			}
 			$lid = $listing->ID;
 			if ( preg_match( '/^l_phone([1-3])(_label|_wa)?$/', $field, $m ) ) {
-				$row = aw_listing_phones( $lid )[ (int) $m[1] - 1 ] ?? null;
+				$row = directoryweb_listing_phones( $lid )[ (int) $m[1] - 1 ] ?? null;
 				if ( $row ) {
 					$part                        = $m[2] ?? '';
 					$ten                         = aw_ff_phone10( $row['number'] ); // the 10 digits after the +91 in front of the box
@@ -205,7 +205,7 @@ function aw_claim_entry( $entry_id ) {
 		}
 		$add = array_filter( array( $s( 'aw_phone' ) => false, $s( 'aw_whatsapp' ) => true ), fn( $k ) => '' !== (string) $k, ARRAY_FILTER_USE_KEY );
 		if ( $add && $lid ) {
-			$rows = aw_listing_phones( $lid );
+			$rows = directoryweb_listing_phones( $lid );
 			foreach ( $add as $num => $wa ) {
 				$rows[] = array( 'number' => (string) $num, 'label' => '', 'whatsapp' => $wa );
 			}
@@ -222,7 +222,7 @@ function aw_claim_entry( $entry_id ) {
 						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( function_exists( 'aw_ff_ticked' ) && aw_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
 					}
 				}
-				foreach ( array_slice( $lid ? aw_listing_phones( $lid ) : array(), 3 ) as $r ) { // numbers past the form's three stay as they are
+				foreach ( array_slice( $lid ? directoryweb_listing_phones( $lid ) : array(), 3 ) as $r ) { // numbers past the form's three stay as they are
 					$lines[] = aw_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
 				}
 				$propose['phones'] = implode( "\n", $lines );
@@ -596,7 +596,7 @@ function aw_claim_apply_field( $c, $key ) {
 				return false; // a line is not a phone number: the list stays as it is, the field is reported as not applied
 			}
 			$log( 'phone', wp_list_pluck( $rows, 'number' ) );
-			aw_set_listing_list( $lid, 'aw_phones', $rows );
+			directoryweb_set_listing_list( $lid, 'aw_phones', $rows );
 			return true;
 		case 'services':
 			$log( 'services', array_filter( explode( ',', $new ) ) );

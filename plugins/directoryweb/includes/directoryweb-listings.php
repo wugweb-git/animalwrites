@@ -388,7 +388,7 @@ function directoryweb_rest_listing_detail( WP_REST_Request $r ) {
 		)
 	);
 	$hours  = array();
-	foreach ( function_exists( 'aw_listing_hours' ) ? aw_listing_hours( $id ) : array() as $h ) {
+	foreach ( function_exists( 'directoryweb_listing_hours' ) ? directoryweb_listing_hours( $id ) : array() as $h ) {
 		$hours[] = array(
 			'day'  => (string) ( $h['day'] ?? '' ),
 			'time' => ! empty( $h['closed'] ) ? __( 'Closed', 'directoryweb' ) : trim( (string) ( $h['open'] ?? '' ) . '–' . (string) ( $h['close'] ?? '' ), '–' ),

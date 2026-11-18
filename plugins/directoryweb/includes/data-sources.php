@@ -20,7 +20,7 @@
  * Imports record their source in the listing meta aw_data_sources (list of slugs); older imports are recognised from
  * the fields they left (AWBI code, source name).
  *
- * @package animal-writes-core
+ * @package directoryweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

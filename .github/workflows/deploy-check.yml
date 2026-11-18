@@ -95,6 +95,8 @@ jobs:
         run: php plugins/directoryweb/tests/org-people-tests.php
       - name: DirectoryWeb screens, pure parts (plugins/directoryweb/tests/directoryweb-tests.php)
         run: php plugins/directoryweb/tests/directoryweb-tests.php
+      - name: DirectoryWeb listing data model and Core's wrappers (plugins/directoryweb/tests/listing-meta-tests.php)
+        run: php plugins/directoryweb/tests/listing-meta-tests.php
       - name: Daily PHP error count by kind (plugins/animal-writes-core/tests/error-count-tests.php)
         run: php plugins/animal-writes-core/tests/error-count-tests.php
       - name: PlanWeb tests without WordPress (field checks, Dates import mapping; plugins/planweb/tests)
