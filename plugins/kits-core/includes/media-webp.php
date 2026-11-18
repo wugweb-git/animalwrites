@@ -407,13 +407,25 @@ add_action(
 	}
 );
 
-/** The Media → Make WebP screen. */
+add_filter(
+	'kits_frame_extra_screens',
+	function ( $screens ) {
+		$screens['aw-media-webp'] = array( 'manage_options', 'kits-tools' );
+		return $screens;
+	}
+);
+
+/** The Media → Make WebP screen, in the Kits frame (admin-kits-frame.php). */
 function kits_media_webp_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
+	kits_frame_screen( 'aw-media-webp', 'Make WebP', 'kits_media_webp_body' );
+}
+
+/** What the Make WebP screen prints inside the frame. */
+function kits_media_webp_body(): void {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended
-	echo '<div class="wrap"><h1>Make WebP</h1>';
 	if ( isset( $_GET['aw_mw'] ) ) {
 		wp_admin_notice( (int) $_GET['aw_mw'] . ' image(s) converted.' . ( ! empty( $_GET['aw_mw_fail'] ) ? ' ' . (int) $_GET['aw_mw_fail'] . ' could not be converted and keep their old sizes (see Status).' : '' ), array( 'type' => 'success', 'dismissible' => true ) );
 	}
@@ -466,5 +478,5 @@ function kits_media_webp_screen() {
 		$rows,
 		array( 'primary' => 'image', 'empty' => 'Nothing converted yet.' )
 	);
-	echo '</form></div>';
+	echo '</form>';
 }

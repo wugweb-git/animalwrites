@@ -172,21 +172,12 @@ function kits_product_icon_img( string $name, int $size = 20 ): string {
  * @param string $intro One line under it (plain text).
  */
 function kits_admin_head( string $slug, string $title, string $intro = '' ): void {
-	if ( kits_admin_embedding() ) {
-		echo '<div>'; // A section of one of the five: no second heading or tabs. The screen closes it as it closes .wrap.
-		if ( '' !== $intro ) {
-			echo '<p>' . esc_html( $intro ) . '</p>';
-		}
-		return;
-	}
-	$theme = wp_get_theme( get_template() );
-	echo '<div class="wrap"><h1>' . kits_product_icon_img( 'Kits', 32 ) . esc_html( $title ) . '</h1>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its image address.
+	// Only reached as a section of one of the five Kits screens (kits_admin_embed()), where the frame has the heading and
+	// the tabs. The standalone classic header (wrap, h1, tab row) is gone: those screens redirect to Help.
+	echo '<div>'; // The screen closes it as it closed .wrap.
 	if ( '' !== $intro ) {
 		echo '<p>' . esc_html( $intro ) . '</p>';
 	}
-	echo '<p class="description">' . esc_html( $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) ) . '</p>';
-	kits_admin_tabs( $slug );
-	settings_errors();
 }
 
 /* ---------- Home: versions and limits ---------- */

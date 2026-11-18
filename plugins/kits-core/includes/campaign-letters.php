@@ -277,15 +277,28 @@ function aw_cl_campaigns() {
 	return $out;
 }
 
+add_filter(
+	'kits_frame_extra_screens',
+	function ( $screens ) {
+		$screens['aw-letter-report'] = array( 'edit_posts', '' );
+		return $screens;
+	}
+);
+
+/** Campaigns → Letter report, in the Kits frame (admin-kits-frame.php). */
 function aw_cl_report_page() {
+	kits_frame_screen( 'aw-letter-report', 'Letter report', 'aw_cl_report_body' );
+}
+
+/** What the Letter report prints inside the frame. */
+function aw_cl_report_body() {
 	global $wpdb;
 	$all = aw_cl_campaigns();
 	$cid = isset( $_GET['campaign'] ) ? absint( $_GET['campaign'] ) : (int) array_key_first( $all ); // phpcs:ignore WordPress.Security.NonceVerification
 	$t   = aw_cl_table();
-	echo '<div class="wrap"><h1>Letter report</h1>';
 	echo '<p class="description">One row each time a letter is sent from a campaign\'s letter tool: the city as typed, the grounds, how it was sent, the device type and the date. No names, emails or IP addresses. "Letters sent" on the campaign counts the "Yes, I sent it" clicks.</p>';
 	if ( ! $all ) {
-		echo '<p>No letters recorded yet.</p></div>';
+		echo '<p>No letters recorded yet.</p>';
 		return;
 	}
 	echo '<form method="get"><input type="hidden" name="post_type" value="aw_campaign"><input type="hidden" name="page" value="aw-letter-report"><label for="aw-cl-c">Campaign </label><select id="aw-cl-c" name="campaign">';
@@ -330,7 +343,6 @@ function aw_cl_report_page() {
 	$table( 'How it was sent', $route, 'Route' );
 	$table( 'Device', $device, 'Device' );
 	$table( 'By day (IST)', $day, 'Date' );
-	echo '</div>';
 }
 
 add_action(
