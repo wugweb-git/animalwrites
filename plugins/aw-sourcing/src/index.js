@@ -825,6 +825,26 @@ function Enrichment() {
 				load();
 			} );
 	};
+	// Reject an applied or undone value for good: an applied one is undone first (the value before it comes back), and
+	// a later check never proposes or applies the same value for this field again.
+	const rejectForGood = ( f ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as for a bulk Undo
+			window.confirm(
+				sprintf(
+					/* translators: 1: field name, 2: the value. */
+					__(
+						'Reject %1$s "%2$s" for good? An applied value is undone first, and later checks will not add it again.',
+						'aw-sourcing'
+					),
+					f.label,
+					f.proposed
+				)
+			)
+		) {
+			decide( { do: 'reject', ids: [ f.key ] } );
+		}
+	};
 	const approveHigh = () => {
 		if (
 			// eslint-disable-next-line no-alert -- a plain browser confirm before a bulk approval
@@ -932,35 +952,61 @@ function Enrichment() {
 								decide( { do: 'undo', ids: [ id ] } )
 							}
 							after={
-								listing.waiting > 0 && (
-									<>
-										<WaitingEdit
-											fields={ listing.fields }
-											onChanged={ ( m ) => {
-												setMsg( m );
-												load();
-											} }
-										/>
+								<>
+									{ listing.applied > 0 && (
 										<p>
-											<Button
-												busy={ busy }
-												onClick={ () =>
-													decide( {
-														do: 'reject',
-														listings: [
-															listing.id,
-														],
-													} )
-												}
-											>
-												{ __(
-													'Reject every waiting value',
-													'aw-sourcing'
-												) }
-											</Button>
+											{ listing.fields
+												.filter( ( f ) => f.applied )
+												.map( ( f ) => (
+													<Button
+														key={ f.key }
+														busy={ busy }
+														onClick={ () =>
+															rejectForGood( f )
+														}
+													>
+														{ sprintf(
+															/* translators: %s: field name. */
+															__(
+																'Reject %s for good',
+																'aw-sourcing'
+															),
+															f.label
+														) }
+													</Button>
+												) ) }
 										</p>
-									</>
-								)
+									) }
+									{ listing.waiting > 0 && (
+										<>
+											<WaitingEdit
+												fields={ listing.fields }
+												onChanged={ ( m ) => {
+													setMsg( m );
+													load();
+												} }
+											/>
+											<p>
+												<Button
+													busy={ busy }
+													onClick={ () =>
+														decide( {
+															do: 'reject',
+															listings: [
+																listing.id,
+															],
+														} )
+													}
+												>
+													{ __(
+														'Reject every waiting value',
+														'aw-sourcing'
+													) }
+												</Button>
+											</p>
+										</>
+									) }
+								</>
 							}
 						/>
 					) : (
@@ -977,12 +1023,23 @@ function Enrichment() {
 							head={ [
 								__( 'Field', 'aw-sourcing' ),
 								__( 'What happened', 'aw-sourcing' ),
+								__( 'Action', 'aw-sourcing' ),
 							] }
 							rows={ listing.others.map( ( f ) => [
 								f.label,
 								[ f.status, f.created, f.proposed, f.note ]
 									.filter( Boolean )
 									.join( ' · ' ),
+								'undone' === f.status ? (
+									<Button
+										busy={ busy }
+										onClick={ () => rejectForGood( f ) }
+									>
+										{ __( 'Reject', 'aw-sourcing' ) }
+									</Button>
+								) : (
+									'–'
+								),
 							] ) }
 						/>
 					) }
