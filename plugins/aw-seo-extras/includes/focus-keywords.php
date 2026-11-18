@@ -52,7 +52,7 @@ function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
 	$kw = trim( preg_replace( array( '/["“”`#]+/u', "/['‘’](?![\\p{L}\\p{N}])|(?<![\\p{L}\\p{N}])['‘’]/u", '/\s+/u' ), array( '', '', ' ' ), $kw ), " \t\n.,;:'-" ); // an apostrophe inside a word stays ("taneja's")
 	$parts = explode( ' ', $kw );
 	$n     = count( $parts );
-	$title = aw_seo_plain( $title );
+	$title = rankweb_plain_text( $title );
 	if ( '' === $kw || $n < 2 || $n > 4 || mb_strlen( $kw ) > 60 ) {
 		return '';
 	}
@@ -67,7 +67,7 @@ function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
 	}
 	$words = fn( $s ) => array_filter( preg_split( '/[^\p{L}\p{N}]+/u', mb_strtolower( $s ) ), fn( $w ) => mb_strlen( $w ) >= 3 );
 	$stem  = fn( $w ) => mb_substr( $w, 0, 5 ); // "dogs" / "dog", "cruelty" / "cruel"
-	$own   = array_map( $stem, $words( $title . ' ' . aw_seo_plain( $text ) ) );
+	$own   = array_map( $stem, $words( $title . ' ' . rankweb_plain_text( $text ) ) );
 	foreach ( $words( $kw ) as $w ) {
 		if ( in_array( $stem( $w ), $own, true ) ) {
 			return $kw;
@@ -89,7 +89,7 @@ function aw_seo_title_for_keyword( $post ) {
 	if ( '' === $t && function_exists( 'aw_seo_item_title' ) ) {
 		$t = aw_seo_item_title( $post );
 	}
-	$t = aw_seo_plain( '' !== $t ? $t : $post->post_title );
+	$t = rankweb_plain_text( '' !== $t ? $t : $post->post_title );
 	return trim( preg_replace( '/\s*[\x{2013}\x{2014}|-]\s*' . preg_quote( get_bloginfo( 'name' ), '/' ) . '$/iu', '', $t ) );
 }
 
@@ -122,7 +122,7 @@ function aw_seo_keyword_in_title( $kw, $seo_title ) {
 
 /** The item's own text the keyword may draw on: its excerpt, else its first paragraph. */
 function aw_seo_keyword_text( $post ) {
-	return aw_seo_plain( has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post ) );
+	return rankweb_plain_text( has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post ) );
 }
 
 /**
@@ -149,7 +149,7 @@ function aw_seo_keyphrase_owners( $kw, $id ) {
 	foreach ( $terms as $t ) {
 		$out[ 'term' . $t ] = array( 'type' => 'term', 'id' => (int) $t );
 	}
-	if ( function_exists( 'aw_si_ready' ) && aw_si_ready() && function_exists( 'aw_si_norm' ) ) {
+	if ( function_exists( 'aw_si_ready' ) && aw_si_ready() && function_exists( 'aw_si_norm' ) && function_exists( 'aw_si_table' ) ) {
 		$k    = aw_si_table( 'keywords' );
 		$pg   = aw_si_table( 'kw_pages' );
 		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT l.obj_type, l.obj_id FROM %i l JOIN %i k ON k.id = l.kw_id WHERE k.norm = %s AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 AND NOT ( l.obj_type = 'post' AND l.obj_id = %d ) LIMIT 5", $pg, $k, aw_si_norm( $kw ), (int) $id ) );
@@ -209,7 +209,7 @@ add_action(
 						$seo   = aw_seo_title_for_keyword( $p );
 						$out[] = array(
 							'id'        => $p->ID,
-							'title'     => aw_seo_plain( $p->post_title ),
+							'title'     => rankweb_plain_text( $p->post_title ),
 							'seo_title' => $seo,
 							'excerpt'   => aw_seo_cut( aw_seo_keyword_text( $p ), 400 ),
 							'focus'     => $focus,

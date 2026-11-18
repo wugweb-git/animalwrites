@@ -144,7 +144,7 @@ function aw_workers_schedule( array $w ) {
 /** "4 min 20 s" / "1 h 05 min". */
 function aw_workers_duration( $s ) {
 	$s = max( 0, (int) $s );
-	return $s < 3600 ? ( $s >= 60 ? intdiv( $s, 60 ) . ' min ' : '' ) . ( $s % 60 ) . ' s' : aw_cron_span( $s );
+	return $s < 3600 ? ( $s >= 60 ? intdiv( $s, 60 ) . ' min ' : '' ) . ( $s % 60 ) . ' s' : sourceweb_cron_span( $s );
 }
 
 /**
@@ -170,7 +170,7 @@ function aw_workers_problems( $now = null ) {
 		$w = aw_worker_def( $file, $w ); // the owner's name and late limit (Planned workers are not here: they never alert)
 		$seen = max( (int) ( $last['ended'] ?? 0 ), (int) ( $last['started'] ?? 0 ) );
 		if ( ! empty( $w['late_after_h'] ) && $now - $seen > (int) $w['late_after_h'] * HOUR_IN_SECONDS ) {
-			$out[ $file . ':late' ] = sprintf( '%s has not reported for %s (late after %d h; last: %s).', $w['name'], aw_cron_span( $now - $seen ), (int) $w['late_after_h'], wp_date( 'j M, g:i a', $seen ) );
+			$out[ $file . ':late' ] = sprintf( '%s has not reported for %s (late after %d h; last: %s).', $w['name'], sourceweb_cron_span( $now - $seen ), (int) $w['late_after_h'], wp_date( 'j M, g:i a', $seen ) );
 		}
 		$result = (string) ( $last['result'] ?? '' );
 		if ( 'running' === $result && $now - (int) $last['started'] > ( (int) $w['timeout_min'] + 10 ) * MINUTE_IN_SECONDS ) {
@@ -335,7 +335,9 @@ add_filter(
  * @return true|WP_Error
  */
 function aw_workers_run_now( $file ) {
-	$res = aw_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) );
+	$res = function_exists( 'aw_dispatch_workflow' ) // Animal Writes Core's cron-health.php (GitHub token, dispatch)
+		? aw_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) )
+		: new WP_Error( 'sourceweb_no_dispatch', 'Run now needs the GitHub dispatch from Animal Writes Core.' );
 	$log = (array) get_option( 'aw_worker_dispatch_log', array() );
 	array_unshift(
 		$log,

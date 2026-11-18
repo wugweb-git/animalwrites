@@ -75,13 +75,13 @@ function aw_district_helpline_listings( $code, $max = 6 ) {
 		if ( ! $num ) {
 			continue;
 		}
-		$types = wp_list_pluck( aw_listing_types( $id ), 'slug' );
+		$types = wp_list_pluck( directoryweb_listing_types( $id ), 'slug' );
 		if ( in_array( 'legal-aid', $types, true ) ) {
 			continue; // legal services authorities help with cases, not with an animal in need
 		}
-		$svcs  = wp_list_pluck( aw_item_tags( $id, aw_service_slugs() ), 'slug' );
+		$svcs  = wp_list_pluck( directoryweb_item_tags( $id, directoryweb_service_slugs() ), 'slug' );
 		$rank  = array_intersect( $svcs, AW_HELPLINE_FIRST ) ? 0 : ( array_intersect( $types, AW_VET_TYPES ) ? 1 : 2 );
-		$type  = aw_listing_types( $id );
+		$type  = directoryweb_listing_types( $id );
 		$rows[] = array( 'id' => $id, 'num' => $num, 'rank' => $rank, 'type' => $type ? $type[0]->name : '' );
 	}
 	usort( $rows, fn( $a, $b ) => array( $a['rank'], get_the_title( $a['id'] ) ) <=> array( $b['rank'], get_the_title( $b['id'] ) ) );
@@ -105,7 +105,7 @@ function aw_district_mvu( $d ) {
 
 /** Whether this request is a district page that shows the helplines (page 1, no type filter). Returns the place or null. */
 function aw_district_helplines_place() {
-	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || aw_hub_page() > 1 ) {
+	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || (int) get_query_var( 'paged' ) > 1 ) { // page 2 on (as Core's aw_hub_page())
 		return null;
 	}
 	$d = aw_current_place();
@@ -138,7 +138,9 @@ function aw_district_helplines_row() {
 	foreach ( $items as $it ) {
 		$chips .= '<a class="kit-chip" href="' . esc_attr( aw_helpline_tel( $it[1] ) ) . '"><span class="aw-dh-row-name">' . esc_html( $it[0] ) . '</span> <strong>' . esc_html( $it[1] ) . '</strong></a>';
 	}
-	aw_use_component_style( 'aw-directory' ); // aw-dh-row
+	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
+		kits_use_component_style( 'aw-directory' ); // aw-dh-row
+	}
 	/* translators: %s: district. */
 	$label = sprintf( __( 'Animal helpline numbers in %s', 'directoryweb' ), $d->name );
 	return '<nav class="kit-tags aw-dh-row" aria-label="' . esc_attr( $label ) . '"><span class="aw-dh-row-label">' . esc_html__( 'Helplines', 'directoryweb' ) . '</span>'
@@ -151,7 +153,7 @@ function aw_district_helplines_html( $d ) {
 	foreach ( aw_district_official_numbers( $d->code ) as $o ) {
 		$src  = esc_html( (string) ( $o['source'] ?? '' ) );
 		$src  = ! empty( $o['url'] ) ? '<a href="' . esc_url( $o['url'] ) . '" rel="nofollow noopener" target="_blank">' . $src . '</a>' : $src;
-		$src .= ! empty( $o['checked'] ) ? ', checked ' . aw_date( $o['checked'] ) : '';
+		$src .= ! empty( $o['checked'] ) ? ', checked ' . kits_date( $o['checked'], null, 'aw-date' ) : '';
 		$own .= aw_helpline_card( (string) $o['name'], (string) $o['number'], (string) ( $o['line'] ?? '' ), $src );
 	}
 	foreach ( aw_district_helpline_listings( $d->code ) as $r ) {
@@ -166,7 +168,9 @@ function aw_district_helplines_html( $d ) {
 	if ( $mvu ) {
 		$cards .= aw_helpline_card( __( 'Mobile Veterinary Units', 'directoryweb' ), '1962', __( 'A vet comes to the animal.', 'directoryweb' ), esc_html( sprintf( '%s animal husbandry department', $state->name ) ), get_permalink( $mvu ) );
 	}
-	aw_use_component_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
+	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
+		kits_use_component_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
+	}
 	$id = 'aw-dh-' . wp_unique_id();
 	/* translators: %s: district. */
 	return '<section class="aw-district-helplines" id="district-helplines" aria-labelledby="' . esc_attr( $id ) . '"><h2 id="' . esc_attr( $id ) . '">' . esc_html( sprintf( __( 'Animal helpline numbers in %s', 'directoryweb' ), $d->name ) ) . '</h2>'
@@ -178,7 +182,7 @@ function aw_district_helplines_html( $d ) {
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
-		if ( 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) ) {
+		if ( ! function_exists( 'aw_hub_of_query' ) || 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) ) { // the hub Query Loops are Animal Writes Core's
 			return $html;
 		}
 		$d = aw_district_helplines_place();

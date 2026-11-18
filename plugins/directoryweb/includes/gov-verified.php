@@ -150,7 +150,7 @@ function aw_gov_verified_count() {
 
 /** The Verified mark beside a listing's name: the green tick. */
 function aw_gov_verified_mark() {
-	return ' <span class="aw-gov-mark" title="Verified: registration details from government documents">' . aw_i( 'check' ) . '<span class="screen-reader-text">Verified: registration details from government documents</span></span>';
+	return ' <span class="aw-gov-mark" title="Verified: registration details from government documents">' . kits_icon( 'check' ) . '<span class="screen-reader-text">Verified: registration details from government documents</span></span>';
 }
 
 /** "Verified on {date}" for the profile's meta row, or ''. */
@@ -160,7 +160,7 @@ function aw_gov_verified_line( $id ) {
 		return '';
 	}
 	/* translators: %s: date. */
-	return '<span class="kit-badge kit-badge--verified aw-item-gov">' . aw_i( 'check' ) . esc_html( sprintf( __( 'Verified on %s', 'directoryweb' ), wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) . '</span>';
+	return '<span class="kit-badge kit-badge--verified aw-item-gov">' . kits_icon( 'check' ) . esc_html( sprintf( __( 'Verified on %s', 'directoryweb' ), wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) . '</span>';
 }
 
 // The tick beside the name on cards (after the Claimed mark when both apply); not on the profile's own title.

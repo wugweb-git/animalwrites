@@ -46,12 +46,15 @@ function aw_seo_breadcrumb_trail() {
 		return $trail;
 	}
 	$trail = array();
-	if ( is_404() || is_front_page() || ! function_exists( 'aw_post_types' ) ) {
+	if ( is_404() || is_front_page() || ! function_exists( 'aw_post_types' ) || ! function_exists( 'aw_hub_url' ) ) { // the content types and hubs (Animal Writes Core)
 		return $trail;
 	}
 	$dir   = array( 'Directory', home_url( '/directory/' ) );
 	$place = function ( $term ) {
 		$out = array();
+		if ( ! function_exists( 'aw_directory_url' ) ) { // DirectoryWeb is off: no place steps
+			return $out;
+		}
 		if ( $term && $term->parent && function_exists( 'aw_place_by_id' ) ) {
 			$st    = aw_place_by_id( $term->parent );
 			$out[] = array( $st->name, aw_directory_url( $st->slug ) );
@@ -121,7 +124,7 @@ function aw_seo_breadcrumb_trail() {
 	if ( count( $trail ) < 2 ) {
 		$trail = array();
 	}
-	$trail = array_map( fn( $c ) => array( aw_seo_plain( $c[0] ), $c[1] ), $trail );
+	$trail = array_map( fn( $c ) => array( rankweb_plain_text( $c[0] ), $c[1] ), $trail );
 	return $trail;
 }
 

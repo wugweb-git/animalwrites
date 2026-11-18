@@ -77,7 +77,9 @@ function aw_org_people_html( $lid ) {
 	if ( ! $people ) {
 		return '';
 	}
-	aw_use_component_style( 'aw-directory' ); // aw-org-links-group, aw-org-links
+	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
+		kits_use_component_style( 'aw-directory' ); // aw-org-links-group, aw-org-links
+	}
 	// A claimant shows with their role (owner, 31 Oct 2026: claim form #6), a volunteer with their name alone.
 	return '<section class="aw-org-links-group aw-org-people"><h2>Volunteers</h2><ul>' . implode( '', array_map( fn( $p ) => '<li>' . esc_html( $p['name'] ) . ( '' !== $p['role'] ? '<span class="aw-org-people-role">, ' . esc_html( $p['role'] ) . '</span>' : '' ) . '</li>', $people ) ) . '</ul></section>';
 }
@@ -136,7 +138,7 @@ function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
 	$has_tag = $tag && \FluentCrm\App\Models\Subscriber::filterByTags( array( (int) $tag->id ) )->where( 'id', (int) $contact->id )->first();
 	$plan    = aw_org_people_link_plan( (array) $contact->custom_fields(), (bool) $has_tag, $lid, (bool) $show, html_entity_decode( get_the_title( $lid ), ENT_QUOTES ), (string) $role );
 	if ( $apply ) {
-		if ( $plan['tag'] ) {
+		if ( $plan['tag'] && function_exists( 'aw_crm_tag_ids' ) ) { // without Animal Writes Core's tag helper the tag is not added
 			$contact->attachTags( aw_crm_tag_ids( array( 'org-approved' ) ) );
 		}
 		if ( $plan['sync'] ) {

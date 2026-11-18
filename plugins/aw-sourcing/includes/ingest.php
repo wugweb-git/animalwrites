@@ -259,7 +259,7 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_hold', $hold );
 	}
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
-	$source_date = aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' );
+	$source_date = sourceweb_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' );
 	// A document dated in its own title ("Circular dated 05.06.2024") keeps that date when the source gave none or only
 	// the day it was fetched (14 Nov 2026: 19 AWBI circulars showed "5 minutes ago" in the Library).
 	if ( ( '' === $source_date || wp_date( 'Y-m-d' ) === $source_date )
@@ -293,24 +293,24 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	$tags = array_filter( (array) $req->get_param( 'tags' ), 'is_scalar' );
 	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
-		if ( ! aw_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php)
+		if ( ! function_exists( 'aw_set_issuer' ) || ! aw_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php, Core)
 			$ignored[] = 'issuer: ' . sanitize_text_field( (string) $req->get_param( 'source_type' ) );
 		}
 	}
 	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
 	if ( 'aw_legal' === $type ) {
 		// The Library type is a tag; with none from the worker, a government press release (PIB) is an Official release.
-		$kind = ( array_intersect( array_map( 'sanitize_title', $tags ), array_keys( AW_LEGAL_KINDS ) ) ? '' : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' ) );
-		foreach ( array_merge( $kind ? array( $kind ) : array(), array_intersect( array_map( 'sanitize_title', $tags ), array_keys( AW_LEGAL_KINDS ) ) ) as $k ) {
+		$kind = ( array_intersect( array_map( 'sanitize_title', $tags ), array_keys( SOURCEWEB_LEGAL_KINDS ) ) ? '' : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' ) );
+		foreach ( array_merge( $kind ? array( $kind ) : array(), array_intersect( array_map( 'sanitize_title', $tags ), array_keys( SOURCEWEB_LEGAL_KINDS ) ) ) as $k ) {
 			if ( ! term_exists( $k, 'post_tag' ) ) {
-				wp_insert_term( AW_LEGAL_KINDS[ $k ] ?? $k, 'post_tag', array( 'slug' => $k ) );
+				wp_insert_term( SOURCEWEB_LEGAL_KINDS[ $k ] ?? $k, 'post_tag', array( 'slug' => $k ) );
 			}
 		}
 		if ( $kind ) {
 			$tags[] = $kind;
 		}
 		// A court is an issuer (8 Oct 2026): Supreme Court, High Court, National Green Tribunal.
-		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) ) {
+		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) && function_exists( 'aw_set_issuer' ) ) {
 			aw_set_issuer( $post_id, (string) $req->get_param( 'court' ) );
 		}
 	}
@@ -328,12 +328,12 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_org_name', sanitize_text_field( (string) $req->get_param( 'org_name' ) ) );
 		aw_link_opportunity_org( $post_id );
 		update_post_meta( $post_id, 'aw_apply_url', $source_url );
-		$deadline = aw_sanitize_meta( (string) $req->get_param( 'deadline' ), 'aw_deadline' );
+		$deadline = sourceweb_sanitize_meta( (string) $req->get_param( 'deadline' ), 'aw_deadline' );
 		if ( $deadline ) {
 			update_post_meta( $post_id, 'aw_deadline', $deadline );
 		}
 		// Employment type only as the source states it ("Type: Full time"); nothing is guessed (meta.php keeps Google's values).
-		$emp = aw_sanitize_meta( (string) $req->get_param( 'employment_type' ), 'aw_employment_type' );
+		$emp = sourceweb_sanitize_meta( (string) $req->get_param( 'employment_type' ), 'aw_employment_type' );
 		if ( $emp ) {
 			update_post_meta( $post_id, 'aw_employment_type', $emp );
 		}
@@ -348,11 +348,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		$l = (array) $req->get_param( 'listing' );
 		foreach ( array( 'email', 'website', 'area', 'services' ) as $f ) {
 			if ( isset( $l[ $f ] ) ) {
-				update_post_meta( $post_id, 'aw_' . $f, aw_sanitize_meta( $l[ $f ], 'aw_' . $f ) );
+				update_post_meta( $post_id, 'aw_' . $f, sourceweb_sanitize_meta( $l[ $f ], 'aw_' . $f ) );
 			}
 		}
 		// Phone and WhatsApp go into the Phone numbers list (one row, marked WhatsApp, when they are the same number).
-		aw_listing_put_phone( $post_id, (string) ( $l['phone'] ?? '' ), (string) ( $l['whatsapp'] ?? '' ) );
+		directoryweb_listing_put_phone( $post_id, (string) ( $l['phone'] ?? '' ), (string) ( $l['whatsapp'] ?? '' ) );
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 	}
 

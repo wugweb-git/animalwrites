@@ -24,6 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** The days in order, Monday first (the same list as the listing hours use). */
+const RANKWEB_WEEKDAYS = array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' );
+
 /**
  * Whether the functions a group of questions reads exist (Animal Writes Core, DirectoryWeb, Kits Core).
  *
@@ -38,10 +41,10 @@ function rankweb_faq_data_ready( $type ) {
 	// Every function outside this file and faq.php that a group's answers, question and hidden callbacks call, directly
 	// or through the helpers here. A new call in an answer builder goes in its group's list too.
 	$needs          = array(
-		'aw_listing' => array( 'aw_lf', 'aw_date', 'aw_listing_phones', 'aw_tel_url', 'aw_listing_hours', 'aw_listing_location_text', 'aw_listing_place', 'aw_listing_rel', 'aw_listing_service_names', 'aw_listing_type_services', 'aw_listing_type_slugs', 'aw_listing_types', 'aw_item_place', 'aw_place_count', 'aw_place_counts', 'aw_place_state', 'aw_directory_url', 'aw_unverified_list', 'aw_unverified_norm', 'kits_preview_only_ids', 'kits_term_url' ),
-		'aw_legal'   => array( 'aw_legal_kinds', 'aw_item_issuer', 'aw_date' ),
-		'post'       => array( 'aw_lgd', 'aw_date', 'aw_legal_kinds' ),
-		'post_tag'   => array( 'aw_lf', 'aw_date', 'aw_item_date_ts', 'aw_item_place', 'aw_item_issuer', 'aw_place_state', 'aw_directory_url', 'aw_listing_type_slugs', 'aw_service_slugs', 'aw_campaign_links', 'aw_legal_kinds', 'kits_term_url' ),
+		'aw_listing' => array( 'aw_lf', 'kits_date', 'directoryweb_listing_phones', 'directoryweb_tel_url', 'directoryweb_listing_hours', 'aw_listing_location_text', 'aw_listing_place', 'aw_listing_rel', 'directoryweb_listing_service_names', 'aw_listing_type_services', 'directoryweb_listing_type_slugs', 'directoryweb_listing_types', 'aw_item_place', 'aw_place_count', 'aw_place_counts', 'aw_place_state', 'aw_directory_url', 'aw_unverified_list', 'aw_unverified_norm', 'kits_preview_only_ids', 'kits_term_url' ),
+		'aw_legal'   => array( 'aw_legal_kinds', 'aw_item_issuer', 'kits_date' ),
+		'post'       => array( 'aw_lgd', 'kits_date', 'aw_legal_kinds' ),
+		'post_tag'   => array( 'aw_lf', 'kits_date', 'aw_item_date_ts', 'aw_item_place', 'aw_item_issuer', 'aw_place_state', 'aw_directory_url', 'directoryweb_listing_type_slugs', 'directoryweb_service_slugs', 'aw_campaign_links', 'aw_legal_kinds', 'kits_term_url' ),
 	);
 	$ready[ $type ] = isset( $needs[ $type ] ) && count( array_filter( $needs[ $type ], 'function_exists' ) ) === count( $needs[ $type ] );
 	return $ready[ $type ];
@@ -236,7 +239,7 @@ function aw_faq_is_topic_name( $name ) {
 }
 /* ---------- A. Directory listings ---------- */
 
-/** "Monday to Saturday 9:00 am – 5:00 pm; Sunday closed" from aw_listing_hours(). */
+/** "Monday to Saturday 9:00 am – 5:00 pm; Sunday closed" from directoryweb_listing_hours(). */
 function aw_faq_hours_summary( array $rows ) {
 	$fmt  = fn( $t ) => wp_date( 'g:i a', strtotime( '2000-01-01 ' . $t . ':00 UTC' ), new DateTimeZone( 'UTC' ) );
 	$days = array();
@@ -244,13 +247,13 @@ function aw_faq_hours_summary( array $rows ) {
 		$days[ $r['day'] ][] = $r['closed'] ? 'closed' : ( '00:00' === $r['open'] && '23:59' === $r['close'] ? 'open 24 hours' : $fmt( $r['open'] ) . ' – ' . $fmt( $r['close'] ) );
 	}
 	$runs = array();
-	foreach ( AW_WEEKDAYS as $d ) {
+	foreach ( RANKWEB_WEEKDAYS as $d ) {
 		if ( ! isset( $days[ $d ] ) ) {
 			continue;
 		}
 		$v    = implode( ', ', array_unique( $days[ $d ] ) );
 		$last = count( $runs ) - 1;
-		if ( $last >= 0 && $runs[ $last ]['v'] === $v && array_search( $runs[ $last ]['to'], AW_WEEKDAYS, true ) === array_search( $d, AW_WEEKDAYS, true ) - 1 ) {
+		if ( $last >= 0 && $runs[ $last ]['v'] === $v && array_search( $runs[ $last ]['to'], RANKWEB_WEEKDAYS, true ) === array_search( $d, RANKWEB_WEEKDAYS, true ) - 1 ) {
 			$runs[ $last ]['to'] = $d;
 		} else {
 			$runs[] = array( 'from' => $d, 'to' => $d, 'v' => $v );
@@ -272,7 +275,7 @@ function aw_faq_listing_phone_allowed( $id ) {
 	return '' !== aw_lf( $id, 'aw_darpan_id' ) && '' === aw_lf( $id, 'aw_darpan_blacklisted_on' ) && '' === aw_lf( $id, 'aw_darpan_blacklisted_by' );
 }
 function aw_faq_listing_phone( $id, $name ) {
-	$phones = array_values( array_filter( aw_listing_phones( $id ), fn( $p ) => '' !== aw_tel_url( $p['number'] ) ) );
+	$phones = array_values( array_filter( directoryweb_listing_phones( $id ), fn( $p ) => '' !== directoryweb_tel_url( $p['number'] ) ) );
 	if ( ! $phones ) {
 		return null;
 	}
@@ -284,7 +287,7 @@ function aw_faq_listing_phone( $id, $name ) {
 			break;
 		}
 	}
-	$a = esc_html( $name ) . '’s phone number is ' . aw_faq_a( aw_tel_url( $first['number'] ), $first['number'] ) . ( $wa === $first['number'] ? ' (also on WhatsApp).' : '.' );
+	$a = esc_html( $name ) . '’s phone number is ' . aw_faq_a( directoryweb_tel_url( $first['number'] ), $first['number'] ) . ( $wa === $first['number'] ? ' (also on WhatsApp).' : '.' );
 	if ( '' !== $wa && $wa !== $first['number'] ) {
 		$a .= ' WhatsApp: ' . esc_html( $wa ) . '.';
 	}
@@ -321,7 +324,7 @@ function aw_faq_listing_location( $id, $name ) {
 }
 
 function aw_faq_listing_services( $id, $name ) {
-	$names = aw_listing_service_names( $id );
+	$names = directoryweb_listing_service_names( $id );
 	$typed = false;
 	if ( ! $names && aw_lf( $id, 'aw_services' ) ) {
 		$names = array_map( 'trim', explode( ',', aw_lf( $id, 'aw_services' ) ) );
@@ -378,11 +381,11 @@ function aw_faq_listing_awbi( $id, $name ) {
 	$drop  = aw_lf( $id, 'aw_awbi_dropped' );
 	$link  = aw_faq_a( aw_faq_section_url( $id, 'registrations' ), 'See its registrations' ) . '.';
 	if ( '' !== $day && $day < wp_date( 'Y-m-d' ) ) {
-		$a = 'The AWBI recognition of ' . esc_html( $name ) . ' (number ' . esc_html( $code ) . ') expired on ' . aw_date( $day ) . '. ' . $link;
+		$a = 'The AWBI recognition of ' . esc_html( $name ) . ' (number ' . esc_html( $code ) . ') expired on ' . kits_date( $day, null, 'aw-date' ) . '. ' . $link;
 	} elseif ( '' !== $drop && strtotime( $drop ) ) {
-		$a = esc_html( $name ) . ' has AWBI number ' . esc_html( $code ) . ', but it is not on the AWBI list of ' . aw_date( $drop ) . '. ' . $link;
+		$a = esc_html( $name ) . ' has AWBI number ' . esc_html( $code ) . ', but it is not on the AWBI list of ' . kits_date( $drop, null, 'aw-date' ) . '. ' . $link;
 	} else {
-		$a = 'Yes. ' . esc_html( $name ) . ' is recognised by the AWBI, number ' . esc_html( $code ) . ( '' !== $day ? ', valid until ' . aw_date( $day ) : '' ) . '. ' . $link;
+		$a = 'Yes. ' . esc_html( $name ) . ' is recognised by the AWBI, number ' . esc_html( $code ) . ( '' !== $day ? ', valid until ' . kits_date( $day, null, 'aw-date' ) : '' ) . '. ' . $link;
 	}
 	return array( $a, 'awbi' );
 }
@@ -393,7 +396,7 @@ function aw_faq_listing_volunteer( $id, $name ) {
 }
 
 function aw_faq_listing_hours( $id, $name ) {
-	$rows = aw_listing_hours( $id );
+	$rows = directoryweb_listing_hours( $id );
 	return $rows ? array( esc_html( $name ) . ' is open ' . esc_html( aw_faq_hours_summary( $rows ) ) . '. ' . aw_faq_a( aw_faq_section_url( $id, 'location' ), 'See the hours by day' ) . '.', 'hours' ) : null;
 }
 
@@ -477,7 +480,7 @@ function aw_faq_type_counts() {
 	if ( ! is_array( $state ) ) {
 		global $wpdb;
 		$state = array();
-		$slugs = function_exists( 'aw_listing_type_slugs' ) ? (array) aw_listing_type_slugs() : array();
+		$slugs = function_exists( 'directoryweb_listing_type_slugs' ) ? (array) directoryweb_listing_type_slugs() : array();
 		$pids  = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array(); // preview-only items
 		$rows  = $slugs ? $wpdb->get_results( "SELECT sm.meta_value code, t.slug type, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} sm ON sm.post_id = p.ID AND sm.meta_key = 'aw_state_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('" . implode( "','", array_map( 'esc_sql', $slugs ) ) . "') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" . ( $pids ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', $pids ) ) . ')' : '' ) . ' GROUP BY sm.meta_value, t.slug', ARRAY_A ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
 		foreach ( (array) $rows as $r ) {
@@ -497,7 +500,7 @@ function aw_faq_unverified( $id, $value ) {
 }
 
 function aw_faq_listing_type( $id, $name ) {
-	$types = array_slice( aw_listing_types( $id ), 0, 3 ); // the type chips the page shows, in their order
+	$types = array_slice( directoryweb_listing_types( $id ), 0, 3 ); // the type chips the page shows, in their order
 	if ( ! $types ) {
 		return null;
 	}
@@ -633,10 +636,10 @@ function aw_faq_legal_date( $id, $doc ) {
 		$src  = (string) get_post_meta( $id, 'aw_source_url', true );
 		$who  = ucfirst( esc_html( aw_faq_the( $iss->name ) ) );
 		$what = aw_faq_is_topic_name( $doc ) ? ' issued it' : ' ' . aw_faq_legal_verb( $id ) . ' the ' . esc_html( $doc ); // not "released the press release on …"
-		return array( $who . $what . ' on ' . aw_date( $d ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' ), 'date' );
+		return array( $who . $what . ' on ' . kits_date( $d, null, 'aw-date' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' ), 'date' );
 	}
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
-	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' ' . aw_faq_legal_verb( $id ) . ' on ' . aw_date( $d ) . ' as ' . ( $src ? aw_faq_a( $src, $no ) : esc_html( $no ) ) . '.';
+	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' ' . aw_faq_legal_verb( $id ) . ' on ' . kits_date( $d, null, 'aw-date' ) . ' as ' . ( $src ? aw_faq_a( $src, $no ) : esc_html( $no ) ) . '.';
 	return array( $a, 'date' );
 }
 
@@ -1093,7 +1096,7 @@ function aw_faq_study_journal( $id ) {
 	if ( '' === $url || '' === $jn ) {
 		return null;
 	}
-	$a = 'The study was published in ' . esc_html( $jn ) . ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) && $d > '1900' ? ' on ' . aw_date( $d ) : '' ) . '. ' . aw_faq_a( $url, 'See it in the journal' ) . '.';
+	$a = 'The study was published in ' . esc_html( $jn ) . ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) && $d > '1900' ? ' on ' . kits_date( $d, null, 'aw-date' ) : '' ) . '. ' . aw_faq_a( $url, 'See it in the journal' ) . '.';
 	return array( $a, 'study-journal' );
 }
 
@@ -1154,7 +1157,7 @@ function aw_faq_tag_items( $term_id ) {
 		return $memo[ $term_id ];
 	}
 	$t     = get_term( $term_id, 'post_tag' );
-	$types = function_exists( 'aw_listing_type_slugs' ) ? (array) aw_listing_type_slugs() : array();
+	$types = function_exists( 'directoryweb_listing_type_slugs' ) ? (array) directoryweb_listing_type_slugs() : array();
 	$own   = $t instanceof WP_Term ? array_filter( aw_faq_items( 'term', $term_id ), fn( $x ) => '' === ( $x['auto'] ?? '' ) && 'approved' === ( $x['status'] ?? '' ) ) : array();
 	if ( ! $t instanceof WP_Term || in_array( $t->slug, $types, true ) || count( $own ) >= AW_FAQ_MIN ) { // a written FAQ of its own: kept as it is
 		return $memo[ $term_id ] = null;
@@ -1264,7 +1267,7 @@ function aw_faq_tag_top( array $counts ) {
 /** An item's title, quoted, with its date: "“Title” (4 Oct 2026)". */
 function aw_faq_tag_item_text( $id ) {
 	$ts = aw_item_date_ts( $id );
-	return '“' . esc_html( aw_faq_plain( get_the_title( $id ) ) ) . '”' . ( $ts ? ' (' . aw_date( $ts ) . ')' : '' );
+	return '“' . esc_html( aw_faq_plain( get_the_title( $id ) ) ) . '”' . ( $ts ? ' (' . kits_date( $ts, null, 'aw-date' ) . ')' : '' );
 }
 
 function aw_faq_tag_news( $term_id ) {
@@ -1342,7 +1345,7 @@ function aw_faq_tag_directory_link( $term_id, $name, array $counts, array $place
 	if ( ! $t instanceof WP_Term ) {
 		return '';
 	}
-	if ( function_exists( 'aw_service_slugs' ) && in_array( $t->slug, (array) aw_service_slugs(), true ) ) {
+	if ( function_exists( 'directoryweb_service_slugs' ) && in_array( $t->slug, (array) directoryweb_service_slugs(), true ) ) {
 		return aw_faq_a( add_query_arg( 'tag', $t->slug, home_url( 'directory/' ) ), 'Find ' . aw_faq_tag_lc( $name ) . ' in the Directory' );
 	}
 	$top = (string) array_key_first( $counts );

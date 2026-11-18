@@ -27,8 +27,7 @@ Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Ki
     - 3 redundant `add_theme_support` removed;
     - zips drop the Animal Writes variation and `tools/`, and ship the Sidebar part as an empty group. The repo keeps the dormant Advanced Ads slot ("sponsored blocks stay dormant").
 - **Before aw-core is deleted (highest risk to live):**
-  - DirectoryWeb (`directoryweb.php:38`) and SourceWeb (`aw-sourcing.php:33`) stop themselves without `AW_CORE_*`. Point them at Kits Core and DirectoryWeb, and declare `Requires Plugins`.
-  - Unguarded calls into aw-core, DirectoryWeb and Kits Core: RankWeb about 22, SourceWeb about 28, InsightWeb about 6. Guard each one or move it.
+  - Startup checks and unguarded calls: on branch `claude/awcore-plugins-standalone` (PR into `wordpress-dev`, not merged or shipped). DirectoryWeb needs Kits Core, SourceWeb needs Kits Core and DirectoryWeb (`Requires Plugins` headers); every call from DirectoryWeb, SourceWeb, RankWeb and InsightWeb into aw-core is moved or guarded. What still needs aw-core to work (content types, the `j M Y` date filter, claims, issuers, cron health): `docs/awcore-retirement.md` §3.
   - Sourcing and keyword code in Kits Core moves to SourceWeb/InsightWeb: `wp_aw_si_*` tables, `aw_kw_*`, `aw_sources`, `[aw_source_row]`, `aw_fetch_favicons`.
 - **Bigger moves (theme ↔ plugin boundary):**
   - `kit.js` analytics, forms, share and ALTCHA → Kits Core.

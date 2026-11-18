@@ -35,7 +35,7 @@ const AW_VET_TYPES = array( 'veterinary-hospital', 'veterinary-dispensary', 'vet
 
 /** A listing-type slug from a URL or filter: a real type (a Directory tag that is not a service), or "veterinary". */
 function aw_listing_type_ok( $slug ) {
-	return 'veterinary' === $slug || in_array( $slug, aw_listing_type_slugs(), true );
+	return 'veterinary' === $slug || in_array( $slug, directoryweb_listing_type_slugs(), true );
 }
 
 /** The ?tag= values on this request (tag=a,b or tag[]=a&tag[]=b). */
@@ -56,7 +56,7 @@ function aw_request_type() {
 
 /** The services chosen by ?tag=. */
 function aw_request_services() {
-	return array_values( array_intersect( aw_request_tags(), aw_service_slugs() ) );
+	return array_values( array_intersect( aw_request_tags(), directoryweb_service_slugs() ) );
 }
 
 /** What to query for a type slug: the type itself, or every veterinary type. */
@@ -280,7 +280,7 @@ add_filter(
 add_filter(
 	'term_link',
 	function ( $url, $term, $tax ) {
-		if ( 'post_tag' !== $tax || ! is_singular( 'aw_listing' ) || ! in_array( $term->slug, aw_listing_type_slugs(), true ) || ! function_exists( 'aw_item_place' ) ) {
+		if ( 'post_tag' !== $tax || ! is_singular( 'aw_listing' ) || ! in_array( $term->slug, directoryweb_listing_type_slugs(), true ) || ! function_exists( 'aw_item_place' ) ) {
 			return $url;
 		}
 		$place = aw_item_place( get_queried_object_id() );
@@ -319,6 +319,15 @@ function aw_directory_title( $title ) {
 add_filter( 'get_the_archive_title', 'aw_directory_title', 20 );
 
 // The document <title> of these views is set in aw-seo-extras (titles.php), from aw_directory_title().
+
+/**
+ * The Directory's own page (/directory/): Animal Writes Core's hub address while Core is active.
+ *
+ * @return string
+ */
+function directoryweb_hub_url(): string {
+	return function_exists( 'aw_hub_url' ) ? aw_hub_url( 'aw_listing' ) : home_url( '/directory/' );
+}
 
 /**
  * Directory URL helper for themes/menus.
@@ -399,7 +408,7 @@ add_action(
 		$tags = array_values( array_filter( array_map( 'sanitize_title', (array) ( $g['tag'] ?? array() ) ) ) );
 		$type = (string) current( array_filter( $tags, 'aw_listing_type_ok' ) ?: array( '' ) );
 		$more = array_values( array_diff( $tags, array( $type ) ) ); // services
-		$base = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, aw_hub_url( 'aw_listing' ) ) : aw_hub_url( 'aw_listing' ) );
+		$base = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, directoryweb_hub_url() ) : directoryweb_hub_url() );
 		if ( $more ) {
 			$have = (string) wp_parse_url( $base, PHP_URL_QUERY );
 			parse_str( $have, $hq );
@@ -523,7 +532,7 @@ function aw_verified_count() {
 function aw_directory_service_field( $field ) {
 	$cur  = (string) current( aw_request_services() ?: array( '' ) );
 	$opts = '';
-	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_service_slugs(), 'hide_empty' => true ) ) as $t ) {
+	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => directoryweb_service_slugs(), 'hide_empty' => true ) ) as $t ) {
 		if ( (int) $t->count >= 3 ) {
 			$opts .= '<option value="' . esc_attr( $t->slug ) . '"' . selected( $cur, $t->slug, false ) . '>' . esc_html( $t->name . ' (' . number_format_i18n( $t->count ) . ')' ) . '</option>';
 		}
@@ -613,7 +622,7 @@ function aw_directory_filter( $type = '' ) {
 	}
 	// Types that have listings, with counts; the veterinary types are one "Veterinary" choice.
 	$opts = array();
-	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
+	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => directoryweb_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
 		$key             = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
 		$opts[ $key ][0] = 'veterinary' === $key ? 'Veterinary' : $t->name;
 		$opts[ $key ][1] = ( $opts[ $key ][1] ?? 0 ) + (int) $t->count;
@@ -635,12 +644,14 @@ function aw_directory_filter( $type = '' ) {
 	$n_active = count( array_filter( array( $district ? $district : $state, $cur_type, $service && aw_request_services(), $verified, $gov ) ) );
 	$checks   = ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
 		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
-	aw_use_component_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
+	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
+		kits_use_component_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
+	}
 	// Row 1: search and Search. Then the filters: inline rows from 768, a "Filters" bottom sheet on phones (the Kits
 	// sheet, kit.js), applied only with "Apply filters". On phones Filters and Near me share one row under the search
 	// (owner's Directory mobile spec, 14 Nov 2026); Near me there opens the toolbar's Near me (aw.js), and shows only
 	// where that toolbar is on the page. Without JavaScript the filters stay inline at every width.
-	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
+	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( directoryweb_hub_url() ) . '">'
 		. '<div class="aw-dir-row">' . $shared['q']
 		. '<div class="aw-dir-submit"><button type="submit" class="kit-btn kit-btn--ico-search">Search</button></div></div>'
 		. '<div class="aw-dir-actions"><details class="kit-filter-sheet aw-dir-sheet" open><summary class="aw-dir-sheet-open"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span>Filters' . ( $n_active ? ' (' . (int) $n_active . ')' : '' ) . '</summary>'
@@ -651,7 +662,7 @@ function aw_directory_filter( $type = '' ) {
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )
 		. $service . '</div>'
 		. ( $checks ? '<fieldset class="aw-dir-checks"><legend class="screen-reader-text">Show only</legend>' . $checks . '</fieldset>' : '' )
-		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '" data-aw-sheet-reset>Reset</a><button type="submit" class="kit-btn">Apply filters</button></div>'
+		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( directoryweb_hub_url() ) . '" data-aw-sheet-reset>Reset</a><button type="submit" class="kit-btn">Apply filters</button></div>'
 		. '</div></details><button type="button" class="kit-btn kit-btn--secondary kit-btn--ico-map-pin aw-near-proxy" aria-controls="aw-near" hidden>Near me</button></div>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'sheet' ) : '' ) // a sheet before the first paint on phones (no layout shift)
 		. '<input type="hidden" name="aw_filter" value="1">'
 		. '</form>';
@@ -689,7 +700,9 @@ function aw_browse_states() {
 	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['tag'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return ''; // the hub and the home page only
 	}
-	aw_use_component_style( 'aw-single' ); // aw-browse-states
+	if ( function_exists( 'kits_use_component_style' ) ) { // the theme's
+		kits_use_component_style( 'aw-single' ); // aw-browse-states
+	}
 	$items = '';
 	foreach ( aw_place_states() as $st ) {
 		$n = aw_state_count( $st );

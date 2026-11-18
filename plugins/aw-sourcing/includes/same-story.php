@@ -129,7 +129,7 @@ function aw_same_story_retire( $dup, $keep ) {
 function aw_same_story_get( WP_REST_Request $req ) {
 	$id = (int) $req->get_param( 'id' );
 	$p  = get_post( $id );
-	if ( ! $p || ! in_array( $p->post_type, AW_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
+	if ( ! $p || ! in_array( $p->post_type, SOURCEWEB_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
 		return new WP_Error( 'aw_not_found', 'No such story', array( 'status' => 404 ) );
 	}
 	return new WP_REST_Response(
@@ -155,11 +155,11 @@ function aw_same_story_get( WP_REST_Request $req ) {
 function aw_same_story_post( WP_REST_Request $req ) {
 	$keep = (int) $req->get_param( 'keep_id' );
 	$p    = get_post( $keep );
-	if ( ! $p || ! in_array( $p->post_type, AW_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
+	if ( ! $p || ! in_array( $p->post_type, SOURCEWEB_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
 		return new WP_Error( 'aw_not_found', 'No such story', array( 'status' => 404 ) );
 	}
 	$dup = (int) $req->get_param( 'dup_id' );
-	if ( $dup && ( $dup === $keep || ! in_array( get_post_type( $dup ), AW_SAME_STORY_TYPES, true ) ) ) {
+	if ( $dup && ( $dup === $keep || ! in_array( get_post_type( $dup ), SOURCEWEB_SAME_STORY_TYPES, true ) ) ) {
 		return new WP_Error( 'aw_bad_dup', 'Bad duplicate', array( 'status' => 400 ) );
 	}
 	$res = aw_same_story_fold( $keep, (string) $req->get_param( 'source_url' ), (string) $req->get_param( 'publisher' ), (string) $req->get_param( 'added_text' ), (string) $req->get_param( 'model' ), (string) $req->get_param( 'summary' ) );
