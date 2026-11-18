@@ -10,24 +10,24 @@
 ?>
 <!-- wp:kits/hero {"align":"full","layout":{"type":"constrained"}} -->
 <section class="wp-block-kits-hero alignfull"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
-<p class="is-style-kits-label">Label</p>
+<p class="is-style-kits-label"><?php esc_html_e( 'Label', 'kits-by-wugweb' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":1} -->
-<h1 class="wp-block-heading">Heading</h1>
+<h1 class="wp-block-heading"><?php esc_html_e( 'Heading', 'kits-by-wugweb' ); ?></h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">Supporting text.</p>
+<p class="has-large-font-size"><?php esc_html_e( 'Supporting text.', 'kits-by-wugweb' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Primary action</a></div>
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Primary action', 'kits-by-wugweb' ); ?></a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button">Secondary action</a></div>
+<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Secondary action', 'kits-by-wugweb' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></section>
 <!-- /wp:kits/hero -->

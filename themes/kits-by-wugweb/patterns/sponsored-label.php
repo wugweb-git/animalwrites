@@ -8,5 +8,5 @@
  */
 ?>
 <!-- wp:paragraph {"className":"is-style-kits-label kits-sponsored"} -->
-<p class="is-style-kits-label kits-sponsored">Sponsored</p>
+<p class="is-style-kits-label kits-sponsored"><?php esc_html_e( 'Sponsored', 'kits-by-wugweb' ); ?></p>
 <!-- /wp:paragraph -->
