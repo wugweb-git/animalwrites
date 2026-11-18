@@ -41,11 +41,6 @@ foreach ( array( 'KITS_CORE_LOADED' => 'kits-core/kits-core.php', 'DIRECTORYWEB_
 	}
 }
 unset( $sourceweb_const, $sourceweb_main );
-// Animal Writes Core loads InsightWeb's Search Insights whether or not InsightWeb is active (owner, 11 Nov 2026), so
-// while Core is active the keyword table comes from that folder too, as it did from Kits Core before 18 Nov 2026.
-if ( ! defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) && defined( 'AW_CORE_DIR' ) && is_readable( dirname( AW_CORE_DIR ) . '/insightweb/includes/keywords.php' ) ) {
-	require_once dirname( AW_CORE_DIR ) . '/insightweb/includes/keywords.php';
-}
 // The host and publisher helpers first, before the check: Animal Writes Core calls aw_host() and aw_publishers().
 require_once __DIR__ . '/includes/sourcing-basics.php';
 // The issuer label too (no dependency): Animal Writes Core's Library item box and card chips call aw_issuer_short() and aw_issuer_box().

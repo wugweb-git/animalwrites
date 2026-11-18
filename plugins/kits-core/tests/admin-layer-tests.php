@@ -23,7 +23,6 @@ if ( 'cli' !== PHP_SAPI ) {
 }
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'KITS_MENU', 'kits' );
-define( 'AW_CORE_DIR', dirname( __DIR__, 2 ) . '/animal-writes-core/' );
 
 /* ---------- WordPress stand-ins: hooks run, everything else is the plain value ---------- */
 

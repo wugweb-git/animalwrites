@@ -117,13 +117,12 @@ $root = dirname( __DIR__, 2 );
 require $root . '/kits-core/includes/primitives.php';
 require $root . '/kits-core/includes/bindings.php';
 require $root . '/kits-core/includes/taxonomy-rename.php'; // KITS_CAMPAIGN_LINK / KITS_MEDIA_GROUP, which systems.php reads (Kits Core loads it first)
-require $root . '/animal-writes-core/includes/systems.php';
 $site = dirname( $root ) . '/themes/kits-by-wugweb/assets/site/'; // the site layer: the content files moved here from animal-writes-core on 19 Nov 2026
+require $site . 'content/systems.php';
 function kits_site_path( $f ) {
 	return dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $f, '/' );
 }
 require $site . 'content/bindings.php';
-define( 'AW_CORE_DIR', $root . '/animal-writes-core/' );
 require $root . '/kits-core/includes/scf.php';
 require $site . 'content/scf.php';
 do_action( 'init' );

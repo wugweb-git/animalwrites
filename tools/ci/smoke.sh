@@ -18,13 +18,12 @@ wp core install --url=http://127.0.0.1:8080 --title="Animal Writes" --admin_user
 for p in "$REPO"/plugins/*/; do ln -s "$p" "wp-content/plugins/$(basename "$p")"; done
 for t in "$REPO"/themes/*/; do ln -s "$t" "wp-content/themes/$(basename "$t")"; done
 wp rewrite structure '/%postname%/' --quiet
-# Kits by Wugweb alone, as on the live site: Animal Writes Core serves the Animal Writes theme parts (includes/theme-parts*.php).
+# Kits by Wugweb alone, as on the live site: the site's own templates, parts and files are the theme's site layer (assets/site/).
 wp theme activate kits-by-wugweb --quiet
-wp plugin activate animal-writes-core --quiet
-# Kits Core active on its own too, as on the live site (Core also loads it; it must not load twice). DirectoryWeb's
+# Kits Core active, as on the live site. DirectoryWeb's
 # header names it (Requires Plugins: kits-core), so WordPress refuses to activate DirectoryWeb without it.
 wp plugin activate kits-core --quiet
-# DirectoryWeb: Core already loads it from the sibling folder; activating it on its own must not load it twice.
+# DirectoryWeb.
 wp plugin activate directoryweb --quiet
 # Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).
 wp plugin install seo-by-rank-math --version=1.0.280 --activate --quiet
@@ -151,7 +150,8 @@ adm "admin.php?page=kits-options" >/dev/null
 has "Theme Options: the app is the default" /tmp/admin.html 'kits-admin-theme-options-js'
 for l in content-types socials share; do has "Theme Options: $l shows today's fields" /tmp/admin.html "data-kits-legacy=\"$l\""; done
 has "Theme Options → Socials: Contact links" /tmp/admin.html 'name="aw_elsewhere[0][label]"'
-for s in aw-keys aw-modules aw-dates; do admok "$s keeps its address" "admin.php?page=$s"; done
+# aw-keys redirects since the shared Keys screen was retired (19 Nov 2026): each plugin keeps its own keys.
+for s in aw-modules aw-dates; do admok "$s keeps its address" "admin.php?page=$s"; done
 # Kits → Modules: the fields that were WP-CLI only (12 Nov 2026), one Settings API form.
 adm "admin.php?page=aw-modules" >/dev/null
 for f in aw_ff_send_email aw_nl_ff_form_full aw_sample_listing_ids aw_district_helplines aw_issuer_short; do has "Modules: field $f" /tmp/admin.html "name=\"$f\""; done
@@ -222,7 +222,6 @@ administrator kits-options 200 kits kits-options
 administrator kits-settings 200 kits kits-settings
 administrator kits-tools 200 kits kits-tools
 administrator kits-help 200 kits kits-help
-administrator aw-keys 200 kits -
 administrator aw-modules 200 kits -
 administrator aw-seo-plus 200 aw-seo-plus aw-seo-plus
 administrator aw-seo-insights 200 aw-seo-plus aw-seo-insights
@@ -439,9 +438,9 @@ if [ "${UI_RAN:-0}" -ge 5 ]; then echo "ok   $UI_RAN plugin screen files ran (to
 wp user delete rw-sub rw-ed --yes --quiet
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
 
-# Second pass: the Animal Writes theme parts animal-writes-core serves over Kits by Wugweb (includes/theme-parts*.php):
+# Second pass: the Animal Writes theme parts the site layer serves over Kits by Wugweb (assets/site/):
 # from a fresh cache, the same URLs answer 200, with one Animal Writes stylesheet, and the pages are the Animal Writes ones.
-echo "-- Animal Writes theme parts (Kits by Wugweb with animal-writes-core)"
+echo "-- Animal Writes theme parts (Kits by Wugweb with the site layer)"
 LOG_START=$( [ -f /tmp/wp-debug.log ] && wc -l </tmp/wp-debug.log || echo 0 )
 wp cache flush --quiet
 wp transient delete --all --quiet || true

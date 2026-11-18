@@ -31,7 +31,7 @@ if ( defined( 'KITS_CORE_LOADED' ) ) { // these files call Kits Core's functions
  * so they live in the site folder, which the distributed theme leaves out (docs/awcore-retirement.md, section 5).
  */
 if ( defined( 'KITS_CORE_LOADED' ) ) { // these files call Kits Core's functions at load: without Kits Core (deactivated, or not yet active) the site loads without them, and does not fatal
-	foreach ( array( 'content-types', 'category-moves', 'tags', 'meta', 'scf', 'summary-display', 'news-article', 'bindings', 'also-reported', 'display', 'sections', 'hubs', 'hub-blocks', 'term-page', 'faq-data', 'model', 'helpers-public', 'pages', 'block-states', 'related', 'law-links', 'near-opps', 'entity-links' ) as $kits_site_content_file ) {
+	foreach ( array( 'systems', 'content-types', 'category-moves', 'tags', 'meta', 'scf', 'summary-display', 'news-article', 'bindings', 'also-reported', 'display', 'sections', 'hubs', 'hub-blocks', 'term-page', 'faq-data', 'model', 'helpers-public', 'pages', 'block-states', 'related', 'law-links', 'near-opps', 'entity-links' ) as $kits_site_content_file ) {
 		require_once __DIR__ . '/content/' . $kits_site_content_file . '.php';
 	}
 	unset( $kits_site_content_file );
