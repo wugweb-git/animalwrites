@@ -64,14 +64,33 @@
 	document.querySelectorAll('input[type=file][data-aw-upload]').forEach(function (inp) {
 		var box = inp.closest('.ff-el-input--content'), tok = box && box.querySelector('input[type=hidden]'), msg = document.getElementById(inp.id + '-error');
 		if (!tok) return;
-		function fail(t) { inp.removeAttribute('aria-busy'); tok.value = ''; if (msg) msg.textContent = t || inp.dataset.msgFile; inp.value = ''; }
+		function fail(t) { inp.removeAttribute('aria-busy'); tok.value = ''; if (msg) msg.textContent = t || inp.dataset.msgFile; inp.value = ''; kept = []; chosen(); }
+		// The chosen files, with name, size and a Remove button; shown once sent (or while sending).
+		var list = document.createElement('ul'); list.className = 'kit-file-list'; list.setAttribute('aria-live', 'polite');
+		inp.parentNode.insertBefore(list, msg || null);
+		var kept = [];
+		function chosen() {
+			list.textContent = '';
+			kept.forEach(function (f, n) {
+				var li = document.createElement('li'), b = document.createElement('button');
+				li.appendChild(document.createTextNode(f.name + ' (' + (Math.round(f.size / 104857.6) / 10) + ' MB) '));
+				b.type = 'button'; b.className = 'kit-file-remove'; b.textContent = 'Remove'; b.setAttribute('aria-label', 'Remove ' + f.name);
+				b.addEventListener('click', function () { kept.splice(n, 1); inp.value = ''; tok.value = tok.value.split(',').filter(function (t, i) { return i !== n; }).join(','); if (msg) msg.textContent = ''; chosen(); inp.focus(); });
+				li.appendChild(b); list.appendChild(li);
+			});
+		}
 		inp.addEventListener('change', function () {
 			var files = Array.prototype.slice.call(inp.files || []), max = +(inp.dataset.maxFiles || 1);
 			tok.value = '';
+			kept = [];
+			chosen();
 			if (msg) msg.textContent = '';
 			if (!files.length) return;
 			if (files.length > max) { fail(inp.dataset.msgFiles); return; }
-			if (files.some(function (f) { return !/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > +(inp.dataset.maxBytes || Infinity); })) { fail(); return; }
+			var bad = '';
+			files.some(function (f) { bad = window.kitsFileProblem ? window.kitsFileProblem(f, +(inp.dataset.maxBytes || Infinity)) : (/^image\/(png|jpeg|webp)$/.test(f.type) && f.size <= +(inp.dataset.maxBytes || Infinity) ? '' : inp.dataset.msgFile); return bad; });
+			if (bad) { fail(bad); return; }
+			kept = files.slice(); chosen();
 			inp.setAttribute('aria-busy', 'true');
 			var tokens = [];
 			files.reduce(function (p, file) { // one at a time, in order

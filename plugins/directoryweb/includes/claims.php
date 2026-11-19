@@ -37,7 +37,7 @@ const AW_CLAIM_FIELDS = array(
 	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (DIRECTORYWEB_SERVICES); saved as service tags
 );
 
-const AW_CLAIM_LOGO_BYTES = 2 * MB_IN_BYTES;
+const AW_CLAIM_LOGO_BYTES = 8 * MB_IN_BYTES; // owner plan 19 Nov 2026 (B2): was 2 MB; the server still resizes to 800 px
 
 /**
  * The aw_claim post type's primitive capabilities: all DIRECTORYWEB_CAP (manage_directoryweb, directoryweb-caps.php),
@@ -88,15 +88,43 @@ function aw_claim_form( $listing ) {
 	return kits_ff_form( 'claim', array( 'listing' => $listing ) );
 }
 
-/** Is the uploaded logo a PNG, JPG or WebP under 2 MB? */
+/**
+ * Why an uploaded picture is refused, in words the sender can act on; '' when it is fine (a PNG, JPG or WebP up to
+ * AW_CLAIM_LOGO_BYTES). One message per cause: no file, over the server's limit, not finished, too big, wrong type.
+ *
+ * @param array|null $logo The $_FILES entry.
+ * @return string
+ */
+function aw_claim_upload_error( $logo ) {
+	$limit = size_format( AW_CLAIM_LOGO_BYTES, 0 );
+	if ( ! is_array( $logo ) || ! isset( $logo['error'] ) || UPLOAD_ERR_NO_FILE === (int) $logo['error'] ) {
+		return 'No file arrived. Choose it again.';
+	}
+	if ( in_array( (int) $logo['error'], array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) ) {
+		return 'This file is too large for the server. Use a picture under ' . size_format( min( AW_CLAIM_LOGO_BYTES, wp_max_upload_size() ), 0 ) . '.';
+	}
+	if ( UPLOAD_ERR_OK !== (int) $logo['error'] || empty( $logo['tmp_name'] ) || ! is_uploaded_file( $logo['tmp_name'] ) ) {
+		return 'The upload did not finish. Check your connection and try again.';
+	}
+	if ( (int) $logo['size'] > AW_CLAIM_LOGO_BYTES ) {
+		return 'This file is ' . size_format( (int) $logo['size'], 1 ) . '. The limit is ' . $limit . '.';
+	}
+	$ft = wp_check_filetype_and_ext( $logo['tmp_name'], $logo['name'], array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) );
+	if ( empty( $ft['type'] ) ) {
+		$ext = strtolower( pathinfo( (string) $logo['name'], PATHINFO_EXTENSION ) );
+		return in_array( $ext, array( 'heic', 'heif' ), true ) ? 'This is a HEIC file. Use PNG, JPG or WebP.' : 'This file type is not accepted. Use PNG, JPG or WebP.';
+	}
+	return '';
+}
+
+/** Is the uploaded logo a PNG, JPG or WebP within the size limit? */
 function aw_claim_logo_ok( $logo ) {
-	$ok = $logo && UPLOAD_ERR_OK === (int) $logo['error'] && is_uploaded_file( $logo['tmp_name'] );
-	$ft = $ok ? wp_check_filetype_and_ext( $logo['tmp_name'], $logo['name'], array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) ) : array();
-	return $ok && ! empty( $ft['type'] ) && (int) $logo['size'] <= AW_CLAIM_LOGO_BYTES;
+	return '' === aw_claim_upload_error( $logo );
 }
 
 /** A logo as a PNG of at most 800 px in the private folder: its file name, or ''. */
 function aw_claim_logo_store( $tmp, $name = '' ) {
+	wp_raise_memory_limit( 'image' ); // an 8 MB photo needs more than the 40 MB front-end limit to resize
 	$editor = wp_get_image_editor( $tmp );
 	if ( is_wp_error( $editor ) || ! function_exists( 'kits_private_dir' ) ) { // never saved outside the private folder (Kits Core's)
 		return '';

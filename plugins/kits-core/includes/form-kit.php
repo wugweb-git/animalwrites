@@ -33,7 +33,7 @@ function kits_field_dict() {
 		'website'      => array( 'label' => 'Website', 'type' => 'url', 'icon' => 'world', 'placeholder' => 'https://example.org', 'attrs' => array( 'autocomplete' => 'url', 'inputmode' => 'url', 'maxlength' => 200, 'data-rule' => 'url', 'data-msg-url' => 'Enter a web address, like https://example.org' ), 'rules' => array( 'url' ), 'messages' => array( 'url' => 'Enter a web address, like https://example.org' ) ),
 		'reason'       => array( 'label' => 'What\'s this about?', 'type' => 'select', 'required' => true, 'messages' => array( 'required' => 'Choose what this is about' ) ),
 		'message'      => array( 'label' => 'Message', 'type' => 'textarea', 'attrs' => array( 'maxlength' => 3000, 'rows' => 5, 'data-counter' => 2500 ), 'rules' => array( 'max:3000' ), 'messages' => array( 'required' => 'Enter your message' ) ),
-		'logo'         => array( 'label' => 'Logo', 'type' => 'file', 'attrs' => array( 'accept' => 'image/png,image/jpeg,image/webp', 'data-max-bytes' => 2 * MB_IN_BYTES, 'data-msg-file' => 'Use a PNG, JPG or WebP under 2 MB.' ) ),
+		'logo'         => array( 'label' => 'Logo', 'type' => 'file', 'attrs' => array( 'accept' => 'image/png,image/jpeg,image/webp', 'data-max-bytes' => 8 * MB_IN_BYTES, 'data-msg-file' => 'Use a PNG, JPG or WebP.' ) ),
 		'consent'      => array( 'label' => '', 'type' => 'checkbox', 'required' => true, 'messages' => array( 'required' => 'Tick the box to agree' ) ),
 	);
 	return (array) apply_filters( 'kits_field_dict', $d );

@@ -38,6 +38,15 @@
 		el.classList.toggle('is-valid', !text && el.value !== '' && el.type !== 'checkbox');
 		errorEl(el).textContent = text || '';
 	}
+	// Says what is wrong with a picked file (size, type), never one message for every cause.
+	function mb(n) { return (Math.round(n / 104857.6) / 10) + ' MB'; }
+	function fileProblem(f, max) {
+		if (/\.(heic|heif)$/i.test(f.name) || /^image\/hei[cf]/.test(f.type)) return 'This is a HEIC file. Use PNG, JPG or WebP.';
+		if (!/^image\/(png|jpeg|webp)$/.test(f.type)) return 'This file type is not accepted. Use PNG, JPG or WebP.';
+		if (f.size > max) return 'This file is ' + mb(f.size) + '. The limit is ' + Math.round(max / 1048576) + ' MB.';
+		return '';
+	}
+	window.kitsFileProblem = fileProblem;
 	// Rules beyond HTML: 10-digit phones (+91 or a leading 0 allowed), web addresses get https://, files ≤ size.
 	function custom(el) {
 		var d = el.dataset, v = el.value.trim();
@@ -49,8 +58,8 @@
 		}
 		if (d.rule === 'url' && v && !/^https?:\/\//i.test(v)) { el.value = 'https://' + v; }
 		if (el.type === 'file' && el.files && el.files[0]) {
-			var ok = /^image\/(png|jpeg|webp)$/.test(el.files[0].type) && el.files[0].size <= +(d.maxBytes || Infinity);
-			if (!ok) el.setCustomValidity(d.msgFile || 'Use a PNG, JPG or WebP under 2 MB.');
+			var why = fileProblem(el.files[0], +(d.maxBytes || Infinity));
+			if (why) el.setCustomValidity(why);
 		}
 	}
 	function check(el, display) {
@@ -351,12 +360,50 @@
 			}
 			go(cur + 1);
 		});
-		// A form plugin (Fluent Forms) that finds errors on send: show the first step that has one.
+		// A form plugin (Fluent Forms) that finds errors on send: say what is wrong (a list on the last step and on the step
+		// shown), then show the first step that has an error. Each item opens its step and focuses the field.
+		function problems() {
+			var out = [];
+			steps.forEach(function (st, n) {
+				Array.prototype.forEach.call(st.querySelectorAll('.ff-el-group.ff-el-is-error'), function (g) {
+					var l = g.querySelector('.ff-el-input--label label, label'), m = g.querySelector('.error, .kit-field-error');
+					var f = g.querySelector('input:not([type=hidden]), select, textarea') || g.querySelector('input');
+					var label = l ? l.textContent.replace(/\(optional\)/, '').replace(/\*/g, '').trim() : 'A field';
+					out.push({ step: n, label: label, text: m ? m.textContent.trim() : '', field: f });
+				});
+			});
+			return out;
+		}
+		function summary(list) {
+			steps.forEach(function (st) { var old = st.querySelector('.kit-error-summary'); if (old) old.remove(); });
+			if (!list.length) return;
+			var first = list[0].step, last = steps.length - 1, where = {};
+			list.forEach(function (it) { where[it.step] = 1; });
+			var many = Object.keys(where).length > 1;
+			[last, first].filter(function (v, i, a) { return a.indexOf(v) === i; }).forEach(function (n) {
+				var wrap = document.createElement('div'), ul = document.createElement('ul'), head = document.createElement('p');
+				wrap.className = 'kit-error-summary'; wrap.setAttribute('role', 'alert'); wrap.tabIndex = -1;
+				head.className = 'kit-error-summary-title';
+				head.textContent = list.length + (list.length === 1 ? ' thing' : ' things') + ' to fix' + (many ? ':' : ' in step ' + (first + 1) + ':');
+				list.forEach(function (it) {
+					var li = document.createElement('li'), a = document.createElement('a');
+					a.href = '#'; a.textContent = (many ? 'Step ' + (it.step + 1) + ': ' : '') + it.label + (it.text ? ' (' + it.text.replace(/\.$/, '') + ')' : '');
+					a.addEventListener('click', function (e) { e.preventDefault(); if (it.step !== cur) go(it.step); if (it.field) { var d = it.field.closest('details'); if (d) d.open = true; it.field.focus(); } });
+					li.appendChild(a); ul.appendChild(li);
+				});
+				wrap.appendChild(head); wrap.appendChild(ul);
+				var lg = steps[n].querySelector('legend');
+				steps[n].insertBefore(wrap, lg ? lg.nextSibling : steps[n].firstChild);
+			});
+		}
 		if (window.jQuery) jQuery(box.closest('form')).on('fluentform_validation_failed fluentform_submission_failed', function () {
 			setTimeout(function () {
-				var i = steps.findIndex(function (s) { return s.querySelector('.ff-el-is-error, [aria-invalid=true]'); });
+				var list = problems(), i = steps.findIndex(function (s) { return s.querySelector('.ff-el-is-error, [aria-invalid=true]'); });
 				box.querySelectorAll('details').forEach(function (d) { if (d.querySelector('.ff-el-is-error, [aria-invalid=true]')) d.open = true; });
+				summary(list);
 				if (i > -1 && i !== cur) go(i);
+				var sm = steps[i > -1 ? i : cur].querySelector('.kit-error-summary');
+				if (sm) sm.focus();
 			}, 0);
 		});
 	});

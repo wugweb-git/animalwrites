@@ -82,13 +82,24 @@ function aw_claim_service_slugs( $lid ) {
 	return $slugs;
 }
 
+/**
+ * Stored or rendered text as plain text for a form box: tags gone (a date chip keeps its words, "Dec 2023"), entities decoded.
+ *
+ * @param string $text Text that may hold markup (an excerpt can hold the rendered date chips).
+ * @return string
+ */
+function aw_claim_plain( $text ) {
+	$text = wp_strip_all_tags( (string) $text );
+	return trim( html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+}
+
 /** The listing's About text as the form shows it: its body, or its short bio when the body is empty. */
 function aw_claim_about( $lid ) {
 	$raw  = (string) get_post_field( 'post_content', $lid );
-	$body = trim( wp_strip_all_tags( $raw ) );
+	$body = aw_claim_plain( $raw );
 	// As the listing page shows it (aw_block_listing_about): the short bio when the body is empty or an import's template intro.
 	$bio = has_excerpt( $lid ) && ( '' === $body || ( function_exists( 'aw_listing_is_template_intro' ) && aw_listing_is_template_intro( trim( $raw ) ) ) );
-	return $bio ? trim( (string) get_post_field( 'post_excerpt', $lid ) ) : $body;
+	return $bio ? aw_claim_plain( (string) get_post_field( 'post_excerpt', $lid ) ) : $body;
 }
 
 /**
@@ -115,7 +126,7 @@ function aw_claim_now( $lid, $key, $public = true ) {
 		case 'about':
 			return aw_claim_about( $lid );
 		default:
-			return trim( (string) get_post_meta( $lid, $def[1], true ) );
+			return aw_claim_plain( get_post_meta( $lid, $def[1], true ) ); // text, never markup, in every pre-filled box
 	}
 }
 
@@ -611,6 +622,7 @@ function aw_claim_apply_field( $c, $key ) {
 			update_post_meta( $lid, 'aw_services_on', wp_date( 'Y-m-d' ) );
 			return true;
 		case 'about':
+			$new = aw_claim_plain( $new ); // tags in a proposed About never reach the listing
 			$log( 'about', $new );
 			wp_update_post( array( 'ID' => $lid, 'post_content' => wpautop( sanitize_textarea_field( $new ) ) ) );
 			return true;
