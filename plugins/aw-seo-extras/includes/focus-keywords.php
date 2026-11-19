@@ -12,6 +12,8 @@
  *        A keyphrase another published page already has (its focus keyphrase, or the owner of the keyword record in
  *        Search Insights) is refused, and a News item never takes one an evergreen page owns (keyphrase-model.php).
  *        An item with clear: true takes its `keyword` off the item instead (the item's other keyphrases stay).
+ *        Press coverage (aw_press) has no Rank Math box, so an administrator can write and clear its keyphrase here:
+ *        an empty `keyword` on a press item clears the whole field (the old value goes to _aw_focus_history).
  *        With dry: true, nothing is written and `written` counts what would be.
  *        {written, skipped: [{id, why, owner?}], dry}
  *
@@ -235,11 +237,31 @@ add_action(
 					foreach ( array_slice( (array) $req->get_param( 'items' ), 0, 200 ) as $it ) {
 						$id   = absint( $it['id'] ?? 0 );
 						$post = $id ? get_post( $id ) : null;
-						if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, AW_SEO_ITEM_TYPES, true ) ) {
+						$is_press = $post && 'aw_press' === $post->post_type; // no Rank Math box: this route is the only way to edit it
+						if ( $is_press && ! current_user_can( 'manage_options' ) ) {
+							$skipped[] = array( 'id' => $id, 'why' => 'press items: administrators only' );
+							continue;
+						}
+						if ( ! $post || ! ( $is_press ? in_array( $post->post_status, array( 'publish', 'private', 'draft', 'pending', 'future' ), true ) : ( 'publish' === $post->post_status && in_array( $post->post_type, AW_SEO_ITEM_TYPES, true ) ) ) ) {
 							$skipped[] = array( 'id' => $id, 'why' => 'not a published item' );
 							continue;
 						}
 						$have = trim( (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) );
+						if ( $is_press && empty( $it['clear'] ) && '' === trim( (string) ( $it['keyword'] ?? '' ) ) ) {
+							// An empty keyword on a press item means clear the field.
+							if ( '' === $have ) {
+								$skipped[] = array( 'id' => $id, 'why' => 'keyword not set on the item' );
+								continue;
+							}
+							if ( ! $dry ) {
+								$hist   = (array) get_post_meta( $id, '_aw_focus_history', true );
+								$hist[] = array( 'keyword' => $have, 'replaced' => gmdate( 'c' ) );
+								update_post_meta( $id, '_aw_focus_history', $hist );
+								delete_post_meta( $id, 'rank_math_focus_keyword' );
+							}
+							++$written;
+							continue;
+						}
 						if ( ! empty( $it['clear'] ) ) {
 							// Take one keyphrase off the item, the others stay: press items have no Rank Math box and
 							// Rank Math's REST refuses them (owner, 10 Nov 2026).
