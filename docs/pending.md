@@ -11,6 +11,22 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Kits by Wugweb & Kits Core: Full Ecosystem Audit & Architectural Improvement (build, 20 Nov 2026; branch `kits-audit-improvement`, PR ready)
+- **Comprehensive Product Audit & Deliverables:** Complete architecture mapping, admin screen & settings inventory, UX/UI severity audit (UI-01 through UI-07), Theme vs Core responsibility matrix, Defaults vs Customization model, and Precedence hierarchy documented in artifact `kits-audit-architecture-deliverables.md`.
+- **Admin Information Architecture & Layouts:**
+  - `kits_frame_card()` enhanced with `$opts` (`class`, `badge`, `hide_header`) for responsive layouts.
+  - New Admin Shell CSS layout utilities in `src/shell/more.css` and `build/shell/index.css`: `.kits-layout-split`, `.kits-editor-grid`, `.kits-editor-tile`, `.kits-status-card`, `.kits-badge`, `.kits-reg-toolbar`, `.kits-drawer`.
+- **Home Screen Modernization:** Transformed `kits_home_theme()` into an executive Site Editor Hub featuring a 2-column split layout: Left 2/3 with interactive tiles for Site Editor destinations (Styles, Navigation, Templates, Parts, Patterns) and clear guidance on FSE vs companion plugin ownership; Right 1/3 with system and runtime environment status.
+- **Design System Registry & Help Screen Modernization:**
+  - Completely eliminated the 172 unpaginated pre-rendered iframes from the DOM table in `system-screen.php`, dramatically improving page load and memory efficiency.
+  - Implemented an accessible slide-over Drawer (`#kits-inspector`) that loads component visuals and iframe previews strictly on demand when "Inspect" is clicked.
+  - Added instant client-side search across all 172 components, classes, blocks, tokens, and files with real-time counter updates.
+  - Added category filter chips (All, Component, Block, Primitive, Pattern, Utility, Layout, Tool).
+  - Streamlined the registry table to 5 constrained, balanced columns with one-click code copy and contrast status badges.
+- **Theme Defaults & User Customization Model:**
+  - Declared explicit `settings.custom.kits.card` and `layout` default tokens in `themes/kits-by-wugweb/theme.json` to formalize theme defaults and bridge CSS variable fallbacks with Site Editor Global Styles.
+- **Validation:** 74/74 PHP admin menu checks passed, all shell-parts checks passed, registry check passed, contrast check passed (87 pairs), theme rules check passed, CSS min check passed.
+
 ### C2: press focus keyphrase, write and clear through `aw/v1/seo-focus` (build, 19 Nov 2026; PR open, owner merges)
 - `seo-focus` now accepts `aw_press` for an administrator (`manage_options`; the workers' user is refused on press) whatever the Item types setting says, in any status except trash, and an empty `keyword` on a press item clears the field (`clear: true` still works; the old value goes to `_aw_focus_history`). Other types behave as before. No new UI.
 - **After the deploy (owner/administrator):** (1) `POST /wp-json/aw/v1/seo-focus` with `{"items":[{"id":21230,"keyword":""}]}` (add `"dry":true` first; expect `written: 1`), then check `rank_math_focus_keyword` on 21230 is empty. (2) Run the InsightWeb update and confirm Conflicts drops ("lab animal rules" then has one owner, 13856). (3) Read-only check that 14205 and 14206 still have an empty `rank_math_focus_keyword` (cleared 3 Nov; not verified from the build session, which has no live login).

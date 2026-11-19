@@ -208,9 +208,22 @@ function kits_frame_close(): void {
  * @param string   $id     Anchor (the current screen's section id, so older #links still land).
  * @param string   $title  Heading.
  * @param callable $render Prints the content.
+ * @param array    $opts   Optional card options: 'class' (extra CSS classes), 'badge' (badge string), 'hide_header' (bool).
  */
-function kits_frame_card( string $id, string $title, callable $render ): void {
-	echo '<section class="kits-shell-card" id="' . esc_attr( $id ) . '"><div class="kits-shell-card__head"><div><h2 class="kits-shell-card__title">' . esc_html( $title ) . '</h2></div></div>';
+function kits_frame_card( string $id, string $title, callable $render, array $opts = array() ): void {
+	$classes = array( 'kits-shell-card' );
+	if ( ! empty( $opts['class'] ) ) {
+		$classes[] = sanitize_html_class( $opts['class'] );
+	}
+	$card_class = implode( ' ', $classes );
+	echo '<section class="' . esc_attr( $card_class ) . '" id="' . esc_attr( $id ) . '">';
+	if ( empty( $opts['hide_header'] ) ) {
+		echo '<div class="kits-shell-card__head"><div><h2 class="kits-shell-card__title">' . esc_html( $title ) . '</h2></div>';
+		if ( ! empty( $opts['badge'] ) ) {
+			echo '<div class="kits-shell-card__badge"><span class="kits-badge">' . esc_html( $opts['badge'] ) . '</span></div>';
+		}
+		echo '</div>';
+	}
 	echo '<div class="kits-shell-card__body kits-shell-prose">';
 	call_user_func( $render );
 	echo '</div></section>';

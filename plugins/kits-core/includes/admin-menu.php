@@ -267,11 +267,41 @@ function kits_home_page() {
 
 /** Kits → Home → Edit the theme: the Site Editor screens that hold the theme's settings. */
 function kits_home_theme(): void {
-	echo '<p>' . esc_html( 'The theme is edited in the Site Editor. Each link opens the place that holds that part.' ) . '</p><ul>';
+	$theme  = wp_get_theme();
+	$parent = $theme->parent();
+	echo '<div class="kits-layout-split">';
+	echo '<div class="kits-layout-main">';
+	echo '<p class="kits-hero-copy"><strong>' . esc_html( 'Kits by Wugweb' ) . '</strong> ' . esc_html( 'is a Full Site Editing block theme. Page layouts, typography, colours, and templates are styled natively in the Site Editor below. Kits Theme Options and companion plugins configure dynamic features, custom post types, and site-wide component defaults.' ) . '</p>';
+	echo '<div class="kits-editor-grid">';
 	foreach ( kits_theme_screens() as $s ) {
-		echo '<li>' . kits_link( $s[0], $s[1] ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_link() escapes.
+		$desc = ! empty( $s[2] ) ? $s[2] : 'Edit in Site Editor';
+		echo '<div class="kits-editor-tile">';
+		echo '<div class="kits-editor-tile__body">';
+		echo '<h3 class="kits-editor-tile__title">' . esc_html( $s[0] ) . '</h3>';
+		echo '<p class="kits-editor-tile__desc">' . esc_html( $desc ) . '</p>';
+		echo '</div>';
+		echo '<div class="kits-editor-tile__foot">';
+		echo '<a href="' . esc_url( admin_url( $s[1] ) ) . '" class="button button-secondary kits-editor-tile__btn">' . esc_html( 'Open in Site Editor →' ) . '</a>';
+		echo '</div>';
+		echo '</div>';
 	}
-	echo '</ul>';
+	echo '</div></div>';
+
+	echo '<aside class="kits-layout-side">';
+	echo '<div class="kits-status-card">';
+	echo '<h3 class="kits-status-card__title">' . esc_html( 'Environment' ) . '</h3>';
+	echo '<dl class="kits-status-card__list">';
+	echo '<div class="kits-status-card__item"><dt>' . esc_html( 'Active Theme' ) . '</dt><dd><strong>' . esc_html( $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) ) . '</strong>' . ( $parent ? '<br><small>' . esc_html( 'Child of ' . $parent->get( 'Name' ) . ' ' . $parent->get( 'Version' ) ) . '</small>' : '' ) . '</dd></div>';
+	echo '<div class="kits-status-card__item"><dt>' . esc_html( 'Kits Core' ) . '</dt><dd><code>' . esc_html( defined( 'KITS_CORE_VERSION' ) ? KITS_CORE_VERSION : 'Loaded' ) . '</code></dd></div>';
+	echo '<div class="kits-status-card__item"><dt>' . esc_html( 'WordPress / PHP' ) . '</dt><dd>' . esc_html( get_bloginfo( 'version' ) ) . ' / ' . esc_html( PHP_VERSION ) . '</dd></div>';
+	echo '</dl>';
+	echo '<div class="kits-status-card__actions">';
+	echo '<a href="' . esc_url( admin_url( 'admin.php?page=kits-help#design-system' ) ) . '" class="button button-secondary">' . esc_html( 'Design System' ) . '</a> ';
+	echo '<a href="' . esc_url( admin_url( 'admin.php?page=kits-tools' ) ) . '" class="button button-secondary">' . esc_html( 'Tools & Export' ) . '</a>';
+	echo '</div>';
+	echo '</div>';
+	echo '</aside>';
+	echo '</div>';
 }
 
 /** Kits → Settings. */
