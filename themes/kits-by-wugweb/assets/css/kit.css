@@ -192,8 +192,8 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 .kit-file-remove { background: none; border: 0; padding: var(--kit-space-2); min-height: 44px; color: var(--kit-color-danger); font: inherit; text-decoration: underline; cursor: pointer; }
 .kit-error-summary { border: 1px solid var(--kit-color-danger); border-radius: var(--kit-radius-md, 8px); padding: var(--kit-space-3) var(--kit-space-4); margin: 0 0 var(--kit-space-4); }
 .kit-error-summary-title { margin: 0 0 var(--kit-space-2); font-weight: var(--kit-weight-strong); color: var(--kit-color-danger); }
-.kit-error-summary ul { margin: 0; padding-left: var(--kit-space-5); }
-.kit-error-summary a { display: inline-block; padding: var(--kit-space-1) 0; min-height: 24px; }
+.kit-error-summary ul { list-style: none; margin: 0; padding: 0; }
+.kit-error-summary a { display: flex; align-items: center; min-height: 44px; padding: var(--kit-space-2) 0; }
 .kit-field-hint { display: block; color: var(--kit-color-muted); font-size: var(--kit-type-sm); margin: calc(-1 * var(--kit-space-1)) 0 var(--kit-space-2); }
 .kit-optional { font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
 .kit-form fieldset > legend { font-family: var(--kit-font-display); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-h4); margin-bottom: var(--kit-space-3); }
