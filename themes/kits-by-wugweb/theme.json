@@ -356,6 +356,16 @@
 				"md": "1.5",
 				"lg": "1.55",
 				"heading": "1.15"
+			},
+			"kits": {
+				"card": {
+					"padding": "var(--wp--preset--spacing--40)",
+					"gap": "var(--wp--preset--spacing--30)"
+				},
+				"layout": {
+					"content": "720px",
+					"wide": "1200px"
+				}
 			}
 		}
 	},
