@@ -247,7 +247,7 @@ function mailweb_fcrm_claim_note( $c, $entry, $data, $form, $ref ) {
 	$rows = array(
 		'Reference'            => $ref,
 		'Listing'              => $lid ? get_the_title( $lid ) . ' (' . $lid . ')' : '',
-		'Role'                 => defined( 'AW_CLAIM_ROLES' ) ? ( AW_CLAIM_ROLES[ (string) ( $data['role'] ?? '' ) ] ?? (string) ( $data['role'] ?? '' ) ) : (string) ( $data['role'] ?? '' ),
+		'Role'                 => defined( 'DW_CLAIM_ROLES' ) ? ( DW_CLAIM_ROLES[ (string) ( $data['role'] ?? '' ) ] ?? (string) ( $data['role'] ?? '' ) ) : (string) ( $data['role'] ?? '' ),
 		'Phone'                => (string) ( $data['phone'] ?? '' ),
 		'WhatsApp'             => (string) ( $data['whatsapp'] ?? '' ),
 		'OK on WhatsApp'       => '' !== (string) ( $data['whatsapp'] ?? '' ) ? ( kits_ff_ticked( $data, 'wa_optin' ) ? '1 (yes)' : '0 (no)' ) : '',

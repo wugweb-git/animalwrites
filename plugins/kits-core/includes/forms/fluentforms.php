@@ -717,7 +717,7 @@ function kits_ff_upload() {
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
 	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked in aw_claim_logo_ok()
-	$why = directoryweb_claim_upload_error( $logo );
+	$why = dw_claim_upload_error( $logo );
 	if ( '' !== $why ) {
 		wp_send_json_error( $why );
 	}

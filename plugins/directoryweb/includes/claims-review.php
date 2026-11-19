@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The claim form's listing fields: form key => label, where it lives (meta key, or phones | hours | services | about),
  * the enrichment field it is logged as, and whether it is public (pre-filled) or kept for the team only.
  */
-const AW_CLAIM_L = array(
+const DW_CLAIM_L = array(
 	'l_email'      => array( 'Listing email', 'aw_email', 'email', true ),
 	'phones'       => array( 'Phone numbers', 'phones', 'phone', true ),
 	'l_area'       => array( 'Area or landmark', 'aw_area', 'area', true ),
@@ -88,7 +88,7 @@ function aw_claim_service_slugs( $lid ) {
  * @param string $text Text that may hold markup (an excerpt can hold the rendered date chips).
  * @return string
  */
-function directoryweb_claim_plain( $text ) {
+function dw_claim_plain( $text ) {
 	$text = wp_strip_all_tags( (string) $text );
 	$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	return trim( wp_strip_all_tags( $text ) ); // again: markup that was stored entity-encoded is tags only after the decode
@@ -97,10 +97,10 @@ function directoryweb_claim_plain( $text ) {
 /** The listing's About text as the form shows it: its body, or its short bio when the body is empty. */
 function aw_claim_about( $lid ) {
 	$raw  = (string) get_post_field( 'post_content', $lid );
-	$body = directoryweb_claim_plain( $raw );
+	$body = dw_claim_plain( $raw );
 	// As the listing page shows it (aw_block_listing_about): the short bio when the body is empty or an import's template intro.
 	$bio = has_excerpt( $lid ) && ( '' === $body || ( function_exists( 'aw_listing_is_template_intro' ) && aw_listing_is_template_intro( trim( $raw ) ) ) );
-	return $bio ? directoryweb_claim_plain( (string) get_post_field( 'post_excerpt', $lid ) ) : $body;
+	return $bio ? dw_claim_plain( (string) get_post_field( 'post_excerpt', $lid ) ) : $body;
 }
 
 /**
@@ -108,12 +108,12 @@ function aw_claim_about( $lid ) {
  * slugs joined with a comma).
  *
  * @param int    $lid    Listing ID.
- * @param string $key    AW_CLAIM_L key.
+ * @param string $key    DW_CLAIM_L key.
  * @param bool   $public True: '' for fields kept for the team only (the form is a public page).
  * @return string
  */
 function aw_claim_now( $lid, $key, $public = true ) {
-	$def = AW_CLAIM_L[ $key ] ?? null;
+	$def = DW_CLAIM_L[ $key ] ?? null;
 	if ( ! $def || ( $public && ! $def[3] ) ) {
 		return '';
 	}
@@ -127,7 +127,7 @@ function aw_claim_now( $lid, $key, $public = true ) {
 		case 'about':
 			return aw_claim_about( $lid );
 		default:
-			return directoryweb_claim_plain( get_post_meta( $lid, $def[1], true ) ); // text, never markup, in every pre-filled box
+			return dw_claim_plain( get_post_meta( $lid, $def[1], true ) ); // text, never markup, in every pre-filled box
 	}
 }
 
@@ -167,7 +167,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 				$data['attributes']['value'] = aw_claim_service_slugs( $lid );
 				return $data;
 			}
-			if ( isset( AW_CLAIM_L[ $field ] ) ) {
+			if ( isset( DW_CLAIM_L[ $field ] ) ) {
 				$now = aw_claim_now( $lid, $field, true );
 				if ( isset( KITS_FF_SOCIAL[ $field ] ) && '' !== kits_ff_social_user( $field, $now ) ) {
 					$now = kits_ff_social_user( $field, $now ); // the username after the link shown in front of the box
@@ -186,7 +186,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 /* ---------- A claim entry, read ---------- */
 
 /**
- * One claim entry: its data, what it proposes for the listing (AW_CLAIM_L keys => text), the person, uploads, status.
+ * One claim entry: its data, what it proposes for the listing (DW_CLAIM_L keys => text), the person, uploads, status.
  * Entries from the earlier form (aw_phone, aw_whatsapp, aw_email, aw_website, aw_area, aw_services) are read too.
  *
  * @param int $entry_id Fluent Forms entry ID.
@@ -227,7 +227,7 @@ function aw_claim_entry( $entry_id ) {
 			$propose['phones'] = implode( "\n", array_map( fn( $r ) => $r['number'] . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), $rows ) );
 		}
 	} else {
-		foreach ( AW_CLAIM_L as $key => $def ) {
+		foreach ( DW_CLAIM_L as $key => $def ) {
 			if ( 'phones' === $key ) {
 				$lines = array();
 				for ( $i = 1; $i <= 3; $i++ ) {
@@ -263,7 +263,7 @@ function aw_claim_entry( $entry_id ) {
 		'sent'    => (string) $row['created_at'],
 		'listing' => $lid,
 		'name'    => $s( 'name' ),
-		'role'    => AW_CLAIM_ROLES[ $s( 'role' ) ] ?? $s( 'role' ),
+		'role'    => DW_CLAIM_ROLES[ $s( 'role' ) ] ?? $s( 'role' ),
 		'email'   => $s( 'email' ),
 		'phone'   => $s( 'phone' ),
 		'show'    => 'yes' === $s( 'show_on_listing' ),
@@ -295,9 +295,9 @@ function aw_claim_changes( $c ) {
 			$now = kits_ff_social_user( $key, $now ); // the link and its username are the same thing
 			$new = kits_ff_social_user( $key, $new );
 		}
-		$loose = 'l_email' === $key || 0 === strpos( AW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', AW_CLAIM_L[ $key ][1] );
+		$loose = 'l_email' === $key || 0 === strpos( DW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', DW_CLAIM_L[ $key ][1] );
 		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
-			$out[ $key ] = array( AW_CLAIM_L[ $key ][0], $now, $new );
+			$out[ $key ] = array( DW_CLAIM_L[ $key ][0], $now, $new );
 		}
 	}
 	return $out;
@@ -306,7 +306,7 @@ function aw_claim_changes( $c ) {
 /* ---------- Fluent Forms → Claims (with the other form entries) ---------- */
 
 /** The Claims screen's address (registered under Directory, so every old link keeps working). */
-const AW_CLAIMS_LINK = 'edit.php?post_type=aw_listing&page=aw-claims';
+const DW_CLAIMS_LINK = 'edit.php?post_type=aw_listing&page=aw-claims';
 
 add_action(
 	'admin_menu',
@@ -345,7 +345,7 @@ add_action(
 				break;
 			}
 		}
-		array_splice( $items, $at, 0, array( array( 'Claims', DIRECTORYWEB_CAP, AW_CLAIMS_LINK, 'Claims' ) ) );
+		array_splice( $items, $at, 0, array( array( 'Claims', DIRECTORYWEB_CAP, DW_CLAIMS_LINK, 'Claims' ) ) );
 		$submenu['fluent_forms'] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one item added to Fluent Forms' menu.
 	},
 	999
@@ -363,7 +363,7 @@ add_filter(
 	'submenu_file',
 	function ( $file ) {
 		global $plugin_page;
-		return 'aw-claims' === $plugin_page && aw_claims_in_forms() ? AW_CLAIMS_LINK : $file;
+		return 'aw-claims' === $plugin_page && aw_claims_in_forms() ? DW_CLAIMS_LINK : $file;
 	},
 	PHP_INT_MAX - 1
 );
@@ -554,7 +554,7 @@ function aw_claim_sideload( $file, $lid, $title ) {
  * Write one approved field to the listing, logged first in the enrichment change log (with what was there, for Undo).
  *
  * @param array  $c   aw_claim_entry().
- * @param string $key AW_CLAIM_L key, logo or photos.
+ * @param string $key DW_CLAIM_L key, logo or photos.
  * @return bool
  */
 function aw_claim_apply_field( $c, $key ) {
@@ -594,7 +594,7 @@ function aw_claim_apply_field( $c, $key ) {
 		$log( 'photos', 'claim upload', $old );
 		return true;
 	}
-	$def = AW_CLAIM_L[ $key ] ?? null;
+	$def = DW_CLAIM_L[ $key ] ?? null;
 	if ( ! $def || 'l_hours' === $key || ! array_key_exists( $key, $c['propose'] ) ) {
 		return false;
 	}
@@ -623,7 +623,7 @@ function aw_claim_apply_field( $c, $key ) {
 			update_post_meta( $lid, 'aw_services_on', wp_date( 'Y-m-d' ) );
 			return true;
 		case 'about':
-			$new = directoryweb_claim_plain( $new ); // tags in a proposed About never reach the listing
+			$new = dw_claim_plain( $new ); // tags in a proposed About never reach the listing
 			$log( 'about', $new );
 			wp_update_post( array( 'ID' => $lid, 'post_content' => wpautop( sanitize_textarea_field( $new ) ) ) );
 			return true;

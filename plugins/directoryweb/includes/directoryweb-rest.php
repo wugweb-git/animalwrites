@@ -553,7 +553,7 @@ function directoryweb_claim_row( array $r ): array {
 /**
  * Label of a claim field.
  *
- * @param string $key AW_CLAIM_L key, logo or photos.
+ * @param string $key DW_CLAIM_L key, logo or photos.
  */
 function directoryweb_field_label( string $key ): string {
 	if ( 'logo' === $key ) {
@@ -562,7 +562,7 @@ function directoryweb_field_label( string $key ): string {
 	if ( 'photos' === $key ) {
 		return __( 'Photos (added before the current ones, 6 at most)', 'directoryweb' );
 	}
-	return defined( 'AW_CLAIM_L' ) && isset( AW_CLAIM_L[ $key ] ) ? (string) AW_CLAIM_L[ $key ][0] : $key;
+	return defined( 'DW_CLAIM_L' ) && isset( DW_CLAIM_L[ $key ] ) ? (string) DW_CLAIM_L[ $key ][0] : $key;
 }
 
 /**
@@ -573,7 +573,7 @@ function directoryweb_field_label( string $key ): string {
  * @return array|null [ 'id', 'status' ].
  */
 function directoryweb_claim_log_row( array $c, string $key ): ?array {
-	if ( ! function_exists( 'aw_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! defined( 'AW_CLAIM_L' ) ) {
+	if ( ! function_exists( 'aw_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! defined( 'DW_CLAIM_L' ) ) {
 		return null;
 	}
 	global $wpdb;
@@ -583,7 +583,7 @@ function directoryweb_claim_log_row( array $c, string $key ): ?array {
 			aw_enrich_table(),
 			(int) $c['listing'],
 			'claim-' . (int) $c['id'],
-			directoryweb_enrich_field( $key, AW_CLAIM_L )
+			directoryweb_enrich_field( $key, DW_CLAIM_L )
 		),
 		ARRAY_A
 	);
@@ -897,7 +897,7 @@ function directoryweb_settings_payload(): array {
 	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		$types[] = function_exists( 'aw_listing_type_name' ) && '' !== aw_listing_type_name( $slug ) ? aw_listing_type_name( $slug ) : $slug;
 	}
-	$roles  = defined( 'AW_CLAIM_ROLES' ) ? array_values( array_filter( AW_CLAIM_ROLES, fn( $k ) => '' !== $k, ARRAY_FILTER_USE_KEY ) ) : array();
+	$roles  = defined( 'DW_CLAIM_ROLES' ) ? array_values( array_filter( DW_CLAIM_ROLES, fn( $k ) => '' !== $k, ARRAY_FILTER_USE_KEY ) ) : array();
 	$where  = fn( string $cmd ) => sprintf(
 		/* translators: %s: a WP-CLI command. */
 		__( 'Set with %s', 'directoryweb' ),

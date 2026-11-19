@@ -103,8 +103,8 @@ function directoryweb_phones_bad( string $lines, callable $phone_ok ): bool {
 /**
  * The change-log field a claim field is logged as (aw_claim_apply_field()).
  *
- * @param string $key    AW_CLAIM_L key, logo or photos.
- * @param array  $fields AW_CLAIM_L.
+ * @param string $key    DW_CLAIM_L key, logo or photos.
+ * @param array  $fields DW_CLAIM_L.
  */
 function directoryweb_enrich_field( string $key, array $fields ): string {
 	if ( 'logo' === $key || 'photos' === $key ) {

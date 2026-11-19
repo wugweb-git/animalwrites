@@ -385,7 +385,7 @@ function directoryweb_claim_light_rows_read(): array {
 				'sent'    => (string) $r['created_at'],
 				'listing' => $lid,
 				'name'    => $s( 'name' ),
-				'role'    => defined( 'AW_CLAIM_ROLES' ) ? ( AW_CLAIM_ROLES[ $role ] ?? $role ) : $role,
+				'role'    => defined( 'DW_CLAIM_ROLES' ) ? ( DW_CLAIM_ROLES[ $role ] ?? $role ) : $role,
 				'email'   => $s( 'email' ),
 				'phone'   => $s( 'phone' ),
 				'has'     => array(
@@ -419,7 +419,7 @@ function directoryweb_claim_light_rows_read(): array {
 				'sent'    => (string) get_post_field( 'post_date', $id ),
 				'listing' => (int) get_post_meta( $id, 'aw_c_listing', true ),
 				'name'    => (string) get_post_meta( $id, 'aw_c_name', true ),
-				'role'    => defined( 'AW_CLAIM_ROLES' ) ? ( AW_CLAIM_ROLES[ $role ] ?? $role ) : $role,
+				'role'    => defined( 'DW_CLAIM_ROLES' ) ? ( DW_CLAIM_ROLES[ $role ] ?? $role ) : $role,
 				'email'   => (string) get_post_meta( $id, 'aw_c_email', true ),
 				'phone'   => (string) get_post_meta( $id, 'aw_c_phone', true ),
 				'has'     => array(
