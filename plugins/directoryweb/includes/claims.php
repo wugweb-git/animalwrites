@@ -95,7 +95,7 @@ function aw_claim_form( $listing ) {
  * @param array|null $logo The $_FILES entry.
  * @return string
  */
-function aw_claim_upload_error( $logo ) {
+function directoryweb_claim_upload_error( $logo ) {
 	$limit = size_format( AW_CLAIM_LOGO_BYTES, 0 );
 	if ( ! is_array( $logo ) || ! isset( $logo['error'] ) || UPLOAD_ERR_NO_FILE === (int) $logo['error'] ) {
 		return 'No file arrived. Choose it again.';
@@ -119,7 +119,7 @@ function aw_claim_upload_error( $logo ) {
 
 /** Is the uploaded logo a PNG, JPG or WebP within the size limit? */
 function aw_claim_logo_ok( $logo ) {
-	return '' === aw_claim_upload_error( $logo );
+	return '' === directoryweb_claim_upload_error( $logo );
 }
 
 /** A logo as a PNG of at most 800 px in the private folder: its file name, or ''. */

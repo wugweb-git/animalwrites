@@ -365,7 +365,9 @@
 		function problems() {
 			var out = [];
 			steps.forEach(function (st, n) {
-				Array.prototype.forEach.call(st.querySelectorAll('.ff-el-group.ff-el-is-error'), function (g) {
+				var groups = [];
+				Array.prototype.forEach.call(st.querySelectorAll('.ff-el-group.ff-el-is-error, [aria-invalid=true]'), function (e) { var g = e.classList.contains('ff-el-group') ? e : e.closest('.ff-el-group'); if (g && groups.indexOf(g) < 0) groups.push(g); });
+				groups.forEach(function (g) {
 					var l = g.querySelector('.ff-el-input--label label, label'), m = g.querySelector('.error, .kit-field-error');
 					var f = g.querySelector('input:not([type=hidden]), select, textarea') || g.querySelector('input');
 					var label = l ? l.textContent.replace(/\(optional\)/, '').replace(/\*/g, '').trim() : 'A field';
@@ -396,6 +398,8 @@
 				steps[n].insertBefore(wrap, lg ? lg.nextSibling : steps[n].firstChild);
 			});
 		}
+		// A fixed field no longer needs the list: it goes as soon as anything in the form changes.
+		['input', 'change'].forEach(function (ev) { box.closest('form').addEventListener(ev, function () { summary([]); }); });
 		if (window.jQuery) jQuery(box.closest('form')).on('fluentform_validation_failed fluentform_submission_failed', function () {
 			setTimeout(function () {
 				var list = problems(), i = steps.findIndex(function (s) { return s.querySelector('.ff-el-is-error, [aria-invalid=true]'); });

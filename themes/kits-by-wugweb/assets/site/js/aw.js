@@ -67,7 +67,7 @@
 		function fail(t) { inp.removeAttribute('aria-busy'); tok.value = ''; if (msg) msg.textContent = t || inp.dataset.msgFile; inp.value = ''; kept = []; chosen(); }
 		// The chosen files, with name, size and a Remove button; shown once sent (or while sending).
 		var list = document.createElement('ul'); list.className = 'kit-file-list'; list.setAttribute('aria-live', 'polite');
-		inp.parentNode.insertBefore(list, msg || null);
+		inp.parentNode.insertBefore(list, msg && msg.parentNode === inp.parentNode ? msg : null);
 		var kept = [];
 		function chosen() {
 			list.textContent = '';
@@ -97,11 +97,11 @@
 				return p.then(function () {
 					var fd = new FormData(); fd.append('logo', file);
 					return fetch(inp.dataset.awUpload, { method: 'POST', body: fd, credentials: 'same-origin' }).then(function (r) { return r.json(); })
-						.then(function (r) { if (!r.success) throw new Error(r.data); tokens.push(r.data.token); });
+						.then(function (r) { if (!r.success) { var er = new Error(r.data); er.fromServer = true; throw er; } tokens.push(r.data.token); });
 				});
 			}, Promise.resolve())
 				.then(function () { inp.removeAttribute('aria-busy'); tok.value = tokens.join(','); })
-				.catch(function (e) { fail(e && e.message && e.message !== '[object Object]' ? e.message : ''); });
+				.catch(function (e) { fail(e && e.fromServer && typeof e.message === 'string' ? e.message : 'The upload did not go through. Check your connection, or try a smaller file.'); });
 		});
 	});
 

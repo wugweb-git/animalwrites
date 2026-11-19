@@ -11,6 +11,10 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Claim flow and clean-ups (plan `docs/cc-master-plan-19-nov.md`, 19 Nov 2026)
+- **PR #164 (B1 to B3, claim-form bugs; owner merges):** About and every pre-filled box now plain text (the short bio held the rendered date chips); uploads 8 MB with one message per cause, file name, size and Remove; "N things to fix" list after a failed send. Still to check on live after deploy: `upload_max_filesize` / `post_max_size`, a 3 MB photo, 375 px.
+- **B4 (merge 18308 into 43, Darpan data): live data, no PR. C1, C2, C3: one small PR each. B5 (3-step form): waits for the owner's go. B6 after B5 is live.**
+
 ### Kits Core screens on the Kits shell frame (build, 19 Nov 2026; PR open, owner merges)
 - **Moved into the Kits frame** (`kits_frame_screen()`, `admin-kits-frame.php`; app header, five tabs, body as one card; same address, capability, nonces, option and field names): Make WebP, Duplicate files and Reuse pictures (Media submenus, under the Tools tab), Letter report (`edit_posts`), Modules (`aw-modules`), Taxonomy rename. Each joins with the `kits_frame_extra_screens` filter, so a file moved into the theme site layer keeps working. Without the shell build the screen falls back to a plain wrap and heading, never blank.
 - **Classic header removed** from `kits_admin_head()` (only reachable as a section of Help).
