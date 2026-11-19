@@ -11,6 +11,10 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### C2: press focus keyphrase, write and clear through `aw/v1/seo-focus` (build, 19 Nov 2026; PR open, owner merges)
+- `seo-focus` now accepts `aw_press` for an administrator (`manage_options`; the workers' user is refused on press) whatever the Item types setting says, in any status except trash, and an empty `keyword` on a press item clears the field (`clear: true` still works; the old value goes to `_aw_focus_history`). Other types behave as before. No new UI.
+- **After the deploy (owner/administrator):** (1) `POST /wp-json/aw/v1/seo-focus` with `{"items":[{"id":21230,"keyword":""}]}` (add `"dry":true` first; expect `written: 1`), then check `rank_math_focus_keyword` on 21230 is empty. (2) Run the InsightWeb update and confirm Conflicts drops ("lab animal rules" then has one owner, 13856). (3) Read-only check that 14205 and 14206 still have an empty `rank_math_focus_keyword` (cleared 3 Nov; not verified from the build session, which has no live login).
+
 ### Kits Core screens on the Kits shell frame (build, 19 Nov 2026; PR open, owner merges)
 - **Moved into the Kits frame** (`kits_frame_screen()`, `admin-kits-frame.php`; app header, five tabs, body as one card; same address, capability, nonces, option and field names): Make WebP, Duplicate files and Reuse pictures (Media submenus, under the Tools tab), Letter report (`edit_posts`), Modules (`aw-modules`), Taxonomy rename. Each joins with the `kits_frame_extra_screens` filter, so a file moved into the theme site layer keeps working. Without the shell build the screen falls back to a plain wrap and heading, never blank.
 - **Classic header removed** from `kits_admin_head()` (only reachable as a section of Help).
