@@ -491,6 +491,7 @@ function kits_system_page() {
 	echo '<div class="kits-reg-toolbar">';
 	echo '<div class="kits-reg-search">';
 	echo '<input type="search" id="kits-reg-search" class="kits-reg-input" placeholder="' . esc_attr__( 'Filter components, classes, blocks, tokens...', 'kits-core' ) . '" aria-label="' . esc_attr__( 'Filter design system entries', 'kits-core' ) . '">';
+	/* translators: %d: total number of entries. */
 	echo '<span id="kits-reg-count" class="kits-reg-count">' . sprintf( esc_html__( 'Showing %d entries', 'kits-core' ), (int) $total_count ) . '</span>';
 	echo '</div>';
 	echo '<div class="kits-reg-filters" role="group" aria-label="' . esc_attr__( 'Filter by type', 'kits-core' ) . '">';

@@ -66,7 +66,9 @@ if ( ! defined( 'KITS_CORE_LOADED' ) || ! defined( 'DIRECTORYWEB_LOADED' ) || ! 
 	return;
 }
 define( 'AW_SOURCING_LOADED', '0.1.0' );
-define( 'AW_SOURCING_DIR', __DIR__ . '/' );
+if ( ! defined( 'AW_SOURCING_DIR' ) ) {
+	define( 'AW_SOURCING_DIR', __DIR__ . '/' );
+}
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once AW_SOURCING_DIR . 'includes/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
