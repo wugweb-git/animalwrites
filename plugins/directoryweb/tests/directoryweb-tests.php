@@ -7,11 +7,11 @@
  * @package directoryweb
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	if ( 'cli' !== PHP_SAPI ) {
-		exit;
-	}
+if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
 	define( 'ABSPATH', __DIR__ . '/' );
+}
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 // phpcs:disable WordPress.Security.EscapeOutput -- a command-line test runner.

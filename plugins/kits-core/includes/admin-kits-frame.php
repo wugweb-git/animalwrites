@@ -228,3 +228,92 @@ function kits_frame_card( string $id, string $title, callable $render, array $op
 	call_user_func( $render );
 	echo '</div></section>';
 }
+
+/**
+ * One KPI/Metric card (Site Kit / FluentCRM style).
+ *
+ * @param string $label Label / metric name.
+ * @param string $val   Primary formatted value (e.g. "172", "99.4%").
+ * @param array  $opts  Optional settings: 'unit', 'trend' (string like "+14%"), 'trend_dir' ('up'|'down'|'neutral'), 'badge', 'sparkline' (array of numbers 0..100).
+ */
+function kits_frame_kpi_card( string $label, string $val, array $opts = array() ): string {
+	$out = '<div class="kits-kpi-card">';
+	$out .= '<div class="kits-kpi-card__head"><h3 class="kits-kpi-card__label">' . esc_html( $label ) . '</h3>';
+	if ( ! empty( $opts['badge'] ) ) {
+		$out .= '<span class="kits-badge">' . esc_html( $opts['badge'] ) . '</span>';
+	}
+	$out .= '</div>';
+	$out .= '<div class="kits-kpi-card__body">';
+	$out .= '<span class="kits-kpi-card__val">' . esc_html( $val ) . '</span>';
+	if ( ! empty( $opts['unit'] ) ) {
+		$out .= '<span class="kits-kpi-card__unit">' . esc_html( $opts['unit'] ) . '</span>';
+	}
+	if ( ! empty( $opts['trend'] ) ) {
+		$dir = in_array( $opts['trend_dir'] ?? '', array( 'up', 'down', 'neutral' ), true ) ? (string) $opts['trend_dir'] : 'up';
+		$out .= '<span class="kits-kpi-card__trend is-' . esc_attr( $dir ) . '">' . esc_html( $opts['trend'] ) . '</span>';
+	}
+	$out .= '</div>';
+	if ( ! empty( $opts['sparkline'] ) && is_array( $opts['sparkline'] ) ) {
+		$pts = $opts['sparkline'];
+		$max = max( 1, ...$pts );
+		$count = count( $pts );
+		$w = $count > 1 ? 100 / ( $count - 1 ) : 100;
+		$d = '';
+		foreach ( $pts as $i => $p ) {
+			$x = round( $i * $w, 1 );
+			$y = round( 32 - ( ( (float) $p / $max ) * 28 ), 1 );
+			$d .= ( 0 === $i ? "M $x $y" : " L $x $y" );
+		}
+		$out .= '<div class="kits-kpi-card__sparkline"><svg viewBox="0 0 100 36" preserveAspectRatio="none"><path d="' . esc_attr( $d ) . '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65" /></svg></div>';
+	}
+	$out .= '</div>';
+	return $out;
+}
+
+/**
+ * A responsive grid of KPI cards.
+ *
+ * @param array $cards Array of html card strings or card options arrays.
+ */
+function kits_frame_kpi_grid( array $cards ): void {
+	echo '<div class="kits-kpi-grid">';
+	foreach ( $cards as $c ) {
+		if ( is_string( $c ) ) {
+			echo $c; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- card markup from kits_frame_kpi_card()
+		} elseif ( is_array( $c ) && isset( $c['label'], $c['val'] ) ) {
+			echo kits_frame_kpi_card( (string) $c['label'], (string) $c['val'], (array) ( $c['opts'] ?? array() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+	}
+	echo '</div>';
+}
+
+/**
+ * Structured Action List (replacing raw button piles).
+ *
+ * @param array $rows Array of [ 'title' => ..., 'desc' => ..., 'status' => ..., 'button' => ..., 'icon' => ... ].
+ */
+function kits_frame_action_list( array $rows ): void {
+	echo '<div class="kits-action-list">';
+	foreach ( $rows as $r ) {
+		echo '<div class="kits-action-row">';
+		echo '<div class="kits-action-row__main">';
+		if ( ! empty( $r['icon'] ) ) {
+			echo '<div class="kits-action-row__icon">' . esc_html( $r['icon'] ) . '</div>';
+		}
+		echo '<div class="kits-action-row__info">';
+		echo '<h4 class="kits-action-row__title">' . esc_html( $r['title'] ?? '' ) . '</h4>';
+		if ( ! empty( $r['desc'] ) ) {
+			echo '<p class="kits-action-row__desc">' . esc_html( $r['desc'] ) . '</p>';
+		}
+		echo '</div></div>';
+		echo '<div class="kits-action-row__meta">';
+		if ( ! empty( $r['status'] ) ) {
+			echo '<span class="kits-action-row__status">' . esc_html( $r['status'] ) . '</span>';
+		}
+		if ( ! empty( $r['button'] ) ) {
+			echo '<div class="kits-action-row__action">' . $r['button'] . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- button element
+		}
+		echo '</div></div>';
+	}
+	echo '</div>';
+}

@@ -214,7 +214,7 @@ function aw_seo_uninstall_backup( string $plugin, string $main, array $names, ar
 	$opts = array();
 	foreach ( array_chunk( array_values( array_unique( array_map( 'strval', $names ) ) ), 100 ) as $chunk ) {
 		$in   = implode( ', ', array_fill( 0, count( $chunk ), '%s' ) );
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value, autoload FROM {$wpdb->options} WHERE option_name IN ($in)", $chunk ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- uninstall backup: the raw stored values; $in is placeholders only
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value, autoload FROM {$wpdb->options} WHERE option_name IN ($in)", $chunk ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- uninstall backup: the raw stored values; $in is placeholders only
 		if ( '' !== $wpdb->last_error || ! is_array( $rows ) ) {
 			return $fail( 'options could not be read' );
 		}

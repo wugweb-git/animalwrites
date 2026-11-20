@@ -18,11 +18,11 @@
  * @package aw-seo-extras
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	if ( 'cli' !== PHP_SAPI ) {
-		exit;
-	}
+if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
 	define( 'ABSPATH', __DIR__ . '/' );
+}
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput, WordPress.PHP.DiscouragedPHPFunctions, WordPress.WP.GlobalVariablesOverride, Squiz.Commenting.FunctionComment.MissingParamTag -- a command-line test runner with WordPress stubs.

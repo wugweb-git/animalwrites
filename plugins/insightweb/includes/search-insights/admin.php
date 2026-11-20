@@ -1073,23 +1073,75 @@ function aw_si_settings_tab(): void {
 		? esc_html( sprintf( __( 'Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now.', 'insightweb' ), wp_date( 'j M Y, H:i', $seeded ) ) )
 		: esc_html__( 'Not seeded yet: the first run seeds it.', 'insightweb' );
 	echo '</p></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Run now', 'insightweb' ) . '</th><td>';
+	echo '<tr><th scope="row">' . esc_html__( 'Action list', 'insightweb' ) . '</th><td>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_run">';
 	wp_nonce_field( 'aw_si_run' );
-	echo '<p><button type="submit" name="what" value="daily" class="button">' . esc_html__( 'Run the daily update', 'insightweb' ) . '</button> ';
-	echo '<button type="submit" name="what" value="rollup" class="button">' . esc_html( sprintf( /* translators: %d: days. */ __( 'Run the %d-day rollup', 'insightweb' ), aw_si_keep_days() ) ) . '</button> ';
-	echo '<button type="submit" name="what" value="ga4" class="button">' . esc_html__( 'Run GA4', 'insightweb' ) . '</button> ';
-	echo '<button type="submit" name="what" value="psi" class="button">' . esc_html__( 'Start PageSpeed', 'insightweb' ) . '</button>';
+	$action_rows = array(
+		array(
+			'title'  => __( 'Daily Update', 'insightweb' ),
+			'desc'   => __( 'Fetches Search Console (4–15 days), keyword roles from Rank Math and Sourcing, Discover and Google News.', 'insightweb' ),
+			'status' => __( 'Daily at 07:10 IST', 'insightweb' ),
+			'icon'   => '⟳',
+			'button' => '<button type="submit" name="what" value="daily" class="button button-primary">' . esc_html__( 'Run daily update', 'insightweb' ) . '</button>',
+		),
+		array(
+			'title'  => sprintf( /* translators: %d: days. */ __( '%d-Day Rollup', 'insightweb' ), aw_si_keep_days() ),
+			'desc'   => __( 'Rolls up older daily figures into monthly totals.', 'insightweb' ),
+			'status' => __( 'Daily at 23:30 IST', 'insightweb' ),
+			'icon'   => '📊',
+			'button' => '<button type="submit" name="what" value="rollup" class="button button-secondary">' . esc_html__( 'Run rollup', 'insightweb' ) . '</button>',
+		),
+		array(
+			'title'  => __( 'Google Analytics 4', 'insightweb' ),
+			'desc'   => __( 'Fetches site search, AI referrals, referral & social sources, and campaign events.', 'insightweb' ),
+			'status' => __( 'Daily at 07:20 IST', 'insightweb' ),
+			'icon'   => '📈',
+			'button' => '<button type="submit" name="what" value="ga4" class="button button-secondary">' . esc_html__( 'Run GA4', 'insightweb' ) . '</button>',
+		),
+		array(
+			'title'  => __( 'PageSpeed Insights', 'insightweb' ),
+			'desc'   => __( 'Lab scores and Chrome users Core Web Vitals for key pages and campaigns.', 'insightweb' ),
+			'status' => __( 'Sundays at 06:00 IST', 'insightweb' ),
+			'icon'   => '⚡',
+			'button' => '<button type="submit" name="what" value="psi" class="button button-secondary">' . esc_html__( 'Start PageSpeed', 'insightweb' ) . '</button>',
+		),
+	);
 	if ( aw_si_bing_on() ) {
-		echo ' <button type="submit" name="what" value="bing" class="button">' . esc_html__( 'Run Bing Webmaster', 'insightweb' ) . '</button>';
+		$action_rows[] = array(
+			'title'  => __( 'Bing Webmaster Tools', 'insightweb' ),
+			'desc'   => __( 'Crawl figures, backlink discovery and search metrics from Bing.', 'insightweb' ),
+			'status' => __( 'Mondays at 06:45 IST', 'insightweb' ),
+			'icon'   => '🔍',
+			'button' => '<button type="submit" name="what" value="bing" class="button button-secondary">' . esc_html__( 'Run Bing', 'insightweb' ) . '</button>',
+		);
 		if ( function_exists( 'aw_si_bing_kw_run' ) ) {
-			echo ' <button type="submit" name="what" value="bing_kw" class="button">' . esc_html__( 'Run Bing keyword volumes', 'insightweb' ) . '</button>';
+			$action_rows[] = array(
+				'title'  => __( 'Bing Search Volumes', 'insightweb' ),
+				'desc'   => __( 'Monthly keyword volume estimates for top tracked search terms.', 'insightweb' ),
+				'status' => __( 'Monthly (2nd at 07:40 IST)', 'insightweb' ),
+				'icon'   => '🏷️',
+				'button' => '<button type="submit" name="what" value="bing_kw" class="button button-secondary">' . esc_html__( 'Fetch volumes', 'insightweb' ) . '</button>',
+			);
 		}
 	}
 	if ( aw_si_clarity_on() ) {
-		echo ' <button type="submit" name="what" value="clarity" class="button">' . esc_html__( 'Run Clarity (uses 2 of its 10 daily calls)', 'insightweb' ) . '</button>';
+		$action_rows[] = array(
+			'title'  => __( 'Microsoft Clarity', 'insightweb' ),
+			'desc'   => __( 'Session replays and click engagement telemetry (uses 2 of 10 daily API calls).', 'insightweb' ),
+			'status' => __( 'Daily at 06:30 IST', 'insightweb' ),
+			'icon'   => '👁',
+			'button' => '<button type="submit" name="what" value="clarity" class="button button-secondary">' . esc_html__( 'Run Clarity', 'insightweb' ) . '</button>',
+		);
 	}
-	echo '</p>';
+	if ( function_exists( 'kits_frame_action_list' ) ) {
+		kits_frame_action_list( $action_rows );
+	} else {
+		echo '<p>';
+		foreach ( $action_rows as $row ) {
+			echo $row['button'] . ' '; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+		echo '</p>';
+	}
 	echo '</form>';
 	echo '<p class="description">' . esc_html__( 'The daily update can take a minute on the first run (it fetches up to 19 days of Search Console).', 'insightweb' ) . '</p></td></tr>';
 	do_action( 'aw_si_settings_rows' ); // More rows: imports and paste forms (imports.php).
