@@ -29,7 +29,8 @@ add_action(
  * @param array $rows Rows: [label, HTML value].
  */
 function aw_seo_extras_kits_status_row( $rows ) {
-	$head = get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) );
+	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
+	$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 	/* translators: %s: plugin version. */
 	$text = sprintf( __( 'Active, %s', 'aw-seo-extras' ), $head['Version'] );
 	if ( ! aw_seo_extras_rank_math() ) {

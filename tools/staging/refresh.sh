@@ -29,7 +29,7 @@ $W config set DISABLE_WP_CRON true --raw --quiet
 
 # 2. Same plugins and themes as live: the repo's own as links into staging's checkout, third-party ones copied from
 # live (not UpdraftPlus: it backs up to remote storage).
-for p in animal-writes-core aw-seo-extras kits-core mailweb; do
+for p in animal-writes-core kits-core mailweb $([ -d "$STAGING_ROOT/aw_deploy/plugins/rankweb" ] && echo rankweb || echo aw-seo-extras); do
   ln -sfn "../../aw_deploy/plugins/$p" "$STAGING_ROOT/wp-content/plugins/$p"
 done
 # The animal-writes child theme was retired on 14 Nov 2026: drop an old link to it, as live has none in use.

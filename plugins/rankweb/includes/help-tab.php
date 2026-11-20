@@ -47,7 +47,8 @@ function aw_seo_help_tab( $screen ) {
 			'priority' => 5,
 		)
 	);
-	$data = function_exists( 'get_file_data' ) ? get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) ) : array();
+	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
+	$data      = function_exists( 'get_file_data' ) ? get_file_data( $main_file, array( 'Version' => 'Version' ) ) : array();
 	$screen->set_help_sidebar(
 		'<p><strong>RankWeb</strong>' . ( empty( $data['Version'] ) ? '' : ' ' . esc_html( $data['Version'] ) ) . '</p>'
 		. '<p><a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Plugins', 'aw-seo-extras' ) . '</a></p>'

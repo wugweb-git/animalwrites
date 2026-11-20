@@ -48,7 +48,8 @@ function aw_src_help_tab( $screen ) {
 			'priority' => 5,
 		)
 	);
-	$data = function_exists( 'get_file_data' ) ? get_file_data( AW_SOURCING_DIR . 'aw-sourcing.php', array( 'Version' => 'Version' ) ) : array();
+	$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( AW_SOURCING_DIR . 'sourceweb.php' ) ? AW_SOURCING_DIR . 'sourceweb.php' : AW_SOURCING_DIR . 'aw-sourcing.php' );
+	$data      = function_exists( 'get_file_data' ) ? get_file_data( $main_file, array( 'Version' => 'Version' ) ) : array();
 	$screen->set_help_sidebar(
 		'<p><strong>SourceWeb</strong>' . ( empty( $data['Version'] ) ? '' : ' ' . esc_html( $data['Version'] ) ) . '</p>'
 		. '<p><a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Plugins', 'aw-sourcing' ) . '</a></p>'

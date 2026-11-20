@@ -155,8 +155,9 @@ add_action( 'aw_fetch_favicons', 'sourceweb_fetch_favicons_run' ); // the hourly
 
 // Switched off: the favicon run comes off (booked again on the next request after it is switched back on, or by
 // InsightWeb's referrer icons while InsightWeb is active).
+$sourceweb_deact_file = file_exists( dirname( __DIR__ ) . '/sourceweb.php' ) ? dirname( __DIR__ ) . '/sourceweb.php' : dirname( __DIR__ ) . '/aw-sourcing.php';
 register_deactivation_hook(
-	dirname( __DIR__ ) . '/aw-sourcing.php',
+	$sourceweb_deact_file,
 	function () {
 		wp_unschedule_hook( 'aw_fetch_favicons' );
 	}

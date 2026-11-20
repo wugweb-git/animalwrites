@@ -33,6 +33,9 @@ define( 'RANKWEB_FILE', __FILE__ );
 if ( ! defined( 'AW_SEO_EXTRAS_DIR' ) ) {
 	define( 'AW_SEO_EXTRAS_DIR', RANKWEB_DIR );
 }
+if ( ! defined( 'AW_SEO_EXTRAS_FILE' ) ) {
+	define( 'AW_SEO_EXTRAS_FILE', RANKWEB_FILE );
+}
 
 require_once AW_SEO_EXTRAS_DIR . 'includes/text.php'; // rankweb_plain_text(), used by every file.
 require_once AW_SEO_EXTRAS_DIR . 'includes/rankweb-caps.php'; // RankWeb's own capability, manage_rankweb (granted from manage_categories).
