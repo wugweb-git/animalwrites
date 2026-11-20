@@ -13,13 +13,14 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ### Claim flow and clean-ups (plan `docs/cc-master-plan-19-nov.md`, 19 Nov 2026)
 - **B4 (merge 18308 into 43, Darpan data): live data, no PR; starts now that PR #164 is live.** C1 (old mail route): blocked on reading `aw_mail_in_old_seen` on live (routes in `plugins/mailweb/includes/website-forms.php`; `tools/ci/smoke.sh` line 63 needs `mailweb/v1/mail-in` in the same PR). C3: no code cause found (tel: links print correctly; old asset paths return 404 and nothing prints them); CDN purge proposed, watch the 404 log after the 19 Nov clear. B5 (3-step form): waits for the owner's go. B6 after B5 is live.
-### Admin button piles: one "action list" part for the Kits shell (owner, 19 Nov 2026; idea only, nothing built)
-- **Seen:** SourceWeb → Enrichment review showed one "Reject <field> for good" pill per applied value in a heap under the table. **Fixed and live** (8b70064a): "Reject for good" now sits on its row beside Undo (`FieldReview` got an optional `onRejectForGood`). The same heap is on InsightWeb → Settings → Runs and data → Run now: seven identical pills (daily update, 90-day rollup, GA4, PageSpeed, Bing Webmaster, Bing keyword volumes, Clarity), with the names repeated as plain text above them, and a Schedule paragraph that describes the same jobs.
-- **Root cause:** the Kits shell has no part for "a set of named actions", so each screen puts bare `.button`s in a row.
-- **Idea:** one shell part, an action list (`plugins/kits-core/src/shell/parts.js`). Each row: job name, what it does or when it runs, its last result, one button on the right.
-  - InsightWeb: Run now and the Schedule prose become one "Jobs" table. The data is already in `plugins/insightweb/includes/search-insights/admin.php` (the Run now block, about line 1076) and `aw_si_runs()`; the buttons are captured from classic HTML by `kits_shell_html_parts()` (`insightweb-tabs.php:70`), so the block is rewritten to emit rows.
-  - SourceWeb: already solved by putting the button on its row.
-- **Route:** small change (commit onto `wordpress-dev`, ship). Not started; owner's word to build.
+### Admin button piles: one "action list" part for the Kits shell (done 20 Nov 2026, PR #167, commit `bd14adb4` live)
+- **Built and live (PR #167, commit `bd14adb4`):**
+  - Added `.kits-action-list` and `.kits-action-row` in `plugins/kits-core/src/shell/more.css` and `includes/admin-kits-frame.php` (`kits_frame_action_list()`).
+  - Added Site Kit / FluentCRM style `.kits-kpi-grid` and `.kits-kpi-card` with SVG sparklines and trend pills (`kits_frame_kpi_card()`, `kits_frame_kpi_grid()`).
+  - Integrated into Kits Core Home (`admin-menu.php`) and InsightWeb Runs & Data (`admin.php`), replacing the 7-button pile with a structured Action List.
+  - Upgraded Design System tabs to interactive `.kits-chip` pills and added KPI scorecard to Colour Contrast tab.
+  - Resolved all issues from the 6 Plugin Check markdown reports: eliminated `eval()` in `admin-layer-tests.php`, deleted hidden `.distignore` in `planweb`, standardized direct file access checks across all test runners, and added `UnfinishedPrepare` suppression in `uninstall-backup.php`.
+  - Verified on live Hostinger production with LiteSpeed cache purge HTTP 200.
 
 ### Theme and Kits Core audit after the aw-core merges (owner, 18 Nov 2026)
 Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Kits Core functions plus content types), against the WP Theme Review "Required" page and developer.wordpress.org.
