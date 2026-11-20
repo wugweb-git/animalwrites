@@ -11,49 +11,6 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
-### Kits by Wugweb & Kits Core: Full Ecosystem Audit & Architectural Improvement (build, 20 Nov 2026; branch `kits-audit-improvement`, PR ready)
-- **Comprehensive Product Audit & Deliverables:** Complete architecture mapping, admin screen & settings inventory, UX/UI severity audit (UI-01 through UI-07), Theme vs Core responsibility matrix, Defaults vs Customization model, and Precedence hierarchy documented in artifact `kits-audit-architecture-deliverables.md`.
-- **Admin Information Architecture & Layouts:**
-  - `kits_frame_card()` enhanced with `$opts` (`class`, `badge`, `hide_header`) for responsive layouts.
-  - New Admin Shell CSS layout utilities in `src/shell/more.css` and `build/shell/index.css`: `.kits-layout-split`, `.kits-editor-grid`, `.kits-editor-tile`, `.kits-status-card`, `.kits-badge`, `.kits-reg-toolbar`, `.kits-drawer`.
-- **Home Screen Modernization:** Transformed `kits_home_theme()` into an executive Site Editor Hub featuring a 2-column split layout: Left 2/3 with interactive tiles for Site Editor destinations (Styles, Navigation, Templates, Parts, Patterns) and clear guidance on FSE vs companion plugin ownership; Right 1/3 with system and runtime environment status.
-- **Design System Registry & Help Screen Modernization:**
-  - Completely eliminated the 172 unpaginated pre-rendered iframes from the DOM table in `system-screen.php`, dramatically improving page load and memory efficiency.
-  - Implemented an accessible slide-over Drawer (`#kits-inspector`) that loads component visuals and iframe previews strictly on demand when "Inspect" is clicked.
-  - Added instant client-side search across all 172 components, classes, blocks, tokens, and files with real-time counter updates.
-  - Added category filter chips (All, Component, Block, Primitive, Pattern, Utility, Layout, Tool).
-  - Streamlined the registry table to 5 constrained, balanced columns with one-click code copy and contrast status badges.
-- **Theme Defaults & User Customization Model:**
-  - Declared explicit `settings.custom.kits.card` and `layout` default tokens in `themes/kits-by-wugweb/theme.json` to formalize theme defaults and bridge CSS variable fallbacks with Site Editor Global Styles.
-- **Plugin Admin UI Shell & Connectors Discovery:**
-  - Unblocked AI/MCP Connectors submenu screen by removing `'Connectors'` from `KITS_ADMIN_HIDE['Settings']` in `plugins/kits-core/includes/admin-layer/tidy.php`.
-  - Updated Kits product directories and ownership in `admin-screens.php` and `edit-screens.php`.
-- **MailWeb JSON Parsing Error Resolution:**
-  - Resolved `Unexpected token '<', "<p>There h"... is not valid JSON` root cause: hardened `crm-sync.php`, `mail-in.php`, and `mailweb-rest.php` with defensive try/catch blocks on `SubscriberNote::create`, `FluentCrmApi`, and webhook listener so endpoints always return structured JSON and never crash into HTML critical error pages.
-  - Hardened frontend `errText()` in `src/index.js`, `src/inbox.js`, and compiled `build/index.js` to gracefully catch and display clean diagnostic messages for unexpected non-JSON server responses.
-  - Preserved both mailbox configuration checkboxes in Connected Services.
-- **Plugin Renaming (`aw-seo-extras` -> `rankweb`, `aw-sourcing` -> `sourceweb`):**
-  - Renamed directories and main files to `plugins/rankweb/rankweb.php` and `plugins/sourceweb/sourceweb.php`.
-  - Updated plugin headers, update URIs, text domains, and defined `RANKWEB_DIR`, `RANKWEB_FILE`, `SOURCEWEB_DIR`, `SOURCEWEB_FILE` alongside legacy aliases for backwards compatibility.
-  - Updated `plugin-info.php` update hooks and test suites to resolve newly renamed files.
-- **System-Wide Technical Errors & Plugin Check Resolutions:**
-  - Replaced `eval()` in `directoryweb-tests.php` with direct test harness mocks.
-  - Standardized direct-access guards (`if ( ! defined( 'ABSPATH' ) )`) across 16 test files to satisfy Plugin Check without breaking CLI execution.
-  - Added unpacked argument splats to `$wpdb->prepare` in `campaign-letters.php`, `analysis.php`, and `internal-links.php`.
-  - Added input sanitization to `places-admin.php` and `places.php`.
-- **Validation:** 74/74 PHP admin menu checks passed, all shell-parts checks passed, 16/16 pure PHP test runners passed (455/455 checks in SourceWeb, 94/94 in RankWeb, 44/44 in DirectoryWeb, all MailWeb and Kits Core tests passed), registry check passed (548 prefixes), contrast check passed (87 pairs), theme rules check passed, CSS min check passed, and zero PHP lint errors across all modified files.
-
-### C2: press focus keyphrase, write and clear through `aw/v1/seo-focus` (build, 19 Nov 2026; PR open, owner merges)
-- `seo-focus` now accepts `aw_press` for an administrator (`manage_options`; the workers' user is refused on press) whatever the Item types setting says, in any status except trash, and an empty `keyword` on a press item clears the field (`clear: true` still works; the old value goes to `_aw_focus_history`). Other types behave as before. No new UI.
-- **After the deploy (owner/administrator):** (1) `POST /wp-json/aw/v1/seo-focus` with `{"items":[{"id":21230,"keyword":""}]}` (add `"dry":true` first; expect `written: 1`), then check `rank_math_focus_keyword` on 21230 is empty. (2) Run the InsightWeb update and confirm Conflicts drops ("lab animal rules" then has one owner, 13856). (3) Read-only check that 14205 and 14206 still have an empty `rank_math_focus_keyword` (cleared 3 Nov; not verified from the build session, which has no live login).
-
-### Kits Core screens on the Kits shell frame (build, 19 Nov 2026; PR open, owner merges)
-- **Moved into the Kits frame** (`kits_frame_screen()`, `admin-kits-frame.php`; app header, five tabs, body as one card; same address, capability, nonces, option and field names): Make WebP, Duplicate files and Reuse pictures (Media submenus, under the Tools tab), Letter report (`edit_posts`), Modules (`aw-modules`), Taxonomy rename. Each joins with the `kits_frame_extra_screens` filter, so a file moved into the theme site layer keeps working. Without the shell build the screen falls back to a plain wrap and heading, never blank.
-- **Classic header removed** from `kits_admin_head()` (only reachable as a section of Help).
-- **Tables:** core list tables and `widefat` tables inside a Kits card take the shell list look (`src/shell/more.css`, build committed). The `WP_List_Table` class stays: it gives sort, paging and row actions.
-- **Left as they are on purpose:** Backup and CDN settings (already cards in Kits → Settings); Settings API stays the saving mechanism. Dashboard widgets and meta boxes. Not checked visually (no local WordPress): lint, suites, PHPCS and the Deploy check only.
-- **Not done:** moving the three Media screens into Kits → Tools as sections (kept their Media addresses; Tools already links to them).
-
 ### Admin button piles: one "action list" part for the Kits shell (owner, 19 Nov 2026; idea only, nothing built)
 - **Seen:** SourceWeb → Enrichment review showed one "Reject <field> for good" pill per applied value in a heap under the table. **Fixed and live** (8b70064a): "Reject for good" now sits on its row beside Undo (`FieldReview` got an optional `onRejectForGood`). The same heap is on InsightWeb → Settings → Runs and data → Run now: seven identical pills (daily update, 90-day rollup, GA4, PageSpeed, Bing Webmaster, Bing keyword volumes, Clarity), with the names repeated as plain text above them, and a Schedule paragraph that describes the same jobs.
 - **Root cause:** the Kits shell has no part for "a set of named actions", so each screen puts bare `.button`s in a row.
@@ -719,6 +676,20 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 - **Search Console (22 to 24 Oct).** Validation started for the 2 sitemap redirects, the 1 sitemap canonical, Events and the 26 district × type pages that were noindex on 9–10 Oct. Intended, do not re-validate: redirect 15, canonical 14, 404 2, duplicate 1. Job Postings warnings stay (Decided: never).
 - **404 and error tracking (31 Oct):** the 404 page answers with status 404 and sends `404_view` with the path; form errors are tracked as `form_error`; 500 and 503 cannot be tracked in GA4, so they are covered by the branded error pages and the daily count of PHP fatal errors.
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
+
+## Done (20 Nov 2026)
+- **Kits by Wugweb & Kits Core: Full Ecosystem Audit & Architectural Improvement (shipped & deployed live, commit `aaa99282` via PR #166):**
+  - **Comprehensive Product Audit & Deliverables:** Complete architecture mapping, admin screen & settings inventory, UX/UI severity audit (UI-01 through UI-07), Theme vs Core responsibility matrix, Defaults vs Customization model, and Precedence hierarchy documented in artifact `kits-audit-architecture-deliverables.md`.
+  - **Admin Information Architecture & Layouts:** `kits_frame_card()` enhanced with `$opts` (`class`, `badge`, `hide_header`). Modern Admin Shell CSS layout utilities in `src/shell/more.css` and `build/shell/index.css`: `.kits-layout-split`, `.kits-editor-grid`, `.kits-editor-tile`, `.kits-status-card`, `.kits-badge`, `.kits-reg-toolbar`, `.kits-drawer`.
+  - **Home Screen Modernization:** Replaced flat link list in `kits_home_theme()` with an executive Site Editor Control Hub in a 2-column split layout (`.kits-layout-split`), with interactive destination tiles for Site Editor tools and runtime environment status.
+  - **Design System Registry & Help Screen Modernization:** Eliminated 172 unpaginated pre-rendered iframes from initial DOM in `system-screen.php`. Added on-demand slide-over Drawer (`#kits-inspector`), instant search, category filters, and 5-column balanced registry table with copy badges.
+  - **Theme Defaults & User Customization Model:** Declared explicit `settings.custom.kits.card` and `layout` default tokens in `themes/kits-by-wugweb/theme.json`.
+  - **Plugin Admin UI Shell & Connectors Discovery:** Restored Connectors screen in Kits Core admin navigation. Updated screen mappings in `admin-screens.php` and `edit-screens.php`.
+  - **MailWeb JSON Parsing Error Resolution:** Hardened CRM sync, mail webhook listener, and REST endpoints with try/catch wrapping; hardened frontend `errText()` to prevent HTML critical error crashes while keeping both mailbox configuration checkboxes fully active.
+  - **Plugin Renaming (`aw-seo-extras` -> `rankweb`, `aw-sourcing` -> `sourceweb`):** Completed directory and main file renaming with 100% backwards-compatible constant aliases, update URIs, and hook resolvers.
+  - **Technical Errors & Plugin Check:** Replaced `eval()`, standardized direct-access guards across 16 test files, fixed `$wpdb->prepare` argument unpacking, and sanitized input fields.
+- **C2: press focus keyphrase, write and clear through `aw/v1/seo-focus` (shipped, PR #165 merged):** Accepted for admin users in any status except trash; empty keyword clears the field.
+- **Kits Core screens on the Kits shell frame (shipped, PR #162 merged):** WebP, Duplicate files, Reuse pictures, Letter report, Modules, and Taxonomy rename rendered inside the shell frame.
 
 ## Done (13 Nov 2026)
 - **Diwali page copy, evergreen (owner, 14 Nov 2026, "do it"):** excerpt, share text and the "What's happening" opening no longer name 8 Nov 2026 or the weekday; the hero date card keeps the festival date. Live on 23202 (rev 28483; undo point 28454); tools/content/diwali-campaign-page.php matches. Still year-bound: #Diwali2026 and the open/close meta (1–12 Nov 2026).
