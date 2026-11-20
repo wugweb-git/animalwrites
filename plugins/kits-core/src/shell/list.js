@@ -19,7 +19,7 @@ import {
 	trash,
 	undo,
 } from '@wordpress/icons';
-import { EmptyState, ErrorState } from './states';
+import { EmptyState, ErrorState, SkeletonTable } from './states';
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
 
@@ -458,7 +458,19 @@ export function DataList( {
 							role="region"
 							aria-label={ label }
 						>
-							<DataViews.Layout />
+							{ loading && rows.length === 0 ? (
+								<SkeletonTable
+									columns={ columns.length || 4 }
+									rows={ 6 }
+									label={ sprintf(
+										/* translators: %s: list label */
+										__( 'Loading %s…', 'kits-core' ),
+										label || __( 'items', 'kits-core' )
+									) }
+								/>
+							) : (
+								<DataViews.Layout />
+							) }
 						</div>
 						{ total > 0 && (
 							<div className="kits-shell-pager">

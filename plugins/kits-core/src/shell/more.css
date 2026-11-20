@@ -1676,3 +1676,80 @@ table.widefat.kits-entries .col-action {
 	margin-bottom: var(--ks-s6);
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
+
+/* ---------- Shimmering Skeletons & Skeleton Layout (AMP / Zero-CLS UX) ---------- */
+
+@keyframes kits-shimmer {
+	0% {
+		background-position: -400px 0;
+	}
+	100% {
+		background-position: 400px 0;
+	}
+}
+
+.kits-skeleton {
+	background: var(--ks-g1, #f1f5f9);
+	background-image: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0) 0,
+		rgba(255, 255, 255, 0.65) 50%,
+		rgba(255, 255, 255, 0) 100%
+	);
+	background-repeat: no-repeat;
+	background-size: 400px 100%;
+	border-radius: var(--ks-r-control, 4px);
+	animation: kits-shimmer 1.6s infinite ease-in-out;
+}
+
+.kits-skeleton-line {
+	display: block;
+	max-width: 100%;
+}
+
+.kits-skeleton-table-wrapper {
+	width: 100%;
+	overflow-x: auto;
+	background: var(--ks-white, #fff);
+	border: 1px solid var(--ks-g2, #e2e8f0);
+	border-radius: var(--ks-r-card, 6px);
+}
+
+.kits-skeleton-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.kits-skeleton-table th,
+.kits-skeleton-table td {
+	padding: var(--ks-s3, 12px) var(--ks-s4, 16px);
+	border-bottom: 1px solid var(--ks-g1, #f1f5f9);
+	text-align: left;
+}
+
+.kits-skeleton-table th {
+	background: var(--ks-g0, #f8fafc);
+}
+
+.kits-skeleton-card {
+	background: var(--ks-white, #fff);
+	border: 1px solid var(--ks-g2, #e2e8f0);
+	border-radius: var(--ks-r-card, 8px);
+	padding: var(--ks-s5, 20px);
+	display: flex;
+	flex-direction: column;
+	gap: var(--ks-s3, 12px);
+}
+
+.kits-skeleton-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--ks-s2, 8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.kits-skeleton {
+		animation: none;
+		background-image: none;
+	}
+}

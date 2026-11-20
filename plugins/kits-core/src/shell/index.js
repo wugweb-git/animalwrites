@@ -25,7 +25,15 @@ import {
 } from '@wordpress/components';
 import { DataList, FieldReview, RowAction } from './list';
 import { SetupFlow } from './setup';
-import { EmptyState, LoadingState, ErrorState } from './states';
+import {
+	EmptyState,
+	LoadingState,
+	ErrorState,
+	SkeletonLine,
+	SkeletonRow,
+	SkeletonTable,
+	SkeletonCard,
+} from './states';
 import { MiniChart, HashList, LinkedSetting, MetricPicker } from './extras';
 import { PageParts, BlockParts, Cell } from './parts';
 import { CalendarGrid } from './calendar';
@@ -40,6 +48,10 @@ export {
 	EmptyState,
 	LoadingState,
 	ErrorState,
+	SkeletonLine,
+	SkeletonRow,
+	SkeletonTable,
+	SkeletonCard,
 	DataList,
 	FieldReview,
 	RowAction,
@@ -739,6 +751,10 @@ const shell = {
 	EmptyState,
 	LoadingState,
 	ErrorState,
+	SkeletonLine,
+	SkeletonRow,
+	SkeletonTable,
+	SkeletonCard,
 	Button,
 	RefTable,
 	DataList,
