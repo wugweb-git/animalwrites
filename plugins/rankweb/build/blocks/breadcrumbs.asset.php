@@ -1,4 +1,8 @@
-<?php return array(
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+return array(
 	'dependencies' => array(
 		'react-jsx-runtime',
 		'wp-block-editor',

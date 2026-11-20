@@ -44,6 +44,8 @@ require_once AW_SEO_EXTRAS_DIR . 'includes/kits-hub.php'; // a tab and a status 
 require_once AW_SEO_EXTRAS_DIR . 'includes/breadcrumbs-render.php'; // the visible trail above the page title, with or without Rank Math and the Breadcrumbs module.
 require_once AW_SEO_EXTRAS_DIR . 'includes/media-autofill.php'; // new image uploads: empty name, alt, caption, description, image context and keyphrase filled, with or without Rank Math.
 require_once AW_SEO_EXTRAS_DIR . 'includes/media-columns.php'; // Media Library columns: slug, SEO fields, where each file is used, optimisation; with or without Rank Math.
+require_once AW_SEO_EXTRAS_DIR . 'includes/reprint.php'; // Reprint, Content Syndication & Canonical Attribution engine (Reprint benchmark).
+require_once AW_SEO_EXTRAS_DIR . 'includes/editor-sidebar.php'; // Gutenberg Block Editor Sidebar & Live 0-100 Score Engine (Rank Math/Yoast benchmark).
 
 /** Whether Rank Math is active (it loads after this plugin, so this is asked on plugins_loaded). */
 function aw_seo_extras_rank_math() {

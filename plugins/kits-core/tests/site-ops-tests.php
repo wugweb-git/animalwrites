@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Tests that need no WordPress: the site operations moved from Animal Writes Core on 19 Nov 2026 (includes/ops/).
  * The scheduled-task statistics and the trigger it names, the 404 page's section and search words, the deployed

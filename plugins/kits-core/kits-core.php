@@ -87,6 +87,8 @@ require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
 require_once KITS_CORE_DIR . 'includes/theme-options.php';
+require_once KITS_CORE_DIR . 'includes/onboarding-wizard.php'; // 1-Click Theme Setup & Onboarding Wizard (Astra/Kadence benchmark).
+require_once KITS_CORE_DIR . 'includes/header-footer-scripts.php'; // Header and Footer Custom Scripts & Pixels (WPCode/Insert Headers benchmark).
 require_once KITS_CORE_DIR . 'includes/admin-screens.php';
 require_once KITS_CORE_DIR . 'includes/admin-menu.php';
 require_once KITS_CORE_DIR . 'includes/admin-bar-products.php'; // The Wugweb menu in the admin bar.

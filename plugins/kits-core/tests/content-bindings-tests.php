@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the icon, the date component and the Block
  * Bindings source moved to Kits Core (kits_icon, kits_date, kits/post-field) print exactly what the site printed before

@@ -118,12 +118,23 @@ function mailweb_nl_ff_id() {
  * [aw_newsletter]: the Fluent Forms form, in the same box (data-kit-form names it for analytics), after what an old
  * confirm or unsubscribe link did (newsletter.php). Without the form: nothing for visitors, a note for administrators.
  */
-function mailweb_nl_ff_form() {
+function mailweb_nl_ff_form( $attributes = array() ) {
 	$id = mailweb_nl_ff_id();
 	if ( ! $id ) {
 		return mailweb_nl_link_note() . ( function_exists( 'kits_ff_missing' ) ? kits_ff_missing( 'Newsletter', 'wp option update ' . MAILWEB_NL_FF_OPTION . ' <form ID>' ) : '' );
 	}
-	return mailweb_nl_link_note() . '<div class="aw-newsletter-form" data-kit-form="newsletter">' . ( function_exists( 'kits_ff_kit_wrap' ) ? kits_ff_kit_wrap( '[fluentform id="' . $id . '"]' ) : do_shortcode( '[fluentform id="' . $id . '"]' ) ) . '</div>';
+
+	$layout     = ! empty( $attributes['layout'] ) ? sanitize_html_class( $attributes['layout'] ) : 'default';
+	$heading    = ! empty( $attributes['heading'] ) ? '<h3 class="mailweb-nl-heading">' . esc_html( $attributes['heading'] ) . '</h3>' : '';
+	$subheading = ! empty( $attributes['subheading'] ) ? '<p class="mailweb-nl-subheading">' . esc_html( $attributes['subheading'] ) . '</p>' : '';
+	$align      = ! empty( $attributes['align'] ) ? ' align' . sanitize_html_class( $attributes['align'] ) : '';
+
+	$inner = ( function_exists( 'kits_ff_kit_wrap' ) ? kits_ff_kit_wrap( '[fluentform id="' . $id . '"]' ) : do_shortcode( '[fluentform id="' . $id . '"]' ) );
+
+	return mailweb_nl_link_note()
+		. '<div class="aw-newsletter-form aw-newsletter-form--' . esc_attr( $layout ) . esc_attr( $align ) . '" data-kit-form="newsletter">'
+		. $heading . $subheading . $inner
+		. '</div>';
 }
 add_shortcode( 'aw_newsletter', 'mailweb_nl_ff_form' );
 add_shortcode( 'mailweb_newsletter', 'mailweb_nl_ff_form' );
@@ -139,6 +150,24 @@ add_action(
 					'description'     => __( 'Newsletter subscription form powered by MailWeb & FluentCRM.', 'mailweb' ),
 					'category'        => 'widgets',
 					'render_callback' => 'mailweb_nl_ff_form',
+					'attributes'      => array(
+						'align'      => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'layout'     => array(
+							'type'    => 'string',
+							'default' => 'default',
+						),
+						'heading'    => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'subheading' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+					),
 				)
 			);
 		}
