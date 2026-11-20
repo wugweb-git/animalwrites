@@ -21,13 +21,14 @@
  * @package insightweb
  */
 
-if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
+if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput, WordPress.PHP.DiscouragedPHPFunctions, WordPress.WP.GlobalVariablesOverride, WordPress.DateTime.RestrictedFunctions, Squiz.Commenting.FunctionComment.MissingParamTag, Universal.Files.SeparateFunctionsFromOO -- a command-line test runner with WordPress stubs.
-
-define( 'ABSPATH', __DIR__ . '/' );
 const DAY_IN_SECONDS    = 86400;
 const MINUTE_IN_SECONDS = 60;
 

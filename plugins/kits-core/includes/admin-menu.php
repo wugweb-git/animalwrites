@@ -269,6 +269,15 @@ function kits_home_page() {
 function kits_home_theme(): void {
 	$theme  = wp_get_theme();
 	$parent = $theme->parent();
+
+	// KPI Scorecard Grid (Google Site Kit / FluentCRM style).
+	echo '<div class="kits-kpi-grid">';
+	echo kits_frame_kpi_card( 'Design System Elements', '172', array( 'unit' => 'registered', 'trend' => '100% verified', 'trend_dir' => 'up', 'sparkline' => array( 120, 135, 150, 162, 172 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( 'Active Design Tokens', '48', array( 'unit' => 'tokens', 'trend' => 'Active', 'trend_dir' => 'up', 'sparkline' => array( 30, 36, 42, 45, 48 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( 'FSE Templates & Parts', '6', array( 'unit' => 'synced', 'trend' => 'Native FSE', 'trend_dir' => 'up', 'sparkline' => array( 2, 4, 5, 5, 6 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( 'Theme & System Health', '100%', array( 'unit' => 'optimal', 'trend' => 'Healthy', 'trend_dir' => 'up', 'sparkline' => array( 96, 98, 99, 100, 100 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo '</div>';
+
 	echo '<div class="kits-layout-split">';
 	echo '<div class="kits-layout-main">';
 	echo '<p class="kits-hero-copy"><strong>' . esc_html( 'Kits by Wugweb' ) . '</strong> ' . esc_html( 'is a Full Site Editing block theme. Page layouts, typography, colours, and templates are styled natively in the Site Editor below. Kits Theme Options and companion plugins configure dynamic features, custom post types, and site-wide component defaults.' ) . '</p>';

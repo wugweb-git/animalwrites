@@ -9,13 +9,14 @@
  * @package planweb
  */
 
-if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
+if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
-
-define( 'ABSPATH', __DIR__ . '/' );
 require dirname( __DIR__ ) . '/includes/model.php';
 require dirname( __DIR__ ) . '/includes/feed-model.php';
 

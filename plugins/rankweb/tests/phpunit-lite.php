@@ -13,11 +13,11 @@
 
 namespace PHPUnit\Framework;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	if ( 'cli' !== PHP_SAPI ) {
-		exit;
-	}
+if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
 	define( 'ABSPATH', __DIR__ . '/' );
+}
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 if ( ! class_exists( TestCase::class ) ) {

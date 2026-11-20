@@ -389,6 +389,15 @@ function kits_system_contrast_table( array $reg, array $vals ): void {
 			'aa'    => $r ? ( $r >= 4.5 ? '✓ pass' : '<strong class="error-message">✗ fail</strong>' ) : 'not a plain colour',
 		);
 	}
+	$pass_count  = count( array_filter( $cells, fn( $c ) => false !== strpos( (string) $c['aa'], '✓ pass' ) ) );
+	$total_count = count( $cells );
+	if ( function_exists( 'kits_frame_kpi_grid' ) && $total_count > 0 ) {
+		echo '<div class="kits-kpi-grid">';
+		echo kits_frame_kpi_card( 'Audited Color Pairs', (string) $total_count, array( 'unit' => 'pairs', 'trend' => 'WCAG AA', 'trend_dir' => 'up' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo kits_frame_kpi_card( 'Compliance Rate', (string) round( ( $pass_count / $total_count ) * 100 ) . '%', array( 'unit' => 'passing', 'trend' => $pass_count . '/' . $total_count . ' pass', 'trend_dir' => 'up' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo kits_frame_kpi_card( 'Minimum AA Standard', '4.5:1', array( 'unit' => 'contrast ratio', 'trend' => 'WCAG 2.1 AA', 'trend_dir' => 'neutral' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '</div>';
+	}
 	kits_simple_table( 'contrast', array( 'name' => 'Component', 'text' => 'Text', 'on' => 'On', 'ratio' => 'Ratio', 'aa' => 'AA (4.5:1 text)' ), $cells );
 }
 
@@ -414,13 +423,13 @@ function kits_system_page() {
 	if ( $missing ) {
 		wp_admin_notice( '<p><strong>' . count( $missing ) . ' class(es) in use with no registry entry.</strong> The deploy check stops on these.</p><details><summary>' . esc_html( 'Classes' ) . '</summary><p>' . esc_html( implode( ', ', $missing ) ) . '</p></details>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
 	}
-	// The Kits tabs are above; this screen's own parts are links under them, as on core list screens.
-	echo '<ul class="subsubsub">';
-	$last = array_key_last( $tabs );
+	// Modern navigation chips (Site Kit / FluentCRM style).
+	echo '<div class="kits-reg-toolbar" style="margin-top: 16px; margin-bottom: 20px;"><div class="kits-reg-filters">';
 	foreach ( $tabs as $k => $label ) {
-		echo '<li><a' . ( $k === $tab ? ' class="current" aria-current="page"' : '' ) . ' href="' . esc_url( add_query_arg( 'tab', $k, $base ) ) . '">' . esc_html( $label ) . '</a>' . ( $k === $last ? '' : ' |' ) . '</li> ';
+		$active = ( $k === $tab ) ? ' is-active' : '';
+		echo '<a class="kits-chip' . esc_attr( $active ) . '" href="' . esc_url( add_query_arg( 'tab', $k, $base ) ) . '">' . esc_html( $label ) . '</a> ';
 	}
-	echo '</ul><br class="clear">';
+	echo '</div></div>';
 
 	if ( 'states' === $tab ) { // every primitive and block in every state, drawn by the site's own styles (the private page /kits-demo/)
 		if ( ! $demo ) {
