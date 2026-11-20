@@ -33,6 +33,9 @@ define( 'SOURCEWEB_FILE', __FILE__ );
 if ( ! defined( 'AW_SOURCING_DIR' ) ) {
 	define( 'AW_SOURCING_DIR', SOURCEWEB_DIR );
 }
+if ( ! defined( 'AW_SOURCING_FILE' ) ) {
+	define( 'AW_SOURCING_FILE', SOURCEWEB_FILE );
+}
 // SourceWeb needs Kits Core (the admin shell and site parts), DirectoryWeb (the listings and places it fills) and
 // InsightWeb (the keyword table, includes/keywords.php there). Plugins load in name order, so active ones load after
 // this file: load them now, once, as Animal Writes Core does (each stops a second load). Animal Writes Core loads Kits

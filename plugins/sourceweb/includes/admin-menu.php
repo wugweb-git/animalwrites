@@ -118,8 +118,9 @@ add_filter(
 );
 
 // Plugins screen: Overview and Settings under the plugin's name (when SourceWeb is listed there as its own plugin).
+$sourceweb_main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( AW_SOURCING_DIR . 'sourceweb.php' ) ? AW_SOURCING_DIR . 'sourceweb.php' : AW_SOURCING_DIR . 'aw-sourcing.php' );
 add_filter(
-	'plugin_action_links_' . plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' ),
+	'plugin_action_links_' . plugin_basename( $sourceweb_main_file ),
 	function ( $links ) {
 		$own = array();
 		foreach ( aw_src_action_link_paths() as $label => $path ) {

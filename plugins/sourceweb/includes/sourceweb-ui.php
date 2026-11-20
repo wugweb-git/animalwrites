@@ -106,7 +106,8 @@ add_action(
 		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! current_user_can( sourceweb_ui_caps()[ $screen ] ) ) {
 			return;
 		}
-		$head   = get_file_data( AW_SOURCING_DIR . 'aw-sourcing.php', array( 'Version' => 'Version' ) );
+		$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( AW_SOURCING_DIR . 'sourceweb.php' ) ? AW_SOURCING_DIR . 'sourceweb.php' : AW_SOURCING_DIR . 'aw-sourcing.php' );
+		$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 		// The header's tabs in menu order.
 		$order = array(
 			'dashboard'  => __( 'Dashboard', 'aw-sourcing' ),
@@ -138,15 +139,15 @@ add_action(
 		$ok = kits_shell_app(
 			array(
 				'handle'      => 'sourceweb-admin',
-				'src'         => plugins_url( 'build/index.js', AW_SOURCING_DIR . 'aw-sourcing.php' ),
+				'src'         => plugins_url( 'build/index.js', $main_file ),
 				'asset'       => AW_SOURCING_DIR . 'build/index.asset.php',
 				'object'      => 'sourcewebApp',
-				'text_domain' => 'aw-sourcing',
+				'text_domain' => 'sourceweb',
 				'data'        => array(
 					'screen'  => $screen,
 					'name'    => 'SourceWeb',
 					'version' => (string) $head['Version'],
-					'icon'    => plugins_url( 'assets/icon.svg', AW_SOURCING_DIR . 'aw-sourcing.php' ),
+					'icon'    => plugins_url( 'assets/icon.svg', $main_file ),
 					'tabs'    => $tabs,
 					'rest'    => SOURCEWEB_REST,
 					'isAdmin' => current_user_can( AW_SRC_CAP ),

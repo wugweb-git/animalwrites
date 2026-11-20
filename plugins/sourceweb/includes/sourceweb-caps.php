@@ -48,7 +48,8 @@ function sourceweb_caps_grant(): void {
 	update_option( 'sourceweb_caps', SOURCEWEB_CAP_VERSION, true );
 }
 
-register_activation_hook( dirname( __DIR__ ) . '/aw-sourcing.php', 'sourceweb_caps_grant' );
+$sourceweb_hook_file = file_exists( dirname( __DIR__ ) . '/sourceweb.php' ) ? dirname( __DIR__ ) . '/sourceweb.php' : dirname( __DIR__ ) . '/aw-sourcing.php';
+register_activation_hook( $sourceweb_hook_file, 'sourceweb_caps_grant' );
 
 // Upgrade check: once per SOURCEWEB_CAP_VERSION, on an admin request.
 add_action(

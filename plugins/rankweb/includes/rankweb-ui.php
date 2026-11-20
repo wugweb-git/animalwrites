@@ -94,7 +94,8 @@ add_action(
 		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( AW_SEO_EXTRAS_DIR . 'build/index.js' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : RANKWEB_CAP ) ) {
 			return;
 		}
-		$head = get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) );
+		$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
+		$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 		$tabs = array(
 			array(
 				'slug'    => 'dashboard',
@@ -136,15 +137,15 @@ add_action(
 		$ok = kits_shell_app(
 			array(
 				'handle'      => 'rankweb-admin',
-				'src'         => plugins_url( 'build/index.js', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+				'src'         => plugins_url( 'build/index.js', $main_file ),
 				'asset'       => AW_SEO_EXTRAS_DIR . 'build/index.asset.php',
 				'object'      => 'rankwebApp',
-				'text_domain' => 'aw-seo-extras',
+				'text_domain' => 'rankweb',
 				'data'        => array(
 					'screen'    => $screen,
 					'name'      => 'RankWeb',
 					'version'   => (string) $head['Version'],
-					'icon'      => plugins_url( 'assets/icon.svg', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+					'icon'      => plugins_url( 'assets/icon.svg', $main_file ),
 					'tabs'      => $tabs,
 					'rest'      => RANKWEB_REST,
 					'faqUrl'    => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
@@ -163,7 +164,7 @@ add_action(
 			// Scoped to the body class below, so no other Kits plugin's shell is affected; the shell package is untouched.
 			wp_enqueue_style(
 				'rankweb-admin-css',
-				plugins_url( 'assets/admin.css', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+				plugins_url( 'assets/admin.css', $main_file ),
 				array( 'kits-shell' ),
 				(string) $head['Version']
 			);

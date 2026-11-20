@@ -45,8 +45,9 @@ add_action(
 );
 
 // Plugins screen: Overview and FAQ under the plugin's name (Search Insights is under InsightWeb's).
+$rankweb_main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
 add_filter(
-	'plugin_action_links_' . plugin_basename( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+	'plugin_action_links_' . plugin_basename( $rankweb_main_file ),
 	function ( $links ) {
 		$own = array(
 			'<a href="' . esc_url( add_query_arg( 'page', AW_SEO_MENU, admin_url( 'admin.php' ) ) ) . '">Overview</a>',

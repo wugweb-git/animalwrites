@@ -39,7 +39,8 @@ function aw_sourcing_kits_export( $names ) {
  * @param array $rows Rows: [label, HTML value].
  */
 function aw_sourcing_kits_status_row( $rows ) {
-	$own  = function_exists( 'is_plugin_active' ) && is_plugin_active( plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' ) ); // network-active too.
+	$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( AW_SOURCING_DIR . 'sourceweb.php' ) ? AW_SOURCING_DIR . 'sourceweb.php' : AW_SOURCING_DIR . 'aw-sourcing.php' );
+	$own       = function_exists( 'is_plugin_active' ) && ( is_plugin_active( plugin_basename( $main_file ) ) || is_plugin_active( plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' ) ) ); // network-active too.
 	$text = 'Active, ' . AW_SOURCING_LOADED . ( $own ? '' : ' (loaded by Animal Writes Core)' );
 	if ( function_exists( 'aw_review_count' ) ) {
 		$text .= '; ' . (int) aw_review_count() . ' to review';
