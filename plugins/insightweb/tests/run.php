@@ -27,6 +27,8 @@ if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput, WordPress.PHP.DiscouragedPHPFunctions, WordPress.WP.GlobalVariablesOverride, WordPress.DateTime.RestrictedFunctions, Squiz.Commenting.FunctionComment.MissingParamTag, Universal.Files.SeparateFunctionsFromOO -- a command-line test runner with WordPress stubs.
 const DAY_IN_SECONDS    = 86400;
 const MINUTE_IN_SECONDS = 60;
 

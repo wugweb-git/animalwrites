@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
 require dirname( __DIR__ ) . '/includes/model.php';
 require dirname( __DIR__ ) . '/includes/feed-model.php';
 

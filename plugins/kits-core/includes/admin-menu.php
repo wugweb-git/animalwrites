@@ -272,10 +272,10 @@ function kits_home_theme(): void {
 
 	// KPI Scorecard Grid (Google Site Kit / FluentCRM style).
 	echo '<div class="kits-kpi-grid">';
-	echo kits_frame_kpi_card( 'Design System Elements', '172', array( 'unit' => 'registered', 'trend' => '100% verified', 'trend_dir' => 'up', 'sparkline' => array( 120, 135, 150, 162, 172 ) ) );
-	echo kits_frame_kpi_card( 'Active Design Tokens', '48', array( 'unit' => 'tokens', 'trend' => 'Active', 'trend_dir' => 'up', 'sparkline' => array( 30, 36, 42, 45, 48 ) ) );
-	echo kits_frame_kpi_card( 'FSE Templates & Parts', '6', array( 'unit' => 'synced', 'trend' => 'Native FSE', 'trend_dir' => 'up', 'sparkline' => array( 2, 4, 5, 5, 6 ) ) );
-	echo kits_frame_kpi_card( 'Theme & System Health', '100%', array( 'unit' => 'optimal', 'trend' => 'Healthy', 'trend_dir' => 'up', 'sparkline' => array( 96, 98, 99, 100, 100 ) ) );
+	echo kits_frame_kpi_card( 'Design System Elements', '172', array( 'unit' => 'registered', 'trend' => '100% verified', 'trend_dir' => 'up', 'sparkline' => array( 120, 135, 150, 162, 172 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( 'Active Design Tokens', '48', array( 'unit' => 'tokens', 'trend' => 'Active', 'trend_dir' => 'up', 'sparkline' => array( 30, 36, 42, 45, 48 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( 'FSE Templates & Parts', '6', array( 'unit' => 'synced', 'trend' => 'Native FSE', 'trend_dir' => 'up', 'sparkline' => array( 2, 4, 5, 5, 6 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( 'Theme & System Health', '100%', array( 'unit' => 'optimal', 'trend' => 'Healthy', 'trend_dir' => 'up', 'sparkline' => array( 96, 98, 99, 100, 100 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
 	echo '</div>';
 
 	echo '<div class="kits-layout-split">';
