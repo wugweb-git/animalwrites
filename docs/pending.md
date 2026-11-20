@@ -13,6 +13,14 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ### Claim flow and clean-ups (plan `docs/cc-master-plan-19-nov.md`, 19 Nov 2026)
 - **B4 (merge 18308 into 43, Darpan data): live data, no PR; starts now that PR #164 is live.** C1 (old mail route): blocked on reading `aw_mail_in_old_seen` on live (routes in `plugins/mailweb/includes/website-forms.php`; `tools/ci/smoke.sh` line 63 needs `mailweb/v1/mail-in` in the same PR). C3: no code cause found (tel: links print correctly; old asset paths return 404 and nothing prints them); CDN purge proposed, watch the 404 log after the 19 Nov clear. B5 (3-step form): waits for the owner's go. B6 after B5 is live.
+### Kits Help IA overhaul & Theme Block-Type patterns (done 20 Nov 2026, PR #168, commit `d88e0304`)
+- **Built and merged (PR #168, commit `d88e0304`):**
+  - Added tabbed section switcher sub-navigation to `kits_sections_page()` and `kits_sections_back()`, visually separating the 6 stacked sections into clean tabs: `[ Docs ]`, `[ Design System ]`, `[ Developer ]` (with `[ Show all ]` fallback), completely eliminating the 20-meter vertical scroll overflow on `kits-help`.
+  - Added client-side pagination (15 items per page with `« Previous`, `Page X of Y`, `Next »`) and real-time search/filter reset to the 172-item Design System registry table in `plugins/kits-core/includes/system-screen.php`.
+  - Added 3-step Quick Start Action List to Kits Home (`admin-menu.php`, `kits_home_theme()`): Step 1 Logo & Header (`site-editor.php?postType=wp_template_part`), Step 2 Brand Colours & Typography (`site-editor.php?path=/wp_global_styles`), Step 3 Block Patterns (`site-editor.php?path=/patterns`).
+  - Added official WordPress Theme Developer Handbook `Block Types:` declarations across 9 theme block patterns (`banner`, `hero-split`, `card-grid`, `cta`, `empty-state`, `faq`, `newsletter`, `section`, `three-big-actions`), enabling native 1-click transformation and suggestion in the block editor.
+  - Added CSS styles for `.kits-section-nav`, `.kits-section-tab`, `.kits-reg-pagination`, and `.kits-quickstart-card` to `plugins/kits-core/src/shell/more.css` and `plugins/kits-core/build/shell/index.css`.
+
 ### Admin button piles: one "action list" part for the Kits shell (done 20 Nov 2026, PR #167, commit `bd14adb4` live)
 - **Built and live (PR #167, commit `bd14adb4`):**
   - Added `.kits-action-list` and `.kits-action-row` in `plugins/kits-core/src/shell/more.css` and `includes/admin-kits-frame.php` (`kits_frame_action_list()`).
