@@ -1,6 +1,6 @@
 <?php
 /**
- * Deploy check (owner, 24 Oct 2026): the site's copy of the workers registry (plugins/aw-sourcing/includes/
+ * Deploy check (owner, 24 Oct 2026): the site's copy of the workers registry (plugins/sourceweb/includes/
  * workers-registry.php, AW_WORKERS) must equal docs/workers.json on the workers repository's main branch, so Next due,
  * late limits and Run now never drift from the workflows. Both repositories are public: read raw, no token.
  * When a change touches the registry in both repositories, merge the workers PR first (the site only displays it), then
@@ -9,9 +9,7 @@
  */
 
 define( 'ABSPATH', __DIR__ . '/' );
-$workers_reg = file_exists( dirname( __DIR__, 2 ) . '/plugins/sourceweb/includes/workers-registry.php' )
-	? dirname( __DIR__, 2 ) . '/plugins/sourceweb/includes/workers-registry.php'
-	: dirname( __DIR__, 2 ) . '/plugins/aw-sourcing/includes/workers-registry.php';
+$workers_reg = dirname( __DIR__, 2 ) . '/plugins/sourceweb/includes/workers-registry.php';
 require $workers_reg;
 
 $src  = $argv[1] ?? 'https://raw.githubusercontent.com/wugweb-git/animal-writes-workers/main/docs/workers.json';

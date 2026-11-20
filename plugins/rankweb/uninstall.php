@@ -22,7 +22,7 @@
  *   aw_link_index_build (both with and without their 'now' argument)
  * Custom tables: {prefix}aw_link_keywords, {prefix}aw_links, {prefix}aw_link_audit, {prefix}aw_silos and {prefix}aw_silo_items (Internal links), dropped. Rank Math's tables are Rank Math's.
  *
- * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/aw-seo-extras-uninstall-<YYYYmmdd-His>.jsonl.gz
+ * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/rankweb-uninstall-<YYYYmmdd-His>.jsonl.gz
  * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
  * every table below (transients are caches and are not kept).
  * aw_seo_settings is kept whole in the backup. If the backup cannot be written, nothing is deleted.
@@ -30,7 +30,7 @@
  * Never deleted: posts, pages, terms, users, post or term meta (FAQ records, focus keywords, scores), Rank Math's data,
  * and any other plugin's options. The link keywords (post meta _aw_link_keywords) stay with the other post meta.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -44,7 +44,9 @@ if ( ! get_option( 'aw_seo_delete_data', 0 ) ) {
 $aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_link_db', 'aw_link_index_version', 'aw_link_page_version', 'aw_link_index_built', 'aw_link_audit_db', 'aw_silo_db', 'aw_link_audit_state', 'aw_link_audit_summary', 'aw_link_audit_checks', 'aw_seo_delete_data' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
-if ( ! aw_seo_uninstall_backup( 'aw-seo-extras', __DIR__ . '/aw-seo-extras.php', array_merge( array( 'aw_seo_settings' ), $aw_seo_options ), array(), array( $GLOBALS['wpdb']->prefix . 'aw_link_keywords', $GLOBALS['wpdb']->prefix . 'aw_links', $GLOBALS['wpdb']->prefix . 'aw_link_audit', $GLOBALS['wpdb']->prefix . 'aw_silos', $GLOBALS['wpdb']->prefix . 'aw_silo_items' ) ) ) {
+$rankweb_uninst_slug = file_exists( __DIR__ . '/rankweb.php' ) ? 'rankweb' : 'aw-seo-extras';
+$rankweb_uninst_file = file_exists( __DIR__ . '/rankweb.php' ) ? __DIR__ . '/rankweb.php' : __DIR__ . '/aw-seo-extras.php';
+if ( ! aw_seo_uninstall_backup( $rankweb_uninst_slug, $rankweb_uninst_file, array_merge( array( 'aw_seo_settings' ), $aw_seo_options ), array(), array( $GLOBALS['wpdb']->prefix . 'aw_link_keywords', $GLOBALS['wpdb']->prefix . 'aw_links', $GLOBALS['wpdb']->prefix . 'aw_link_audit', $GLOBALS['wpdb']->prefix . 'aw_silos', $GLOBALS['wpdb']->prefix . 'aw_silo_items' ) ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 

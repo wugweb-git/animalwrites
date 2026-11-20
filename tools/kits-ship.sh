@@ -50,6 +50,8 @@ if [ "$live" != "$sha" ]; then
 fi
 [ "$live" = "$sha" ] || { echo "NOT deployed: server is at ${live:0:7}, wanted $short"; exit 1; }
 echo "deployed $short"
+# Ensure all repo plugins in aw_deploy/plugins are symlinked in wp-content/plugins, and purge dead links:
+"${server[@]}" 'cd ~/domains/animalwrites.in/public_html && for p in aw_deploy/plugins/*; do [ -d "$p" ] && ln -sfn "../../$p" "wp-content/plugins/$(basename "$p")"; done && rm -f wp-content/plugins/aw-seo-extras wp-content/plugins/aw-sourcing' 2>/dev/null || true
 # Purge through the site, not WP-CLI: "wp litespeed-purge all" cannot notify the web server on this host (24 Oct 2026).
 # A one-off home URL is a cache miss, so deploy-purge.php (Kits Core, includes/ops) runs and purges once for the new commit.
 code=$(curl -s -o /dev/null -m 30 -w "%{http_code}" "https://animalwrites.in/?aw_deploy_nudge=ship-$short-$(date +%s)" || true)

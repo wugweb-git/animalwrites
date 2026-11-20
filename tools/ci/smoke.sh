@@ -25,14 +25,14 @@ wp theme activate kits-by-wugweb --quiet
 wp plugin activate kits-core --quiet
 # DirectoryWeb.
 wp plugin activate directoryweb --quiet
-# Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).
+# Rank Math is the site's SEO system; RankWeb adds what it cannot do (it does nothing without Rank Math).
 wp plugin install seo-by-rank-math --version=1.0.280 --activate --quiet
-if [ -d "$REPO/plugins/rankweb" ]; then wp plugin activate rankweb --quiet; else wp plugin activate aw-seo-extras --quiet; fi
+wp plugin activate rankweb --quiet
 # Mailweb: all site mail (inbox, webhook /wp-json/mailweb/v1/mail-in, SMTP sending, daily limit, signatures).
 wp plugin activate mailweb --quiet
 # InsightWeb and SourceWeb: active on the live site; animal-writes-core used to load them from their folders (retired 19 Nov 2026).
 wp plugin activate insightweb --quiet
-if [ -d "$REPO/plugins/sourceweb" ]; then wp plugin activate sourceweb --quiet; else wp plugin activate aw-sourcing --quiet; fi
+wp plugin activate sourceweb --quiet
 # One item of each kind.
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
