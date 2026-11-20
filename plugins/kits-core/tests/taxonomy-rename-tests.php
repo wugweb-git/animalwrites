@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Stub tests for includes/taxonomy-rename.php (no WordPress): the active name follows the data, nothing moves on
  * load, Rename moves terms, menu items and Rank Math keys after saving a backup, Undo puts them back, and the counts.
@@ -152,7 +155,8 @@ $fails = 0;
 /** Assert. */
 function check( $name, $ok ) {
 	global $fails;
-	fwrite( STDOUT, ( $ok ? 'ok   ' : 'FAIL ' ) . $name . "\n" ); // CLI test output.
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- CLI test output.
+	fwrite( STDOUT, ( $ok ? 'ok   ' : 'FAIL ' ) . $name . "\n" );
 	$fails += $ok ? 0 : 1;
 }
 
@@ -191,5 +195,6 @@ check( 'undo keeps the backup', isset( get_option( 'kits_taxonomy_rename_backup'
 
 check( 'key rename touches only the names', array( 'tax_kits_media_group_x' => 1, 'pt_post' => 2 ) === kits_taxonomy_rename_keys( kits_taxonomy_renames(), array( 'tax_aw_media_group_x' => 1, 'pt_post' => 2 ) ) );
 
+// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- CLI test output.
 fwrite( STDOUT, $fails ? "\n$fails failed\n" : "\nall passed\n" ); // CLI test output.
 exit( $fails ? 1 : 0 );

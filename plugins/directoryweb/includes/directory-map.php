@@ -348,8 +348,15 @@ function aw_dir_panels_html() {
  * @return string HTML output.
  */
 function directoryweb_render_map_block( $attributes = array() ): string {
-	$align = ! empty( $attributes['align'] ) ? ' align' . sanitize_html_class( $attributes['align'] ) : ' alignwide';
-	return '<div class="directoryweb-block-map' . esc_attr( $align ) . '">'
+	$align    = ! empty( $attributes['align'] ) ? ' align' . sanitize_html_class( $attributes['align'] ) : ' alignwide';
+	$radius   = isset( $attributes['radius'] ) ? (int) $attributes['radius'] : 25;
+	$zoom     = isset( $attributes['zoom'] ) ? (int) $attributes['zoom'] : 11;
+	$near_me  = ! isset( $attributes['showNearMe'] ) || ! empty( $attributes['showNearMe'] );
+	$height   = ! empty( $attributes['height'] ) ? esc_attr( $attributes['height'] ) : '500px';
+
+	$custom_attrs = ' data-radius="' . esc_attr( $radius ) . '" data-zoom="' . esc_attr( $zoom ) . '" data-near-me="' . ( $near_me ? '1' : '0' ) . '" style="--aw-map-height:' . esc_attr( $height ) . ';"';
+
+	return '<div class="directoryweb-block-map' . esc_attr( $align ) . '"' . $custom_attrs . '>'
 		. aw_dir_tools_html()
 		. aw_dir_panels_html()
 		. '</div>';
@@ -368,9 +375,25 @@ add_action(
 					'category'        => 'widgets',
 					'render_callback' => 'directoryweb_render_map_block',
 					'attributes'      => array(
-						'align' => array(
+						'align'      => array(
 							'type'    => 'string',
 							'default' => 'wide',
+						),
+						'radius'     => array(
+							'type'    => 'number',
+							'default' => 25,
+						),
+						'zoom'       => array(
+							'type'    => 'number',
+							'default' => 11,
+						),
+						'showNearMe' => array(
+							'type'    => 'boolean',
+							'default' => true,
+						),
+						'height'     => array(
+							'type'    => 'string',
+							'default' => '500px',
 						),
 					),
 				)

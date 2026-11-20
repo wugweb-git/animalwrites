@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the ops pieces moved from Animal Writes Core
  * on 18 Nov 2026. The error pages (includes/error-pages.php) install a missing drop-in, update ours, leave a current

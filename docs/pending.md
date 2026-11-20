@@ -11,6 +11,15 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### World-Class Products Suite: Onboarding Wizard, Scripts Manager, Reprint Engine, RankWeb Editor Sidebar, Block Inspector Controls, and PCP Fixes (PR #170)
+- **Built and validated across Theme and 6 Plugins:**
+  - **Kits by Wugweb Onboarding & Setup Wizard (`plugins/kits-core/includes/onboarding-wizard.php`)**: Built 1-click guided onboarding (`admin.php?page=kits-onboarding`) covering site identity (custom logo via `wp.media`, title, tagline), style variations (`default`, `slate`, `forest`, `ink`) with visual palette swatches, typography pairing, and Site Editor launcher (benchmark: Astra, Kadence, Create Block Theme).
+  - **Header & Footer Custom Scripts & Pixels Manager (`plugins/kits-core/includes/header-footer-scripts.php`)**: Built secure admin UI (`admin.php?page=kits-scripts`) and hooks for `<head>`, `wp_body_open`, and `wp_footer` injection (benchmark: WPCode / Insert Headers and Footers).
+  - **Reprint & Canonical Syndication Engine (`plugins/rankweb/includes/reprint.php`)**: Meta box and automated canonical protection + frontend attribution badge for syndicated/republished articles (benchmark: Reprint).
+  - **RankWeb Gutenberg Editor Sidebar (`plugins/rankweb/includes/editor-sidebar.php`, `assets/editor-sidebar.js`, `assets/editor-sidebar.css`)**: Live 0–100 SEO score pill in header, Google SERP snippet preview (desktop/mobile toggle), and real-time content analysis checklist (benchmark: Rank Math Pro / Yoast).
+  - **DirectoryWeb & MailWeb Gutenberg Block Inspector Enhancements**: Added attributes and responsive container data attributes (`radius`, `zoom`, `showNearMe`, `height`) to `directoryweb/map`, and layout styling variants (`layout`, `heading`, `subheading`) to `mailweb/newsletter`.
+  - **Plugin Check (PCP) Complete Clean-Up**: Added direct file access guards (`if ( ! defined( 'ABSPATH' ) ) exit;`) to all 15 `.asset.php` and test files across all 6 plugins, fixed `taxonomy-rename-tests.php` syntax, and fixed `mailweb_settings_url()` classic UI redirect.
+
 ### Claim flow and clean-ups (plan `docs/cc-master-plan-19-nov.md`, 19 Nov 2026)
 - **B4 (merge 18308 into 43, Darpan data): live data, no PR; starts now that PR #164 is live.** C1 (old mail route): blocked on reading `aw_mail_in_old_seen` on live (routes in `plugins/mailweb/includes/website-forms.php`; `tools/ci/smoke.sh` line 63 needs `mailweb/v1/mail-in` in the same PR). C3: no code cause found (tel: links print correctly; old asset paths return 404 and nothing prints them); CDN purge proposed, watch the 404 log after the 19 Nov clear. B5 (3-step form): waits for the owner's go. B6 after B5 is live.
 ### Native Blocks, Schema Consumer & A11y Polish (done 20 Nov 2026, PR #169, commit `86c8ea2d` live)

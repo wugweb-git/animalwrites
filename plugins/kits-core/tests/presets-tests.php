@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the content-type presets (includes/presets.php).
  * Every preset is off by default and registers nothing; a switched-on preset registers its type with core category and

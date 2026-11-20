@@ -58,6 +58,7 @@ function mailweb_settings_url( $sub = 'incoming', $args = array(), $anchor = '' 
 	$base = 'sending' === $sub ? array(
 		'page' => 'mailweb-settings',
 		'sub'  => 'sending',
+		'ui'   => 'classic',
 	) : array( 'page' => 'mailweb-settings' );
 	$url  = add_query_arg( array_merge( $base, $args ), admin_url( 'admin.php' ) );
 	return $url . ( '' !== $anchor ? '#' . $anchor : '' );
