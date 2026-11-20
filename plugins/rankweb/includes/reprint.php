@@ -204,10 +204,12 @@ add_filter(
 		}
 
 		$source_link = ! empty( $orig_url ) ? '<a href="' . esc_url( $orig_url ) . '" target="_blank" rel="noopener noreferrer nofollow">' . esc_html( $orig_source ?: $orig_url ) . '</a>' : esc_html( $orig_source );
+		/* translators: %s: formatted publication date */
 		$date_str    = ! empty( $orig_date ) ? ' ' . sprintf( esc_html__( 'on %s', 'rankweb' ), esc_html( wp_date( get_option( 'date_format' ), strtotime( $orig_date ) ) ) ) : '';
 
 		$badge = '<div class="rankweb-reprint-badge" style="margin-top:24px;padding:12px 16px;background:#f8fafc;border-left:4px solid #3b82f6;border-radius:4px;font-size:14px;color:#475569;">'
-			. '<em>' . sprintf( esc_html__( 'This article was originally published by %s%s and is republished here with attribution.', 'rankweb' ), $source_link, $date_str ) . '</em>'
+			/* translators: 1: original source name or link, 2: original publication date */
+			. '<em>' . sprintf( wp_kses_post( __( 'This article was originally published by %1$s%2$s and is republished here with attribution.', 'rankweb' ) ), $source_link, $date_str ) . '</em>'
 			. '</div>';
 
 		return $content . $badge;
