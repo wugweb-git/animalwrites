@@ -68,7 +68,7 @@ Only Newsletter #3 sends people to /thank-you/ (Fluent Forms confirmation "redir
 | Failure | Message |
 |---|---|
 | Required field empty | The field's own message from the form (e.g. "Enter your name", "Choose a state", "Choose your role") |
-| Wrong format | Email: Fluent Forms' email rule message; phone / WhatsApp: "Enter a 10-digit number, like 9876543210."; claim username: "Enter the username only, like animalwrites."; claim date: "Enter a date like 8 Oct 2026."; year: "Enter a year, like 2010."; web address: the form's url rule message; upload: "Use a PNG, JPG or WebP under 2 MB." |
+| Wrong format | Email: Fluent Forms' email rule message; phone / WhatsApp: "Enter a 10-digit number, like 9876543210."; claim username: "Enter the username only, like animalwrites."; claim date: "Enter a date like 8 Oct 2026."; year: "Enter a year, like 2010."; web address: the form's url rule message; upload (up to 8 MB; one message per cause): "This file is 3.4 MB. The limit is 8 MB.", "This is a HEIC file. Use PNG, JPG or WebP.", "This file type is not accepted. Use PNG, JPG or WebP." |
 | Spam check | "Couldn't verify you're not a bot. Try again." |
 | Too many sends | "Too many tries. Wait a minute, then try again." |
 | The send itself fails (no connection, server error) | "Your message didn't send. Check your connection and try again." (aw.js) |

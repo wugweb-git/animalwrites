@@ -133,7 +133,7 @@ function mailweb_wf_fields( $key ) {
 function mailweb_wf_value( $k, $v ) {
 	$labels = array(
 		'roles'  => defined( 'KITS_VOL_ROLES' ) ? KITS_VOL_ROLES : array(),
-		'role'   => defined( 'AW_CLAIM_ROLES' ) ? AW_CLAIM_ROLES : array(),
+		'role'   => defined( 'DW_CLAIM_ROLES' ) ? DW_CLAIM_ROLES : array(),
 		'reason' => function_exists( 'kits_report_reasons' ) ? kits_report_reasons() : array(),
 	)[ $k ] ?? ( defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
 	return implode( ', ', array_map( fn( $x ) => $labels[ $x ] ?? (string) $x, is_array( $v ) ? $v : array( $v ) ) );

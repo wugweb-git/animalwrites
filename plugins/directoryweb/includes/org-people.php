@@ -157,7 +157,7 @@ function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
  */
 function aw_org_people_from_claim( $claim, $lid, $apply = true ) {
 	$role = (string) get_post_meta( $claim, 'aw_c_role', true );
-	$role = defined( 'AW_CLAIM_ROLES' ) && '' !== $role ? ( AW_CLAIM_ROLES[ $role ] ?? $role ) : $role;
+	$role = defined( 'DW_CLAIM_ROLES' ) && '' !== $role ? ( DW_CLAIM_ROLES[ $role ] ?? $role ) : $role;
 	return aw_org_people_link( $lid, (string) get_post_meta( $claim, 'aw_c_email', true ), $role, false, $apply );
 }
 

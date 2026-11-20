@@ -40,7 +40,7 @@
 | `core/places.php` | LGD places: reader `aw_lgd()` `:53` (`data/lgd.json` `:58`), place helpers `:85-518`, option `aw_place_counts`, `save_post`/`set_object_terms` count resets `:320-331`, PIN lookup `aw_pin` `:494`, old place redirects `:382`, WP-CLI `aw redirects-import` `:408` | DW. Also used by News, Library, Campaigns and Opportunities (`AW_PLACE_TYPES` `:28`): DirectoryWeb owns places, and the other types use them because Core requires DirectoryWeb |
 | `core/places-admin.php` | Place box on the edit screen (`acf/render_field` `:73`, save `:84`, `wp_ajax_aw_pin_lookup` `:127`) | DW |
 | `core/claims.php` | Legacy `aw_claim` type (`:42-60`, kept so pre–Fluent Forms claims stay readable), logo checks, `admin_post_aw_claim_decide` `:182` (fires `aw_claim_before_apply` `:191`) | DW |
-| `core/claims-review.php` | Claim form #6: pre-fill `fluentform/rendering_field_data_*` `:124-172`, `AW_CLAIM_L` `:27`, Directory → Claims (`add_submenu_page` `:296`, cap `manage_directoryweb` since 13 Nov 2026), per-field approve `aw_claim_apply_field` `:494`, `admin_post_aw_claim_ff_decide` `:578` | DW |
+| `core/claims-review.php` | Claim form #6: pre-fill `fluentform/rendering_field_data_*` `:124-172`, `DW_CLAIM_L` `:27`, Directory → Claims (`add_submenu_page` `:296`, cap `manage_directoryweb` since 13 Nov 2026), per-field approve `aw_claim_apply_field` `:494`, `admin_post_aw_claim_ff_decide` `:578` | DW |
 | `core/find-help.php` | "Find help near you": place detection in text `:122-256` (`save_post` 30 `:266`), links on `item-more` `:354` and the campaign band `:370`, WP-CLI `aw-places` `:419`, `:507` | DW |
 | `core/featured.php` | "Featured in" matcher (see §0.4): scan, cron `aw_featured_rescan` `:322`, meta `aw_rel_org*`, schema helpers `:442-455`, WP-CLI `:497` | DW. Delete dead `aw_featured_html` `:415` |
 | `core/gov-verified.php` | Verified (government records): `aw_gov_verification` `:57`, sync on meta change `:112-128` (only while option `aw_gov_verified_live`), title mark `:167`, edit-screen box `:222`, WP-CLI `aw gov-verify` `:236` | DW |
@@ -177,7 +177,7 @@ In phase 1 these become settings or data. Each starts with today's value, suppli
 - **Helplines:** 112 and 1962 (`district-helplines.php:103-107`).
 - **Copy:** "Animal Helpline Numbers in …" / "Help in …" (`directory.php:226-248`), "Animal welfare directory: %s" (`:307`), the intro (`:644-650`), the "Blue Cross" alias and placeholder (`:414`, `:575`), redirect-by "Animal Writes" (`:105`), "Claimed only" / "Verified only" (`:581-582`).
 - **City and neighbourhood lists:** `AW_PLACE_DETECT_CITIES`, `AW_DISTRICT_COMMON_NAMES`, and the Hindi stop-words in `AW_FEATURED_COMMON`.
-- **Fixed paths:** `/directory/`, `/claim/`, `/volunteer/`, `/contact/?about=listing`; claim role list `AW_CLAIM_ROLES`; the `+91` phone handling.
+- **Fixed paths:** `/directory/`, `/claim/`, `/volunteer/`, `/contact/?about=listing`; claim role list `DW_CLAIM_ROLES`; the `+91` phone handling.
 - **What is not text to move:** the data keys (`aw_*` meta, options, `aw/v1`, `aw_listing`, block names in saved content). They stay as they are (owner).
 
 ## 2. Admin: what DirectoryWeb registers into the Kits Core shell
@@ -250,7 +250,7 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 - **Directory copy:** titles, intro, search aliases, helplines (112/1962 rows), redirect-by.
 
 **What all settings follow:**
-- Every setting goes through `register_setting( …, array( 'show_in_rest' => … ) )` and **keeps its current option name**. Today's constants (`AW_VET_TYPES`, `AW_SEARCH_NAME_ALIASES`, `AW_FINDHELP_MAX`, `AW_REVERIFY_DAYS`, `AW_CLAIM_ROLES`…) become defaults, so no saved value is lost.
+- Every setting goes through `register_setting( …, array( 'show_in_rest' => … ) )` and **keeps its current option name**. Today's constants (`AW_VET_TYPES`, `AW_SEARCH_NAME_ALIASES`, `AW_FINDHELP_MAX`, `AW_REVERIFY_DAYS`, `DW_CLAIM_ROLES`…) become defaults, so no saved value is lost.
 - Keys never reach the browser.
 
 **Technical (per the standard):**

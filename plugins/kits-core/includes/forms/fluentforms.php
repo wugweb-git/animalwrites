@@ -409,7 +409,7 @@ function kits_ff_render_logo( $element, $form ) {
 		. '<input type="hidden" name="' . esc_attr( $name ) . '" value="">'
 		. '<span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite"></span>';
 	$label = wp_strip_all_tags( (string) ( $element['settings']['label'] ?? 'Logo' ) );
-	$hint  = (string) ( $element['settings']['help_message'] ?? 'PNG, JPG or WebP, up to 2 MB.' );
+	$hint  = (string) ( $element['settings']['help_message'] ?? 'PNG, JPG or WebP, up to 8 MB.' );
 	return kits_ff_group( $id, $label, $ctl, array( 'hint' => $hint, 'data_name' => $name ) );
 }
 
@@ -612,7 +612,7 @@ function kits_ff_errors( $key, $data ) {
 	foreach ( KITS_FF_UPLOADS as $up => $max ) {
 		$tokens = array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) );
 		if ( count( $tokens ) > $max || array_filter( $tokens, fn( $t ) => ! kits_ff_logo_file( $t ) ) ) {
-			$errors[ $up ] = 1 < $max ? 'Use up to ' . $max . ' PNG, JPG or WebP pictures, each under 2 MB.' : 'Use a PNG, JPG or WebP under 2 MB.';
+			$errors[ $up ] = 1 < $max ? 'Add up to ' . $max . ' pictures again: one was not received.' : 'Add this file again: it was not received.';
 		}
 	}
 	return $errors;
@@ -717,8 +717,9 @@ function kits_ff_upload() {
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
 	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked in aw_claim_logo_ok()
-	if ( ! aw_claim_logo_ok( $logo ) ) {
-		wp_send_json_error( 'Use a PNG, JPG or WebP under 2 MB.' );
+	$why = dw_claim_upload_error( $logo );
+	if ( '' !== $why ) {
+		wp_send_json_error( $why );
 	}
 	foreach ( (array) glob( kits_private_dir() . '/tmp-*.png' ) as $old ) { // uploads never sent with a claim go after a day
 		if ( $old && filemtime( $old ) < time() - DAY_IN_SECONDS ) {
@@ -727,7 +728,7 @@ function kits_ff_upload() {
 	}
 	$token = bin2hex( random_bytes( 16 ) );
 	if ( ! aw_claim_logo_store( $logo['tmp_name'], 'tmp-' . $token . '.png' ) ) {
-		wp_send_json_error( 'Use a PNG, JPG or WebP under 2 MB.' );
+		wp_send_json_error( 'We could not read this picture. Try another file, or a smaller one.' );
 	}
 	set_transient( $rl, (int) get_transient( $rl ) + 1, HOUR_IN_SECONDS );
 	wp_send_json_success( array( 'token' => $token ) );

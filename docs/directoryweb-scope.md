@@ -89,7 +89,7 @@ Where Native replaces the code, the plugin named in brackets is the one that cal
 | Side | Piece | Where |
 |---|---|---|
 | A | Claims (legacy `aw_claim` type), decide handler | `dw/claims.php`, `admin_post_aw_claim_decide` `:199` |
-| A | Claim review (Directory → Claims), the review screen | `dw/claims-review.php` (field map `AW_CLAIM_L` `:26`, screen `:299`, `admin_post_aw_claim_ff_decide` `:627`) |
+| A | Claim review (Directory → Claims), the review screen | `dw/claims-review.php` (field map `DW_CLAIM_L` `:26`, screen `:299`, `admin_post_aw_claim_ff_decide` `:627`) |
 | A | DirectoryWeb Claims list in the Kits shell: **read-only** | `dw/directoryweb-rest.php`, `dw/directoryweb-ui.php:97-99` |
 | F | Badges: Claimed = `aw_verified`; Verified = government documents | `dw/listing-template.php:405`, `:568`; `dw/gov-verified.php:57`, `:84` |
 | A | SCF groups (8), the one-pager fallback | `plugins/directoryweb/acf-json/`, `directoryweb.php:96-115`; `dw/listing-profile.php:61-79` (branch) |
@@ -378,7 +378,7 @@ DirectoryWeb Claims screen stays **read-only** [A].
 | Extra posted fields, uploads (`logo_token`, `proof_token`, `photo_tokens`), +91 phones | `core/forms-fluentforms.php:64-70`, `:793-794` (`wp_ajax(_nopriv)_aw_ff_upload`) | F |
 | Claim socials → `aw_instagram`, `aw_facebook`, `aw_x`, `aw_youtube`, `aw_linkedin` | `core/forms-fluentforms.php:73-79` | — |
 | Claim pre-fill from the listing (public fields only) | `dw/claims-review.php:124-172` | F |
-| Field map form → listing → enrichment field (`l_email` → `aw_email`, `phones`, `l_area` → `aw_area`, `l_address` → `aw_address`, `l_maps` → `aw_maps_url`, `l_hours`, `l_about`, `l_aliases`, `l_founded`, `l_head`, `l_animals`, `l_areas` → `aw_areas_served`, `l_services`, `l_languages`…) | `dw/claims-review.php:26-40` (`AW_CLAIM_L`) | — |
+| Field map form → listing → enrichment field (`l_email` → `aw_email`, `phones`, `l_area` → `aw_area`, `l_address` → `aw_address`, `l_maps` → `aw_maps_url`, `l_hours`, `l_about`, `l_aliases`, `l_founded`, `l_head`, `l_animals`, `l_areas` → `aw_areas_served`, `l_services`, `l_languages`…) | `dw/claims-review.php:26-40` (`DW_CLAIM_L`) | — |
 | Values normalised on submit; org picker (published listing only) | `core/forms-fluentforms.php:140-144`, `:525-528` | — |
 | References `AW-C-` / `AW-R-`, phone de-dup, contact on submit | `core/forms-fluentforms.php:553-575`, `:690` (`fluentform/submission_inserted`) | — |
 | Review and per-field apply (logged in SourceWeb's change log with Undo) | `dw/claims-review.php:536-560`, `:627` | A |

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CLAIM_ROLES = array(
+const DW_CLAIM_ROLES = array(
 	''          => 'Choose one',
 	'founder'   => 'Founder, trustee or director',
 	'staff'     => 'Staff member',
@@ -28,7 +28,7 @@ const AW_CLAIM_ROLES = array(
  * a phone and a WhatsApp number; on approval they go into the listing's Phone numbers list (aw_listing_put_phone), not
  * into single fields.
  */
-const AW_CLAIM_FIELDS = array(
+const DW_CLAIM_FIELDS = array(
 	'aw_phone'    => array( 'Phone', 'phone' ),
 	'aw_whatsapp' => array( 'WhatsApp', 'phone' ),
 	'aw_email'    => array( 'Public email', 'email' ),
@@ -37,7 +37,7 @@ const AW_CLAIM_FIELDS = array(
 	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (DIRECTORYWEB_SERVICES); saved as service tags
 );
 
-const AW_CLAIM_LOGO_BYTES = 2 * MB_IN_BYTES;
+const DW_CLAIM_LOGO_BYTES = 8 * MB_IN_BYTES; // owner plan 19 Nov 2026 (B2): was 2 MB; the server still resizes to 800 px
 
 /**
  * The aw_claim post type's primitive capabilities: all DIRECTORYWEB_CAP (manage_directoryweb, directoryweb-caps.php),
@@ -88,15 +88,43 @@ function aw_claim_form( $listing ) {
 	return kits_ff_form( 'claim', array( 'listing' => $listing ) );
 }
 
-/** Is the uploaded logo a PNG, JPG or WebP under 2 MB? */
+/**
+ * Why an uploaded picture is refused, in words the sender can act on; '' when it is fine (a PNG, JPG or WebP up to
+ * DW_CLAIM_LOGO_BYTES). One message per cause: no file, over the server's limit, not finished, too big, wrong type.
+ *
+ * @param array|null $logo The $_FILES entry.
+ * @return string
+ */
+function dw_claim_upload_error( $logo ) {
+	$limit = size_format( DW_CLAIM_LOGO_BYTES, 0 );
+	if ( ! is_array( $logo ) || ! isset( $logo['error'] ) || UPLOAD_ERR_NO_FILE === (int) $logo['error'] ) {
+		return 'No file arrived. Choose it again.';
+	}
+	if ( in_array( (int) $logo['error'], array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) ) {
+		return 'This file is too large for the server. Use a picture under ' . size_format( min( DW_CLAIM_LOGO_BYTES, wp_max_upload_size() ), 0 ) . '.';
+	}
+	if ( UPLOAD_ERR_OK !== (int) $logo['error'] || empty( $logo['tmp_name'] ) || ! is_uploaded_file( $logo['tmp_name'] ) ) {
+		return 'The upload did not finish. Check your connection and try again.';
+	}
+	if ( (int) $logo['size'] > DW_CLAIM_LOGO_BYTES ) {
+		return 'This file is ' . size_format( (int) $logo['size'], 1 ) . '. The limit is ' . $limit . '.';
+	}
+	$ft = wp_check_filetype_and_ext( $logo['tmp_name'], $logo['name'], array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) );
+	if ( empty( $ft['type'] ) ) {
+		$ext = strtolower( pathinfo( (string) $logo['name'], PATHINFO_EXTENSION ) );
+		return in_array( $ext, array( 'heic', 'heif' ), true ) ? 'This is a HEIC file. Use PNG, JPG or WebP.' : 'This file type is not accepted. Use PNG, JPG or WebP.';
+	}
+	return '';
+}
+
+/** Is the uploaded logo a PNG, JPG or WebP within the size limit? */
 function aw_claim_logo_ok( $logo ) {
-	$ok = $logo && UPLOAD_ERR_OK === (int) $logo['error'] && is_uploaded_file( $logo['tmp_name'] );
-	$ft = $ok ? wp_check_filetype_and_ext( $logo['tmp_name'], $logo['name'], array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) ) : array();
-	return $ok && ! empty( $ft['type'] ) && (int) $logo['size'] <= AW_CLAIM_LOGO_BYTES;
+	return '' === dw_claim_upload_error( $logo );
 }
 
 /** A logo as a PNG of at most 800 px in the private folder: its file name, or ''. */
 function aw_claim_logo_store( $tmp, $name = '' ) {
+	wp_raise_memory_limit( 'image' ); // an 8 MB photo needs more than the 40 MB front-end limit to resize
 	$editor = wp_get_image_editor( $tmp );
 	if ( is_wp_error( $editor ) || ! function_exists( 'kits_private_dir' ) ) { // never saved outside the private folder (Kits Core's)
 		return '';
@@ -117,7 +145,7 @@ add_action(
 			echo esc_html( ucfirst( (string) get_post_meta( $id, 'aw_c_status', true ) ) );
 		} elseif ( 'aw_changes' === $col ) {
 			$p = (array) get_post_meta( $id, 'aw_c_proposed', true );
-			$n = array_map( fn( $k ) => AW_CLAIM_FIELDS[ $k ][0] ?? $k, array_keys( $p ) );
+			$n = array_map( fn( $k ) => DW_CLAIM_FIELDS[ $k ][0] ?? $k, array_keys( $p ) );
 			if ( get_post_meta( $id, 'aw_c_logo', true ) ) {
 				$n[] = 'Logo';
 			}
@@ -145,12 +173,12 @@ function aw_claim_review_box( $post ) {
 	$status   = (string) get_post_meta( $post->ID, 'aw_c_status', true );
 	$proposed = (array) get_post_meta( $post->ID, 'aw_c_proposed', true );
 	$logo     = (string) get_post_meta( $post->ID, 'aw_c_logo', true );
-	$roles    = AW_CLAIM_ROLES;
+	$roles    = DW_CLAIM_ROLES;
 	echo '<p><strong>Listing:</strong> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank">' . esc_html( get_the_title( $lid ) ) . '</a> · <strong>Status:</strong> ' . esc_html( ucfirst( $status ) ) . '</p>';
 	echo '<p><strong>From:</strong> ' . esc_html( get_post_meta( $post->ID, 'aw_c_name', true ) ) . ' (' . esc_html( $roles[ get_post_meta( $post->ID, 'aw_c_role', true ) ] ?? '' ) . '), '
 		. esc_html( get_post_meta( $post->ID, 'aw_c_email', true ) ) . ' ' . esc_html( get_post_meta( $post->ID, 'aw_c_phone', true ) ) . '</p>';
 	$cells = array();
-	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
+	foreach ( DW_CLAIM_FIELDS as $key => $def ) {
 		if ( isset( $proposed[ $key ] ) ) {
 			$cells[] = array( 'field' => esc_html( $def[0] ), 'now' => esc_html( aw_claim_current( $lid, $key ) ), 'proposed' => '<strong>' . esc_html( $proposed[ $key ] ) . '</strong>' );
 		}
@@ -206,7 +234,7 @@ add_action(
 		if ( 'approve' === sanitize_key( wp_unslash( $_GET['do'] ?? '' ) ) && 'aw_listing' === get_post_type( $lid ) ) {
 			do_action( 'aw_claim_before_apply', $lid, (array) get_post_meta( $id, 'aw_c_proposed', true ), $id ); // enrichment.php logs the organisation as the source
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
-				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {
+				if ( isset( DW_CLAIM_FIELDS[ $key ] ) ) {
 					if ( 'aw_services' === $key ) {
 						directoryweb_set_item_tags( $lid, explode( ',', (string) $val ), directoryweb_service_slugs() ); // the services only; the listing's types stay
 					} elseif ( 'aw_phone' === $key ) {
