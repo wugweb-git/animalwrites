@@ -3,6 +3,7 @@
  * Title: Call to action
  * Slug: kits-by-wugweb/cta
  * Categories: kits-components
+ * Block Types: core/group
  * Keywords: call to action, button, band
  * Viewport Width: 1280
  */

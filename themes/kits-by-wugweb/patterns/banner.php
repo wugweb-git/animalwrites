@@ -3,6 +3,7 @@
  * Title: Banner
  * Slug: kits-by-wugweb/banner
  * Categories: kits-components
+ * Block Types: core/cover, core/group
  * Description: A wide image with optional text on it: 16:5 on wide screens, 4:3 on phones. Shows nothing until an image is chosen. Source images up to 5 MB; WebP or AVIF.
  * Viewport Width: 1280
  * Keywords: banner, hero, image

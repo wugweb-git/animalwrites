@@ -3,6 +3,7 @@
  * Title: Card grid — latest
  * Slug: kits-by-wugweb/card-grid
  * Categories: kits-lists
+ * Block Types: core/query
  * Keywords: cards, grid, posts, list
  * Viewport Width: 1280
  */

@@ -654,6 +654,15 @@ function kits_system_page() {
 		)
 	);
 
+	// Pagination Controls (15 items per page to prevent vertical scroll overflow)
+	echo '<div id="kits-reg-pagination" class="kits-reg-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--ks-surface);border:1px solid var(--ks-border);border-top:none;border-radius:0 0 var(--ks-r) var(--ks-r);margin-bottom:20px;">';
+	echo '<div class="kits-reg-pagination__info"><span id="kits-reg-page-info" class="description">' . esc_html__( 'Page 1 of 12', 'kits-core' ) . '</span></div>';
+	echo '<div class="kits-reg-pagination__nav" style="display:flex;gap:8px;">';
+	echo '<button type="button" id="kits-reg-prev" class="button button-secondary" disabled>' . esc_html__( '« Previous', 'kits-core' ) . '</button>';
+	echo '<button type="button" id="kits-reg-next" class="button button-secondary">' . esc_html__( 'Next »', 'kits-core' ) . '</button>';
+	echo '</div>';
+	echo '</div>';
+
 	// Slide-Over Drawer Markup
 	echo '<div id="kits-drawer-backdrop" class="kits-drawer-backdrop" aria-hidden="true"></div>';
 	echo '<aside id="kits-inspector" class="kits-drawer" aria-hidden="true" role="dialog" aria-labelledby="kits-drawer-title">';
@@ -678,6 +687,11 @@ function kits_system_page() {
 		var drawerClose = document.getElementById('kits-drawer-close');
 		var drawerBody = document.getElementById('kits-drawer-body');
 		var drawerTitle = document.getElementById('kits-drawer-title');
+		var pageInfoEl = document.getElementById('kits-reg-page-info');
+		var prevBtn = document.getElementById('kits-reg-prev');
+		var nextBtn = document.getElementById('kits-reg-next');
+		var pageSize = 15;
+		var currentPage = 1;
 
 		if (!table) return;
 		var rows = Array.from(table.querySelectorAll('tbody tr'));
@@ -702,27 +716,69 @@ function kits_system_page() {
 		});
 
 		function filterTable() {
-			var visible = 0;
+			var matching = [];
 			rows.forEach(function(r) {
 				var type = r.getAttribute('data-type') || '';
 				var corpus = r.getAttribute('data-search') || '';
 				var matchType = (!activeType || type === activeType);
 				var matchSearch = (!activeSearch || corpus.indexOf(activeSearch) !== -1);
 				if (matchType && matchSearch) {
-					r.style.display = '';
-					visible++;
+					matching.push(r);
 				} else {
 					r.style.display = 'none';
 				}
 			});
+
+			var totalPages = Math.max(1, Math.ceil(matching.length / pageSize));
+			if (currentPage > totalPages) currentPage = totalPages;
+			if (currentPage < 1) currentPage = 1;
+
+			var startIdx = (currentPage - 1) * pageSize;
+			var endIdx = startIdx + pageSize;
+
+			matching.forEach(function(r, idx) {
+				if (idx >= startIdx && idx < endIdx) {
+					r.style.display = '';
+				} else {
+					r.style.display = 'none';
+				}
+			});
+
 			if (countEl) {
-				countEl.textContent = 'Showing ' + visible + ' of ' + rows.length + ' entries';
+				var from = matching.length ? (startIdx + 1) : 0;
+				var to = Math.min(matching.length, endIdx);
+				countEl.textContent = 'Showing ' + from + '-' + to + ' of ' + matching.length + ' entries';
 			}
+			if (pageInfoEl) {
+				pageInfoEl.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+			}
+			if (prevBtn) {
+				prevBtn.disabled = (currentPage <= 1);
+			}
+			if (nextBtn) {
+				nextBtn.disabled = (currentPage >= totalPages);
+			}
+		}
+
+		if (prevBtn) {
+			prevBtn.addEventListener('click', function() {
+				if (currentPage > 1) {
+					currentPage--;
+					filterTable();
+				}
+			});
+		}
+		if (nextBtn) {
+			nextBtn.addEventListener('click', function() {
+				currentPage++;
+				filterTable();
+			});
 		}
 
 		if (searchInput) {
 			searchInput.addEventListener('input', function(e) {
 				activeSearch = (e.target.value || '').trim().toLowerCase();
+				currentPage = 1;
 				filterTable();
 			});
 		}
@@ -733,6 +789,7 @@ function kits_system_page() {
 				filterChips.forEach(function(c) { c.classList.remove('is-active'); });
 				chip.classList.add('is-active');
 				activeType = chip.getAttribute('data-type') || '';
+				currentPage = 1;
 				filterTable();
 			});
 		});

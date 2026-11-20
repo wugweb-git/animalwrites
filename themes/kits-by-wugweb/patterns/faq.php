@@ -3,6 +3,7 @@
  * Title: FAQ
  * Slug: kits-by-wugweb/faq
  * Categories: kits-components
+ * Block Types: core/group
  * Keywords: faq, questions, answers
  * Viewport Width: 1280
  */

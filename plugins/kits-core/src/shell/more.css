@@ -1626,3 +1626,53 @@ table.widefat.kits-entries .col-action {
 .kits-action-row__action {
 	flex-shrink: 0;
 }
+
+/* Tabbed section switcher navigation */
+.kits-section-nav {
+	margin-bottom: var(--ks-s5);
+}
+
+.kits-section-tab {
+	text-decoration: none;
+	cursor: pointer;
+	transition: all 0.15s ease-in-out;
+}
+
+.kits-section-tab.is-active {
+	background: var(--ks-ink);
+	color: var(--ks-white);
+	border-color: var(--ks-ink);
+}
+
+/* Registry Pagination Controls */
+.kits-reg-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--ks-s3) var(--ks-s4);
+	background: var(--ks-surface, #fff);
+	border: 1px solid var(--ks-border, #e2e8f0);
+	border-top: none;
+	border-radius: 0 0 var(--ks-r, 6px) var(--ks-r, 6px);
+	margin-bottom: var(--ks-s5);
+}
+
+.kits-reg-pagination__info {
+	font-size: 13px;
+	color: var(--ks-g6, #64748b);
+}
+
+.kits-reg-pagination__nav {
+	display: flex;
+	gap: var(--ks-s2);
+}
+
+/* Quickstart Card */
+.kits-quickstart-card {
+	background: var(--ks-surface, #fff);
+	border: 1px solid var(--ks-border, #e2e8f0);
+	border-radius: var(--ks-r, 8px);
+	padding: var(--ks-s4) var(--ks-s5);
+	margin-bottom: var(--ks-s6);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
