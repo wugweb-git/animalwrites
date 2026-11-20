@@ -154,7 +154,7 @@ function kits_edit_screen_source_from( string $where ): string {
 		return 'WordPress';
 	}
 	if ( preg_match( '~/(?:plugins|mu-plugins)/([^/]+)/~', $where, $m ) ) {
-		$ours = array( 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb' );
+		$ours = array( 'aw-seo-extras', 'aw-sourcing', 'rankweb', 'sourceweb', 'kits-core', 'mailweb', 'directoryweb', 'insightweb', 'planweb' );
 		return in_array( $m[1], $ours, true ) ? 'Animal Writes (' . $m[1] . ')' : $m[1];
 	}
 	return 'Theme or other';

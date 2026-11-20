@@ -7,13 +7,16 @@
  * @package directoryweb
  */
 
-if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
-	exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	if ( 'cli' !== PHP_SAPI ) {
+		exit;
+	}
+	define( 'ABSPATH', __DIR__ . '/' );
 }
 
 // phpcs:disable WordPress.Security.EscapeOutput -- a command-line test runner.
 
-define( 'ABSPATH', __DIR__ . '/' );
+
 require dirname( __DIR__ ) . '/includes/directoryweb-shape.php';
 
 $fails = 0;
@@ -213,8 +216,16 @@ check( ! preg_match( '/aw_claim_apply_field|aw_claim_ff_decide|update_post_meta|
 check( false === strpos( $cl, "'capability_type' => array( 'aw_volunteer'" ), 'Claims: the post type no longer uses the volunteer capabilities' );
 check( false !== strpos( $cl, "'capabilities'    => aw_claim_caps()," ), 'Claims: the post type takes aw_claim_caps()' );
 if ( ! function_exists( 'aw_claim_caps' ) ) {
-	preg_match( '/function aw_claim_caps\(\): array \{.*?\n\}/s', (string) file_get_contents( $inc . 'claims.php' ), $m ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
-	eval( $m[0] ); // phpcs:ignore Squiz.PHP.Eval.Discouraged -- the test loads one pure function from the plugin file
+	if ( ! function_exists( 'add_action' ) ) {
+		function add_action() {}
+	}
+	if ( ! function_exists( 'add_filter' ) ) {
+		function add_filter() {}
+	}
+	if ( ! defined( 'MB_IN_BYTES' ) ) {
+		define( 'MB_IN_BYTES', 1048576 );
+	}
+	require_once $inc . 'claims.php';
 }
 $cc = aw_claim_caps();
 check( 'do_not_allow' === $cc['create_posts'] && 10 === count( array_filter( $cc, fn( $v ) => 'manage_directoryweb' === $v ) ), 'Claims: every claim capability is manage_directoryweb, none can be created by hand' );

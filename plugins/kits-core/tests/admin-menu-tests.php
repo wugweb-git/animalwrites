@@ -10,16 +10,16 @@
  * @package kits-core
  */
 
-if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
-	exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	if ( 'cli' !== PHP_SAPI ) {
+		exit;
+	}
+	define( 'ABSPATH', __DIR__ . '/' );
 }
 
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
 
-if ( 'cli' !== PHP_SAPI ) {
-	exit;
-}
-define( 'ABSPATH', __DIR__ . '/' );
+
 
 /**
  * Stand-in for __().

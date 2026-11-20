@@ -8,13 +8,16 @@
  * @package directoryweb
  */
 
-if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
-	exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	if ( 'cli' !== PHP_SAPI ) {
+		exit;
+	}
+	define( 'ABSPATH', __DIR__ . '/' );
 }
 
 // phpcs:disable -- a command-line test runner with stand-ins for WordPress functions.
 
-define( 'ABSPATH', __DIR__ . '/' );
+
 $meta = array();
 $reg  = array();
 $wrong   = array();

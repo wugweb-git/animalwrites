@@ -172,8 +172,8 @@ function aw_seo_unscored_ids( $limit ) {
 	global $wpdb;
 	$types = array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_press' ) ) );
 	$in    = implode( ', ', array_fill( 0, count( $types ), '%s' ) );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders
-	return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} k ON k.post_id = p.ID AND k.meta_key = 'rank_math_focus_keyword' AND k.meta_value <> '' LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'rank_math_seo_score' WHERE p.post_status = 'publish' AND p.post_type IN ($in) GROUP BY p.ID HAVING COALESCE( MAX( s.meta_value ), '' ) = '' ORDER BY p.ID DESC LIMIT %d", array_merge( $types, array( (int) $limit ) ) ) ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} k ON k.post_id = p.ID AND k.meta_key = 'rank_math_focus_keyword' AND k.meta_value <> '' LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'rank_math_seo_score' WHERE p.post_status = 'publish' AND p.post_type IN ($in) GROUP BY p.ID HAVING COALESCE( MAX( s.meta_value ), '' ) = '' ORDER BY p.ID DESC LIMIT %d", ...array_merge( $types, array( (int) $limit ) ) ) ) );
 }
 
 /**

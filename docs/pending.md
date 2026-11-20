@@ -25,7 +25,23 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
   - Streamlined the registry table to 5 constrained, balanced columns with one-click code copy and contrast status badges.
 - **Theme Defaults & User Customization Model:**
   - Declared explicit `settings.custom.kits.card` and `layout` default tokens in `themes/kits-by-wugweb/theme.json` to formalize theme defaults and bridge CSS variable fallbacks with Site Editor Global Styles.
-- **Validation:** 74/74 PHP admin menu checks passed, all shell-parts checks passed, registry check passed, contrast check passed (87 pairs), theme rules check passed, CSS min check passed.
+- **Plugin Admin UI Shell & Connectors Discovery:**
+  - Unblocked AI/MCP Connectors submenu screen by removing `'Connectors'` from `KITS_ADMIN_HIDE['Settings']` in `plugins/kits-core/includes/admin-layer/tidy.php`.
+  - Updated Kits product directories and ownership in `admin-screens.php` and `edit-screens.php`.
+- **MailWeb JSON Parsing Error Resolution:**
+  - Resolved `Unexpected token '<', "<p>There h"... is not valid JSON` root cause: hardened `crm-sync.php`, `mail-in.php`, and `mailweb-rest.php` with defensive try/catch blocks on `SubscriberNote::create`, `FluentCrmApi`, and webhook listener so endpoints always return structured JSON and never crash into HTML critical error pages.
+  - Hardened frontend `errText()` in `src/index.js`, `src/inbox.js`, and compiled `build/index.js` to gracefully catch and display clean diagnostic messages for unexpected non-JSON server responses.
+  - Preserved both mailbox configuration checkboxes in Connected Services.
+- **Plugin Renaming (`aw-seo-extras` -> `rankweb`, `aw-sourcing` -> `sourceweb`):**
+  - Renamed directories and main files to `plugins/rankweb/rankweb.php` and `plugins/sourceweb/sourceweb.php`.
+  - Updated plugin headers, update URIs, text domains, and defined `RANKWEB_DIR`, `RANKWEB_FILE`, `SOURCEWEB_DIR`, `SOURCEWEB_FILE` alongside legacy aliases for backwards compatibility.
+  - Updated `plugin-info.php` update hooks and test suites to resolve newly renamed files.
+- **System-Wide Technical Errors & Plugin Check Resolutions:**
+  - Replaced `eval()` in `directoryweb-tests.php` with direct test harness mocks.
+  - Standardized direct-access guards (`if ( ! defined( 'ABSPATH' ) )`) across 16 test files to satisfy Plugin Check without breaking CLI execution.
+  - Added unpacked argument splats to `$wpdb->prepare` in `campaign-letters.php`, `analysis.php`, and `internal-links.php`.
+  - Added input sanitization to `places-admin.php` and `places.php`.
+- **Validation:** 74/74 PHP admin menu checks passed, all shell-parts checks passed, 16/16 pure PHP test runners passed (455/455 checks in SourceWeb, 94/94 in RankWeb, 44/44 in DirectoryWeb, all MailWeb and Kits Core tests passed), registry check passed (548 prefixes), contrast check passed (87 pairs), theme rules check passed, CSS min check passed, and zero PHP lint errors across all modified files.
 
 ### C2: press focus keyphrase, write and clear through `aw/v1/seo-focus` (build, 19 Nov 2026; PR open, owner merges)
 - `seo-focus` now accepts `aw_press` for an administrator (`manage_options`; the workers' user is refused on press) whatever the Item types setting says, in any status except trash, and an empty `keyword` on a press item clears the field (`clear: true` still works; the old value goes to `_aw_focus_history`). Other types behave as before. No new UI.

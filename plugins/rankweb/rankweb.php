@@ -2,7 +2,7 @@
 /**
  * RankWeb
  *
- * @package           aw-seo-extras
+ * @package           rankweb
  * @author            Wugweb
  * @copyright         2026 Wugweb
  * @license           GPL-2.0-or-later
@@ -19,8 +19,8 @@
  * Author URI:        https://wugweb.com/
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI:        https://wugweb.com/plugins/aw-seo-extras/
- * Text Domain:       aw-seo-extras
+ * Update URI:        https://wugweb.com/plugins/rankweb/
+ * Text Domain:       rankweb
  * Domain Path:       /languages
  */
 
@@ -28,7 +28,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AW_SEO_EXTRAS_DIR', plugin_dir_path( __FILE__ ) );
+define( 'RANKWEB_DIR', plugin_dir_path( __FILE__ ) );
+define( 'RANKWEB_FILE', __FILE__ );
+if ( ! defined( 'AW_SEO_EXTRAS_DIR' ) ) {
+	define( 'AW_SEO_EXTRAS_DIR', RANKWEB_DIR );
+}
 
 require_once AW_SEO_EXTRAS_DIR . 'includes/text.php'; // rankweb_plain_text(), used by every file.
 require_once AW_SEO_EXTRAS_DIR . 'includes/rankweb-caps.php'; // RankWeb's own capability, manage_rankweb (granted from manage_categories).

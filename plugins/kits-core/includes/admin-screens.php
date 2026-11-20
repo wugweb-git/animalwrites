@@ -125,8 +125,8 @@ function kits_product_icon( string $name ): string {
 		'kits_product_folders',
 		array(
 			'Kits Core'    => array( 'KITS_CORE_DIR', 'kits-core' ),
-			'RankWeb'      => array( 'AW_SEO_EXTRAS_DIR', 'aw-seo-extras' ),
-			'SourceWeb'    => array( 'AW_SOURCING_DIR', 'aw-sourcing' ),
+			'RankWeb'      => array( defined( 'RANKWEB_DIR' ) ? 'RANKWEB_DIR' : 'AW_SEO_EXTRAS_DIR', 'rankweb' ),
+			'SourceWeb'    => array( defined( 'SOURCEWEB_DIR' ) ? 'SOURCEWEB_DIR' : 'AW_SOURCING_DIR', 'sourceweb' ),
 			'MailWeb'      => array( 'MAILWEB_DIR', 'mailweb' ),
 			'InsightWeb'   => array( 'INSIGHTWEB_DIR', 'insightweb' ),
 			'DirectoryWeb' => array( 'DIRECTORYWEB_DIR', 'directoryweb' ),

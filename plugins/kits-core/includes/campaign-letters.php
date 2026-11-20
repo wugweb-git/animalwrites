@@ -133,7 +133,7 @@ function aw_cl_record_letter( $id, $req ) {
 	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
 			'INSERT IGNORE INTO ' . aw_cl_table() . ' (campaign_id, city, grounds, route, device, sent_on, nl_optin, wa_optin, send_id) VALUES (%d, %s, %s, %s, %s, %s, %d, %d, ' . ( $send ? '%s' : 'NULL' ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- the table name is the plugin's own; every value is a placeholder
-			array_merge(
+			...array_merge(
 				array(
 					$id,
 					aw_cl_city( $req['city'] ),
