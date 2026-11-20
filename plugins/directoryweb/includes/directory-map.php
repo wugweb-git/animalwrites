@@ -341,6 +341,44 @@ function aw_dir_panels_html() {
 		. '<div class="aw-dir-icons" hidden>' . $icons . '</div>';
 }
 
+/**
+ * Render the directory map block and shortcode.
+ *
+ * @param array $attributes Block attributes.
+ * @return string HTML output.
+ */
+function directoryweb_render_map_block( $attributes = array() ): string {
+	$align = ! empty( $attributes['align'] ) ? ' align' . sanitize_html_class( $attributes['align'] ) : ' alignwide';
+	return '<div class="directoryweb-block-map' . esc_attr( $align ) . '">'
+		. aw_dir_tools_html()
+		. aw_dir_panels_html()
+		. '</div>';
+}
+add_shortcode( 'directoryweb_map', 'directoryweb_render_map_block' );
+
+add_action(
+	'init',
+	function () {
+		if ( function_exists( 'register_block_type' ) ) {
+			register_block_type(
+				'directoryweb/map',
+				array(
+					'title'           => __( 'Directory Map', 'directoryweb' ),
+					'description'     => __( 'Interactive directory map with markers, clustering, and Near me geolocation.', 'directoryweb' ),
+					'category'        => 'widgets',
+					'render_callback' => 'directoryweb_render_map_block',
+					'attributes'      => array(
+						'align' => array(
+							'type'    => 'string',
+							'default' => 'wide',
+						),
+					),
+				)
+			);
+		}
+	}
+);
+
 add_action(
 	'wp_enqueue_scripts',
 	function () {

@@ -105,7 +105,7 @@ function directoryweb_listing_control( $key, $f, $val ) {
 			. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' );
 	}
 	$input = 'textarea' === $f[1]
-		? '<textarea class="widefat" rows="3" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>'
+		? '<textarea class="widefat" rows="3" autocomplete="off" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>'
 		: '<input class="widefat" type="' . esc_attr( $f[1] ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '">';
 	return '<label class="directoryweb-profile__label" for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label>' . $input
 		. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' );
@@ -258,7 +258,7 @@ function aw_block_org_details( $a, $id ) {
 			$rel    = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
 			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="' . esc_attr( $rel ) . '" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . kits_icon( $l[0] ) . esc_html( $l[1] ) . '</a>'; // data-act: analytics (aw-analytics.js)
 		} elseif ( 'aw_maps_url' === $k ) { // no map link yet: Directions stays, greyed out and not a link (owner, 15 Oct 2026)
-			$links .= '<span class="kit-btn kit-btn--secondary kit-btn--sm" role="link" aria-disabled="true" data-act="maps_url">' . kits_icon( $l[0] ) . esc_html( $l[1] ) . '</span>';
+			$links .= '<span class="kit-btn kit-btn--secondary kit-btn--sm" aria-disabled="true" data-act="maps_url">' . kits_icon( $l[0] ) . esc_html( $l[1] ) . '</span>';
 		}
 	}
 	$photos = '';
