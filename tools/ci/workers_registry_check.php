@@ -9,7 +9,10 @@
  */
 
 define( 'ABSPATH', __DIR__ . '/' );
-require dirname( __DIR__, 2 ) . '/plugins/aw-sourcing/includes/workers-registry.php';
+$workers_reg = file_exists( dirname( __DIR__, 2 ) . '/plugins/sourceweb/includes/workers-registry.php' )
+	? dirname( __DIR__, 2 ) . '/plugins/sourceweb/includes/workers-registry.php'
+	: dirname( __DIR__, 2 ) . '/plugins/aw-sourcing/includes/workers-registry.php';
+require $workers_reg;
 
 $src  = $argv[1] ?? 'https://raw.githubusercontent.com/wugweb-git/animal-writes-workers/main/docs/workers.json';
 $raw  = false;

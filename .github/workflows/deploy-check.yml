@@ -89,8 +89,8 @@ jobs:
         run: php tools/ci/mailweb_addresses_test.php
       - name: MailWeb screens tests without WordPress (unchanged saves write nothing, clean-ups, Dashboard tiles; plugins/mailweb/tests)
         run: php plugins/mailweb/tests/run.php
-      - name: Sourcing tests without WordPress (shared keyword matcher, Sources model; plugins/aw-sourcing/tests)
-        run: php plugins/aw-sourcing/tests/run.php
+      - name: Sourcing tests without WordPress (shared keyword matcher, Sources model; plugins/sourceweb/tests)
+        run: php plugins/sourceweb/tests/run.php
       - name: Claimant link to the listing's people (plugins/directoryweb/tests/org-people-tests.php)
         run: php plugins/directoryweb/tests/org-people-tests.php
       - name: DirectoryWeb screens, pure parts (plugins/directoryweb/tests/directoryweb-tests.php)
@@ -119,10 +119,10 @@ jobs:
         run: php plugins/kits-core/tests/site-ops-tests.php
       - name: Kits presets' SCF field groups match the presets (plugins/kits-core/tests/presets-scf-tests.php)
         run: php plugins/kits-core/tests/presets-scf-tests.php
-      - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
-        run: php plugins/aw-seo-extras/tests/run.php
-      - name: RankWeb auto-linker tests (sample HTML in, expected HTML out; PHPUnit classes run without PHPUnit, plugins/aw-seo-extras/tests)
-        run: php plugins/aw-seo-extras/tests/phpunit-lite.php
+      - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/rankweb/tests)
+        run: php plugins/rankweb/tests/run.php
+      - name: RankWeb auto-linker tests (sample HTML in, expected HTML out; PHPUnit classes run without PHPUnit, plugins/rankweb/tests)
+        run: php plugins/rankweb/tests/phpunit-lite.php
       - name: InsightWeb tests without WordPress (unchanged saves write nothing, Dashboard tiles; plugins/insightweb/tests)
         run: php plugins/insightweb/tests/run.php
       - name: Footer height follows its content (no max-height, vh height or overflow hidden)
@@ -150,7 +150,7 @@ jobs:
         run: |
           # Plugin Check on each of our plugins that changed (all of them when the base cannot be read: a new branch).
           PLUGIN_CHECK=""
-          for p in directoryweb kits-core aw-seo-extras mailweb aw-sourcing insightweb planweb; do
+          for p in directoryweb kits-core rankweb mailweb sourceweb insightweb planweb; do
             if ! git cat-file -e "$BASE" 2>/dev/null || ! git diff --quiet "$BASE" "$HEAD" -- "plugins/$p"; then
               PLUGIN_CHECK="$PLUGIN_CHECK $p"
             fi
