@@ -181,7 +181,7 @@ function aw_block_listing_contact( $a, $id ) {
 	}
 	$btns .= aw_lf( $id, 'aw_maps_url' )
 		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . kits_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</a>'
-		: '<span class="kit-btn kit-btn--secondary" role="link" aria-disabled="true" data-act="maps_url">' . kits_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</span>'; // no map link yet: greyed out (field note)
+		: '<span class="kit-btn kit-btn--secondary" aria-disabled="true" data-act="maps_url">' . kits_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</span>'; // no map link yet: greyed out (field note)
 	$more = array();
 	foreach ( array( array( '' === $first, __( 'Phone', 'directoryweb' ), 'phone', 'phone' ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'directoryweb' ), 'mail', 'email' ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'directoryweb' ), 'world', '' ) ) as $na ) {
 		if ( $na[0] ) { // a missing way to reach them is said, never hidden

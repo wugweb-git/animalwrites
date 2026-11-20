@@ -1060,6 +1060,43 @@ function aw_categories_schema() {
 }
 
 /**
+ * Build a schema.org node from a kits_schema_map preset entry.
+ *
+ * @param int   $post_id Post ID.
+ * @param array $conf    Preset schema configuration.
+ * @return array Schema node, or empty array if required properties are missing.
+ */
+function rankweb_preset_schema_node( $post_id, array $conf ): array {
+	$val_cb   = ! empty( $conf['value_callback'] ) && is_callable( $conf['value_callback'] ) ? $conf['value_callback'] : null;
+	$fields   = ! empty( $conf['fields'] ) && is_array( $conf['fields'] ) ? $conf['fields'] : array();
+	$requires = ! empty( $conf['requires'] ) && is_array( $conf['requires'] ) ? $conf['requires'] : array();
+
+	$node = array(
+		'@type'      => $conf['type'],
+		'@id'        => get_permalink( $post_id ) . '#' . strtolower( sanitize_key( $conf['type'] ) ),
+		'url'        => get_permalink( $post_id ),
+		'name'       => rankweb_plain_text( get_the_title( $post_id ) ),
+		'inLanguage' => 'en-IN',
+		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
+	);
+
+	foreach ( $fields as $prop => $key ) {
+		$val = $val_cb ? call_user_func( $val_cb, $key, $post_id ) : ( function_exists( 'kits_post_field_value' ) ? kits_post_field_value( $key, $post_id ) : get_post_meta( $post_id, $key, true ) );
+		if ( '' !== $val && null !== $val ) {
+			$node[ $prop ] = $val;
+		}
+	}
+
+	foreach ( $requires as $req ) {
+		if ( empty( $node[ $req ] ) ) {
+			return array();
+		}
+	}
+
+	return $node;
+}
+
+/**
  * The schema.org nodes of the current page's own content (not the publisher, the site or the breadcrumb trail):
  * the article, legislation, job, campaign, listing organisation, contact page, hub list or category collection.
  *
@@ -1082,6 +1119,15 @@ function aw_schema_nodes() {
 		$story   = aw_campaign_record_schema( get_queried_object_id() );
 		if ( $story ) {
 			$nodes[] = $story; // a closed campaign's page is also the record of what happened
+		}
+	} elseif ( is_singular() ) {
+		$post_type  = get_post_type();
+		$schema_map = apply_filters( 'kits_schema_map', array() );
+		if ( ! empty( $schema_map[ $post_type ]['type'] ) ) {
+			$preset_node = rankweb_preset_schema_node( get_queried_object_id(), $schema_map[ $post_type ] );
+			if ( $preset_node ) {
+				$nodes[] = $preset_node;
+			}
 		}
 	} elseif ( is_page( 'contact' ) ) {
 		$nodes[] = array(

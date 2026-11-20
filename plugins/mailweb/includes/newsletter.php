@@ -126,6 +126,24 @@ function mailweb_nl_ff_form() {
 	return mailweb_nl_link_note() . '<div class="aw-newsletter-form" data-kit-form="newsletter">' . ( function_exists( 'kits_ff_kit_wrap' ) ? kits_ff_kit_wrap( '[fluentform id="' . $id . '"]' ) : do_shortcode( '[fluentform id="' . $id . '"]' ) ) . '</div>';
 }
 add_shortcode( 'aw_newsletter', 'mailweb_nl_ff_form' );
+add_shortcode( 'mailweb_newsletter', 'mailweb_nl_ff_form' );
+
+add_action(
+	'init',
+	function () {
+		if ( function_exists( 'register_block_type' ) ) {
+			register_block_type(
+				'mailweb/newsletter',
+				array(
+					'title'           => __( 'Newsletter Signup', 'mailweb' ),
+					'description'     => __( 'Newsletter subscription form powered by MailWeb & FluentCRM.', 'mailweb' ),
+					'category'        => 'widgets',
+					'render_callback' => 'mailweb_nl_ff_form',
+				)
+			);
+		}
+	}
+);
 
 /* ---------- Mobile (optional) and "On WhatsApp" (owner, 12 Nov 2026) ---------- */
 
