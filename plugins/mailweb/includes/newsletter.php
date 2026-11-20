@@ -125,8 +125,8 @@ function mailweb_nl_ff_form( $attributes = array() ) {
 	}
 
 	$layout     = ! empty( $attributes['layout'] ) ? sanitize_html_class( $attributes['layout'] ) : 'default';
-	$heading    = ! empty( $attributes['heading'] ) ? '<h3 class="aw-nl-heading">' . esc_html( $attributes['heading'] ) . '</h3>' : '';
-	$subheading = ! empty( $attributes['subheading'] ) ? '<p class="aw-nl-subheading">' . esc_html( $attributes['subheading'] ) . '</p>' : '';
+	$heading    = ! empty( $attributes['heading'] ) ? '<h3 class="mailweb-nl-heading">' . esc_html( $attributes['heading'] ) . '</h3>' : '';
+	$subheading = ! empty( $attributes['subheading'] ) ? '<p class="mailweb-nl-subheading">' . esc_html( $attributes['subheading'] ) . '</p>' : '';
 	$align      = ! empty( $attributes['align'] ) ? ' align' . sanitize_html_class( $attributes['align'] ) : '';
 
 	$inner = ( function_exists( 'kits_ff_kit_wrap' ) ? kits_ff_kit_wrap( '[fluentform id="' . $id . '"]' ) : do_shortcode( '[fluentform id="' . $id . '"]' ) );
