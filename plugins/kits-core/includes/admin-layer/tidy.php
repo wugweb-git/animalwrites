@@ -9,7 +9,7 @@
  * steadier than internal slugs). Hidden:
  * - Tools: Available Tools (WordPress's old converters), Server-Timing (a Performance Lab developer tool), Scheduled
  *   Actions (FluentCRM's job queue; Kits → Home shows scheduled-task health).
- * - Settings: Discussion (comments are off site-wide), Connectors (unused AI/MCP connectors).
+ * - Settings: Discussion (comments are off site-wide).
  * - Upsells and paid features (owner: no paid plans): any submenu link to another site in these menus (sales and
  *   pricing pages, 12 Nov 2026), Rank Math's Unlock PRO, AI Visibility, Content AI, AI Link Genius,
  *   Help & Support; Link Whisper's AI Subscription, Get Premium; Fluent Forms' Support; FluentCRM's Addons, SMTP (a
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Menu label => submenu labels to hide (a label matches when the item's text starts with it). */
 const KITS_ADMIN_HIDE = array(
 	'Tools'         => array( 'Available Tools', 'Server-Timing', 'Scheduled Actions' ),
-	'Settings'      => array( 'Discussion', 'Connectors' ),
+	'Settings'      => array( 'Discussion' ),
 	'Rank Math SEO' => array( 'Unlock PRO', 'AI Visibility', 'Content AI', 'AI Link Genius', 'Help & Support' ),
 	'Link Whisper'  => array( 'AI Subscription', 'Get Premium' ),
 	'Fluent Forms'  => array( 'Support' ),

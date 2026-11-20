@@ -1,27 +1,35 @@
 <?php
 /**
- * SourceWeb on the Plugins screen: its icon, banner and a "View details" window (description and changelog from its
+ * RankWeb on the Plugins screen: its icon, banner and a "View details" window (description and changelog from its
  * readme.txt), through WordPress's own hooks for a plugin with an Update URI: update_plugins_wugweb.com (WordPress
  * 5.8+) and plugins_api. It reports the installed version, so WordPress never offers an update from here; nothing is
  * downloaded and no other site is asked.
  *
- * @package aw-sourcing
+ * @package aw-seo-extras
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_filter( 'update_plugins_wugweb.com', 'aw_src_plugin_update_row', 10, 3 );
-add_filter( 'plugins_api', 'aw_src_plugin_details', 10, 3 );
+add_filter( 'update_plugins_wugweb.com', 'aw_seo_plugin_update_row', 10, 3 );
+add_filter( 'plugins_api', 'aw_seo_plugin_details', 10, 3 );
+
+function aw_seo_plugin_file(): string {
+	if ( defined( 'RANKWEB_FILE' ) ) {
+		return RANKWEB_FILE;
+	}
+	$new = ( defined( 'AW_SEO_EXTRAS_DIR' ) ? AW_SEO_EXTRAS_DIR : plugin_dir_path( __DIR__ ) ) . 'rankweb.php';
+	return file_exists( $new ) ? $new : ( defined( 'AW_SEO_EXTRAS_DIR' ) ? AW_SEO_EXTRAS_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-seo-extras.php';
+}
 
 /**
- * SourceWeb's icon and banner addresses.
+ * RankWeb's icon and banner addresses.
  *
  * @return array{icons: array<string, string>, banners: array<string, string>}
  */
-function aw_src_plugin_art(): array {
-	$base = plugins_url( 'assets/', AW_SOURCING_DIR . 'aw-sourcing.php' );
+function aw_seo_plugin_art(): array {
+	$base = plugins_url( 'assets/', aw_seo_plugin_file() );
 	return array(
 		'icons'   => array(
 			'1x'  => $base . 'icon-128x128.png',
@@ -36,60 +44,62 @@ function aw_src_plugin_art(): array {
 }
 
 /**
- * The row WordPress keeps for SourceWeb when it checks for updates: the installed version, so it is "up to date".
+ * The row WordPress keeps for RankWeb when it checks for updates: the installed version, so it is "up to date".
  *
  * @param array|false $update      What another filter returned, or false.
  * @param array       $plugin_data The plugin's header.
  * @param string      $plugin_file The plugin's file, relative to the plugins folder.
  * @return array|false
  */
-function aw_src_plugin_update_row( $update, $plugin_data, $plugin_file ) {
-	if ( plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' ) !== $plugin_file ) {
+function aw_seo_plugin_update_row( $update, $plugin_data, $plugin_file ) {
+	$main = plugin_basename( aw_seo_plugin_file() );
+	if ( $main !== $plugin_file && plugin_basename( ( defined( 'AW_SEO_EXTRAS_DIR' ) ? AW_SEO_EXTRAS_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-seo-extras.php' ) !== $plugin_file ) {
 		return $update;
 	}
 	return array_merge(
 		array(
 			'id'           => (string) ( $plugin_data['UpdateURI'] ?? '' ),
-			'slug'         => 'aw-sourcing',
+			'slug'         => 'rankweb',
 			'version'      => (string) ( $plugin_data['Version'] ?? '' ),
 			'url'          => 'https://wugweb.com',
 			'package'      => '',
 			'requires_php' => (string) ( $plugin_data['RequiresPHP'] ?? '' ),
 		),
-		aw_src_plugin_art()
+		aw_seo_plugin_art()
 	);
 }
 
 /**
- * The "View details" window for SourceWeb.
+ * The "View details" window for RankWeb.
  *
  * @param false|object|array $result What another filter returned.
  * @param string             $action The plugins_api action.
  * @param object             $args   Its arguments (slug).
  * @return false|object|array
  */
-function aw_src_plugin_details( $result, $action, $args ) {
-	if ( 'plugin_information' !== $action || 'aw-sourcing' !== ( $args->slug ?? '' ) ) {
+function aw_seo_plugin_details( $result, $action, $args ) {
+	if ( 'plugin_information' !== $action || ! in_array( $args->slug ?? '', array( 'rankweb', 'aw-seo-extras' ), true ) ) {
 		return $result;
 	}
 	if ( ! function_exists( 'get_plugin_data' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
-	$head   = get_plugin_data( AW_SOURCING_DIR . 'aw-sourcing.php', false, false );
-	$readme = (string) @file_get_contents( dirname( AW_SOURCING_DIR . 'aw-sourcing.php' ) . '/readme.txt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged -- the plugin's own readme; none is fine.
+	$plugin_file = aw_seo_plugin_file();
+	$head   = get_plugin_data( $plugin_file, false, false );
+	$readme = (string) @file_get_contents( dirname( $plugin_file ) . '/readme.txt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged -- the plugin's own readme; none is fine.
 	$parts  = array();
 	foreach ( preg_split( '/^==\s*(.+?)\s*==\s*$/m', $readme, -1, PREG_SPLIT_DELIM_CAPTURE ) as $i => $chunk ) {
 		if ( $i % 2 ) {
 			$name = strtolower( trim( $chunk ) );
 		} elseif ( isset( $name ) ) {
-			$parts[ $name ] = aw_src_plugin_readme_html( $chunk );
+			$parts[ $name ] = aw_seo_plugin_readme_html( $chunk );
 		}
 	}
 	$tested = preg_match( '/^Tested up to:\s*(\S+)/mi', $readme, $m ) ? $m[1] : '';
-	$art    = aw_src_plugin_art();
+	$art    = aw_seo_plugin_art();
 	return (object) array(
-		'name'          => 'SourceWeb',
-		'slug'          => 'aw-sourcing',
+		'name'          => 'RankWeb',
+		'slug'          => 'aw-seo-extras',
 		'version'       => (string) $head['Version'],
 		'author'        => '<a href="https://wugweb.com">Wugweb</a>',
 		'homepage'      => 'https://wugweb.com',
@@ -113,7 +123,7 @@ function aw_src_plugin_details( $result, $action, $args ) {
  *
  * @param string $text The section's text.
  */
-function aw_src_plugin_readme_html( string $text ): string {
+function aw_seo_plugin_readme_html( string $text ): string {
 	$html = '';
 	$list = false;
 	foreach ( preg_split( '/\R/', trim( $text ) ) as $line ) {

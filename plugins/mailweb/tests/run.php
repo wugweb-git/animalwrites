@@ -14,13 +14,16 @@
  * @package mailweb
  */
 
-if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
-	exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	if ( 'cli' !== PHP_SAPI ) {
+		exit;
+	}
+	define( 'ABSPATH', __DIR__ . '/' );
 }
 
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput, WordPress.PHP.DiscouragedPHPFunctions, WordPress.WP.GlobalVariablesOverride, WordPress.DateTime.RestrictedFunctions, Squiz.Commenting.FunctionComment.MissingParamTag, Universal.Files.SeparateFunctionsFromOO -- a command-line test runner with WordPress stubs.
 
-define( 'ABSPATH', __DIR__ . '/' );
+
 define( 'MINUTE_IN_SECONDS', 60 );
 define( 'HOUR_IN_SECONDS', 3600 );
 define( 'DAY_IN_SECONDS', 86400 );

@@ -501,7 +501,7 @@ function aw_pin_public() {
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
 	set_transient( $key, $n + 1, 10 * MINUTE_IN_SECONDS );
-	$r = aw_pin_lookup( (string) wp_unslash( $_GET['pin'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$r = aw_pin_lookup( sanitize_text_field( (string) wp_unslash( $_GET['pin'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	is_array( $r ) ? wp_send_json_success( $r ) : wp_send_json_error( $r );
 }
 

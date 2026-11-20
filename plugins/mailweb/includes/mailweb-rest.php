@@ -1099,23 +1099,28 @@ function mailweb_rest_save_smtp( WP_REST_Request $r ) {
  * @param WP_REST_Request $r Request.
  */
 function mailweb_rest_save_crm( WP_REST_Request $r ) {
-	$crm   = mailweb_crm_settings();
-	$keys  = array_keys( mailweb_all_boxes() );
-	$saved = mailweb_save_changed(
-		'mailweb_crm',
-		array(
-			'on'    => ! empty( $crm['on'] ),
-			'tag'   => (string) $crm['tag'],
-			'boxes' => mailweb_crm_boxes(),
-		),
-		mailweb_rest_sent( $r, array( 'on', 'tag', 'boxes' ) ),
-		fn( $v ) => mailweb_crm_clean( $v, $keys )
-	);
-	return rest_ensure_response(
-		array(
-			'saved'    => $saved,
-			'services' => mailweb_services(),
-			'message'  => $saved ? __( 'Saved.', 'mailweb' ) : __( 'Nothing changed, so nothing was saved.', 'mailweb' ),
-		)
-	);
+	try {
+		$crm   = mailweb_crm_settings();
+		$keys  = array_keys( mailweb_all_boxes() );
+		$saved = mailweb_save_changed(
+			'mailweb_crm',
+			array(
+				'on'    => ! empty( $crm['on'] ),
+				'tag'   => (string) $crm['tag'],
+				'boxes' => mailweb_crm_boxes(),
+			),
+			mailweb_rest_sent( $r, array( 'on', 'tag', 'boxes' ) ),
+			fn( $v ) => mailweb_crm_clean( $v, $keys )
+		);
+		return rest_ensure_response(
+			array(
+				'saved'    => $saved,
+				'services' => mailweb_services(),
+				'message'  => $saved ? __( 'Saved.', 'mailweb' ) : __( 'Nothing changed, so nothing was saved.', 'mailweb' ),
+			)
+		);
+	} catch ( \Throwable $e ) {
+		error_log( 'MailWeb rest_save_crm error: ' . $e->getMessage() );
+		return new WP_Error( 'mailweb_save_error', $e->getMessage(), array( 'status' => 500 ) );
+	}
 }

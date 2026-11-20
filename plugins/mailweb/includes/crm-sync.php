@@ -49,19 +49,31 @@ function mailweb_crm_on() {
  * @return object|null
  */
 function mailweb_crm_contact_for( $email, $name ) {
-	$c     = mailweb_crm_upsert( $email, $name, 'mailweb' );
-	$title = trim( (string) mailweb_crm_settings()['tag'] );
-	if ( $c && '' !== $title ) {
-		$tags = FluentCrmApi( 'tags' )->getInstance();
-		$tag  = $tags->where( 'slug', sanitize_title( $title ) )->first();
-		if ( ! $tag ) {
-			$tag = $tags->create( array( 'title' => $title, 'slug' => sanitize_title( $title ) ) );
+	try {
+		$c = mailweb_crm_upsert( $email, $name, 'mailweb' );
+		if ( ! $c ) {
+			return null;
 		}
-		if ( $tag ) {
-			$c->attachTags( array( (int) $tag->id ) );
+		$title = trim( (string) mailweb_crm_settings()['tag'] );
+		if ( '' !== $title && function_exists( 'FluentCrmApi' ) ) {
+			$tagsApi = FluentCrmApi( 'tags' );
+			if ( is_object( $tagsApi ) && method_exists( $tagsApi, 'getInstance' ) ) {
+				$tags = $tagsApi->getInstance();
+				$tag  = $tags->where( 'slug', sanitize_title( $title ) )->first();
+				if ( ! $tag ) {
+					$tag = $tags->create( array( 'title' => $title, 'slug' => sanitize_title( $title ) ) );
+				}
+				$tag_id = is_object( $tag ) ? (int) $tag->id : ( is_array( $tag ) ? (int) ( $tag['id'] ?? 0 ) : 0 );
+				if ( $tag_id && is_object( $c ) && method_exists( $c, 'attachTags' ) ) {
+					$c->attachTags( array( $tag_id ) );
+				}
+			}
 		}
+		return is_object( $c ) ? $c : null;
+	} catch ( \Throwable $e ) {
+		error_log( 'MailWeb crm_contact_for error: ' . $e->getMessage() );
+		return null;
 	}
-	return $c ? $c : null;
 }
 
 /**
@@ -74,18 +86,30 @@ function mailweb_crm_contact_for( $email, $name ) {
  * @return object|null
  */
 function mailweb_crm_upsert( $email, $name, $source ) {
-	$c = FluentCrmApi( 'contacts' )->getContact( $email );
-	if ( ! $c ) {
-		$data  = array( 'email' => $email, 'status' => 'transactional', 'source' => $source );
-		$name  = false !== strpos( (string) $name, '@' ) ? '' : trim( (string) $name, " \t\"'" );
-		$parts = preg_split( '/\s+/', $name, 2 );
-		if ( '' !== ( $parts[0] ?? '' ) ) {
-			$data['first_name'] = $parts[0];
-			$data['last_name']  = $parts[1] ?? '';
+	try {
+		if ( ! function_exists( 'FluentCrmApi' ) ) {
+			return null;
 		}
-		$c = FluentCrmApi( 'contacts' )->createOrUpdate( $data );
+		$contactsApi = FluentCrmApi( 'contacts' );
+		if ( ! is_object( $contactsApi ) ) {
+			return null;
+		}
+		$c = $contactsApi->getContact( $email );
+		if ( ! $c ) {
+			$data  = array( 'email' => $email, 'status' => 'transactional', 'source' => $source );
+			$name  = false !== strpos( (string) $name, '@' ) ? '' : trim( (string) $name, " \t\"'" );
+			$parts = preg_split( '/\s+/', $name, 2 );
+			if ( '' !== ( $parts[0] ?? '' ) ) {
+				$data['first_name'] = $parts[0];
+				$data['last_name']  = $parts[1] ?? '';
+			}
+			$c = $contactsApi->createOrUpdate( $data );
+		}
+		return is_object( $c ) ? $c : null;
+	} catch ( \Throwable $e ) {
+		error_log( 'MailWeb crm_upsert error: ' . $e->getMessage() );
+		return null;
 	}
-	return $c ? $c : null;
 }
 
 /** Is this sender a person (not us, not a mail system or notification sender)? */
@@ -165,21 +189,26 @@ function mailweb_crm_note_email( $key, $folder, $m ) {
 		$html .= '<strong>' . esc_html( $k ) . ':</strong> ' . esc_html( $v ) . '<br>';
 	}
 	$open = add_query_arg( array( 'page' => 'mailweb', 'box' => $key, 'folder' => mailweb_role_of( $folder ), 'uid' => (int) $m['uid'], 'view' => 'all' ), admin_url( 'admin.php' ) );
-	$note = \FluentCrm\App\Models\SubscriberNote::create(
-		array(
-			'subscriber_id' => (int) $c->id,
-			'type'          => 'email',
-			'title'         => sprintf(
-				/* translators: %s: email subject */
-				__( 'Email: %s', 'mailweb' ),
-				'' !== trim( (string) ( $m['subject'] ?? '' ) ) ? $m['subject'] : __( '(no subject)', 'mailweb' )
-			),
-			'description'   => '<p>' . $html . '</p>' . ( '' !== $text ? wpautop( esc_html( $text ) ) : '<p><em>' . esc_html__( '(no text)', 'mailweb' ) . '</em></p>' ) . '<p><a href="' . esc_url( $open ) . '">' . esc_html__( 'Open in Mail', 'mailweb' ) . '</a></p>',
-			'created_at'    => wp_date( 'Y-m-d H:i:s', $sent ),
-		)
-	);
-	mailweb_crm_mark_done( $mid, $note ? (int) $note->id : 0 );
-	return $note ? 'noted' : 'error';
+	try {
+		$note = \FluentCrm\App\Models\SubscriberNote::create(
+			array(
+				'subscriber_id' => (int) $c->id,
+				'type'          => 'email',
+				'title'         => sprintf(
+					/* translators: %s: email subject */
+					__( 'Email: %s', 'mailweb' ),
+					'' !== trim( (string) ( $m['subject'] ?? '' ) ) ? $m['subject'] : __( '(no subject)', 'mailweb' )
+				),
+				'description'   => '<p>' . $html . '</p>' . ( '' !== $text ? wpautop( esc_html( $text ) ) : '<p><em>' . esc_html__( '(no text)', 'mailweb' ) . '</em></p>' ) . '<p><a href="' . esc_url( $open ) . '">' . esc_html__( 'Open in Mail', 'mailweb' ) . '</a></p>',
+				'created_at'    => wp_date( 'Y-m-d H:i:s', $sent ),
+			)
+		);
+		mailweb_crm_mark_done( $mid, $note ? (int) $note->id : 0 );
+		return $note ? 'noted' : 'error';
+	} catch ( \Throwable $e ) {
+		error_log( 'MailWeb crm_note_email error: ' . $e->getMessage() );
+		return 'error';
+	}
 }
 
 /**
@@ -219,6 +248,9 @@ function mailweb_crm_sync( $key, $folder = 'INBOX', $all = false, $per = 25 ) {
 	}
 	try {
 		$n = mailweb_crm_sync_pages( $key, $folder, $all, $per );
+	} catch ( \Throwable $e ) {
+		error_log( 'MailWeb crm_sync error: ' . $e->getMessage() );
+		$n = array( 'error' => $e->getMessage() );
 	} finally {
 		mailweb_crm_unlock();
 	}
@@ -265,8 +297,12 @@ add_action(
 add_action(
 	'mailweb_webhook_noted',
 	function ( $key ) {
-		if ( in_array( $key, mailweb_crm_boxes(), true ) ) {
-			mailweb_crm_sync( $key, 'INBOX', false, 5 );
+		try {
+			if ( in_array( $key, mailweb_crm_boxes(), true ) ) {
+				mailweb_crm_sync( $key, 'INBOX', false, 5 );
+			}
+		} catch ( \Throwable $e ) {
+			error_log( 'MailWeb webhook sync error: ' . $e->getMessage() );
 		}
 	}
 );
@@ -283,23 +319,36 @@ function mailweb_crm_note_reply( $from, $to, $subject, $html ) {
 	if ( ! mailweb_crm_on() ) {
 		return;
 	}
-	$user = wp_get_current_user();
-	foreach ( (array) $to as $email ) {
-		$c = FluentCrmApi( 'contacts' )->getContact( strtolower( (string) $email ) );
-		if ( ! $c ) {
-			continue;
+	try {
+		$user = wp_get_current_user();
+		foreach ( (array) $to as $email ) {
+			if ( ! function_exists( 'FluentCrmApi' ) ) {
+				continue;
+			}
+			$contactsApi = FluentCrmApi( 'contacts' );
+			if ( ! is_object( $contactsApi ) || ! method_exists( $contactsApi, 'getContact' ) ) {
+				continue;
+			}
+			$c = $contactsApi->getContact( strtolower( (string) $email ) );
+			if ( ! $c ) {
+				continue;
+			}
+			$head = '<strong>' . esc_html__( 'To:', 'mailweb' ) . '</strong> ' . esc_html( $email ) . '<br><strong>' . esc_html__( 'From:', 'mailweb' ) . '</strong> ' . esc_html( $from ) . '<br><strong>' . esc_html__( 'Sent:', 'mailweb' ) . '</strong> ' . esc_html( wp_date( 'j M Y, g:i a' ) ) . '<br><strong>' . esc_html__( 'Sent by:', 'mailweb' ) . '</strong> ' . esc_html( $user && $user->exists() ? $user->display_name : get_bloginfo( 'name' ) );
+			if ( class_exists( '\FluentCrm\App\Models\SubscriberNote' ) ) {
+				\FluentCrm\App\Models\SubscriberNote::create(
+					array(
+						'subscriber_id' => (int) $c->id,
+						'type'          => 'email',
+						/* translators: %s: email subject */
+						'title'         => sprintf( __( 'Reply sent: %s', 'mailweb' ), $subject ),
+						'description'   => '<p>' . $head . '</p>' . wp_kses_post( $html ),
+						'created_at'    => current_time( 'mysql' ),
+					)
+				);
+			}
 		}
-		$head = '<strong>' . esc_html__( 'To:', 'mailweb' ) . '</strong> ' . esc_html( $email ) . '<br><strong>' . esc_html__( 'From:', 'mailweb' ) . '</strong> ' . esc_html( $from ) . '<br><strong>' . esc_html__( 'Sent:', 'mailweb' ) . '</strong> ' . esc_html( wp_date( 'j M Y, g:i a' ) ) . '<br><strong>' . esc_html__( 'Sent by:', 'mailweb' ) . '</strong> ' . esc_html( $user && $user->exists() ? $user->display_name : get_bloginfo( 'name' ) );
-		\FluentCrm\App\Models\SubscriberNote::create(
-			array(
-				'subscriber_id' => (int) $c->id,
-				'type'          => 'email',
-				/* translators: %s: email subject */
-				'title'         => sprintf( __( 'Reply sent: %s', 'mailweb' ), $subject ),
-				'description'   => '<p>' . $head . '</p>' . wp_kses_post( $html ),
-				'created_at'    => current_time( 'mysql' ),
-			)
-		);
+	} catch ( \Throwable $e ) {
+		error_log( 'MailWeb crm_note_reply error: ' . $e->getMessage() );
 	}
 }
 

@@ -245,8 +245,8 @@ function aw_link_insert_rows( array $rows ): void {
 			$sql[] = '(%s,%s,%d,%d)';
 			array_push( $args, $r[0], $r[1], $r[2], $r[3] );
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders -- RankWeb's own table; the placeholders are built above.
-		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (keyword, keyword_norm, target_id, priority) VALUES ' . implode( ',', $sql ), $args ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders, PluginCheck.Security.DirectDB.UnescapedDBParameter -- RankWeb's own table; the placeholders are built above.
+		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (keyword, keyword_norm, target_id, priority) VALUES ' . implode( ',', $sql ), ...$args ) );
 	}
 }
 
