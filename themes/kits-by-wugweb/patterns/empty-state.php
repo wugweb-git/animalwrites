@@ -3,6 +3,7 @@
  * Title: Empty state
  * Slug: kits-by-wugweb/empty-state
  * Categories: kits-components
+ * Block Types: core/query-no-results, core/group
  * Keywords: empty, no results, nothing found
  * Viewport Width: 800
  */

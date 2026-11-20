@@ -3,6 +3,7 @@
  * Title: Hero — split
  * Slug: kits-by-wugweb/hero-split
  * Categories: kits-components
+ * Block Types: core/columns, core/group
  * Keywords: hero, image, split, intro
  * Viewport Width: 1280
  */

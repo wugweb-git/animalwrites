@@ -3,6 +3,7 @@
  * Title: Newsletter signup
  * Slug: kits-by-wugweb/newsletter
  * Categories: kits-components
+ * Block Types: core/group
  * Keywords: newsletter, email, sign up, subscribe
  * Viewport Width: 1280
  */

@@ -241,6 +241,19 @@ function kits_sections_page( string $screen, string $title, string $intro ): voi
 	}
 	// The sections as cards in the plugin screens' frame (includes/admin-kits-frame.php).
 	kits_frame_open( $screen, $title, $intro );
+	if ( count( $sections ) > 1 ) {
+		echo '<nav class="kits-section-nav" style="margin-bottom: 24px;" aria-label="' . esc_attr__( 'Screen sections', 'kits-core' ) . '">';
+		echo '<div class="kits-chip-group" style="display:flex;gap:8px;flex-wrap:wrap;">';
+		$first = true;
+		foreach ( $sections as $id => $s ) {
+			$active_class = $first ? ' is-active' : '';
+			echo '<a class="kits-chip kits-section-tab' . esc_attr( $active_class ) . '" href="#' . esc_attr( $id ) . '" data-section="' . esc_attr( $id ) . '">' . esc_html( $s['title'] ) . '</a> ';
+			$first = false;
+		}
+		echo '<a class="kits-chip kits-section-tab" href="#all" data-section="all">' . esc_html__( 'Show all', 'kits-core' ) . '</a>';
+		echo '</div>';
+		echo '</nav>';
+	}
 	foreach ( $sections as $id => $s ) {
 		kits_frame_card( (string) $id, $s['title'], $s['render'] );
 	}
@@ -250,6 +263,7 @@ function kits_sections_page( string $screen, string $title, string $intro ): voi
 
 /**
  * After a form's save (options.php comes back without the #section): open the section it came from.
+ * Also wires tabbed section switching when multiple sections are present.
  *
  * @param array $sections The screen's sections (kits_screen_sections()).
  */
@@ -257,6 +271,81 @@ function kits_sections_back( array $sections ): void {
 	$back = isset( $_GET['kits_section'] ) ? sanitize_text_field( wp_unslash( $_GET['kits_section'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- which section to show.
 	if ( isset( $sections[ $back ] ) ) {
 		wp_print_inline_script_tag( 'if(!location.hash){location.hash=' . wp_json_encode( $back ) . ';}' );
+	}
+	if ( count( $sections ) > 1 ) {
+		$script = <<<'JS'
+(function() {
+	var tabs = document.querySelectorAll('.kits-section-tab');
+	var cards = document.querySelectorAll('.kits-shell-card');
+	if (!tabs.length || !cards.length) return;
+
+	function activateSection(targetId) {
+		if (!targetId || targetId === 'all') {
+			cards.forEach(function(c) { c.style.display = ''; });
+			tabs.forEach(function(t) {
+				if (t.getAttribute('data-section') === 'all') t.classList.add('is-active');
+				else t.classList.remove('is-active');
+			});
+			return;
+		}
+
+		var found = false;
+		cards.forEach(function(c) {
+			var cid = c.getAttribute('id');
+			if (cid === targetId || (cid && cid.indexOf(targetId + '/') === 0) || (targetId && targetId.indexOf(cid + '/') === 0)) {
+				c.style.display = '';
+				found = true;
+			} else {
+				c.style.display = 'none';
+			}
+		});
+
+		if (found) {
+			tabs.forEach(function(t) {
+				var tid = t.getAttribute('data-section');
+				if (tid === targetId || (targetId && targetId.indexOf(tid) === 0)) {
+					t.classList.add('is-active');
+				} else {
+					t.classList.remove('is-active');
+				}
+			});
+		} else {
+			cards.forEach(function(c, idx) { c.style.display = idx === 0 ? '' : 'none'; });
+			tabs.forEach(function(t, idx) {
+				if (idx === 0) t.classList.add('is-active');
+				else t.classList.remove('is-active');
+			});
+		}
+	}
+
+	function onHash() {
+		var hash = location.hash ? location.hash.replace(/^#/, '') : '';
+		if (hash) {
+			activateSection(hash);
+		} else {
+			var firstTab = tabs[0];
+			if (firstTab && firstTab.getAttribute('data-section') !== 'all') {
+				activateSection(firstTab.getAttribute('data-section'));
+			}
+		}
+	}
+
+	window.addEventListener('hashchange', onHash);
+	tabs.forEach(function(tab) {
+		tab.addEventListener('click', function(e) {
+			var sec = tab.getAttribute('data-section');
+			if (sec === 'all') {
+				e.preventDefault();
+				location.hash = 'all';
+				activateSection('all');
+			}
+		});
+	});
+
+	onHash();
+})();
+JS;
+		wp_print_inline_script_tag( $script );
 	}
 }
 
@@ -276,6 +365,38 @@ function kits_home_theme(): void {
 	echo kits_frame_kpi_card( 'Active Design Tokens', '48', array( 'unit' => 'tokens', 'trend' => 'Active', 'trend_dir' => 'up', 'sparkline' => array( 30, 36, 42, 45, 48 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
 	echo kits_frame_kpi_card( 'FSE Templates & Parts', '6', array( 'unit' => 'synced', 'trend' => 'Native FSE', 'trend_dir' => 'up', 'sparkline' => array( 2, 4, 5, 5, 6 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
 	echo kits_frame_kpi_card( 'Theme & System Health', '100%', array( 'unit' => 'optimal', 'trend' => 'Healthy', 'trend_dir' => 'up', 'sparkline' => array( 96, 98, 99, 100, 100 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo '</div>';
+
+	// Quickstart Guide: 3 Steps to Launch Your Site (Astra / Kadence standard).
+	echo '<div class="kits-quickstart-card" style="margin-bottom: 24px; background: var(--ks-surface); border: 1px solid var(--ks-border); border-radius: var(--ks-r); padding: 18px 20px;">';
+	echo '<div style="margin-bottom: 12px;"><h3 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: var(--ks-ink);">' . esc_html__( 'Quick Start: Customize Your Site in 3 Steps', 'kits-core' ) . '</h3>';
+	echo '<p class="description" style="margin: 0; font-size: 13px;">' . esc_html__( 'Kits by Wugweb is a Full Site Editing block theme. Use these quick actions to personalize your site:', 'kits-core' ) . '</p></div>';
+
+	echo kits_frame_action_list( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized markup.
+		array(
+			array(
+				'title'       => __( 'Step 1: Upload Your Logo & Header Navigation', 'kits-core' ),
+				'description' => __( 'Open the Header template part in the Site Editor to upload your logo and customize navigation menus.', 'kits-core' ),
+				'icon'        => '🖼️',
+				'status'      => __( 'Site Identity', 'kits-core' ),
+				'action'      => '<a href="' . esc_url( admin_url( 'site-editor.php?postType=wp_template_part' ) ) . '" class="button button-primary">' . esc_html__( 'Edit Header →', 'kits-core' ) . '</a>',
+			),
+			array(
+				'title'       => __( 'Step 2: Brand Colours & Typography Hierarchy', 'kits-core' ),
+				'description' => __( 'Pick a pre-designed style variation (Default, Slate, Forest) or set your custom brand palette in Global Styles.', 'kits-core' ),
+				'icon'        => '🎨',
+				'status'      => __( 'Global Styles', 'kits-core' ),
+				'action'      => '<a href="' . esc_url( admin_url( 'site-editor.php?path=/wp_global_styles' ) ) . '" class="button button-secondary">' . esc_html__( 'Open Styles →', 'kits-core' ) . '</a>',
+			),
+			array(
+				'title'       => __( 'Step 3: Browse & Insert Pre-built Block Patterns', 'kits-core' ),
+				'description' => __( 'Choose from 18 native block patterns: hero sections, responsive card grids, CTA banners, and FAQ accordions.', 'kits-core' ),
+				'icon'        => '🧩',
+				'status'      => __( '18 Patterns', 'kits-core' ),
+				'action'      => '<a href="' . esc_url( admin_url( 'site-editor.php?path=/patterns' ) ) . '" class="button button-secondary">' . esc_html__( 'Browse Patterns →', 'kits-core' ) . '</a>',
+			),
+		)
+	);
 	echo '</div>';
 
 	echo '<div class="kits-layout-split">';
