@@ -483,15 +483,29 @@ function kits_system_page() {
 		echo '<p>Change the colours, and see this table update before saving, in <a href="' . esc_url( admin_url( 'admin.php?page=kits-options#colours' ) ) . '">Theme Options → Colours</a>.</p></div>';
 		return;
 	}
-	// Components, blocks and patterns.
-	$types = array_unique( array_map( fn( $i ) => $i['type'], $reg['items'] ) );
-	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( '' === $type ? ' class="current"' : '' ) . '>All (' . count( $reg['items'] ) . ')</a></li>';
+
+	// Components, blocks and patterns: modern registry with instant search, category filters and slide-over inspector.
+	$types       = array_unique( array_map( fn( $i ) => $i['type'], $reg['items'] ) );
+	$total_count = count( $reg['items'] );
+
+	echo '<div class="kits-reg-toolbar">';
+	echo '<div class="kits-reg-search">';
+	echo '<input type="search" id="kits-reg-search" class="kits-reg-input" placeholder="' . esc_attr__( 'Filter components, classes, blocks, tokens...', 'kits-core' ) . '" aria-label="' . esc_attr__( 'Filter design system entries', 'kits-core' ) . '">';
+	/* translators: %d: total number of entries. */
+	echo '<span id="kits-reg-count" class="kits-reg-count">' . sprintf( esc_html__( 'Showing %d entries', 'kits-core' ), (int) $total_count ) . '</span>';
+	echo '</div>';
+	echo '<div class="kits-reg-filters" role="group" aria-label="' . esc_attr__( 'Filter by type', 'kits-core' ) . '">';
+	echo '<button type="button" class="kits-chip' . ( '' === $type ? ' is-active' : '' ) . '" data-type="">' . esc_html__( 'All', 'kits-core' ) . ' <span class="kits-chip__count">(' . (int) $total_count . ')</span></button>';
 	foreach ( $types as $t ) {
 		$n = count( array_filter( $reg['items'], fn( $i ) => $i['type'] === $t ) );
-		echo '<li> | <a href="' . esc_url( add_query_arg( 'type', $t, $base ) ) . '"' . ( $t === $type ? ' class="current"' : '' ) . '>' . esc_html( ucfirst( $t ) ) . ' (' . (int) $n . ')</a></li>';
+		echo '<button type="button" class="kits-chip' . ( $t === $type ? ' is-active' : '' ) . '" data-type="' . esc_attr( $t ) . '">' . esc_html( ucfirst( $t ) ) . ' <span class="kits-chip__count">(' . (int) $n . ')</span></button>';
 	}
-	echo '</ul><br class="clear">';
-	$cells = array();
+	echo '</div>';
+	echo '</div>';
+
+	$cells             = array();
+	$inspector_payload = array();
+
 	foreach ( $reg['items'] as $it ) {
 		if ( $type && $it['type'] !== $type ) {
 			continue;
@@ -507,39 +521,408 @@ function kits_system_page() {
 		$files = array_unique( $files );
 		$a     = (array) ( $it['a11y'] ?? array() );
 		$s     = (array) ( $it['seo'] ?? array() );
-		$acc   = array();
+		$style = kits_registry_style( $it );
+
+		$acc = array();
 		foreach ( array( 'element' => 'Element', 'aria' => 'ARIA', 'keyboard' => 'Keyboard', 'focus' => 'Focus', 'target' => 'Target', 'motion' => 'Motion', 'sr' => 'Screen reader' ) as $k => $l ) {
 			if ( ! empty( $a[ $k ] ) && 'none' !== $a[ $k ] && 'n/a' !== $a[ $k ] && 'not interactive' !== $a[ $k ] ) {
-				$acc[] = '<strong>' . esc_html( $l ) . ':</strong> ' . esc_html( $a[ $k ] );
+				$acc[] = array( 'label' => $l, 'value' => $a[ $k ] );
 			}
 		}
 		$seo = array();
 		foreach ( array( 'heading' => 'Heading', 'link' => 'Links', 'alt' => 'Images', 'schema' => 'Schema' ) as $k => $l ) {
 			if ( ! empty( $s[ $k ] ) && ! in_array( $s[ $k ], array( 'none', 'n/a' ), true ) ) {
-				$seo[] = '<strong>' . esc_html( $l ) . ':</strong> ' . esc_html( $s[ $k ] );
+				$seo[] = array( 'label' => $l, 'value' => $s[ $k ] );
 			}
 		}
-		$what    = ! empty( $it['block'] ) ? '<code>' . esc_html( $it['block'] ) . '</code>' : implode( ' ', array_map( fn( $c ) => '<code>' . esc_html( $c ) . '</code>', (array) $it['classes'] ) );
-		$states  = (array) ( $it['states'] ?? array() );
-		$style   = kits_registry_style( $it );
+
+		$entry_tokens = kits_system_entry_tokens( $it, $vals );
+		$preview_url  = kits_system_preview_url( $it, $demo );
+		$entry_id     = sanitize_title( $it['name'] );
+
+		// Data payload for slide-over drawer
+		$inspector_payload[ $entry_id ] = array(
+			'name'     => $it['name'],
+			'type'     => $it['type'],
+			'status'   => $it['status'] ?? 'live',
+			'owner'    => $it['owner'] ?? '',
+			'note'     => $it['note'] ?? '',
+			'block'    => $it['block'] ?? '',
+			'classes'  => (array) ( $it['classes'] ?? array() ),
+			'style'    => $style ? $style[0] . ' → ' . $style[1] : '',
+			'style_where' => $style ? 'styles.blocks.' . $style[0] . '.variations.' . $style[1] : '',
+			'tokens'   => $entry_tokens,
+			'a11y'     => $acc,
+			'seo'      => $seo,
+			'states'   => (array) ( $it['states'] ?? array() ),
+			'files'    => array_values( $files ),
+			'preview'  => $preview_url,
+		);
+
+		// Column 1: Component & Type
+		$badge_class = 'kits-badge--' . sanitize_html_class( $it['type'] );
+		$status_html = ( isset( $it['status'] ) && 'live' !== $it['status'] ) ? ' <span class="kits-badge kits-badge--status">' . esc_html( $it['status'] ) . '</span>' : '';
+		$note_html   = ! empty( $it['note'] ) ? '<br><small class="description">' . esc_html( $it['note'] ) . '</small>' : '';
+		$cell_name   = '<strong>' . esc_html( $it['name'] ) . '</strong><br>'
+			. '<span class="kits-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $it['type'] ) . '</span>'
+			. $status_html . $note_html;
+
+		// Column 2: Implementation & Source
+		$code_chips = array();
+		if ( ! empty( $it['block'] ) ) {
+			$code_chips[] = '<button type="button" class="kits-copy-code" data-copy="' . esc_attr( $it['block'] ) . '" title="' . esc_attr__( 'Click to copy block name', 'kits-core' ) . '"><code>' . esc_html( $it['block'] ) . '</code></button>';
+		}
+		foreach ( array_slice( (array) ( $it['classes'] ?? array() ), 0, 2 ) as $c ) {
+			$code_chips[] = '<button type="button" class="kits-copy-code" data-copy="' . esc_attr( $c ) . '" title="' . esc_attr__( 'Click to copy class', 'kits-core' ) . '"><code>.' . esc_html( $c ) . '</code></button>';
+		}
+		$more_count = count( (array) ( $it['classes'] ?? array() ) ) - 2;
+		if ( $more_count > 0 && empty( $it['block'] ) ) {
+			$code_chips[] = '<small class="description">+' . (int) $more_count . ' more</small>';
+		}
+		$owner_label = ! empty( $it['owner'] ) ? '<br><small class="description">From: ' . esc_html( $it['owner'] ) . '</small>' : '';
+		$cell_what   = implode( ' ', $code_chips ) . $owner_label;
+
+		// Column 3: Tokens & Styles
+		$token_items = array();
+		if ( $style ) {
+			$token_items[] = '<div><small class="description">Style:</small> <code>' . esc_html( $style[1] ) . '</code></div>';
+		}
+		foreach ( array_slice( $entry_tokens, 0, 2 ) as $tok ) {
+			$swatch        = preg_match( '/^#[0-9a-f]{3,8}$/i', $tok['value'] ) ? '<span class="dashicons" style="background:' . esc_attr( $tok['value'] ) . ';width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px;"></span>' : '';
+			$token_items[] = '<div>' . $swatch . '<code>' . esc_html( $tok['name'] ) . '</code></div>';
+		}
+		$cell_tokens = $token_items ? implode( '', $token_items ) : '<span class="description">—</span>';
+
+		// Column 4: Quality & Accessibility
+		$qual = array();
+		$pair = $it['a11y']['contrast'] ?? null;
+		if ( $pair ) {
+			$fg = kits_token_resolve( $pair[0], $vals );
+			$bg = kits_token_resolve( $pair[1], $vals );
+			$r  = kits_contrast( $fg, $bg );
+			if ( $r ) {
+				$qual[] = $r >= 4.5 ? '<span class="kits-badge kits-badge--live">✓ AA ' . esc_html( number_format( $r, 1 ) ) . ':1</span>' : '<span class="kits-badge kits-badge--status">✗ ' . esc_html( number_format( $r, 1 ) ) . ':1</span>';
+			}
+		}
+		if ( ! empty( $a['keyboard'] ) && 'not interactive' !== $a['keyboard'] && 'none' !== $a['keyboard'] ) {
+			$qual[] = '<span class="kits-badge">Keyboard</span>';
+		}
+		if ( ! empty( $s['schema'] ) && 'none' !== $s['schema'] ) {
+			$qual[] = '<br><small class="description">' . esc_html( $s['schema'] ) . '</small>';
+		}
+		$cell_quality = $qual ? implode( ' ', $qual ) : '<span class="description">—</span>';
+
+		// Column 5: Inspect Action
+		$cell_action = '<button type="button" class="button button-small kits-inspect-trigger" data-entry-id="' . esc_attr( $entry_id ) . '">' . esc_html__( 'Inspect →', 'kits-core' ) . '</button>';
+
+		// Search keywords for fast client-side filtering
+		$search_corpus = strtolower( $it['name'] . ' ' . ( $it['type'] ?? '' ) . ' ' . ( $it['owner'] ?? '' ) . ' ' . ( $it['block'] ?? '' ) . ' ' . implode( ' ', (array) ( $it['classes'] ?? array() ) ) );
+
 		$cells[] = array(
-			'name'   => '<strong>' . esc_html( $it['name'] ) . '</strong><br><span class="description">' . esc_html( $it['type'] . ( 'live' !== $it['status'] ? ' · ' . $it['status'] : '' ) ) . '</span>' . ( ! empty( $it['note'] ) ? '<br><em>' . esc_html( $it['note'] ) . '</em>' : '' ) . ( $style ? '<br>' . kits_block_style_where( $style[0], $style[1] ) : '' ),
-			'owner'  => esc_html( $it['owner'] ),
-			'what'   => count( (array) ( $it['classes'] ?? array() ) ) > 3 ? '<details><summary>' . esc_html( count( (array) $it['classes'] ) . ' classes' ) . '</summary>' . $what . '</details>' : $what,
-			'states' => $states ? kits_system_fold( count( $states ) . ' state' . ( 1 === count( $states ) ? '' : 's' ), implode( '<br>', array_map( 'esc_html', $states ) ) ) : '—',
-			'a11y'   => $acc ? kits_system_fold( count( $acc ) . ' note' . ( 1 === count( $acc ) ? '' : 's' ), implode( '<br>', $acc ) ) : '—',
-			'seo'    => $seo ? kits_system_fold( count( $seo ) . ' note' . ( 1 === count( $seo ) ? '' : 's' ), implode( '<br>', $seo ) ) : '—',
-			'used'   => ! empty( $it['block'] ) ? '—' : ( $files ? kits_system_fold( count( $files ) . ' file' . ( 1 === count( $files ) ? '' : 's' ), implode( '<br>', array_map( 'esc_html', $files ) ) ) : '<span class="error-message">not used</span>' ),
-			'_after' => kits_system_visual_row( $it, $vals, $demo ),
+			'name'    => $cell_name,
+			'what'    => $cell_what,
+			'tokens'  => $cell_tokens,
+			'quality' => $cell_quality,
+			'action'  => $cell_action,
+			'_sort'   => array( 'name' => $it['name'] ),
+			'_after'  => '', // Eliminates the 172 unpaginated iframes
 		);
 	}
+
 	kits_simple_table(
 		'kits-entries',
-		array( 'name' => 'Name', 'owner' => 'From', 'what' => 'Classes or block', 'states' => 'States', 'a11y' => 'Accessibility', 'seo' => 'SEO', 'used' => 'Used in' ),
+		array(
+			'name'    => 'Component',
+			'what'    => 'Implementation',
+			'tokens'  => 'Tokens & Styles',
+			'quality' => 'Quality & A11y',
+			'action'  => 'Inspect',
+		),
 		$cells,
-		array( 'empty' => 'No entries.' )
+		array(
+			'empty'   => __( 'No entries matched your criteria.', 'kits-core' ),
+			'caption' => __( 'Kits Design System Components and Registry', 'kits-core' ),
+		)
 	);
+
+	// Slide-Over Drawer Markup
+	echo '<div id="kits-drawer-backdrop" class="kits-drawer-backdrop" aria-hidden="true"></div>';
+	echo '<aside id="kits-inspector" class="kits-drawer" aria-hidden="true" role="dialog" aria-labelledby="kits-drawer-title">';
+	echo '<div class="kits-drawer__head">';
+	echo '<h3 id="kits-drawer-title" class="kits-drawer__title">' . esc_html__( 'Component Details', 'kits-core' ) . '</h3>';
+	echo '<button type="button" id="kits-drawer-close" class="kits-drawer__close" aria-label="' . esc_attr__( 'Close Inspector', 'kits-core' ) . '">&times;</button>';
 	echo '</div>';
+	echo '<div id="kits-drawer-body" class="kits-drawer__body"></div>';
+	echo '</aside>';
+
+	// Inline JavaScript for Instant Search, Filtering & Drawer Inspection
+	echo '<script>';
+	echo 'window.kitsInspectorPayload = ' . wp_json_encode( $inspector_payload ) . ';';
+	?>
+	(function() {
+		var searchInput = document.getElementById('kits-reg-search');
+		var countEl = document.getElementById('kits-reg-count');
+		var filterChips = document.querySelectorAll('.kits-chip');
+		var table = document.querySelector('table.kits-entries');
+		var drawer = document.getElementById('kits-inspector');
+		var backdrop = document.getElementById('kits-drawer-backdrop');
+		var drawerClose = document.getElementById('kits-drawer-close');
+		var drawerBody = document.getElementById('kits-drawer-body');
+		var drawerTitle = document.getElementById('kits-drawer-title');
+
+		if (!table) return;
+		var rows = Array.from(table.querySelectorAll('tbody tr'));
+		var activeType = '';
+		var activeSearch = '';
+
+		// Attach data-search and data-type to table rows
+		var entries = window.kitsInspectorPayload || {};
+		var entryIds = Object.keys(entries);
+		rows.forEach(function(r, idx) {
+			var btn = r.querySelector('.kits-inspect-trigger');
+			if (btn) {
+				var id = btn.getAttribute('data-entry-id');
+				var data = entries[id];
+				if (data) {
+					r.setAttribute('data-entry-id', id);
+					r.setAttribute('data-type', data.type || '');
+					var corpus = (data.name + ' ' + (data.type||'') + ' ' + (data.owner||'') + ' ' + (data.block||'') + ' ' + (data.classes||[]).join(' ')).toLowerCase();
+					r.setAttribute('data-search', corpus);
+				}
+			}
+		});
+
+		function filterTable() {
+			var visible = 0;
+			rows.forEach(function(r) {
+				var type = r.getAttribute('data-type') || '';
+				var corpus = r.getAttribute('data-search') || '';
+				var matchType = (!activeType || type === activeType);
+				var matchSearch = (!activeSearch || corpus.indexOf(activeSearch) !== -1);
+				if (matchType && matchSearch) {
+					r.style.display = '';
+					visible++;
+				} else {
+					r.style.display = 'none';
+				}
+			});
+			if (countEl) {
+				countEl.textContent = 'Showing ' + visible + ' of ' + rows.length + ' entries';
+			}
+		}
+
+		if (searchInput) {
+			searchInput.addEventListener('input', function(e) {
+				activeSearch = (e.target.value || '').trim().toLowerCase();
+				filterTable();
+			});
+		}
+
+		filterChips.forEach(function(chip) {
+			chip.addEventListener('click', function(e) {
+				e.preventDefault();
+				filterChips.forEach(function(c) { c.classList.remove('is-active'); });
+				chip.classList.add('is-active');
+				activeType = chip.getAttribute('data-type') || '';
+				filterTable();
+			});
+		});
+
+		// Copy code helper
+		document.addEventListener('click', function(e) {
+			var copyBtn = e.target.closest('.kits-copy-code');
+			if (copyBtn) {
+				var text = copyBtn.getAttribute('data-copy');
+				if (text && navigator.clipboard) {
+					navigator.clipboard.writeText(text).then(function() {
+						var orig = copyBtn.innerHTML;
+						copyBtn.innerHTML = '<code>Copied!</code>';
+						setTimeout(function() { copyBtn.innerHTML = orig; }, 1200);
+					});
+				}
+			}
+		});
+
+		// Open Drawer on Inspect
+		document.addEventListener('click', function(e) {
+			var btn = e.target.closest('.kits-inspect-trigger');
+			if (!btn) return;
+			var id = btn.getAttribute('data-entry-id');
+			var data = entries[id];
+			if (!data) return;
+
+			drawerTitle.textContent = data.name;
+			var html = '';
+
+			// Overview Section
+			html += '<div class="kits-drawer__section">';
+			html += '<div style="margin-bottom:8px;"><span class="kits-badge kits-badge--' + (data.type||'') + '">' + (data.type||'') + '</span>';
+			if (data.status && data.status !== 'live') {
+				html += ' <span class="kits-badge kits-badge--status">' + data.status + '</span>';
+			}
+			html += ' <small class="description">Origin: ' + (data.owner||'Theme') + '</small></div>';
+			if (data.note) {
+				html += '<p><em>' + data.note + '</em></p>';
+			}
+			html += '</div>';
+
+			// Implementation Section
+			html += '<div class="kits-drawer__section">';
+			html += '<h4 class="kits-drawer__heading">Implementation</h4>';
+			if (data.block) {
+				html += '<p><strong>Block:</strong> <code>' + data.block + '</code></p>';
+			}
+			if (data.classes && data.classes.length) {
+				html += '<p><strong>CSS Classes:</strong><br>';
+				data.classes.forEach(function(c) {
+					html += '<span class="kits-copy-code" data-copy="' + c + '"><code>.' + c + '</code></span> ';
+				});
+				html += '</p>';
+			}
+			if (data.style) {
+				html += '<p><strong>Block Style:</strong> ' + data.style + '<br><code>' + data.style_where + '</code></p>';
+			}
+			html += '</div>';
+
+			// Tokens & Styles
+			if (data.tokens && data.tokens.length) {
+				html += '<div class="kits-drawer__section">';
+				html += '<h4 class="kits-drawer__heading">Design Tokens</h4>';
+				html += '<table class="widefat striped"><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>';
+				data.tokens.forEach(function(tok) {
+					var isHex = /^#[0-9a-f]{3,8}$/i.test(tok.value);
+					var swatch = isHex ? '<span class="dashicons" style="background:' + tok.value + ';width:12px;height:12px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px;"></span>' : '';
+					html += '<tr><td><code>' + tok.name + '</code></td><td>' + swatch + '<code>' + tok.value + '</code></td></tr>';
+				});
+				html += '</tbody></table></div>';
+			}
+
+			// Accessibility Section
+			if (data.a11y && data.a11y.length) {
+				html += '<div class="kits-drawer__section">';
+				html += '<h4 class="kits-drawer__heading">Accessibility & ARIA</h4><ul>';
+				data.a11y.forEach(function(item) {
+					html += '<li><strong>' + item.label + ':</strong> ' + item.value + '</li>';
+				});
+				html += '</ul></div>';
+			}
+
+			// Files where used
+			if (data.files && data.files.length) {
+				html += '<div class="kits-drawer__section">';
+				html += '<h4 class="kits-drawer__heading">Used In Files (' + data.files.length + ')</h4><ul>';
+				data.files.forEach(function(f) {
+					html += '<li><code>' + f + '</code></li>';
+				});
+				html += '</ul></div>';
+			}
+
+			// Live Preview (Lazy-loaded inside iframe ONLY on demand!)
+			if (data.preview) {
+				html += '<div class="kits-drawer__section">';
+				html += '<h4 class="kits-drawer__heading">Live Preview</h4>';
+				html += '<div class="kits-drawer__preview-wrap">';
+				html += '<iframe class="kits-drawer__iframe" title="' + data.name + ' preview" src="' + data.preview + '"></iframe>';
+				html += '</div>';
+				html += '<p style="margin-top:8px;"><a href="' + data.preview + '" target="_blank" rel="noopener">Open preview in new tab →</a></p>';
+				html += '</div>';
+			}
+
+			drawerBody.innerHTML = html;
+			drawer.classList.add('is-open');
+			drawer.setAttribute('aria-hidden', 'false');
+			backdrop.classList.add('is-open');
+			backdrop.setAttribute('aria-hidden', 'false');
+		});
+
+		function closeDrawer() {
+			drawer.classList.remove('is-open');
+			drawer.setAttribute('aria-hidden', 'true');
+			backdrop.classList.remove('is-open');
+			backdrop.setAttribute('aria-hidden', 'true');
+			if (drawerBody) {
+				drawerBody.innerHTML = ''; // Clears iframe from memory
+			}
+		}
+
+		if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+		if (backdrop) backdrop.addEventListener('click', closeDrawer);
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+				closeDrawer();
+			}
+		});
+	})();
+	<?php
+	echo '</script>';
+	echo '</div>';
+}
+
+/**
+ * Extracts preview URL for a registry entry without preloading it.
+ *
+ * @param array        $it   Registry entry.
+ * @param WP_Post|null $demo Demo page.
+ * @return string
+ */
+function kits_system_preview_url( $it, $demo ) {
+	if ( ! $demo ) {
+		return '';
+	}
+	$url = add_query_arg( 'kits_embed', '1', get_permalink( $demo ) );
+	$src = '';
+	if ( 'pattern' === ( $it['type'] ?? '' ) && ! empty( $it['block'] ) ) {
+		$src = add_query_arg( 'kits_pattern', rawurlencode( $it['block'] ), $url );
+	} elseif ( ! empty( $it['block'] ) ) {
+		$src = add_query_arg( 'kits_only_block', rawurlencode( $it['block'] ), $url );
+	} elseif ( ! empty( $it['classes'] ) ) {
+		$src = add_query_arg( 'kits_only_classes', rawurlencode( implode( ',', (array) $it['classes'] ) ), $url );
+	}
+	if ( ! $src && 'pattern' !== ( $it['type'] ?? '' ) ) {
+		$src = add_query_arg( 'kits_only_classes', '', add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) );
+	}
+	if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) {
+		$src = add_query_arg( 'kits_only_name', rawurlencode( $it['name'] ), $src );
+	}
+	if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) {
+		$spot = kits_spot_map()[ $it['name'] ] ?? '';
+		$src  = add_query_arg( 'kits_spot_url', rawurlencode( '' !== $spot ? $spot : 'none' ), $src );
+	}
+	return $src;
+}
+
+/**
+ * Extracts and resolves tokens for a registry entry.
+ *
+ * @param array $it   Registry entry.
+ * @param array $vals Token values.
+ * @return array
+ */
+function kits_system_entry_tokens( $it, $vals ) {
+	$toks  = array();
+	$style = kits_registry_style( $it );
+	if ( $style ) {
+		foreach ( kits_block_style_values( $style[0], $style[1] ) as $label => $v ) {
+			$toks[] = array(
+				'label' => $label,
+				'name'  => $v[0],
+				'value' => $v[1],
+			);
+		}
+	}
+	foreach ( (array) ( $it['tokens'] ?? array() ) as $t ) {
+		$t     = ltrim( (string) $t, '-' );
+		$names = '*' === substr( $t, -1 ) ? array_filter( array_keys( $vals ), fn( $k ) => 0 === strpos( $k, substr( $t, 0, -1 ) ) ) : ( isset( $vals[ $t ] ) ? array( $t ) : array() );
+		foreach ( array_slice( array_values( $names ), 0, 12 ) as $k ) {
+			$r      = kits_token_resolve( $k, $vals );
+			$toks[] = array(
+				'label' => 'Token',
+				'name'  => '--' . $k,
+				'value' => $r,
+			);
+		}
+	}
+	return $toks;
 }
 
 /**

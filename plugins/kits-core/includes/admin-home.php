@@ -32,14 +32,14 @@ add_action(
 	8 // before the other Kits screens join the menu
 );
 
-/** The theme's settings in the Site Editor: label and address (relative to wp-admin). Linked from Home and Docs. */
+/** The theme's settings in the Site Editor: label, address (relative to wp-admin) and description. Linked from Home and Docs. */
 function kits_theme_screens(): array {
 	return array(
-		'navigation' => array( 'Navigation', 'site-editor.php?path=/navigation' ),
-		'styles'     => array( 'Styles (colours, fonts)', 'site-editor.php?path=/wp_global_styles' ),
-		'templates'  => array( 'Templates', 'site-editor.php?postType=wp_template' ),
-		'parts'      => array( 'Header & footer', 'site-editor.php?postType=wp_template_part' ),
-		'patterns'   => array( 'Patterns', 'site-editor.php?path=/patterns' ),
+		'styles'     => array( 'Styles (colours, fonts)', 'site-editor.php?path=/wp_global_styles', 'Colours, typography, layout dimensions & block styling' ),
+		'navigation' => array( 'Navigation', 'site-editor.php?path=/navigation', 'Header, footer & mobile explore navigation menus' ),
+		'templates'  => array( 'Templates', 'site-editor.php?postType=wp_template', 'Page, post, archive, single & 404 block templates' ),
+		'parts'      => array( 'Header & footer', 'site-editor.php?postType=wp_template_part', 'Header, footer & sidebar template parts' ),
+		'patterns'   => array( 'Patterns', 'site-editor.php?path=/patterns', 'Pre-designed sections: heroes, cards, CTAs & FAQs' ),
 	);
 }
 

@@ -20,7 +20,14 @@ import './inbox.css';
 
 const app = window.mailwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
-const errText = ( e ) => ( e && e.message ) || String( e );
+const errText = ( e ) => {
+	if ( ! e ) return '';
+	const msg = ( e && e.message ) || String( e );
+	if ( typeof msg === 'string' && ( msg.includes( 'is not valid JSON' ) || msg.includes( 'Unexpected token' ) ) ) {
+		return 'The server encountered an error and returned an unexpected response. Please check server error logs.';
+	}
+	return msg;
+};
 
 /** The Inbox's place from the address, so a reload or a link opens the same view and message. */
 function startState() {

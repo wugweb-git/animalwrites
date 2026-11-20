@@ -27,12 +27,12 @@ wp plugin activate kits-core --quiet
 wp plugin activate directoryweb --quiet
 # Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).
 wp plugin install seo-by-rank-math --version=1.0.280 --activate --quiet
-wp plugin activate aw-seo-extras --quiet
+if [ -d "$REPO/plugins/rankweb" ]; then wp plugin activate rankweb --quiet; else wp plugin activate aw-seo-extras --quiet; fi
 # Mailweb: all site mail (inbox, webhook /wp-json/mailweb/v1/mail-in, SMTP sending, daily limit, signatures).
 wp plugin activate mailweb --quiet
 # InsightWeb and SourceWeb: active on the live site; animal-writes-core used to load them from their folders (retired 19 Nov 2026).
 wp plugin activate insightweb --quiet
-wp plugin activate aw-sourcing --quiet
+if [ -d "$REPO/plugins/sourceweb" ]; then wp plugin activate sourceweb --quiet; else wp plugin activate aw-sourcing --quiet; fi
 # One item of each kind.
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
@@ -531,7 +531,7 @@ wp plugin deactivate insightweb --quiet
 wp eval '$s = (array) get_option( "aw_seo_settings", array() ); $s["search-insights"]["on"] = 0; update_option( "aw_seo_settings", $s );'
 iw bridge
 wp eval '$s = (array) get_option( "aw_seo_settings", array() ); unset( $s["search-insights"]["on"] ); update_option( "aw_seo_settings", $s );'
-if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning|PHP Deprecated:.*/(plugins|themes)/(animal-writes|kits|aw-|mailweb|insightweb|planweb)'; then FAIL=1; fi
+if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning|PHP Deprecated:.*/(plugins|themes)/(animal-writes|kits|aw-|mailweb|insightweb|planweb|rankweb|sourceweb)'; then FAIL=1; fi
 wp cache flush --quiet
 # Menu pages for the PR's before and after screenshots (pull requests only; the Deploy check keeps them with the Kits
 # screens): as an administrator and as an editor, the same screens on this commit (menu-after) and on the base commit

@@ -168,29 +168,40 @@ function mailweb_webhook_permission( WP_REST_Request $req ) {
 
 /** A webhook delivery: refresh the counts and tell listeners which mailbox has new mail. */
 function mailweb_in( WP_REST_Request $req ) {
-	$key = (string) $req->get_param( '_mailweb_box' );
-	if ( function_exists( 'mailweb_overview_flush' ) ) {
-		mailweb_overview_flush();
+	try {
+		$key = (string) $req->get_param( '_mailweb_box' );
+		if ( function_exists( 'mailweb_overview_flush' ) ) {
+			mailweb_overview_flush();
+		}
+		foreach ( array_keys( mailweb_all_boxes() ) as $k ) {
+			delete_transient( 'mailweb_folders_' . $k );
+		}
+		update_option(
+			'mailweb_last',
+			array(
+				'at'      => current_time( 'mysql' ),
+				'mailbox' => mailweb_all_boxes()[ $key ] ?? '',
+			),
+			false
+		);
+		/**
+		 * New mail arrived in a mailbox (the webhook fired).
+		 *
+		 * @param string          $key Mailbox key.
+		 * @param WP_REST_Request $req The delivery.
+		 */
+		do_action( 'mailweb_webhook_noted', $key, $req );
+		return new WP_REST_Response( array( 'status' => 'noted' ), 200 );
+	} catch ( \Throwable $e ) {
+		error_log( 'MailWeb mail_in error: ' . $e->getMessage() );
+		return new WP_REST_Response(
+			array(
+				'status'  => 'error',
+				'message' => $e->getMessage(),
+			),
+			500
+		);
 	}
-	foreach ( array_keys( mailweb_all_boxes() ) as $k ) {
-		delete_transient( 'mailweb_folders_' . $k );
-	}
-	update_option(
-		'mailweb_last',
-		array(
-			'at'      => current_time( 'mysql' ),
-			'mailbox' => mailweb_all_boxes()[ $key ] ?? '',
-		),
-		false
-	);
-	/**
-	 * New mail arrived in a mailbox (the webhook fired).
-	 *
-	 * @param string          $key Mailbox key.
-	 * @param WP_REST_Request $req The delivery.
-	 */
-	do_action( 'mailweb_webhook_noted', $key, $req );
-	return new WP_REST_Response( array( 'status' => 'noted' ), 200 );
 }
 
 add_action(

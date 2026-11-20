@@ -90,13 +90,15 @@ add_action(
 		$state    = absint( $_POST['aw_state_code'] ?? 0 );
 		$district = absint( $_POST['aw_district_code'] ?? 0 );
 		$places   = $state ? array( array( $state, $district ) ) : array();
-		foreach ( (array) wp_unslash( $_POST['aw_place_more'] ?? array() ) as $more ) {
+		$more_raw = isset( $_POST['aw_place_more'] ) ? (array) wp_unslash( $_POST['aw_place_more'] ) : array();
+		foreach ( $more_raw as $more ) {
+			$more  = sanitize_text_field( $more );
 			$parts = array_map( 'absint', explode( ':', (string) $more ) );
 			if ( ! empty( $parts[0] ) ) {
 				$places[] = array( $parts[0], $parts[1] ?? 0 );
 			}
 		}
-		$pin    = preg_replace( '/\D/', '', (string) wp_unslash( $_POST['aw_pincode'] ?? '' ) );
+		$pin    = preg_replace( '/\D/', '', sanitize_text_field( (string) wp_unslash( $_POST['aw_pincode'] ?? '' ) ) );
 		$city   = sanitize_text_field( wp_unslash( $_POST['aw_place_city'] ?? '' ) );
 		$before = aw_item_codes( $id );
 		if ( aw_set_item_places( $id, $places, $pin, $city ) ) {
@@ -131,7 +133,7 @@ add_action(
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			wp_send_json_error( 'Not allowed.' );
 		}
-		$r = aw_pin_lookup( (string) wp_unslash( $_GET['pin'] ?? '' ) );
+		$r = aw_pin_lookup( sanitize_text_field( (string) wp_unslash( $_GET['pin'] ?? '' ) ) );
 		is_array( $r ) ? wp_send_json_success( $r ) : wp_send_json_error( $r );
 	}
 );

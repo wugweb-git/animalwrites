@@ -8,8 +8,8 @@
  * Author: Wugweb
  * Author URI: https://wugweb.com
  * License: GPL-2.0-or-later
- * Update URI: https://wugweb.com/plugins/aw-sourcing/
- * Text Domain: aw-sourcing
+ * Update URI: https://wugweb.com/plugins/sourceweb/
+ * Text Domain: sourceweb
  * Domain Path: /languages
  * Requires Plugins: kits-core, directoryweb, insightweb
  *
@@ -18,7 +18,7 @@
  *
  * This file only defines and includes (no functions): it may be reached twice, from Core and as an active plugin.
  *
- * @package aw-sourcing
+ * @package sourceweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,6 +27,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Core loads this file; if it is also active on its own, the second load stops here.
 if ( defined( 'AW_SOURCING_LOADED' ) ) {
 	return;
+}
+define( 'SOURCEWEB_DIR', plugin_dir_path( __FILE__ ) );
+define( 'SOURCEWEB_FILE', __FILE__ );
+if ( ! defined( 'AW_SOURCING_DIR' ) ) {
+	define( 'AW_SOURCING_DIR', SOURCEWEB_DIR );
+}
+if ( ! defined( 'AW_SOURCING_FILE' ) ) {
+	define( 'AW_SOURCING_FILE', SOURCEWEB_FILE );
 }
 // SourceWeb needs Kits Core (the admin shell and site parts), DirectoryWeb (the listings and places it fills) and
 // InsightWeb (the keyword table, includes/keywords.php there). Plugins load in name order, so active ones load after
@@ -58,7 +66,9 @@ if ( ! defined( 'KITS_CORE_LOADED' ) || ! defined( 'DIRECTORYWEB_LOADED' ) || ! 
 	return;
 }
 define( 'AW_SOURCING_LOADED', '0.1.0' );
-define( 'AW_SOURCING_DIR', __DIR__ . '/' );
+if ( ! defined( 'AW_SOURCING_DIR' ) ) {
+	define( 'AW_SOURCING_DIR', __DIR__ . '/' );
+}
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once AW_SOURCING_DIR . 'includes/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)

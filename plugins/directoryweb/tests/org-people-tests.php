@@ -7,13 +7,16 @@
  * @package directoryweb
  */
 
-if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
-	exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	if ( 'cli' !== PHP_SAPI ) {
+		exit;
+	}
+	define( 'ABSPATH', __DIR__ . '/' );
 }
 
 // phpcs:disable WordPress.Security.EscapeOutput -- a command-line test runner.
 
-define( 'ABSPATH', __DIR__ . '/' );
+
 require dirname( __DIR__ ) . '/includes/org-people-link.php';
 
 $fails = 0;
