@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 	define( 'ABSPATH', sys_get_temp_dir() . '/aw-error-count-root/' );
 }
+
+// phpcs:disable WordPress.Security.EscapeOutput, WordPress.WP.AlternativeFunctions -- a command-line test runner with a temporary log file.
+
 define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
 define( 'DAY_IN_SECONDS', 86400 );
 define( 'HOUR_IN_SECONDS', 3600 );
