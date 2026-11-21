@@ -1,8 +1,8 @@
 # Wugweb & Kits 3.0: Master Architectural Synthesis
 
 **Status:** Canonical Living Blueprint  
-**Scope:** Design System, Block Theme, Companion Plugins, Token Foundry, Multi-Tenant Fleet, and Distribution Pipeline  
-**Governing Rule:** One Repository $\neq$ One Product $\neq$ One Release  
+**Scope:** Design System, Block Theme, Companion Plugins, Token Foundry, Multi-Tenant Fleet, Governance, and Distribution Pipeline  
+**Governing Axiom:** One Repository $\neq$ One Product $\neq$ One Release  
 
 ---
 
@@ -184,8 +184,6 @@ A critical architectural separation:
 * **GPL License Only**: No trialware, no locked core features, no bundled hosted plugins.
 * **No `Update URI`**: Removed from all public `.org` plugin and theme headers.
 * **`Requires Plugins` Rule**: Restricted strictly to dependencies that are themselves hosted on WordPress.org.
-* **External Services Disclosure**: Every outbound host must be registered via `register_external_service()` and fully disclosed in `== External services ==` in `readme.txt` with privacy links and purpose.
-* **Centralized Network Relay**: `remote_request()` using `wp_safe_remote_*` is the sole authorized outbound route. Returns `WP_Error` if host is unregistered.
 * **Unique Prefixes**: Minimum 4-character prefix per plugin. No legacy `aw_` or `aw-` in new code.
 
 ### 7.2 Security Safeguards
@@ -194,7 +192,87 @@ A critical architectural separation:
 
 ---
 
-## 8. Debunked Misconceptions & Clarified Realities
+## 8. Capability & Role Isolation Matrix
+
+To prevent privilege escalation and ensure that activating or deactivating one plugin never alters another plugin's permissions, each Wugweb product defines its own granular capability:
+
+| Plugin | Primary Capability | Constant | Scope / Protected Actions | Granted Default Roles |
+|---|---|---|---|---|
+| **Kits Core** | `manage_kits` | `KITS_CAP` | Theme Hub, Brand Tokens, Help | Administrator, `manage_options` |
+| **DirectoryWeb** | `manage_directoryweb` | `DIRECTORYWEB_CAP` | Directory Dashboard, Claims, Listings (`aw_listing`) | Administrator, `edit_aw_volunteers` |
+| **SourceWeb** | `manage_sourceweb` | `SOURCEWEB_CAP` | Sourcing Dashboard, Feed Review, Enrichment | Administrator, `edit_others_posts` |
+| **RankWeb** | `manage_rankweb` | `RANKWEB_CAP` | SEO Overview, Schemas, Silos, Redirects | Administrator, `manage_categories` |
+| **InsightWeb** | `manage_insightweb` | `INSIGHTWEB_CAP` | Search Insights, Query Tables, GSC Sync | Administrator, `manage_options` |
+| **MailWeb** | `manage_mailweb` | `MAILWEB_CAP` | Mailboxes, Outbox, SMTP/DKIM Settings | Administrator, `edit_others_posts` |
+| **PlanWeb** | `edit_planweb_entries`<br>`planweb_approve` | `PLANWEB_CAP` | Editorial Calendar entries<br>Publishing approvals | Editor, Administrator<br>Administrator only |
+
+---
+
+## 9. External Services Registry & Outbound Routing Contract
+
+Every public plugin must centralize all outbound HTTP requests through a strict registration and routing contract:
+
+```php
+// 1. Register allowed outbound endpoints
+register_external_service( 'hostinger_mail_api', array(
+    'host'     => 'api.hostinger.com',
+    'purpose'  => 'Mailbox synchronization and campaign dispatch',
+    'data'     => 'Email recipient metadata and dispatch payloads',
+    'terms'    => 'https://www.hostinger.com/legal/universal-terms-of-service-agreement',
+    'privacy'  => 'https://www.hostinger.com/legal/privacy-policy',
+    'enabled'  => true,
+) );
+
+// 2. Centralized, safe dispatch
+function wugweb_remote_request( $url, $args = array(), $method = 'GET' ) {
+    $host = wp_parse_url( $url, PHP_URL_HOST );
+    if ( ! wugweb_is_service_registered_and_enabled( $host ) ) {
+        return new WP_Error( 'unregistered_service', sprintf( 'Host %s is not registered in the External Services Registry.', $host ) );
+    }
+    return 'POST' === $method ? wp_safe_remote_post( $url, $args ) : wp_safe_remote_get( $url, $args );
+}
+```
+
+* **Mandatory Disclosure**: Every registered host, its purpose, data sent, and privacy links are automatically compiled into the `== External services ==` section of the plugin's `readme.txt`.
+
+---
+
+## 10. Service Keys Policy & Vault Retirement
+
+* **Vault Retirement (18 Nov 2026)**: The centralized vault (`aw_keys` / `admin.php?page=aw-keys`) is **officially retired**.
+* **One Place Per Plugin**: Every standalone plugin keeps its service credentials in its own dedicated settings screen.
+* **Environment & Constant Precedence**: `wp-config.php` constants take unconditional precedence over database values:
+  * `define( 'SMTP_HOST', 'smtp.hostinger.com' );`
+  * `define( 'SMTP_PORT', 465 );`
+  * `define( 'GSC_CLIENT_ID', '...' );`
+* **Zero AI Keys in Repository**: AI provider credentials remain exclusively under direct owner control and are never stored in plugin options or committed to Git.
+
+---
+
+## 11. The 5-Tier Governance Framework
+
+Governance in the Wugweb ecosystem is enforced deterministically across five layers:
+
+$$\text{Skill (Guidance)} \longrightarrow \text{Scripts (Enforcement)} \longrightarrow \text{CI (Release Gate)} \longrightarrow \text{Workers (Monitoring)} \longrightarrow \text{Evals (Quality Measurement)}$$
+
+1. **Skills (`skills/*`)**: Instructs AI agents how to build compliant code, follow token hierarchies, and avoid known traps.
+2. **Scripts (`tools/*`, `scripts/*`)**: Deterministically detects violations in <2 seconds (`check-raw-visual-values.mjs`, `smoke.sh`, PHPCS). Never replace a shell script with an AI agent loop!
+3. **CI Workflows (`.github/workflows/*`)**: Automated release gates blocking commits on lint, Plugin Check, unit tests, or contrast failures.
+4. **Workers**: Headless background runners executing scheduled health checks, sitemap builds, and feed indexing.
+5. **Evals**: Standardized prompt tests (19 recorded test cases) verifying that AI models correctly select tokens, avoid raw values, and follow contracts.
+
+---
+
+## 12. Worker Execution Architecture & Automation Contracts
+
+* **Execution Runtime, Not a Repository**: The "Workers Union" is an execution runtime (serverless functions, GitHub Actions cron runners), **not** a competing Git repository.
+* **Contract-Driven Schemas (`packages/automation-contracts`)**: JSON schemas defining exact worker payloads, input schemas, and expected outputs.
+* **Bi-Directional Telemetry**: Workers report run execution, throughput, and error metrics back to `sourceweb` (feed throughput) and `insightweb` (search spikes).
+* **Test Gate**: All worker scripts must pass `pytest` before automated deployment.
+
+---
+
+## 13. Debunked Misconceptions & Clarified Realities
 
 | Misconception / Rejected Proposal | Authoritative Architectural Standard |
 |---|---|
@@ -207,9 +285,9 @@ A critical architectural separation:
 
 ---
 
-## 9. Delivery Pipeline & Git Workflow
+## 14. Delivery Pipeline & Git Workflow
 
-### 9.1 Review & Merge Sequence
+### 14.1 Review & Merge Sequence
 $$\text{Worktree Branch} \longrightarrow \text{Pull Request} \longrightarrow \text{Review Gate} \longrightarrow \text{Owner Approval \& Merge} \longrightarrow \text{Ship Script}$$
 
 * **Review Gate Checklist**:
@@ -221,7 +299,7 @@ $$\text{Worktree Branch} \longrightarrow \text{Pull Request} \longrightarrow \te
   6. Workers pytest green (where applicable).
   7. Commit attribution: `Co-Authored-By: Wugweb <admin@wugweb.com>`.
 
-### 9.2 Independent Artifact Packaging
+### 14.2 Independent Artifact Packaging
 Each product is built and packaged independently:
 * `dist/kits-by-wugweb.zip` (Theme)
 * `dist/kits-core.zip` (Core Companion)
@@ -230,7 +308,7 @@ Each product is built and packaged independently:
 
 ---
 
-## 10. Multi-Tenant Fleet Deployment Map
+## 15. Multi-Tenant Fleet Deployment Map
 
 ```
                                   CANONICAL SOURCE REPO
