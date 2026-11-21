@@ -11,11 +11,19 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
-### AMP-Grade Skeletons, Zero-CLS Layouts & Native A/B Testing Engine (PR in progress, Nov 2026)
-- **Built across Kits Core, DirectoryWeb & Theme:**
+### UI & Section Spacing Normalization Audit (completed 21 Nov 2026, docs `docs/ui-spacing-audit.md` and `docs/master-roadmap-audit.md`)
+- **Full audit conducted across live production (`/`, `/directory/`, `/library/`, `/news/`, single listings, campaigns):**
+  - Identified adjacent `.is-style-kits-section` blocks producing cumulative 192px dead space on desktop (96px on mobile) when sharing identical canvas backgrounds. Normalization rule specified: `.is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) + .is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) { padding-top: 0 !important; }`.
+  - Identified missing vertical padding on `.wp-block-cover.kit-section.aw-ed-story` (Home story band), where inline styles declared horizontal padding only (`padding-left` and `padding-right`), leaving vertical content touching container boundaries. Normalization rule specified: `padding-top: var(--kit-space-section) !important; padding-bottom: var(--kit-space-section) !important;`.
+  - Identified Hub list (`.aw-system`) into `.aw-hub-faq` and `.kit-nl-band` transitions producing irregular 136px vertical stacking gaps. Normalization rule specified: `margin-top: var(--kit-space-6)`.
+  - Pruned 14 merged/stale worktrees and 64 merged local branches.
+
+### AMP-Grade Skeletons, Zero-CLS Layouts & Native A/B Testing Engine (done 21 Nov 2026, PR #171, commit `6a3da1fd` live)
+- **Built, merged and live (PR #171, commit `6a3da1fd`):**
   - **Shimmering Skeleton Layouts (`plugins/kits-core/src/shell/states.js`, `more.css`)**: Built `SkeletonTable`, `SkeletonRow`, `SkeletonCard`, and `SkeletonLine` with `@keyframes kits-shimmer` linear gradient animation. Integrated into `DataList` so initial loads and view filters display zero-CLS animated placeholder tables instead of abrupt UI pops.
   - **DirectoryWeb Shimmer Dashboards (`plugins/directoryweb/src/index.js`)**: Modernized Overview dashboard loading state to render 6 shimmering `SkeletonCard` tiles during count calculations.
   - **Native A/B & Multivariate Testing Engine (`plugins/kits-core/includes/ab-testing.php`)**: Built cache-friendly, zero-CLS split test framework with `kits_ab_variant()`, `kits_ab_is()`, `[kits_ab]` shortcode, 30-day cookie persistence, QA query string override (`?kits_ab_{exp}=B`), and automatic Google Tag Manager / GA4 (`kits_experiment_impression`) and Microsoft Clarity integration. Covered with 11 standalone unit tests (`plugins/kits-core/tests/ab-testing-tests.php`).
+  - Gated deploy run `44899989371` passed green; Hostinger deployed `6a3da1fd` with LiteSpeed cache purge HTTP 200.
 
 ### World-Class Products Suite: Onboarding Wizard, Scripts Manager, Reprint Engine, RankWeb Editor Sidebar, Block Inspector Controls, and PCP Fixes (done 20 Nov 2026, PR #170, commit `4151ad25` live)
 - **Built, merged and live (PR #170, commit `4151ad25`, tag `release-20261120-2231-4151ad25`):**
