@@ -22,7 +22,7 @@ SourceWeb decides what comes into the site and lets the team review it.
 * AI models: which free models do which job, with daily caps.
 * Worker endpoints for ingest, relay, sourcing policy, relevance, same-story grouping, summaries and enrichment.
 
-Needs Kits Core, DirectoryWeb and InsightWeb (the keyword table). Animal Writes Core loads it from this folder while Core is active; it can also be activated on its own.
+Needs Kits Core, DirectoryWeb and InsightWeb (the keyword table). Built for modular, standalone activation or suite deployment.
 
 == Uninstall ==
 

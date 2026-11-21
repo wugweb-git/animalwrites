@@ -13,12 +13,57 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The listing post type, with the arguments Animal Writes Core's content-types.php builds for it (one function builds
  * them, aw_content_type_args()), and the core category on it, as Core's loop gave it.
  */
+/**
+ * Return the primary post type used for directory listings.
+ * Filterable via 'directoryweb_post_type'.
+ * Supports 'wpbdp_listing' (Business Directory Plugin) if active and chosen.
+ */
+function directoryweb_post_type(): string {
+	static $post_type = null;
+	if ( null !== $post_type ) {
+		return $post_type;
+	}
+
+	if ( defined( 'WPBDP_VERSION' ) && apply_filters( 'directoryweb_consume_bdp', false ) ) {
+		$default = 'wpbdp_listing';
+	} elseif ( function_exists( 'aw_content_type_args' ) || post_type_exists( 'aw_listing' ) ) {
+		$default = 'aw_listing';
+	} else {
+		$default = 'directory_listing';
+	}
+
+	$post_type = (string) apply_filters( 'directoryweb_post_type', $default );
+	return $post_type;
+}
+
 function directoryweb_register_listing_type(): void {
-	if ( ! function_exists( 'aw_content_type_args' ) ) {
+	$cpt = directoryweb_post_type();
+
+	// If Business Directory Plugin already registered wpbdp_listing, bind category and return
+	if ( 'wpbdp_listing' === $cpt && post_type_exists( 'wpbdp_listing' ) ) {
+		register_taxonomy_for_object_type( 'category', $cpt );
 		return;
 	}
-	register_post_type( 'aw_listing', aw_content_type_args( 'aw_listing' ) );
-	register_taxonomy_for_object_type( 'category', 'aw_listing' );
+
+	if ( function_exists( 'aw_content_type_args' ) ) {
+		$args = aw_content_type_args( $cpt );
+	} else {
+		$args = array(
+			'labels'       => array(
+				'name'          => __( 'Directory Listings', 'directoryweb' ),
+				'singular_name' => __( 'Directory Listing', 'directoryweb' ),
+			),
+			'public'       => true,
+			'show_ui'      => true,
+			'show_in_menu' => true,
+			'show_in_rest' => true,
+			'supports'     => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
+			'has_archive'  => true,
+			'rewrite'      => array( 'slug' => 'directory' ),
+		);
+	}
+	register_post_type( $cpt, $args );
+	register_taxonomy_for_object_type( 'category', $cpt );
 }
 /** One flush of the rewrite rules after the first deploy of a version (the Directory addresses come from this plugin now). */
 add_action(

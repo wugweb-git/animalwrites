@@ -12,7 +12,7 @@ A directory of organisations in WordPress: listings with their places and types,
 
 == Description ==
 
-DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
+DirectoryWeb is a modern directory engine for WordPress: listings with places, types, interactive maps, and claim workflows.
 
 = Listings, places and types =
 

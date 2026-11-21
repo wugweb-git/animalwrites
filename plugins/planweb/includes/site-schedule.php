@@ -175,16 +175,28 @@ function planweb_site_items( string $from, string $to ): array {
 			$future  = 'future' === $p->post_status;
 			$late    = $future && strtotime( $p->post_date_gmt . ' UTC' ) < $now - 5 * MINUTE_IN_SECONDS;
 			$status  = $late ? 'missed' : ( $future ? 'scheduled' : 'published' );
+			$date = substr( $p->post_date, 0, 10 );
+			$time = substr( $p->post_date, 11, 5 );
+
+			// Consume The Events Calendar event start date if present
+			if ( 'tribe_events' === $p->post_type ) {
+				$event_start = get_post_meta( $p->ID, '_EventStartDate', true );
+				if ( $event_start ) {
+					$date = substr( $event_start, 0, 10 );
+					$time = substr( $event_start, 11, 5 );
+				}
+			}
+
 			$items[] = array(
 				'source'     => 'post',
 				'uid'        => 'planweb-site-post-' . $p->ID,
 				'id'         => (int) $p->ID,
-				'date'       => substr( $p->post_date, 0, 10 ),
-				'time'       => substr( $p->post_date, 11, 5 ),
+				'date'       => $date,
+				'time'       => $time,
 				'title'      => wp_strip_all_tags( $p->post_title ),
-				'type'       => 'site',
-				'typeText'   => $type ? (string) $type->labels->singular_name : $p->post_type,
-				'channels'   => array( 'site' ),
+				'type'       => 'tribe_events' === $p->post_type ? 'event' : 'site',
+				'typeText'   => 'tribe_events' === $p->post_type ? __( 'Event', 'planweb' ) : ( $type ? (string) $type->labels->singular_name : $p->post_type ),
+				'channels'   => 'tribe_events' === $p->post_type ? array( 'events', 'site' ) : array( 'site' ),
 				'status'     => $status,
 				'statusText' => PLANWEB_SITE_STATUSES[ $status ],
 				'link'       => $future ? '' : (string) get_permalink( $p ),

@@ -51,13 +51,38 @@ function mailweb_smtp_settings() {
 	return $s;
 }
 
+/** Check whether a dedicated external SMTP plugin is handling outbound mail. */
+function mailweb_has_external_smtp(): bool {
+	return defined( 'FLUENTMAIL' ) || class_exists( 'FluentMail' ) || defined( 'POST_SMTP_VER' ) || class_exists( 'Postman' ) || class_exists( 'WPMailSMTP\\Core' );
+}
+
 // Every message leaves as the site's mailbox (never wordpress@), with the site's name.
-add_filter( 'wp_mail_from', fn() => mailweb_smtp_settings()['user'] );
-add_filter( 'wp_mail_from_name', fn() => mailweb_smtp_settings()['name'] );
+add_filter(
+	'wp_mail_from',
+	function ( $from ) {
+		if ( mailweb_has_external_smtp() && apply_filters( 'mailweb_defer_to_external_smtp', true ) ) {
+			return $from;
+		}
+		return mailweb_smtp_settings()['user'];
+	}
+);
+
+add_filter(
+	'wp_mail_from_name',
+	function ( $name ) {
+		if ( mailweb_has_external_smtp() && apply_filters( 'mailweb_defer_to_external_smtp', true ) ) {
+			return $name;
+		}
+		return mailweb_smtp_settings()['name'];
+	}
+);
 
 add_action(
 	'phpmailer_init',
 	function ( $mailer ) {
+		if ( mailweb_has_external_smtp() && apply_filters( 'mailweb_defer_to_external_smtp', true ) ) {
+			return; // Defer outbound sending to FluentSMTP, Post SMTP, or WP Mail SMTP.
+		}
 		$s = mailweb_smtp_settings();
 		// A site-wide Reply-To (mailweb_smtp_reply_to filter), unless the message sets its own.
 		$reply = (string) apply_filters( 'mailweb_smtp_reply_to', '' );
