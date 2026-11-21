@@ -43,9 +43,18 @@ interface Mailweb_Provider {
 /**
  * The Hostinger Mail API adapter — the default, and today the only, provider.
  *
+ * Supports both direct REST transport (zero dependency, WordPress native) and the official
+ * Hostinger Mail API PHP SDK (hostinger/mail-api-php-sdk: Hostinger\MailApi\Api\SendApi) when installed in vendor/.
  * The base URL is `MAILWEB_API_HOST`, overridable with the `mailweb_api_base` filter.
  */
 final class Mailweb_Hostinger_Provider implements Mailweb_Provider {
+
+	/**
+	 * Returns whether the Hostinger Mail API PHP SDK is loaded.
+	 */
+	public static function has_sdk(): bool {
+		return class_exists( 'Hostinger\\MailApi\\Configuration' );
+	}
 
 	/**
 	 * {@inheritDoc}

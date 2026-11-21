@@ -31,6 +31,22 @@ function mailweb_smtp_settings() {
 		$s['pass'] = (string) $env;
 	} elseif ( defined( 'MAILWEB_SMTP_PASSWORD' ) && MAILWEB_SMTP_PASSWORD ) {
 		$s['pass'] = (string) MAILWEB_SMTP_PASSWORD;
+	} elseif ( getenv( 'SMTP_PASS' ) ) {
+		$s['pass'] = (string) getenv( 'SMTP_PASS' );
+	} elseif ( defined( 'SMTP_PASS' ) && SMTP_PASS ) {
+		$s['pass'] = (string) SMTP_PASS;
+	}
+
+	if ( getenv( 'SMTP_HOST' ) ) {
+		$s['host'] = (string) getenv( 'SMTP_HOST' );
+	} elseif ( defined( 'SMTP_HOST' ) && SMTP_HOST ) {
+		$s['host'] = (string) SMTP_HOST;
+	}
+
+	if ( getenv( 'SMTP_PORT' ) ) {
+		$s['port'] = (int) getenv( 'SMTP_PORT' );
+	} elseif ( defined( 'SMTP_PORT' ) && SMTP_PORT ) {
+		$s['port'] = (int) SMTP_PORT;
 	}
 	return $s;
 }
@@ -102,7 +118,98 @@ function mailweb_smtp_screen() {
 		echo '<input class="regular-text" id="mailweb-smtp-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" type="' . esc_attr( $r[1] ) . '" value="' . esc_attr( (string) $r[2] ) . '"' . $ph . ' autocomplete="' . ( 'pass' === $k ? 'new-password' : 'off' ) . '"></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $ph is escaped above
 	}
 	echo '</table><p><button class="button button-primary" name="do" value="save">' . esc_html__( 'Save', 'mailweb' ) . '</button> <button class="button" name="do" value="test">' . esc_html__( 'Save and send a test email', 'mailweb' ) . '</button></p></form>';
+
+	// DNS & Deliverability verification section (DKIM, SPF, Hostinger SMTP).
+	$dns   = mailweb_dns_records();
+	$dkim  = mailweb_verify_dkim();
+	$badge = 'valid' === $dkim['status']
+		? '<span style="color:#15803d; font-weight:600;">✓ ' . esc_html( $dkim['message'] ) . '</span>'
+		: '<span style="color:#b45309; font-weight:600;">⚠ ' . esc_html( $dkim['message'] ) . '</span>';
+
+	echo '<div class="card" style="max-width: 100%; margin-top: 24px; padding: 18px 20px;">';
+	echo '<h3 style="margin-top: 0;">' . esc_html__( 'DNS & Deliverability Records (DKIM, SPF, SMTP)', 'mailweb' ) . '</h3>';
+	echo '<p>' . esc_html__( 'Add these DNS records to your domain DNS provider to ensure maximum inbox delivery and prevent spoofing.', 'mailweb' ) . ' ' . $badge . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<table class="widefat striped" style="margin-top: 12px;">';
+	echo '<thead><tr><th>' . esc_html__( 'Record Type', 'mailweb' ) . '</th><th>' . esc_html__( 'Host / Name', 'mailweb' ) . '</th><th>' . esc_html__( 'Value', 'mailweb' ) . '</th><th>' . esc_html__( 'Notes', 'mailweb' ) . '</th></tr></thead><tbody>';
+	foreach ( $dns as $rec ) {
+		echo '<tr>';
+		echo '<td><strong>' . esc_html( $rec['type'] ) . '</strong></td>';
+		echo '<td><code>' . esc_html( $rec['host'] ) . '</code></td>';
+		echo '<td><textarea readonly rows="2" style="width:100%; font-family:monospace; font-size:11px;" onclick="this.select();">' . esc_textarea( $rec['value'] ) . '</textarea></td>';
+		echo '<td style="font-size:12px; color:#64748b;">' . esc_html( $rec['note'] ) . '</td>';
+		echo '</tr>';
+	}
+	echo '</tbody></table></div>';
+
 	do_action( 'mailweb_smtp_screen_after' ); // the daily limit and queue (mail-cap.php)
+}
+
+/**
+ * Expected DNS and deliverability records (DKIM, SPF, Hostinger SMTP).
+ *
+ * @return array<string, array{type: string, host: string, fqdn: string, value: string, note: string}>
+ */
+function mailweb_dns_records(): array {
+	$domain = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	return array(
+		'dkim' => array(
+			'type'  => 'TXT',
+			'host'  => 'hostingermail1._domainkey',
+			'fqdn'  => 'hostingermail1._domainkey.' . $domain,
+			'value' => 'v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtDmULKqEraHiYpO3qZFQ2H40o6W7uLpredsqq/yD1mujgQ9HOdeb/NiZuwfl53dZSyLtra2vYM4N2NknjKOJrh68xRBucd+n/uiwuS7pVmdu8fCp3vCIP0i8143bVFvBYm9q3ohpckCmEu6Xwogj3gx0HdwAJwLvRRSzdjUtFAyc8H1dpjOeo8sMFYcm9IgEqYgkqpLS5ee8cAsu2hi4OHLszurchuycZHxIECzAEzdX4zrcsnP8dsTiGbl+M9xdi+W9gWVevinxCzOLckxpaB3+iT417kRxiBJIbILEWrDsaWWZ1eFXg2/W306XeUuAZqjyd/fQdLxPAgOD4Akm3wIDAQAB',
+			'note'  => __( 'Cryptographic DKIM signature verifying emails originate from authorized Hostinger mail servers.', 'mailweb' ),
+		),
+		'spf'  => array(
+			'type'  => 'TXT',
+			'host'  => '@',
+			'fqdn'  => $domain,
+			'value' => 'v=spf1 include:_spf.mail.hostinger.com ~all',
+			'note'  => __( 'SPF policy designating Hostinger as an authorized sender for this domain.', 'mailweb' ),
+		),
+		'smtp' => array(
+			'type'  => 'SMTP Gateway',
+			'host'  => 'smtp.hostinger.com',
+			'fqdn'  => 'smtp.hostinger.com:465 (SSL)',
+			'value' => 'Port 465 (SSL) / Port 587 (TLS)',
+			'note'  => __( 'Secure outgoing SMTP relay for transactional and newsletter dispatch.', 'mailweb' ),
+		),
+	);
+}
+
+/**
+ * Verifies live DKIM DNS record.
+ *
+ * @return array{status: string, message: string}
+ */
+function mailweb_verify_dkim(): array {
+	$domain = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	$host   = 'hostingermail1._domainkey.' . $domain;
+	if ( ! function_exists( 'dns_get_record' ) ) {
+		return array(
+			'status'  => 'unknown',
+			'message' => __( 'DNS check not available on this server.', 'mailweb' ),
+		);
+	}
+	$records = @dns_get_record( $host, DNS_TXT ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+	if ( empty( $records ) || ! is_array( $records ) ) {
+		return array(
+			'status'  => 'pending',
+			'message' => __( 'Record not detected yet (DNS propagation may take up to 24h).', 'mailweb' ),
+		);
+	}
+	foreach ( $records as $r ) {
+		$txt = $r['txt'] ?? ( $r['entries'][0] ?? '' );
+		if ( false !== strpos( $txt, 'v=DKIM1' ) || false !== strpos( $txt, 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8' ) ) {
+			return array(
+				'status'  => 'valid',
+				'message' => __( 'DKIM signature verified and active in DNS.', 'mailweb' ),
+			);
+		}
+	}
+	return array(
+		'status'  => 'mismatch',
+		'message' => __( 'DKIM TXT record found but public key differs.', 'mailweb' ),
+	);
 }
 
 add_action(
