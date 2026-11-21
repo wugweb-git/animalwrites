@@ -27,18 +27,16 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
-### Consumption Bridges: Business Directory Plugin, FluentSMTP / Post SMTP, and The Events Calendar (done 22 Nov 2026, pushed to Kits and dev)
+### Compatibility Hooks: Initial BDP, External SMTP, and Calendar Discovery (22 Nov 2026)
 - **Business Directory Plugin (`plugins/directoryweb/includes/bootstrap.php`, `compat-bdp.php`):**
-  - Added dynamic filter `apply_filters( 'directoryweb_post_type', 'directory_listing' )` with fallback to `aw_listing` or `wpbdp_listing`.
-  - Built `DirectoryWeb_BDP_Adapter` in `compat-bdp.php` that intercepts metadata (`phone`, `address`, `website`, coordinates) from BDP's `_wpbdp[fields]` schema so DirectoryWeb FSE blocks, maps, and schema render seamlessly over BDP.
-  - Added tenant hook in `themes/kits-by-wugweb/assets/site/site.php` pinning `directoryweb_post_type` to `aw_listing`.
-- **FluentSMTP & Post SMTP Outbound Delegation (`plugins/mailweb/includes/smtp.php`):**
-  - Added `mailweb_has_external_smtp()` check detecting FluentSMTP (`FLUENTMAIL`), Post SMTP (`POST_SMTP_VER`), and WP Mail SMTP.
-  - Automatically defers outbound `phpmailer_init` and `wp_mail_from` hooks to the dedicated SMTP plugin when active, allowing MailWeb to focus exclusively on the unified inbox and thread management.
-- **The Events Calendar Consumption (`plugins/planweb/includes/site-schedule.php`):**
-  - Added native consumption of `tribe_events` in PlanWeb's unified site schedule, extracting `_EventStartDate` for chronological calendar alignment.
-- **WordPress.org Standalone Readme Polish (`plugins/directoryweb/readme.txt`, `sourceweb/readme.txt`):**
-  - Neutralized tenant descriptions in `readme.txt` across DirectoryWeb and SourceWeb for standalone directory submission.
+  - Added filterable `directoryweb_post_type()` returning `apply_filters( 'directoryweb_post_type', 'directory_listing' )` with fallback to `aw_listing` or `wpbdp_listing`.
+  - Added initial metadata hook in `compat-bdp.php` mapping basic BDP fields (`_wpbdp[fields][*]`).
+  - *Pending for true consumption:* Hardcoded `'aw_listing'` still exists across `directory-map.php`, `directoryweb-ui.php`, and schema generators.
+- **External SMTP Deconfliction (`plugins/mailweb/includes/smtp.php`):**
+  - Added `mailweb_has_external_smtp()` guard so MailWeb defers `phpmailer_init` when FluentSMTP, Post SMTP, or WP Mail SMTP is active.
+  - *Pending for true consumption:* Outbound email logging table, delivery metric tiles, and resend queues from FluentSMTP are not yet built.
+- **The Events Calendar (`plugins/planweb/includes/site-schedule.php`):**
+  - Added `tribe_events` date reading for `_EventStartDate` in the site schedule reader.
 
 ### Hostinger Mail API PHP SDK, SMTP Overrides & DKIM / SPF Deliverability (deployed 22 Nov 2026, release live on production)
 - **Hostinger Mail API SDK (`plugins/mailweb/composer.json`, `includes/providers.php`, `mailweb.php`):**
