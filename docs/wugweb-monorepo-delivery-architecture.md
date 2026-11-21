@@ -495,5 +495,94 @@ flowchart LR
 * **Plugin Ownership (`kits-core`)**: Administrative management, Theme Hub, onboarding wizard, Day/Night script injection, token manager UI, and licensing.
 * **Editing Canvas**: The native WordPress Site Editor is the sole editing canvas. Kits Core never duplicates native Site Editor controls without an explicit technical gap.
 
+---
+
+# 14. Consolidated Technical Audit, Architectural Boundaries & Security Safeguards
+
+## 14.1 The Three Distinct Layers
+The ecosystem strictly separates responsibilities into three isolated layers:
+
+| Layer | Primary Responsibility | Repository Placement | Allowed Content | Strict Prohibitions |
+|---|---|---|---|---|
+| **Foundry** | Master design tokens, approved patterns, Storybook builds, visual QA, schemas | `packages/design-tokens`<br>`packages/design-system` | `tokens.json`, semantic mappings, build scripts, Storybook | Zero WordPress runtime dependencies; zero customer data |
+| **Theme** | Pure visual presentation, layout templates, template parts, global styles | `themes/kits-by-wugweb` | `style.css`, `theme.json`, `templates/`, `parts/`, `patterns/`, `styles/*.json` | **Zero business logic**, zero cloud sync, zero custom admin screens, zero silent plugin installers |
+| **Companion Plugin** | Admin UI, onboarding, licensing, token management, cloud sync, durable custom blocks | `plugins/kits-core` | `admin/theme-hub/`, onboarding wizard, licensing endpoints, REST APIs | Must not duplicate native Site Editor controls where WordPress core already provides them |
+
+### Foundry-to-WordPress Data Flow
+$$\text{Foundry (tokens.json, patterns, manifests)} \longrightarrow \text{Cloudflare R2 / Release Bundles} \longrightarrow \text{Kits Core Plugin} \longrightarrow \text{WordPress Site Editor} \longrightarrow \text{Kits Theme} \longrightarrow \text{Rendered Site}$$
+
+---
+
+## 14.2 The Four-Phase Customer Onboarding Journey
+The onboarding flow is designed to showcase high design fidelity without resorting to generic plugin installation wizards or forced redirects.
+
+### Phase 1 — Purchase & Store Handoff
+* Store confirmation displays theme download ZIP, license key with 1-click copy, and 3-step installation guide.
+* Welcome email dispatches download link, license key, invoice, and quick-start docs.
+
+### Phase 2 — WordPress Installation & Safe Activation
+* Customer installs and activates `kits-by-wugweb`.
+* **Guardrail**: **Zero activation hijacking**. The theme presents a clean, dismissible admin notice with a button to begin setup or install `kits-core`. Forcibly redirecting users upon theme activation is strictly banned for WordPress.org compliance.
+
+### Phase 3 — Four-Step Tailored Onboarding Wizard (inside `kits-core`)
+1. **Step 1: Brand & License Verification**: Enter license key, validate entitlement, connect to Foundry, explain unlocked assets.
+2. **Step 2: Design System & Starter Architecture**: Select curated design preset, choose starter pages, select pattern bundle, optionally import placeholder media, apply selected theme style variation.
+3. **Step 3: Brand Customization**: Upload logo, configure primary/accent colors, select typography pairing, live preview.
+4. **Step 4: Theme Hub Launch**: Review imported assets, manage headers/footers, and link to the native Site Editor.
+
+### Phase 4 — Ongoing Experience in Theme Hub
+Theme Hub (`admin.php?page=kits-hub` under Appearance via `add_theme_page()`) serves as the permanent administrative dashboard:
+* Component and block pattern library.
+* Design system and visual token manager.
+* Starter layouts and page creation shortcuts.
+* Header and footer management.
+* License and Foundry synchronization controls.
+
+---
+
+## 14.3 Technical Audit & Debunked Misconceptions
+The architecture explicitly corrects several misleading implementation claims:
+
+| Incorrect or Misleading Claim | Architectural Correction & Official Standard |
+|---|---|
+| **"Put the custom React wizard & Theme Hub in the theme."** | **REJECTED**: Theme admin screens must not contain heavy React applications or custom business logic. WordPress.org classifies custom management as plugin territory. Theme Hub lives exclusively in `kits-core`. |
+| **"Themes can silently install their companion plugin."** | **REJECTED**: Themes submitted to WordPress.org cannot bundle or silently auto-install plugins. Must be a dismissible recommendation notice with explicit user action. |
+| **"Updating `wp_global_styles` is the normal way to apply style variations."** | **REJECTED**: Too simplistic and risks database corruption. Theme style variations are declarative JSON files under `/styles/*.json`. Direct database writes are avoided. |
+| **"Filtering `wp_theme_json_data_user` prevents database overrides."** | **REJECTED**: The filter modifies user-level data at runtime, but does not stop users from saving changes in the Site Editor and risks overriding user choices destructively. |
+| **"`custom: false` and `defaultPalette: false` lock down the entire editor."** | **REJECTED**: These only control specific color customization controls; they do not lock the entire Gutenberg editor. |
+| **"Everything can live in the theme because FSE supports it."** | **REJECTED**: FSE does not erase the boundary between presentation (theme) and durable functionality/blocks (plugin). |
+| **"Zero database bloat because pages use pattern references."** | **REJECTED**: Pages and synced patterns still create database records in `wp_posts` and `wp_block`. Do not claim zero database footprint. |
+
+---
+
+## 14.4 Security & Operational Safeguards
+
+| Operational Risk | Mandatory Architectural Safeguard |
+|---|---|
+| **GitHub Credentials Exposed** | **Never ship Foundry write tokens or GitHub personal access tokens in the plugin.** |
+| **Unauthorized Submissions** | Per-installation authentication, tenant-scoped API keys, and server-side validation. |
+| **Malicious Block Markup** | Strict server-side HTML/block sanitization; human/automated code review before publishing to the Foundry. |
+| **Stale Pattern Manifests** | Versioned manifests, explicit cache expirations (`set_transient`), and manual cache-invalidation actions. |
+| **Tenant Data Leakage** | Strict tenant-scoped authorization and isolated configuration payloads. |
+| **Remote Service Outage** | **Graceful fallback**: Theme and plugin must remain 100% operational using local cached patterns and local theme assets if the Cloudflare relay or Foundry is offline. |
+| **Plugin/Theme Version Mismatch** | Explicit compatibility declarations (`Requires Plugins`, minimum theme version checks) and migration scripts. |
+| **Theme Switching** | Keep all durable business functionality, custom post types, and custom block definitions in `kits-core` so content survives a theme switch. |
+
+---
+
+## 14.5 Contradiction Resolutions Across Architecture Discussions
+
+| Topic | Earlier Misalignment | Resolved Official Architecture |
+|---|---|---|
+| **Theme Logic** | React wizard inside theme | **Zero-code declarative theme**. Custom UI and logic belong exclusively in `kits-core`. |
+| **Theme Admin** | Theme creates admin menus | **Plugin owns Theme Hub** under Appearance via `add_theme_page()`. |
+| **Plugin Installation** | Silent auto-installation | **Separate installation** triggered by explicit user action via dismissible notice. |
+| **Design Tokens** | Writing directly to DB | **Foundry is source of truth**; theme exposes `theme.json`; plugin injects overrides via `wp_theme_json_data_theme`. |
+| **Pattern Delivery** | Cloud-only vs Theme-only | **Hybrid**: Local default patterns bundled in theme; optional/new patterns delivered via versioned manifests. |
+| **Global Styles** | Rigid editor lock down | **Defined boundaries**: Defaults defined by theme, tenant baselines injected via filter, native Site Editor remains editable. |
+| **Day / Night** | Style variation vs Toggle | **Separate layers**: `styles/dark.json` is a design variation; runtime toggle is a visitor-facing script. |
+| **Onboarding Flow** | Aggressive activation redirect | **Controlled, guided entry point** via clean admin notice; zero activation hijacking. |
+
+
 
 
