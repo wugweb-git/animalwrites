@@ -426,4 +426,74 @@ WordPress Playground (`https://wordpress.org/playground/`) serves as the disposa
 * **Synced vs Unsynced Distinction**: Only synced patterns live in `wp_block`; unsynced patterns live inline inside page HTML.
 * **Playground vs Staging**: Playground is for disposable, browser-based visual verification; permanent staging environments (`staging.animalwrites.in`) remain reserved for end-to-end integration and cron/email validation.
 
+---
+
+# 13. FSE Customer Interaction Model, Theme Hub & Day/Night Architecture
+
+## 13.1 Complete Four-Tier Customer Interaction Model
+
+| Touchpoint | Purpose | Customer Action |
+|---|---|---|
+| **Pages & Posts** | Build individual content URLs | Create native pages (`/about`, `/pricing`, `/contact`) and insert block patterns |
+| **Site Editor** | Control site-wide structure | Edit global headers, footers, query loops, and template hierarchies |
+| **Global Styles** | Control the visual system | Tune colors, typography scale, spacing, and select style variations |
+| **Wugweb Theme Hub** | Access Kits operational suite | Complete onboarding wizard, discover components, configure tokens, licensing |
+
+### Clear Boundary: Pages vs. Central Management
+* **Pages**: Individual URL endpoints and post content. FSE does **not** replace standard WordPress Pages and Posts.
+* **Templates**: Reusable layout shells housing dynamic blocks (`core/post-content`, `core/post-title`).
+* **Patterns**: Curated, responsive section modules.
+* **Styles**: Global design token configurations (`theme.json`).
+* **Theme Hub**: Branded administrative entry point in wp-admin (`admin.php?page=kits-hub`) that connects and accelerates these capabilities without replacing the native Site Editor.
+
+## 13.2 Day/Night Runtime Architecture
+A visitor-facing dark mode toggle and an editor-level style variation are two fundamentally different architectural concerns:
+
+| Feature Layer | Architectural Mechanism | Purpose |
+|---|---|---|
+| **Editor Style Variation** | `themes/kits-by-wugweb/styles/dark.json` | An editorial design choice for customers who desire a permanently dark website. |
+| **Visitor Runtime Toggle** | Lightweight script / WP Interactivity API | A live interactive toggle in the header enabling visitors to switch modes on the fly. |
+
+### Technical Implementation Pillars:
+1. **Semantic Color Tokens in `theme.json`**:
+   Backgrounds and inks use semantic tokens (`--kit-color-bg`, `--kit-color-ink`, `--kit-color-raised`, `--kit-color-line`) that resolve appropriately in both light and dark modes.
+2. **Early `wp_head` Anti-FOUC Script**:
+   Inline, blocking micro-script in `<head>` evaluating `localStorage.getItem('kit_theme_mode')` or system `window.matchMedia('(prefers-color-scheme: dark)')` to immediately apply `data-theme="dark"` before DOM rendering, preventing flash of unstyled content.
+3. **CSS Custom Property Shift**:
+   `[data-theme="dark"]` shifts the underlying semantic variables without rewriting component styles.
+
+## 13.3 Architectural Separation of Ownership
+
+```mermaid
+flowchart LR
+    subgraph Theme["Kits Theme (themes/kits-by-wugweb)"]
+        FSE["Native FSE Assets<br>templates/ & parts/"]
+        Patterns["Block Pattern Library<br>patterns/"]
+        ThemeJSON["tokens.json & theme.json"]
+        Variations["Style Variations<br>styles/dark.json"]
+    end
+
+    subgraph Core["Kits Core (plugins/kits-core)"]
+        Hub["Theme Hub Management<br>admin.php?page=kits-hub"]
+        Wizard["Onboarding Experience"]
+        TokenUI["Token Manager UI<br>wp_theme_json_data_theme"]
+        DayNight["Day/Night Toggle Script & REST"]
+        License["Entitlement & Updates"]
+    end
+
+    subgraph WP["WordPress Core"]
+        Editor["Native Site Editor & Gutenberg"]
+        Content["Pages, Posts, wp_block"]
+    end
+
+    Theme --> Editor
+    Core --> Editor
+    Content --> Editor
+```
+
+* **Theme Ownership (`kits-by-wugweb`)**: Pure presentation, template parts (header, footer), block patterns, styles, `theme.json`, and style variations.
+* **Plugin Ownership (`kits-core`)**: Administrative management, Theme Hub, onboarding wizard, Day/Night script injection, token manager UI, and licensing.
+* **Editing Canvas**: The native WordPress Site Editor is the sole editing canvas. Kits Core never duplicates native Site Editor controls without an explicit technical gap.
+
+
 
