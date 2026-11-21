@@ -1,6 +1,22 @@
-# Pending (10 Nov 2026)
+# Pending (10 Nov 2026, Harmonized 22 Nov 2026)
 
 Check this list against git and the live site before acting on it. Refer to items by their bold title (owner, 24 Oct 2026). Failing AI keys are the owner's own job: never list them. This file is the list of open and finished work.
+
+## Repository & Architectural Partitioning (22 Nov 2026)
+As part of the Wugweb Monorepo and Kits Suite standardization, pending tasks are strictly partitioned to eliminate cross-domain entanglement:
+1. **Kits Platform & Component Roadmaps** (housed directly within each component):
+   - **Theme Engine**: [`themes/kits-by-wugweb/PENDING.md`](../themes/kits-by-wugweb/PENDING.md) (Day/Night anti-FOUC, spacing normalization, block-type patterns)
+   - **Kits Core**: [`plugins/kits-core/PENDING.md`](../plugins/kits-core/PENDING.md) (Brand customizer, 4-layer theme.json injection, Cloudflare Worker relay, onboarding wizard)
+   - **DirectoryWeb**: [`plugins/directoryweb/PENDING.md`](../plugins/directoryweb/PENDING.md) (Data model decoupling, search & facet harmonization, 3-step listing claim flow)
+   - **RankWeb**: [`plugins/rankweb/PENDING.md`](../plugins/rankweb/PENDING.md) (Editor sidebar, breadcrumbs block, auto-linker, schema JSON-LD)
+   - **MailWeb**: [`plugins/mailweb/PENDING.md`](../plugins/mailweb/PENDING.md) (Hostinger Mail API transport fallback, daily DNS DKIM/SPF telemetry cron, sender profiles)
+   - **SourceWeb**: [`plugins/sourceweb/PENDING.md`](../plugins/sourceweb/PENDING.md) (Content reprint engine, feed ingestion, auto-rejection rules)
+   - **InsightWeb**: [`plugins/insightweb/PENDING.md`](../plugins/insightweb/PENDING.md) (SVG MiniCharts, empty-state dashboard tiles, keyword action plan tracking)
+   - **PlanWeb**: [`plugins/planweb/PENDING.md`](../plugins/planweb/PENDING.md) (Editorial calendar drag-and-drop, timeline visualization)
+2. **Animal Writes Site Operations & Content Roadmap**:
+   - Comprehensive detail: [`docs/animalwrites-operations-and-content-pending.md`](animalwrites-operations-and-content-pending.md)
+   - Decoupling inventory: [`docs/animalwrites-monorepo-migration-inventory.md`](animalwrites-monorepo-migration-inventory.md)
+   - Sections below track site-specific content, campaigns (`/diwali/`, `/sc/`, `/lab/`), 7,738 directory entries, workers, and Hostinger operations.
 
 **Sessions (owner, 10 Nov 2026):**
 - Animal Writes (content, SEO, campaign pages)
