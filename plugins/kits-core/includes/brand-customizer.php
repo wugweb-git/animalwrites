@@ -35,6 +35,7 @@ add_action(
 		$tokens = kits_get_brand_tokens();
 		$css    = kits_brand_compile_css( $tokens );
 		if ( '' !== $css ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS compiled from sanitized token values.
 			echo "\n<!-- Kits Brand Customizer Tokens -->\n<style id=\"kits-brand-tokens\">\n" . wp_strip_all_tags( $css ) . "\n</style>\n";
 		}
 	},
@@ -54,6 +55,7 @@ add_action(
 		$tokens = kits_get_brand_tokens();
 		$css    = kits_brand_compile_css( $tokens );
 		if ( '' !== $css ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS compiled from sanitized token values.
 			echo "\n<!-- Kits Brand Customizer Tokens (Editor) -->\n<style id=\"kits-brand-tokens-editor\">\n.editor-styles-wrapper {\n" . wp_strip_all_tags( $css ) . "\n}\n</style>\n";
 		}
 	},
@@ -98,9 +100,11 @@ function kits_brand_customizer_render_page() {
 
 	$notices = array();
 
+	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+
 	// Handle form submissions: Save, Reset, Import, Preset Apply.
-	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && check_admin_referer( 'kits_brand_tokens_save', 'kits_brand_nonce' ) ) {
-		$action = sanitize_text_field( wp_unslash( $_POST['kits_brand_action'] ?? 'save' ) );
+	if ( 'POST' === $request_method && check_admin_referer( 'kits_brand_tokens_save', 'kits_brand_nonce' ) ) {
+		$action = isset( $_POST['kits_brand_action'] ) ? sanitize_text_field( wp_unslash( $_POST['kits_brand_action'] ) ) : 'save';
 
 		if ( 'reset' === $action ) {
 			delete_option( KITS_BRAND_OPTION );
@@ -109,7 +113,7 @@ function kits_brand_customizer_render_page() {
 			}
 			$notices[] = array( 'type' => 'success', 'msg' => __( 'All brand tokens have been reset to theme defaults.', 'kits-core' ) );
 		} elseif ( 'apply_preset' === $action ) {
-			$preset_key = sanitize_key( wp_unslash( $_POST['preset_key'] ?? '' ) );
+			$preset_key = isset( $_POST['preset_key'] ) ? sanitize_key( wp_unslash( $_POST['preset_key'] ) ) : '';
 			$presets    = kits_brand_presets();
 			if ( isset( $presets[ $preset_key ] ) ) {
 				update_option( KITS_BRAND_OPTION, $presets[ $preset_key ]['tokens'] );
@@ -119,7 +123,8 @@ function kits_brand_customizer_render_page() {
 				$notices[] = array( 'type' => 'success', 'msg' => sprintf( __( 'Preset "%s" applied successfully!', 'kits-core' ), esc_html( $presets[ $preset_key ]['name'] ) ) );
 			}
 		} elseif ( 'import_json' === $action ) {
-			$json_raw = trim( wp_unslash( $_POST['import_json_data'] ?? '' ) );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw JSON decoded and each token sanitized by kits_brand_sanitize_tokens().
+			$json_raw = isset( $_POST['import_json_data'] ) ? trim( (string) wp_unslash( $_POST['import_json_data'] ) ) : '';
 			$decoded  = json_decode( $json_raw, true );
 			if ( is_array( $decoded ) ) {
 				$sanitized = kits_brand_sanitize_tokens( $decoded );
@@ -133,8 +138,9 @@ function kits_brand_customizer_render_page() {
 			}
 		} else {
 			// Standard Save
-			$raw_tokens = (array) ( $_POST['tokens'] ?? array() );
-			$sanitized  = kits_brand_sanitize_tokens( wp_unslash( $raw_tokens ) );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Per-token sanitization by kits_brand_sanitize_tokens().
+			$raw_tokens = isset( $_POST['tokens'] ) && is_array( $_POST['tokens'] ) ? wp_unslash( $_POST['tokens'] ) : array();
+			$sanitized  = kits_brand_sanitize_tokens( (array) $raw_tokens );
 			update_option( KITS_BRAND_OPTION, $sanitized );
 			if ( function_exists( 'do_action' ) ) {
 				do_action( 'litespeed_purge_all' );

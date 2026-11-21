@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/' );
 }
 
+// phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- a command-line test runner.
+
 require dirname( __DIR__ ) . '/includes/brand-customizer-model.php';
 
 $fails = 0;
