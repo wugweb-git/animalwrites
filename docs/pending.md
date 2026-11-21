@@ -26,6 +26,16 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
   - Added real-time DNS lookup verification (`dns_get_record`) with status badges (Verified, Mismatch, Pending Propagation).
   - Listed SPF record (`v=spf1 include:_spf.mail.hostinger.com ~all`) and outgoing SSL port 465.
 
+### Wugweb Final Monorepo, Packaging & WordPress Delivery Architecture (adopted 22 Nov 2026)
+- **Canonical Architecture & Delivery Specification (`docs/wugweb-monorepo-delivery-architecture.md` and `../Kits/docs/architecture/monorepo-delivery-architecture.md`):**
+  - **One Monorepo ≠ One Product**: `https://github.com/wugweb-git/kits` established as the central monorepo, while preserving independent code boundaries, versions, changelogs, test suites, and ZIP packaging for each plugin and theme.
+  - **Bundled-Code Model & Namespaced Shells**: Public plugins never depend at runtime on sibling plugins. Reusable admin shell is namespaced per plugin (`rankweb-shell`, `mailweb-shell`, etc.) with zero global handle collisions.
+  - **External Services Registry**: Enforces centralized outbound network requests (`register_external_service` + `remote_request` via `wp_safe_remote_*`) and transparency disclosures in `readme.txt`.
+  - **WordPress.org Readiness**: GPL compliance, removal of `Update URI`, `Requires Plugins` restricted to .org dependencies, Plugin Check integration, and security gates.
+  - **WordPress Playground Previews**: Automated disposable browser PR previews with Blueprints (`WordPress/action-wp-playground-pr-preview`).
+  - **Minimal UI Admin Standard**: Greyscale with rare yellow accent, inline SVG MiniCharts (no Chart.js), and filterable/sortable data tables following Google Site Kit and Uncode models.
+  - **Monorepo Topology Scaffolded**: Prepared `packages/`, `tools/`, `docs/`, `skills/`, `agents/`, `marketplace/`, and `tests/` in `../Kits`.
+
 ### Kits WordPress Suite Monorepo & Multi-Tenant Brand Customizer (done 21 Nov 2026, branch `kits-suite` on wugweb-git/kits)
 - **Standalone Monorepo & Multi-Tenant Suite (`https://github.com/wugweb-git/kits` branch `kits-suite`):**
   - Populated standalone repository on dedicated branch `kits-suite` with universal FSE block theme `themes/kits-by-wugweb` and 7 companion plugins: `kits-core`, `directoryweb`, `rankweb`, `mailweb`, `sourceweb`, `insightweb`, `planweb`.
