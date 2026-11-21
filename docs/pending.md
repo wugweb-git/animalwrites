@@ -27,6 +27,12 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
   - Listed SPF record (`v=spf1 include:_spf.mail.hostinger.com ~all`) and outgoing SSL port 465.
 
 ### Wugweb Final Monorepo, Packaging & WordPress Delivery Architecture (adopted 22 Nov 2026)
+- **Monorepo Migration Inventory & Tenant Decoupling Architecture (`docs/animalwrites-monorepo-migration-inventory.md`):**
+  - Published comprehensive inventory detailing what was extracted to the central platform (`wugweb-git/kits` on branch `kits-suite`) vs. what remains in `Animal Writes` (`wugweb-git/animalwrites`).
+  - Documented tenant-only assets: legacy bridge (`animal-writes-core`), brand overrides (`themes/kits-by-wugweb/assets/site/`, `styles/animal-writes.json`), custom CPT templates (`aw_listing`, `/lab/`, `/diwali/`, `/sc/`), data processors (`tools/directory/`, `tools/lgd/`, `tools/content/`, `tools/awbi/`, `forms/`), and server deploy scripts (`tools/kits-ship.sh`, `tools/ci/`, Hostinger target).
+- **Packaging Automation in Kits (`../Kits/tools/package/pack.sh`, `../Kits/tools/build/build-dist.py`):**
+  - Added standalone packaging automation generating clean, independent distribution ZIPs for all 8 packages (`dist/kits-by-wugweb.zip`, `dist/kits-core.zip`, `dist/directoryweb.zip`, `dist/rankweb.zip`, `dist/mailweb.zip`, `dist/sourceweb.zip`, `dist/insightweb.zip`, `dist/planweb.zip`).
+  - Tracked compiled build bundles in `plugins/*/build/` with SHA-256 integrity reporting.
 - **Canonical Master Architecture Synthesis (`docs/wugweb-master-architecture-synthesis.md` and `../Kits/docs/architecture/wugweb-master-architecture-synthesis.md`):**
   - **Master Architecture Artifact Compiled**: Complete living synthesis unifying all 15 operational pillars: Three Layers, Product Boundaries, Token Foundry, Two-Way Flywheel, Customer Touchpoints, Day/Night Anti-FOUC Architecture, Onboarding Safety, Directory Readiness, and Deployment Pipelines.
   - **Capability & Role Isolation Matrix**: Granular capabilities mapped per plugin (`manage_kits`, `manage_directoryweb`, `manage_sourceweb`, `manage_rankweb`, `manage_insightweb`, `manage_mailweb`, `edit_planweb_entries`) preventing permission collisions or role creep.
