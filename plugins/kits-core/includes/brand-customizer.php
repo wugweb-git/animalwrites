@@ -120,6 +120,7 @@ function kits_brand_customizer_render_page() {
 				if ( function_exists( 'do_action' ) ) {
 					do_action( 'litespeed_purge_all' );
 				}
+				/* translators: %s: Preset name */
 				$notices[] = array( 'type' => 'success', 'msg' => sprintf( __( 'Preset "%s" applied successfully!', 'kits-core' ), esc_html( $presets[ $preset_key ]['name'] ) ) );
 			}
 		} elseif ( 'import_json' === $action ) {
