@@ -119,7 +119,25 @@ function mailweb_smtp_screen() {
 	}
 	echo '</table><p><button class="button button-primary" name="do" value="save">' . esc_html__( 'Save', 'mailweb' ) . '</button> <button class="button" name="do" value="test">' . esc_html__( 'Save and send a test email', 'mailweb' ) . '</button></p></form>';
 
-	// DNS & Deliverability verification section (DKIM, SPF, Hostinger SMTP).
+	// 1. Hostinger Mail Server Connectivity Configuration.
+	$servers = mailweb_server_protocols();
+	echo '<div class="card" style="max-width: 100%; margin-top: 24px; padding: 18px 20px;">';
+	echo '<h3 style="margin-top: 0;">' . esc_html__( 'Hostinger Mail Server Connectivity (IMAP, SMTP, POP3)', 'mailweb' ) . '</h3>';
+	echo '<p class="description">' . esc_html__( 'Standard protocol endpoints and ports for incoming and outgoing mailbox synchronization.', 'mailweb' ) . '</p>';
+	echo '<table class="widefat striped" style="margin-top: 12px;">';
+	echo '<thead><tr><th>' . esc_html__( 'Protocol', 'mailweb' ) . '</th><th>' . esc_html__( 'Hostname', 'mailweb' ) . '</th><th>' . esc_html__( 'Port', 'mailweb' ) . '</th><th>' . esc_html__( 'TLS/SSL', 'mailweb' ) . '</th><th>' . esc_html__( 'Status / Recommendation', 'mailweb' ) . '</th></tr></thead><tbody>';
+	foreach ( $servers as $srv ) {
+		echo '<tr>';
+		echo '<td><strong>' . esc_html( $srv['protocol'] ) . '</strong></td>';
+		echo '<td><code>' . esc_html( $srv['hostname'] ) . '</code></td>';
+		echo '<td><strong>' . esc_html( $srv['port'] ) . '</strong></td>';
+		echo '<td>' . esc_html( $srv['security'] ) . '</td>';
+		echo '<td style="font-size:12px; color:' . ( ! empty( $srv['warning'] ) ? '#b45309' : '#15803d' ) . ';">' . esc_html( $srv['note'] ) . '</td>';
+		echo '</tr>';
+	}
+	echo '</tbody></table></div>';
+
+	// 2. DNS & Deliverability verification section (DKIM, SPF).
 	$dns   = mailweb_dns_records();
 	$dkim  = mailweb_verify_dkim();
 	$badge = 'valid' === $dkim['status']
@@ -127,7 +145,7 @@ function mailweb_smtp_screen() {
 		: '<span style="color:#b45309; font-weight:600;">⚠ ' . esc_html( $dkim['message'] ) . '</span>';
 
 	echo '<div class="card" style="max-width: 100%; margin-top: 24px; padding: 18px 20px;">';
-	echo '<h3 style="margin-top: 0;">' . esc_html__( 'DNS & Deliverability Records (DKIM, SPF, SMTP)', 'mailweb' ) . '</h3>';
+	echo '<h3 style="margin-top: 0;">' . esc_html__( 'DNS & Deliverability Records (DKIM, SPF)', 'mailweb' ) . '</h3>';
 	echo '<p>' . esc_html__( 'Add these DNS records to your domain DNS provider to ensure maximum inbox delivery and prevent spoofing.', 'mailweb' ) . ' ' . $badge . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo '<table class="widefat striped" style="margin-top: 12px;">';
 	echo '<thead><tr><th>' . esc_html__( 'Record Type', 'mailweb' ) . '</th><th>' . esc_html__( 'Host / Name', 'mailweb' ) . '</th><th>' . esc_html__( 'Value', 'mailweb' ) . '</th><th>' . esc_html__( 'Notes', 'mailweb' ) . '</th></tr></thead><tbody>';
@@ -145,7 +163,39 @@ function mailweb_smtp_screen() {
 }
 
 /**
- * Expected DNS and deliverability records (DKIM, SPF, Hostinger SMTP).
+ * Hostinger Mail protocol endpoints, ports and security settings.
+ *
+ * @return array<string, array{protocol: string, hostname: string, port: string, security: string, note: string, warning?: bool}>
+ */
+function mailweb_server_protocols(): array {
+	return array(
+		'imap' => array(
+			'protocol' => __( 'Incoming server (IMAP)', 'mailweb' ),
+			'hostname' => 'imap.hostinger.com',
+			'port'     => '993',
+			'security' => 'SSL',
+			'note'     => __( 'Recommended for syncing messages, folders, and read states.', 'mailweb' ),
+		),
+		'smtp' => array(
+			'protocol' => __( 'Outgoing server (SMTP)', 'mailweb' ),
+			'hostname' => 'smtp.hostinger.com',
+			'port'     => '465',
+			'security' => 'SSL',
+			'note'     => __( 'Recommended outgoing relay for transaction notices and campaigns.', 'mailweb' ),
+		),
+		'pop3' => array(
+			'protocol' => __( 'Incoming server (POP3)', 'mailweb' ),
+			'hostname' => 'pop.hostinger.com',
+			'port'     => '995',
+			'security' => 'SSL',
+			'note'     => __( 'Not recommended (downloads emails to single device without folder sync).', 'mailweb' ),
+			'warning'  => true,
+		),
+	);
+}
+
+/**
+ * Expected DNS and deliverability records (DKIM, SPF).
  *
  * @return array<string, array{type: string, host: string, fqdn: string, value: string, note: string}>
  */
@@ -165,13 +215,6 @@ function mailweb_dns_records(): array {
 			'fqdn'  => $domain,
 			'value' => 'v=spf1 include:_spf.mail.hostinger.com ~all',
 			'note'  => __( 'SPF policy designating Hostinger as an authorized sender for this domain.', 'mailweb' ),
-		),
-		'smtp' => array(
-			'type'  => 'SMTP Gateway',
-			'host'  => 'smtp.hostinger.com',
-			'fqdn'  => 'smtp.hostinger.com:465 (SSL)',
-			'value' => 'Port 465 (SSL) / Port 587 (TLS)',
-			'note'  => __( 'Secure outgoing SMTP relay for transactional and newsletter dispatch.', 'mailweb' ),
 		),
 	);
 }
