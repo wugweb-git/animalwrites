@@ -78,7 +78,6 @@ require_once KITS_CORE_DIR . 'includes/tools/media-merge.php'; // Kits → Tools
 require_once KITS_CORE_DIR . 'includes/tools/media-reuse.php'; // Kits → Tools: Media → Reuse pictures (recycle, never delete)
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
-require_once KITS_CORE_DIR . 'includes/ab-testing.php'; // Native A/B Testing & Multivariate Experimentation (GTM, GA4, Clarity).
 require_once KITS_CORE_DIR . 'includes/performance.php';
 require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined stylesheets (the Kits theme's core files, the component files per kind of page)
 require_once KITS_CORE_DIR . 'includes/preview.php';

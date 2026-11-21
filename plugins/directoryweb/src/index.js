@@ -17,7 +17,6 @@ import {
 	Field,
 	LinkedSetting,
 	LoadingState,
-	SkeletonCard,
 	MediaThumbs,
 	MiniChart,
 	Notice,
@@ -131,13 +130,9 @@ function Dashboard() {
 	}
 	if ( ! data ) {
 		return (
-			<div className="directoryweb-dashboard-loading" role="status" aria-busy="true">
-				<TileGrid>
-					{ Array.from( { length: 6 } ).map( ( _, i ) => (
-						<SkeletonCard key={ i } lines={ 2 } />
-					) ) }
-				</TileGrid>
-			</div>
+			<LoadingState
+				label={ __( 'Loading the counts…', 'directoryweb' ) }
+			/>
 		);
 	}
 	const tiles = data.tiles.filter(

@@ -117,8 +117,6 @@ jobs:
         run: php plugins/kits-core/tests/ops-tests.php
       - name: Kits site operations moved from Core (cron stats, 404 words, deployed commit and purge, retention, keep-modified; plugins/kits-core/tests/site-ops-tests.php)
         run: php plugins/kits-core/tests/site-ops-tests.php
-      - name: Kits Native A/B Testing & Multivariate Engine (plugins/kits-core/tests/ab-testing-tests.php)
-        run: php plugins/kits-core/tests/ab-testing-tests.php
       - name: Kits presets' SCF field groups match the presets (plugins/kits-core/tests/presets-scf-tests.php)
         run: php plugins/kits-core/tests/presets-scf-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/rankweb/tests)

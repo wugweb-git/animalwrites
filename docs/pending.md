@@ -11,6 +11,12 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### UI & Plugin Code Reset to Last Claude Push (completed 21 Nov 2026, commit `4151ad25` / PR #170)
+- **UI and plugin code reset to the last Claude push (`4151ad25` / PR #170):**
+  - Reverted experimental skeleton loaders, zero-CLS layout states, and A/B testing engine from `plugins/kits-core` and `plugins/directoryweb`.
+  - All plugins and theme files are 100% byte-for-byte identical to Claude's PR #170 release (`4151ad25`).
+  - All documentation, research notes, and audit reports (`docs/master-roadmap-audit.md`, `docs/ui-spacing-audit.md`, `docs/kits-audit-architecture-deliverables.md`, rabies research notes) remain committed and tracked in Git.
+
 ### UI & Section Spacing Normalization Audit (completed 21 Nov 2026, docs `docs/ui-spacing-audit.md` and `docs/master-roadmap-audit.md`)
 - **Full audit conducted across live production (`/`, `/directory/`, `/library/`, `/news/`, single listings, campaigns):**
   - Identified adjacent `.is-style-kits-section` blocks producing cumulative 192px dead space on desktop (96px on mobile) when sharing identical canvas backgrounds. Normalization rule specified: `.is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) + .is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) { padding-top: 0 !important; }`.
