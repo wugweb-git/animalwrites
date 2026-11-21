@@ -27,10 +27,14 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
   - Listed SPF record (`v=spf1 include:_spf.mail.hostinger.com ~all`) and outgoing SSL port 465.
 
 ### Wugweb Final Monorepo, Packaging & WordPress Delivery Architecture (adopted 22 Nov 2026)
-- **Canonical Architecture & Delivery Specification (`docs/wugweb-monorepo-delivery-architecture.md` and `../Kits/docs/architecture/monorepo-delivery-architecture.md`):**
+- **Canonical Master Architecture Synthesis (`docs/wugweb-master-architecture-synthesis.md` and `../Kits/docs/architecture/wugweb-master-architecture-synthesis.md`):**
+  - **Master Architecture Artifact Compiled**: Complete living synthesis unifying all 15 operational pillars: Three Layers, Product Boundaries, Token Foundry, Two-Way Flywheel, Customer Touchpoints, Day/Night Anti-FOUC Architecture, Onboarding Safety, Directory Readiness, and Deployment Pipelines.
+  - **Capability & Role Isolation Matrix**: Granular capabilities mapped per plugin (`manage_kits`, `manage_directoryweb`, `manage_sourceweb`, `manage_rankweb`, `manage_insightweb`, `manage_mailweb`, `edit_planweb_entries`) preventing permission collisions or role creep.
+  - **External Services Registry Contract**: Outbound network routing strictly centralized through `register_external_service()` and `remote_request()` (with `wp_safe_remote_*`), automatically disclosed in `readme.txt` under `== External services ==`.
+  - **Service Keys Policy**: Confirmed formal retirement of centralized `aw_keys` vault; each plugin owns its own credentials, with `wp-config.php` constants taking precedence.
+  - **5-Tier Governance Framework**: `Skill (Guidance) → Scripts (Enforcement) → CI (Release Gate) → Workers (Monitoring) → Evals (Quality Measurement)`. Deterministic shell/Python scripts enforce rules; AI agents are measured by evals.
   - **One Monorepo ≠ One Product**: `https://github.com/wugweb-git/kits` established as the central monorepo, while preserving independent code boundaries, versions, changelogs, test suites, and ZIP packaging for each plugin and theme.
   - **Bundled-Code Model & Namespaced Shells**: Public plugins never depend at runtime on sibling plugins. Reusable admin shell is namespaced per plugin (`rankweb-shell`, `mailweb-shell`, etc.) with zero global handle collisions.
-  - **External Services Registry**: Enforces centralized outbound network requests (`register_external_service` + `remote_request` via `wp_safe_remote_*`) and transparency disclosures in `readme.txt`.
   - **WordPress.org Readiness**: GPL compliance, removal of `Update URI`, `Requires Plugins` restricted to .org dependencies, Plugin Check integration, and security gates.
   - **WordPress Playground Previews**: Automated disposable browser PR previews with Blueprints (`WordPress/action-wp-playground-pr-preview`).
   - **Minimal UI Admin Standard**: Greyscale with rare yellow accent, inline SVG MiniCharts (no Chart.js), and filterable/sortable data tables following Google Site Kit and Uncode models.
