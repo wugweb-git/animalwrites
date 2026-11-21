@@ -363,3 +363,67 @@ Four distinct variable tiers coexist without collision:
 9. **UI vs Theme Token Separation**: Admin chrome (`--wpds-*` / Minimal UI) isolated from front-end theme variables.
 10. **Bidirectional Figma Sync**: Automated token parity between code repository and Figma design libraries.
 
+---
+
+# 12. Tenant Pattern Discovery & Upstream Contribution Pipeline
+
+## 12.1 The Two-Way Foundry Flywheel
+The Foundry operates not merely as a downstream distribution system, but as an active bidirectional flywheel:
+
+$$\text{Downstream Distribution: } \text{Foundry} \longrightarrow \text{Theme / Plugin} \longrightarrow \text{Tenant Fleet}$$
+$$\text{Upstream Contribution: } \text{Tenant Innovation} \longrightarrow \text{Extraction} \longrightarrow \text{Standardization} \longrightarrow \text{Foundry Canonical Release}$$
+
+When a tenant creates or refines a high-performing block pattern, layout, or card module, that innovation can be selectively ingested, cleaned, standardized, and released to the entire multi-tenant network.
+
+## 12.2 Where Tenant Changes Live (Storage Boundaries)
+A critical engineering distinction: GitHub does **not** automatically see edits made inside the WordPress Block Editor.
+
+| Asset Type | Storage Location | Ingestion / Export Requirement |
+|---|---|---|
+| **Page Content** | WordPress Database (`wp_posts`) | Export block markup from post content |
+| **Synced Patterns** | Database (`wp_block` post type) | Export JSON / copy reusable pattern markup |
+| **Theme Templates** | Filesystem or Database (`wp_template`) | Diff database customization against theme file |
+| **Global Styles** | Database (`wp_global_styles`) | Export `wp_theme_json_data_theme` / user styles |
+| **Theme & Plugin Source** | Git Repository (`wugweb-git/kits`) | Canonical Git commits and Pull Requests |
+
+## 12.3 Tenant-to-Foundry Workflow
+
+```mermaid
+flowchart TD
+    Tenant["Business Tenant<br>(Uses Kits & WP Block Editor)"] --> Customize["Customizes Pages, Cards & Patterns"]
+    Customize --> Stored["Saved in Database<br>(wp_posts / wp_block)"]
+    Stored --> Share["Tenant Exports / Shares Pattern"]
+    Share --> Review["Wugweb Review & Triage"]
+    Review --> Standardize["Content & Token Normalization<br>(Zero Raw Values Checklist)"]
+    Standardize --> Playground["Visual QA in WordPress Playground<br>(Disposable Browser Runtime)"]
+    Playground --> PR["GitHub Pull Request<br>(Branch -> PR into kits-suite)"]
+    PR --> Gate["Deploy Check & Review Gate"]
+    Gate --> Canonical["Merge to Canonical Theme<br>(themes/kits-by-wugweb/patterns)"]
+    Canonical --> Release["Publish Foundry Release<br>Available to all tenants"]
+```
+
+## 12.4 Three Pattern Extraction Methods
+1. **JSON Export**: Exporting individual saved pattern definitions directly from WordPress (`wp_block`).
+2. **Block Markup Copying**: Extracting clean block HTML grammar (`<!-- wp:... /-->`) directly from the code editor view.
+3. **Theme-File Extraction**: Diffing modified tenant template files against the upstream repository source.
+
+## 12.5 Pre-Promotion Standardization Checklist
+Before any tenant pattern is merged into the canonical Foundry library, it must pass this gate:
+- [ ] **Media Sanitation**: Remove tenant-specific images/videos; replace with neutral SVG placeholders or open Kits assets.
+- [ ] **Content Neutralization**: Remove proprietary tenant copy, brand names, and localized phone numbers.
+- [ ] **CSS Purification**: Remove ad-hoc `<style>` tags or inline style attributes.
+- [ ] **Token Alignment**: Replace all hardcoded hex colors, pixel margins, and raw font declarations with semantic `--kit-*` tokens.
+- [ ] **IP & Licensing Verification**: Ensure explicit customer consent and GPL compatibility.
+
+## 12.6 Visual Development & QA via WordPress Playground
+WordPress Playground (`https://wordpress.org/playground/`) serves as the disposable runtime for pattern testing and PR previews:
+* **PR Previews**: GitHub Action `WordPress/action-wp-playground-pr-preview` boots a temporary WordPress instance per PR with candidate patterns installed.
+* **Blueprint Configuration**: Automatically activates the Kits theme, companion plugins, and loads tenant-contributed patterns for visual inspection.
+* **Review Boundary**: Playground allows zero-cost visual regression testing without needing dedicated permanent staging servers for every review.
+
+## 12.7 Architectural Corrections & Guardrails
+* **No `Create Block Theme` Dependency**: The `Create Block Theme` plugin is rejected as a universal extraction mechanism. Extraction must use direct, predictable file/markup diffing.
+* **Synced vs Unsynced Distinction**: Only synced patterns live in `wp_block`; unsynced patterns live inline inside page HTML.
+* **Playground vs Staging**: Playground is for disposable, browser-based visual verification; permanent staging environments (`staging.animalwrites.in`) remain reserved for end-to-end integration and cron/email validation.
+
+
