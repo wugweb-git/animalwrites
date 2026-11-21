@@ -11,6 +11,20 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Kits WordPress Suite Monorepo & Multi-Tenant Brand Customizer (done 21 Nov 2026, branch `kits-suite` on wugweb-git/kits)
+- **Standalone Monorepo & Multi-Tenant Suite (`https://github.com/wugweb-git/kits` branch `kits-suite`):**
+  - Populated standalone repository on dedicated branch `kits-suite` with universal FSE block theme `themes/kits-by-wugweb` and 7 companion plugins: `kits-core`, `directoryweb`, `rankweb`, `mailweb`, `sourceweb`, `insightweb`, `planweb`.
+  - Pre-existing files in the `Kits` repository preserved 100% untouched.
+  - Authored comprehensive architectural and operational guide `KITS_WP_SUITE.md` in repository root.
+- **Brand Customizer UI (`plugins/kits-core/includes/brand-customizer.php`, `brand-customizer-model.php`):**
+  - Registered admin screen at `admin.php?page=kits-brand` and shortcut under `Appearance > Brand Tokens`.
+  - Configured full brand token coverage: Brand Colors (`--kit-color-accent`, `--kit-color-accent-ink`, `--kit-color-bg`, `--kit-color-raised`, `--kit-color-ink`, `--kit-color-text`, `--kit-color-muted`, `--kit-color-line`), Typography (`--kit-font-display`, `--kit-font-body`), Corner Radii (`--kit-radius-control`, `--kit-radius-card`, `--kit-radius-media`, `--kit-radius-pill`), and Layout Boundaries (`--kit-width-content`, `--kit-width-wide`, `--kit-space-section-base`).
+  - Added 4 built-in 1-Click Tenant Profiles: Default (Animal Writes / Neutral), Tenant 1 (Modern Tech & SaaS), Tenant 2 (Editorial & Publication), and Tenant 3 (Eco & Community Wellness).
+  - Added Export / Import JSON functionality for zero-downtime replication across tenant WordPress instances.
+  - Dual CSS bridge injection into frontend `<head>` and block editor canvas `.editor-styles-wrapper` with automated LiteSpeed cache purge on save.
+  - Comprehensive unit test suite `plugins/kits-core/tests/brand-customizer-tests.php` passing all 22 tests cleanly without WordPress dependencies.
+  - Detailed tenant onboarding guide written to `docs/multi-tenant-setup-guide.md`.
+
 ### UI & Plugin Code Reset to Last Claude Push (completed 21 Nov 2026, commit `4151ad25` / PR #170)
 - **UI and plugin code reset to the last Claude push (`4151ad25` / PR #170):**
   - Reverted experimental skeleton loaders, zero-CLS layout states, and A/B testing engine from `plugins/kits-core` and `plugins/directoryweb`.
