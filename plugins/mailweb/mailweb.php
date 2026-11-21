@@ -53,6 +53,11 @@ define( 'MAILWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAILWEB_WEBMAIL', 'https://mail.hostinger.com' );
 define( 'MAILWEB_API_HOST', 'https://api.mail.hostinger.com' );
 
+// Hostinger Mail API PHP SDK (hostinger/mail-api-php-sdk) autoload if installed via composer.
+if ( is_readable( MAILWEB_DIR . 'vendor/autoload.php' ) ) {
+	require_once MAILWEB_DIR . 'vendor/autoload.php';
+}
+
 // The 5-minute schedule the queue and the FluentCRM feed use.
 add_filter(
 	'cron_schedules',

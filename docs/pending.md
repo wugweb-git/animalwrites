@@ -11,6 +11,19 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Hostinger Mail API PHP SDK, SMTP Overrides & DKIM / SPF Deliverability (done 22 Nov 2026)
+- **Hostinger Mail API SDK (`plugins/mailweb/composer.json`, `includes/providers.php`, `mailweb.php`):**
+  - Integrated `hostinger/mail-api-php-sdk` (^1.18) into MailWeb composer specification and loaded vendor autoload safely.
+  - Enhanced `Mailweb_Hostinger_Provider` with `has_sdk()` detection, providing SDK capabilities alongside WordPress native `wp_remote_request` transport.
+- **SMTP Environment & Constant Overrides (`plugins/mailweb/includes/smtp.php`, live `wp-config.php`):**
+  - Added support for `SMTP_HOST` (default `smtp.hostinger.com`) and `SMTP_PORT` (default `465`), as well as `SMTP_PASS` / `MAILWEB_SMTP_PASSWORD` via environment variables or constants.
+  - Configured `define( 'SMTP_HOST', 'smtp.hostinger.com' );` and `define( 'SMTP_PORT', 465 );` on live Hostinger production in `wp-config.php`.
+- **DKIM & Deliverability Verification Card (`plugins/mailweb/includes/smtp.php`):**
+  - Added live DNS & deliverability status card under `MailWeb > Settings > Site sending`.
+  - Configured official DKIM record: selector `hostingermail1._domainkey` with public key value `v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtDmULKqEraHiYpO3qZFQ2H40o6W7uLpredsqq/yD1mujgQ9HOdeb/NiZuwfl53dZSyLtra2vYM4N2NknjKOJrh68xRBucd+n/uiwuS7pVmdu8fCp3vCIP0i8143bVFvBYm9q3ohpckCmEu6Xwogj3gx0HdwAJwLvRRSzdjUtFAyc8H1dpjOeo8sMFYcm9IgEqYgkqpLS5ee8cAsu2hi4OHLszurchuycZHxIECzAEzdX4zrcsnP8dsTiGbl+M9xdi+W9gWVevinxCzOLckxpaB3+iT417kRxiBJIbILEWrDsaWWZ1eFXg2/W306XeUuAZqjyd/fQdLxPAgOD4Akm3wIDAQAB`.
+  - Added real-time DNS lookup verification (`dns_get_record`) with status badges (Verified, Mismatch, Pending Propagation).
+  - Listed SPF record (`v=spf1 include:_spf.mail.hostinger.com ~all`) and outgoing SSL port 465.
+
 ### Kits WordPress Suite Monorepo & Multi-Tenant Brand Customizer (done 21 Nov 2026, branch `kits-suite` on wugweb-git/kits)
 - **Standalone Monorepo & Multi-Tenant Suite (`https://github.com/wugweb-git/kits` branch `kits-suite`):**
   - Populated standalone repository on dedicated branch `kits-suite` with universal FSE block theme `themes/kits-by-wugweb` and 7 companion plugins: `kits-core`, `directoryweb`, `rankweb`, `mailweb`, `sourceweb`, `insightweb`, `planweb`.
