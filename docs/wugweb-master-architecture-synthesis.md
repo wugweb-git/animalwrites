@@ -97,12 +97,16 @@ To prevent collision between editor tools, theme presets, and component styles:
 * Token identifiers (`blur.md`, `stroke.default`, `radius.md`, `shadow.card`) are **frozen and immutable across releases**.
 * Tenants modify the **values**, never the keys. This guarantees that updating design tokens never breaks existing block templates, patterns, or child themes.
 
-### 3.4 The "Reset to Tenant Baseline" Requirement
-Native WordPress Site Editor behavior resets styles to the theme's disk defaults. In the Kits multi-tenant suite:
-1. Tenant values are configured in Kits Core's Token Customizer UI and stored in `wp_options` (`kits_brand_tokens`).
-2. Kits Core hooks the WordPress core filter **`wp_theme_json_data_theme`**.
-3. It dynamically injects the tenant's token overrides into the theme's baseline data structure *before* user-level customizations are evaluated.
-4. **Outcome**: When an administrator clicks "Reset to Default" inside native Site Editor > Styles, WordPress resets to the **tenant's configured brand baseline**, not the theme's original generic default!
+### 3.4 The 4-Layer Cascade & The "Reset to Tenant Baseline" Requirement
+WordPress evaluates theme JSON across four distinct hierarchical layers:
+
+1. **`wp_theme_json_data_default`**: WordPress core defaults.
+2. **`wp_theme_json_data_blocks`**: Block-specific defaults (e.g. core buttons, columns).
+3. **`wp_theme_json_data_theme`**: Theme baseline. **This is our architectural injection point.** Kits Core injects the tenant's registered token values from `wp_options` here.
+4. **`wp_theme_json_data_user`**: Site Editor database overrides stored in `wp_global_styles`.
+
+**The Critical Outcome:**
+Because Kits Core injects the tenant's brand tokens into Layer 3 (`wp_theme_json_data_theme`), when an administrator clicks "Reset styles" or "Reset to defaults" in the native WordPress Site Editor (which wipes Layer 4), WordPress automatically falls back to Layer 3—reverting to the **tenant's registered brand baseline**, not the generic theme defaults!
 
 ---
 
@@ -115,7 +119,7 @@ The Foundry operates as an active bidirectional innovation loop:
 Foundry (tokens.json) ──> Cloudflare R2 / ZIP ──> Kits Core ──> Theme ──> Live Tenant Site
 
 [Upstream Contribution]
-Tenant Site (Pattern) ──> Export (JSON/HTML) ──> Sanitization Gate ──> Playground QA ──> PR into Foundry
+Tenant Site (save_post_wp_block) ──> Cloudflare Worker Relay ──> Sanitization Gate ──> Playground QA ──> PR into Foundry
 ```
 
 ### 4.1 Storage Boundaries (Where Changes Live)
@@ -126,9 +130,16 @@ Tenant Site (Pattern) ──> Export (JSON/HTML) ──> Sanitization Gate ─�
 * **Theme Source Code**: Git repository (`wugweb-git/kits`).
 * *Crucial Realization:* GitHub never sees Block Editor edits automatically. Synchronization requires an explicit export pipeline.
 
-### 4.2 Pre-Promotion Sanitization Checklist
+### 4.2 The Cloudflare Worker Relay & Two-Way Pattern Capture
+To capture tenant patterns without compromising security:
+1. **Hook `save_post_wp_block`**: In `kits-core`, hook `save_post_wp_block` to capture `$post->post_title` and `$post->post_content`.
+2. **Cloudflare Worker Relay**: The plugin dispatches `wp_remote_post()` to an authenticated Cloudflare Worker relay.
+3. **Zero Secrets in Tenant Code**: The tenant plugin carries only an opaque, revocable tenant API key. The GitHub write token / Personal Access Token (PAT) resides exclusively in Cloudflare Worker environment secrets.
+4. **Automated Draft PR / Gist**: The Worker sanitizes the markup, runs initial validation, and creates a draft pull request or Gist against `wugweb-git/kits` for review.
+
+### 4.3 Pre-Promotion Sanitization Checklist
 Before any tenant pattern is merged into canonical Foundry patterns:
-- [x] **Media Scrubbing**: Replace tenant images/video with neutral SVG placeholders or open Kits assets.
+- [x] **Media Scrubbing**: Replace tenant images/video with neutral SVG placeholders or open Kits assets (`get_theme_file_uri(...)`).
 - [x] **Copy Neutralization**: Strip brand names, localized addresses, and private phone numbers.
 - [x] **CSS Purification**: Purge ad-hoc `<style>` tags and inline `style="..."` attributes.
 - [x] **Token Mapping**: Ensure all colors, paddings, and radii strictly map to semantic `--kit-*` tokens.
@@ -263,12 +274,25 @@ $$\text{Skill (Guidance)} \longrightarrow \text{Scripts (Enforcement)} \longrigh
 
 ---
 
-## 12. Worker Execution Architecture & Automation Contracts
+## 12. Worker Execution Architecture & The 7-Layer Automation Stack
 
 * **Execution Runtime, Not a Repository**: The "Workers Union" is an execution runtime (serverless functions, GitHub Actions cron runners), **not** a competing Git repository.
 * **Contract-Driven Schemas (`packages/automation-contracts`)**: JSON schemas defining exact worker payloads, input schemas, and expected outputs.
 * **Bi-Directional Telemetry**: Workers report run execution, throughput, and error metrics back to `sourceweb` (feed throughput) and `insightweb` (search spikes).
 * **Test Gate**: All worker scripts must pass `pytest` before automated deployment.
+
+### The 7-Layer Background Automation Stack
+To ensure resilient, non-blocking execution across the multi-tenant fleet:
+
+| Layer | Mechanism | Implementation Standard |
+|---|---|---|
+| **1. Cron & Scheduled Polling** | Standard 5-field crontab | 1-minute standard resolution, non-blocking `flock` file mutex, randomized jitter to prevent thundering herds, and headless vs. HTTP runner segregation. |
+| **2. Hooks & Webhook Ingestion** | Event-driven callbacks | Protected with concurrency mutex locks, idempotency keys, and debouncing queues to prevent duplicate task execution. |
+| **3. Scheduled Actions (Hybrid)** | Hooks + DB Queue + Cron Runner | Asynchronous background dispatch in WordPress (`ActionScheduler` pattern) so user requests are never blocked by heavy processing. |
+| **4. Dedicated Worker Pools** | Serverless / Cloudflare Workers | Offloads long-running tasks (RSS feed parsing, sitemap indexing, link auditing) outside the WordPress PHP runtime. |
+| **5. State Machines** | Deterministic state transitions | Multi-step workflows (e.g. Ingest $\rightarrow$ Extract $\rightarrow$ Review $\rightarrow$ Publish) with verifiable state checkpoints. |
+| **6. Retries & Dead-Letter Queues (DLQ)** | Exponential backoff | Automatic failure retry with max threshold; unrecoverable payloads moved to DLQ with admin telemetry alerts. |
+| **7. Event Streams & Audit Logs** | Append-only event history | Structured JSON logging of every system action and data modification for full auditability. |
 
 ---
 
