@@ -18,7 +18,7 @@
 | **Plugin: `planweb`** | **Master Upstream** | Local Deploy Copy | Editorial calendar, campaign roadmaps, content planning |
 | **Foundry Design Tokens** | **Master Upstream** (`packages/design-tokens`) | Synced Baseline | Single source of truth for semantic color/spacing/typography tokens |
 | **Packaging & Dist (`pack.sh`)** | **Master Upstream** (`tools/package/`) | N/A (Builds dist locally) | Generates clean distribution ZIPs for all 8 packages |
-| **Legacy Caller: `animal-writes-core`** | ❌ Excluded | **Fully Retired (19 Nov 2026)** | Retired in commit `69832857`; `systems.php` moved to site layer (`themes/kits-by-wugweb/assets/site/content/systems.php`), ops moved to `kits-core`, directory moved to `directoryweb`. Zero active footprint on live. |
+| **Core Engine: `kits-core` (replaced `animal-writes-core`)** | **Master Upstream** | Local Deploy Copy | `animal-writes-core` was permanently retired in commit `69832857` and superseded by universal `kits-core`. Zero custom tenant plugins exist on production. |
 | **Tenant Site Assets (`assets/site/`)** | ❌ Excluded | **Active in Repo** | Animal Writes logos, SVGs, favicon, custom CSS (`aw-patterns.css`, `aw-site.css`) |
 | **Tenant Style Variation** | ❌ Excluded | **Active in Repo** | `themes/kits-by-wugweb/styles/animal-writes.json` (Animal Writes brand palette) |
 | **Tenant Templates (`aw_listing`, campaigns)** | ❌ Excluded | **Active in Repo** | Indian animal directory templates, `/lab/`, `/diwali/`, `/sc/` campaigns |
@@ -29,16 +29,18 @@
 
 ## 2. What Remains in `Animal Writes` (Detailed Breakdown)
 
-### A. Legacy Caller / Bridge Plugin Status
-* **`animal-writes-core` — FULLY RETIRED & DECOMMISSIONED (19 Nov 2026, commit `69832857`)**:
-  - The plugin directory `plugins/animal-writes-core/` was permanently deleted in commit `69832857` (1,490 lines removed).
-  - `git merge-base --is-ancestor 69832857 origin/wordpress` confirms it has been live and promoted since Nov 19.
-  - Where the responsibilities moved:
-    - **Site systems & content bindings**: Moved to the site layer at `themes/kits-by-wugweb/assets/site/content/systems.php`.
-    - **Content types, presets & ops**: Moved to `plugins/kits-core/` (presets, cron stats, 404 tracking, deploy purge hooks).
-    - **Directory & Listings**: Moved to `plugins/directoryweb/`.
-    - **`aw-keys` vault**: Permanently retired; each plugin now manages its own credentials directly.
-  - On the live server (`animalwrites.in`), `wp plugin list --status=active` confirms `animal-writes-core` is zero-footprint (not active, not installed).
+### A. Zero Custom Tenant Plugins: `animal-writes-core` Succeeded by `kits-core`
+* **`animal-writes-core` was Permanently Retired (19 Nov 2026, commit `69832857`)**:
+  - The plugin directory `plugins/animal-writes-core/` was deleted in commit `69832857` (1,490 lines removed).
+  - Its capabilities were modularized into **universal `kits-core`** (presets, ops, cron stats, brand customizer) and **`directoryweb`** (directory CPT, fields, claims).
+* **Where Tenant Custom Code & Shortcodes Live**:
+  - **Zero custom tenant plugins**: There is no custom `animal-writes` plugin running on production.
+  - **All shortcodes and blocks belong to universal plugins**:
+    - `[kits_ab]` $\rightarrow$ `kits-core`
+    - `[directoryweb_map]` $\rightarrow$ `directoryweb`
+    - `[mailweb_newsletter]` $\rightarrow$ `mailweb`
+    - RankWeb breadcrumbs block $\rightarrow$ `rankweb`
+  - **Tenant hooks & configurations**: Loaded cleanly via the **Site Layer** (`themes/kits-by-wugweb/inc/site-layer.php` $\rightarrow$ `assets/site/site.php`), keeping the plugin layer 100% universal and multi-tenant.
 
 ### B. Visual Tokens & Brand Overrides
 * **`themes/kits-by-wugweb/assets/site/`**:
