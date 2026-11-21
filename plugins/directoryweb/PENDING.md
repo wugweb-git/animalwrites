@@ -29,3 +29,8 @@ The directory and faceted search plugin owns:
 4. **Directory Performance & Caching**:
    - Cache expensive facet aggregation counts in transients.
    - Ensure zero slow MySQL queries on large directory datasets (7,000+ entries).
+
+5. **Business Directory Plugin (WPBDP) Deep Consumption**:
+   - *Status (22 Nov 2026):* Initial `directoryweb_post_type()` dynamic filter and metadata adapter (`includes/compat-bdp.php`) added.
+   - *Open:* Generalize remaining hardcoded `'aw_listing'` references across `directory-map.php`, `listing-template.php`, `directoryweb-ui.php`, and `featured.php` to `directoryweb_post_type()`.
+   - *Open:* Bridge BDP custom table `wpbdp_form_fields` and taxonomies (`wpbdp_category`, `wpbdp_tag`) so WPBDP installations can use native Gutenberg directory cards and Leaflet map blocks without database migration.
