@@ -295,12 +295,6 @@ if ( ! defined( 'AW_DATE_FORMAT' ) ) {
 }
 add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );
 
-/**
- * Tenant Directory post type: Animal Writes uses 'aw_listing'.
- * Kept here so generic DirectoryWeb can default to 'directory_listing' or 'wpbdp_listing'.
- */
-add_filter( 'directoryweb_post_type', fn() => 'aw_listing' );
-
 /*
  * The site's configuration for Kits Core, moved from Animal Writes Core on 19 Nov 2026: analytics and sharing values
  * (config.php), the admin menus, labels, Overview and edit-screen map (admin.php), the values Kits Core's site

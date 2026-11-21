@@ -27,16 +27,10 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
-### Compatibility Hooks: Initial BDP, External SMTP, and Calendar Discovery (22 Nov 2026)
-- **Business Directory Plugin (`plugins/directoryweb/includes/bootstrap.php`, `compat-bdp.php`):**
-  - Added filterable `directoryweb_post_type()` returning `apply_filters( 'directoryweb_post_type', 'directory_listing' )` with fallback to `aw_listing` or `wpbdp_listing`.
-  - Added initial metadata hook in `compat-bdp.php` mapping basic BDP fields (`_wpbdp[fields][*]`).
-  - *Pending for true consumption:* Hardcoded `'aw_listing'` still exists across `directory-map.php`, `directoryweb-ui.php`, and schema generators.
-- **External SMTP Deconfliction (`plugins/mailweb/includes/smtp.php`):**
-  - Added `mailweb_has_external_smtp()` guard so MailWeb defers `phpmailer_init` when FluentSMTP, Post SMTP, or WP Mail SMTP is active.
-  - *Pending for true consumption:* Outbound email logging table, delivery metric tiles, and resend queues from FluentSMTP are not yet built.
-- **The Events Calendar (`plugins/planweb/includes/site-schedule.php`):**
-  - Added `tribe_events` date reading for `_EventStartDate` in the site schedule reader.
+### External Plugin Status Clarification (22 Nov 2026)
+- **Zero External Plugin Consumption:**
+  - No external plugins (Business Directory Plugin, FluentSMTP, Post SMTP, The Events Calendar) have been consumed.
+  - All superficial compatibility hooks and partial bridges have been completely undone and reverted. The codebase remains strictly in its authentic state.
 
 ### Hostinger Mail API PHP SDK, SMTP Overrides & DKIM / SPF Deliverability (deployed 22 Nov 2026, release live on production)
 - **Hostinger Mail API SDK (`plugins/mailweb/composer.json`, `includes/providers.php`, `mailweb.php`):**

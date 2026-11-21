@@ -94,7 +94,6 @@ $directoryweb_includes = array(
 	'district-helplines',
 	'find-help',
 	'plugin-info',
-	'compat-bdp',
 	'bootstrap',
 );
 foreach ( $directoryweb_includes as $directoryweb_include ) {
