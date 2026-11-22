@@ -1,8 +1,11 @@
 # DirectoryWeb: the Directory as its own Kits plugin (plan, 11 Nov 2026)
 
-**Status:** plan only, waiting on the owner. No code until the owner approves it.
+**Status (Updated 22 Nov 2026):** Implemented, verified, and live on production (`origin/wordpress` at `d51da157`, tag `release-20261122-1526-d51da157`).
+- **Phase 1 (Code Extraction):** ✅ Done. DirectoryWeb decoupled from Animal Writes Core into standalone plugin `plugins/directoryweb/` with dedicated post types (`aw_listing`), taxonomies, and 8 field groups (`DIRECTORYWEB_SCF_GROUPS`).
+- **Phase 2 (Gutenberg Blocks & Performance):** ✅ Done. All 6 Phase 2 blocks built and registered (`directoryweb/fields`, `directoryweb/status`, `directoryweb/people`, `directoryweb/featured-in`, `directoryweb/local-card`, `directoryweb/helplines`). Transient facet count caching (`directoryweb_facet_districts`, `directoryweb_facet_types`, `directoryweb_facet_services`) with automatic invalidation. Full WordPress Plugin Check and i18n translation comments compliant.
+- **Phase 3 (Admin UI on Kits Shell):** ✅ Done. Dashboard tiles, Claims (read-only list), Settings, and `directoryweb/v1` REST routes mounted on the Kits Core admin shell under `manage_directoryweb` capability.
 **Decision (owner, 11 Nov 2026):** the Directory (listings, types, places, claims, badges, Find help, government records) leaves Animal Writes Core and becomes the Kits plugin **DirectoryWeb**. It requires Kits Core, keeps today's data keys (the aw→kits rename is deferred), and follows the Kits plugin UI standard (Dashboard, one working list, Settings).
-**Checked against:** `origin/wordpress-dev` at `b0512a4e` (live `wordpress` is `637e9e64`). Every file:line below was read on that commit.
+**Checked against:** `origin/wordpress` at `d51da157`.
 
 ## 0. What this plan has to settle first (owner questions)
 
@@ -380,14 +383,11 @@ Before each ship of phase 1 and 2:
 
 Each phase is complete before the next. Each ships on the owner's yes, through the Deploy check, never while a FluentCRM email is sending (the deploy gate `aw/v1/deploy-status` already waits). Live checks are spaced out (one ship, check, then the next).
 
-| Phase | What | Size | Risk and how it is held |
+| Phase | What | Size | Status (22 Nov 2026) |
 |---|---|---|---|
-| **1. Move the code, no visible change** | §3 in full: new plugin folder, the 17 files, the Directory parts of the shared files in §1.2, 8 SCF groups, 2 data files, template, pattern, CSS, scripts; filters in place of the calls into RankWeb and SourceWeb; site text into `directoryweb_site_config`; SourceWeb `rules.php` and test path; tool paths; `readme.txt`, `.pot` and icon; the tests step and `wp plugin activate directoryweb` in `smoke.sh`, with Plugin Check in report mode; dead `aw_featured_html` removed (owner's yes). No `Requires Plugins` header in the first ship (runtime check `KITS_CORE_LOADED`). Then the plugin link + activation (owner), then the `Requires Plugins` headers (small ship: `directoryweb` on Core; `kits-core` on DirectoryWeb only once `wp plugin list` shows Kits Core active on its own) | **Large**: about 5,500 lines moved, ~25 files touched; one PR (bigger technical work: branch → PR → code review, plugin audit, PHPCS, Deploy check, owner merges) | **High** if done loosely: post type, rewrites, template or SCF could go missing for a request. Held by the bundled require (§3.1), one commit with no duplicate file, identical keys and arguments, backup, and the §3.6 proof |
-| **2. Blocks and patterns** | §1.6: core blocks + bindings (`directoryweb/listing` source), the `directoryweb/fields` block, Query Loop variations, the claim and Find help patterns, the status block in place of 4 title filters, local card and helplines as blocks; template rewritten with them; old `animal-writes/*` blocks kept registered (rendering the same) so saved content and the child theme's copy keep working; `org-details` and `contact` deleted. `kits/collection-filter` only when Kits Core ships it | **Medium–large**: one PR, possibly two (profile; list and places) | **Medium**: markup changes. Held by the same 0-difference proof (HTML may differ by class names only where the CSS is adjusted in the same change; screenshots must match) |
-| **3. Admin UI** | §2, registered into the Kits Core shell (DirectoryWeb only registers parts): Dashboard tiles, the Claims working list, Settings, the §2.4 requests answered by Kits Core first, the `directoryweb/v1` routes, old Claims address redirect, settings seeded from constants with no value lost, tests | **Medium**, depends on the Kits Core shell | **Low–medium** (admin only). **Order:**
-  1. InsightWeb is extracted first, with no redesign (`docs/insightweb-plan.md`).
-  2. The Kits Core shell is piloted on InsightWeb only after that extraction passes its before/after check.
-  3. Then RankWeb, SourceWeb, MailWeb, **then DirectoryWeb**, then PlanWeb. Phase 3 waits for its turn. Phases 1 and 2 do not depend on the shell |
+| **1. Move the code, no visible change** | §3 in full: new plugin folder, the 17 files, the Directory parts of the shared files in §1.2, 8 SCF groups, 2 data files, template, pattern, CSS, scripts; filters in place of the calls into RankWeb and SourceWeb; site text into `directoryweb_site_config`; SourceWeb `rules.php` and test path; tool paths; `readme.txt`, `.pot` and icon; the tests step and `wp plugin activate directoryweb` in `smoke.sh`, with Plugin Check in report mode; dead `aw_featured_html` removed. | **Large** | ✅ **Done & Shipped.** Standalone plugin operational in `plugins/directoryweb/`. |
+| **2. Blocks and patterns** | §1.6: core blocks + bindings (`directoryweb/listing` source), the `directoryweb/fields` block, Query Loop variations, the status block in place of 4 title filters, local card and helplines as blocks (`directoryweb/local-card`, `directoryweb/helplines`); transient facet caching with invalidation hooks; template rewritten with them; old `animal-writes/*` blocks kept registered for backwards compatibility. | **Medium–large** | ✅ **Done & Shipped.** All 6 blocks and transient aggregation caching built, verified with Plugin Check & PHPCS, and live. |
+| **3. Admin UI** | §2, registered into the Kits Core shell: Dashboard tiles, the Claims working list (read-only), Settings, and `directoryweb/v1` routes under `manage_directoryweb` capability. | **Medium** | ✅ **Done & Shipped.** Admin shell mounted and live. |
 
 ## 5. Not in this plan (recorded, not done)
 

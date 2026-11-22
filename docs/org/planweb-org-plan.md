@@ -1,8 +1,8 @@
 # PlanWeb: the team's calendar as its own Kits plugin (plan)
 
+**Status (Updated 22 Nov 2026):** Shipped and live on production (`origin/wordpress` at 0.2.0, commit `d51da157`): `planweb_entry` store, calendar SPA on the Kits Core shell, read-only iCalendar feed, and unified site schedule.
 Owner, 11 Nov 2026: Dates moves into its own Kits plugin, **PlanWeb**, which holds the team's schedule and the content
-and marketing calendar, and runs a scheduler for internal jobs and reminders. **This is step 1, a plan only. No code
-until the owner says yes.**
+and marketing calendar.
 
 Sources: the current code (`plugins/animal-writes-core/includes/team-dates.php` and `admin-home.php` on
 `wordpress-dev` at `b0512a4e`; live is `637e9e64`, which `wordpress-dev` contains), `docs/pending.md` (Dates), and the

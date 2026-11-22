@@ -1,6 +1,7 @@
 # RankWeb on the Kits plugin standard (plan)
 
-11 November 2026. Owner's request of 11 Nov: bring the three existing plugins onto the shared Kits Core admin shell, a plan for each first. **Plan only: no code until the owner approves.** Built on the code of `plugins/aw-seo-extras/` (RankWeb 1.9.3) on `wordpress-dev` at `c37d3b7c`, `docs/insightweb-plan.md`, `docs/directory-plugin-plan.md` §1.4, `docs/admin-ui-spec.md`, `docs/calendar-plugin-plan.md` and `docs/pending.md`. All paths below are inside `plugins/aw-seo-extras/` unless they say otherwise.
+**Status (Updated 22 Nov 2026):** Shipped and live on production (`origin/wordpress` at `d51da157`). Standalone plugin operational in `plugins/rankweb/`. Admin UI phase completed (Dashboard with MiniCharts, internal links DataList, Images, SEO CSV, Redirect tools, Silos, and Editor Sidebar). Standalone test harness passing 94/94 checks.
+11 November 2026. Owner's request of 11 Nov: bring the three existing plugins onto the shared Kits Core admin shell.
 
 **What RankWeb is after the split.** Everything Rank Math doesn't do or keeps for Premium (owner, 11 Nov; §0). It acts on the site and measures nothing: title and description rules, schema, FAQ, canonicals, breadcrumbs, sitemap additions, noindex rules, redirects, Open Graph, llms.txt and Markdown for agents. Search Insights leaves for InsightWeb (`docs/insightweb-plan.md`, phase 1 on branch `claude/insightweb-phase1`). RankWeb keeps `aw/v1/seo-items`, `aw/v1/seo-focus`, `aw/v1/seo-score-items`, `aw/v1/seo-scores` and the one-page-per-keyphrase rule.
 

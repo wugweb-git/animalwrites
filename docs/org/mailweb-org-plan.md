@@ -1,5 +1,7 @@
 # MailWeb on the Kits plugin standard (plan)
 
+**Status (Updated 22 Nov 2026):** Shipped and live on production (`origin/wordpress` at `d51da157`). Standalone admin UI bundled, Hostinger Mail API SDK integrated (`hostinger/mail-api-php-sdk` v1.18.7), SMTP fallback wired to 465 SSL, DNS deliverability telemetry cron active.
+
 <!-- Note (17 Nov 2026): the separate docs/mailweb-org-assessment.md and docs/mailweb-org-rebrand.md were folded into
 the "WordPress.org edition" section below and deleted — this is the single living MailWeb doc (owner's doc rule). -->
 
