@@ -65,7 +65,7 @@
 .kit-tag.aw-datasrc { background: var(--kit-chip-bg); color: var(--kit-chip-fg); border-color: var(--kit-chip-border); }
 .aw-datasrc-mark { font-weight: var(--kit-weight-medium); letter-spacing: 0.02em; }
 .aw-datasrc-row { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
-.aw-listing-help { margin-block: var(--s-10); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--r-4); background: var(--kit-color-raised); }
+.aw-listing-help { margin-block: var(--kit-space-6, 2rem); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card, 16px); background: var(--kit-color-raised); }
 .aw-listing-help > h2 { font-size: var(--kit-type-h3); margin: 0 0 var(--kit-space-2); }
 .aw-listing-help > p { margin: 0 0 var(--kit-space-4); color: var(--kit-color-muted); }
 .aw-listing-help-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); }
@@ -126,7 +126,7 @@
 .aw-datasrcs.is-full { grid-template-columns: max-content minmax(0, 1fr); }
 .aw-claim-find { max-width: 36rem; }
 .aw-claim-results { list-style: none; margin: var(--kit-space-4) 0 var(--kit-space-5); padding: 0; display: grid; gap: var(--kit-space-2); }
-.aw-claim-results a { display: flex; flex-direction: column; gap: var(--kit-space-1); padding: var(--kit-space-3) var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--r-4); text-decoration: none; }
+.aw-claim-results a { display: flex; flex-direction: column; gap: var(--kit-space-1); padding: var(--kit-space-3) var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card, 16px); text-decoration: none; }
 .aw-claim-results span { color: var(--kit-color-muted); }
 .kit-section-band .aw-claim-logo { display: inline-block; width: 1.4em; height: 1.4em; margin-right: var(--kit-space-3); object-fit: contain; vertical-align: -0.2em; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
 .aw-claim-meta { margin-top: var(--kit-space-3); }

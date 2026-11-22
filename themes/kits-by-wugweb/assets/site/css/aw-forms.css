@@ -1,6 +1,6 @@
 /* Animal Writes: Fluent Forms skin for the site's own forms (aw-form-ff: contact, volunteer, claim, report) and the form-for line.
    The newsletter form stays in aw.css. Loads after aw.css (dependency aw-components). Rules copied unchanged from aw.css, in their original order. */
-.aw-form-for { display: flex; flex-direction: column; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-5); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--r-4); }
+.aw-form-for { display: flex; flex-direction: column; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-5); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card, 16px); }
 .aw-form-for a { font-weight: var(--kit-weight-strong); }
 .aw-form-for span { color: var(--kit-color-muted); }
 .aw-form-ff .frm-fluent-form fieldset:not(.kit-step):not(.kit-check-group) { border: 0; padding: 0; margin: 0; min-width: 0; }
@@ -50,6 +50,7 @@
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::after { border-color: var(--kit-color-ink); background: var(--kit-color-ink); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::before { content: ""; position: absolute; z-index: 1; top: calc(var(--kit-space-3) + 0.1875rem); right: calc(var(--kit-space-3) + 0.1875rem); width: 0.875rem; height: 0.875rem; background: var(--kit-color-bg); -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; }
 @media (max-width: 767px) {
+	.aw-form-ff input:not([type=checkbox]):not([type=radio]), .aw-form-ff select, .aw-form-ff textarea { font-size: 16px !important; }
 	.aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-2); }
 	.aw-form-ff .aw-vol-role.kit-checkbox { flex-direction: row; align-items: center; gap: var(--kit-space-3); min-height: 3.5rem; padding: var(--kit-space-2) calc(var(--kit-space-3) * 2 + 1.25rem) var(--kit-space-2) var(--kit-space-3); }
 	.aw-form-ff .aw-vol-role .aw-ff-opt-ico { width: 1.5rem; height: 1.5rem; }
