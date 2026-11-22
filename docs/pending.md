@@ -27,15 +27,21 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
-### External Plugin Status Clarification (22 Nov 2026)
-- **Zero External Plugin Consumption:**
-  - No external plugins (Business Directory Plugin, FluentSMTP, Post SMTP, The Events Calendar) have been consumed.
-  - All superficial compatibility hooks and partial bridges have been completely undone and reverted. The codebase remains strictly in its authentic state.
+### Wugweb Kits PHP SDK Built (`packages/shared-php/`, 22 Nov 2026)
+- **Standalone PHP SDK (`packages/shared-php/`):**
+  - Built zero-dependency PHP SDK providing contracts (`PluginInterface`, `TokenEngineInterface`, `ServiceRegistryInterface`).
+  - Implemented `TokenEngine` for resolving design tokens, generating CSS custom properties (`--kit-*`), and mapping to Gutenberg `theme.json` palettes.
+  - Implemented `ExternalServiceRegistry` for declaring outbound HTTP services per WordPress.org guidelines with automated README markdown generator.
+  - Implemented `NonceGuard` and `Sanitizer` cross-environment helpers.
+  - Added standalone test suite (`tests/TokenEngineTest.php`) passing 5/5 test suites without WordPress boot.
 
-### Hostinger Mail API PHP SDK, SMTP Overrides & DKIM / SPF Deliverability (deployed 22 Nov 2026, release live on production)
+### Hostinger Mail API PHP SDK Real Integration (22 Nov 2026)
 - **Hostinger Mail API SDK (`plugins/mailweb/composer.json`, `includes/providers.php`, `mailweb.php`):**
-  - Integrated `hostinger/mail-api-php-sdk` (^1.18) into MailWeb composer specification and loaded vendor autoload safely.
-  - Enhanced `Mailweb_Hostinger_Provider` with `has_sdk()` detection, providing SDK capabilities alongside WordPress native `wp_remote_request` transport.
+  - Ran Composer install for `hostinger/mail-api-php-sdk` (v1.18.7) generating `vendor/autoload.php`.
+  - Safely load `vendor/autoload.php` in `mailweb.php`.
+  - Corrected SDK namespace in `includes/providers.php` to `Hostinger\Configuration` and `Hostinger\Api\SendApi`.
+  - Added `get_send_api()` client factory and wired `Hostinger\Model\V1SendRequest` model directly into `Mailweb_Hostinger_Provider::request()`, seamlessly falling back to `wp_remote_request` on any failure.
+  - Verified `Mailweb_Hostinger_Provider::has_sdk()` evaluates to `true` in CLI.
 - **SMTP Environment & Constant Overrides (`plugins/mailweb/includes/smtp.php`, live `wp-config.php`):**
   - Added support for `SMTP_HOST` (default `smtp.hostinger.com`) and `SMTP_PORT` (default `465`), as well as `SMTP_PASS` / `MAILWEB_SMTP_PASSWORD` via environment variables or constants.
   - Configured `define( 'SMTP_HOST', 'smtp.hostinger.com' );` and `define( 'SMTP_PORT', 465 );` on live Hostinger production in `wp-config.php`.

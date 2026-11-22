@@ -53,7 +53,30 @@ final class Mailweb_Hostinger_Provider implements Mailweb_Provider {
 	 * Returns whether the Hostinger Mail API PHP SDK is loaded.
 	 */
 	public static function has_sdk(): bool {
-		return class_exists( 'Hostinger\\MailApi\\Configuration' );
+		if ( ! class_exists( 'Hostinger\\Configuration' ) && defined( 'MAILWEB_DIR' ) && is_readable( MAILWEB_DIR . 'vendor/autoload.php' ) ) {
+			require_once MAILWEB_DIR . 'vendor/autoload.php';
+		}
+		return class_exists( 'Hostinger\\Configuration' ) && class_exists( 'Hostinger\\Api\\SendApi' );
+	}
+
+	/**
+	 * Returns an authenticated Hostinger SendApi client instance when SDK is available.
+	 *
+	 * @return \Hostinger\Api\SendApi|null
+	 */
+	public static function get_send_api(): ?\Hostinger\Api\SendApi {
+		if ( ! self::has_sdk() ) {
+			return null;
+		}
+		$token = function_exists( 'mailweb_setting' ) ? (string) mailweb_setting( 'api_token' ) : '';
+		if ( '' === $token ) {
+			return null;
+		}
+		$config = \Hostinger\Configuration::getDefaultConfiguration();
+		$config->setAccessToken( $token );
+		$base = (string) apply_filters( 'mailweb_api_base', defined( 'MAILWEB_API_HOST' ) ? MAILWEB_API_HOST : 'https://api.mail.hostinger.com' );
+		$config->setHost( $base );
+		return new \Hostinger\Api\SendApi( null, $config );
 	}
 
 	/**
@@ -64,6 +87,35 @@ final class Mailweb_Hostinger_Provider implements Mailweb_Provider {
 		if ( '' === $token ) {
 			return array( 0, null, array() );
 		}
+
+		// Use the official Hostinger Mail API PHP SDK when dispatching /send and SDK is available
+		if ( 'POST' === $method && preg_match( '#^/api/v1/mailboxes/([^/]+)/send$#', $path, $matches ) && self::has_sdk() ) {
+			$send_api = self::get_send_api();
+			if ( $send_api && is_array( $body ) ) {
+				try {
+					$mailbox_id = rawurldecode( $matches[1] );
+					$send_req   = ( new \Hostinger\Model\V1SendRequest() )
+						->setTo( (array) ( $body['to'] ?? array() ) )
+						->setSubject( (string) ( $body['subject'] ?? '' ) )
+						->setHtml( (string) ( $body['html'] ?? '' ) )
+						->setText( (string) ( $body['text'] ?? '' ) );
+					if ( ! empty( $body['cc'] ) ) {
+						$send_req->setCc( (array) $body['cc'] );
+					}
+					if ( ! empty( $body['bcc'] ) ) {
+						$send_req->setBcc( (array) $body['bcc'] );
+					}
+					if ( ! empty( $body['displayName'] ) ) {
+						$send_req->setDisplayName( (string) $body['displayName'] );
+					}
+					$response = $send_api->sendEmail( $mailbox_id, $send_req );
+					return array( 200, (array) $response, array() );
+				} catch ( \Throwable $e ) {
+					// Fall through to native wp_remote_request transport seamlessly
+				}
+			}
+		}
+
 		$args = array(
 			'method'  => $method,
 			'timeout' => $timeout > 0 ? $timeout : ( $raw ? 60 : 20 ),

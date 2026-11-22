@@ -3,3 +3,4 @@ node_modules/
 
 # Marketplace build artifacts (tools/build-dist.py)
 dist/
+vendor/
