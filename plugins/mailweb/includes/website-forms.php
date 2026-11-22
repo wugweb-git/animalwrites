@@ -7,7 +7,7 @@
  * - Mail → Website forms: the Contact, Volunteer, Claim and Report forms' Fluent Forms entries and the older contact
  *   messages (aw_message), through `mailweb_forms_source`; a notice in wp-admin while any of them is unread (no email).
  *   Inbox → Contact messages opens it.
- * - The old webhook address /wp-json/aw/v1/mail-in still answers (the hPanel webhooks point there).
+ * - Webhook address: /wp-json/mailweb/v1/mail-in is the active webhook receiver (old aw/v1/mail-in retired).
  * - Kits → Home → Email sending: a line on email sending.
  * - One-time move (20 Oct 2026) from the aw-mail plugin: options aw_mail_* → mailweb_* (secrets encrypted), kits_mail →
  *   mailweb_smtp, table aw_mail_queue → mailweb_queue, old cron jobs cleared, and Animal Writes' choices set: replies go
@@ -315,47 +315,6 @@ add_action(
 		}
 		$url = add_query_arg( array( 'page' => 'mailweb', 'folder' => 'forms' ), admin_url( 'admin.php' ) );
 		wp_admin_notice( '<strong>New form entries:</strong> ' . esc_html( implode( ', ', $parts ) ) . '. <a href="' . esc_url( $url ) . '">Open Plugins → MailWeb → Website forms</a>', array( 'type' => 'info' ) );
-	}
-);
-
-/* ---------- The old webhook address ---------- */
-
-add_action(
-	'rest_api_init',
-	function () {
-		if ( ! function_exists( 'mailweb_in' ) ) {
-			return;
-		}
-		register_rest_route(
-			'aw/v1',
-			'/mail-in',
-			array(
-				'methods'             => 'POST',
-				'permission_callback' => 'mailweb_webhook_permission',
-				'callback'            => function ( WP_REST_Request $req ) {
-					// Which mailboxes still call the old address, and when (2 Nov 2026): once this stays empty, the route can go.
-					$seen = (array) get_option( 'aw_mail_in_old_seen', array() );
-					$seen[ (string) $req->get_param( '_mailweb_box' ) ] = current_time( 'mysql' );
-					update_option( 'aw_mail_in_old_seen', $seen, false );
-					return mailweb_in( $req );
-				},
-			)
-		);
-		register_rest_route(
-			'aw/v1',
-			'/mail-in',
-			array(
-				'methods'             => 'GET',
-				'permission_callback' => '__return_true',
-				'callback'            => fn() => new WP_REST_Response(
-					array(
-						'status' => 'ready',
-						'method' => 'POST',
-					),
-					200
-				),
-			)
-		);
 	}
 );
 

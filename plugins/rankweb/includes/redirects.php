@@ -171,6 +171,37 @@ add_action(
 	0
 );
 
+// Crawlers and link scrapers that strip the "tel:" scheme and request it as a path (e.g. /tel:1962, /tel:112; 404 audit).
+// Send each to its dedicated guide or directory page instead of a 404 error.
+add_action(
+	'parse_request',
+	function () {
+		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
+			return;
+		}
+		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( ! preg_match( '#^/+tel:([0-9\+\-]+)$#i', $path, $m ) ) {
+			return;
+		}
+		$num = preg_replace( '/\D+/', '', $m[1] );
+		if ( '1962' === $num ) {
+			wp_safe_redirect( home_url( '/resources/1962-helpline-mobile-veterinary-units/' ), 301, 'Animal Writes' );
+			exit;
+		}
+		if ( '112' === $num ) {
+			wp_safe_redirect( home_url( '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' ), 301, 'Animal Writes' );
+			exit;
+		}
+		if ( '01292555700' === $num || '1292555700' === $num ) {
+			wp_safe_redirect( home_url( '/resources/animal-cruelty-law-india/' ), 301, 'Animal Writes' );
+			exit;
+		}
+		wp_safe_redirect( home_url( '/directory/' ), 301, 'Animal Writes' );
+		exit;
+	},
+	0
+);
+
 // Module imports by name ("@wordpress/interactivity") are resolved by the import map, which every page prints in its
 // head. Crawlers that ignore import maps read the name as a path beside the importing file (core's navigation
 // view.min.js, the theme's dropdown.js): 65 hits in the 404 Monitor (audit 12 Nov 2026). Browsers never ask for these

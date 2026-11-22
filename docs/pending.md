@@ -820,6 +820,9 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (22 Nov 2026)
+- **Clean-ups & SEO 404 Resolution (C1 & C3 from `docs/cc-master-plan-19-nov.md`):**
+  - **C1 (Legacy Webhook Route Retired):** Removed outdated `aw/v1/mail-in` route from `plugins/mailweb/includes/website-forms.php`. All webhooks now route exclusively to the canonical `mailweb/v1/mail-in` endpoint.
+  - **C3 (Crawler Helpline Path 301 Redirects):** Resolved 404 hits from scrapers requesting `tel:` links as paths in `plugins/rankweb/includes/redirects.php`. `/tel:1962` redirects 301 to `/resources/1962-helpline-mobile-veterinary-units/`, `/tel:112` redirects 301 to `/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/`, `/tel:01292555700` redirects 301 to `/resources/animal-cruelty-law-india/`, and all other telephone links redirect 301 to `/directory/`.
 - **DirectoryWeb Phase 2 Gutenberg Blocks & Theme Templates Shipped:**
   - Built and registered `directoryweb/find-help` (`includes/directoryweb-find-help.php`) supporting compact and full directory find-help views, live listing counter, state picker, and type pills.
   - Built and registered `directoryweb/listing-finder` (`includes/directoryweb-listing-finder.php`) encapsulating claim finder, progress stepper, and interactive form submissions.
