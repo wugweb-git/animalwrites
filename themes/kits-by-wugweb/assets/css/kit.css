@@ -376,6 +376,22 @@ html { overflow-x: clip; }
 .kit-bg-canvas { background: var(--kit-color-canvas); }
 .kit-bg-kraft { background: var(--kit-color-surface); }
 
+/* Section Spacing & Vertical Rhythm Normalization: collapse adjacent canvas sections to eliminate 192px dead space */
+.is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) + 
+.is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) {
+	padding-top: 0 !important;
+}
+/* Normalize FAQ container nesting inside outer section wrapper */
+.is-style-kits-section > .kit-faq {
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+/* Ensure cover story bands respect section vertical padding */
+.wp-block-cover.kit-section.aw-ed-story {
+	padding-top: var(--kit-space-section) !important;
+	padding-bottom: var(--kit-space-section) !important;
+}
+
 /* 4.9 Section header — title + description left, one CTA right. */
 .kit-sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-3) var(--kit-space-6); margin-bottom: var(--kit-space-6); }
 .kit-sec-head h2 { margin: 0; }
@@ -1261,7 +1277,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card[class*="kit-card--"] .wp-block-post-date { min-height: 0; padding-right: 0; } /* no arrow circle in a card */
 .wp-block-post-template > li:has(> .kit-card[class*="kit-card--"])::after { content: none !important; display: none !important; }
 .kit-card[class*="kit-card--"] {
-	display: flex; flex-direction: column; height: 100%; box-sizing: border-box; min-width: 0; margin: 0 !important;
+	display: flex; flex-direction: column; height: 100%; box-sizing: border-box; min-width: 0; margin: 0 !important; padding: 0 !important;
 	background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); overflow: hidden;
 	transition: box-shadow var(--kit-motion-base) var(--kit-motion-ease);
 }
@@ -1276,27 +1292,25 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-media > .kit-card-label { position: absolute; top: var(--kit-space-2); left: var(--kit-space-2); z-index: 1; max-width: calc(100% - 2 * var(--kit-space-2)); overflow: hidden; text-overflow: ellipsis; }
 .kit-tag.kit-card-label--icon { justify-content: center; width: 1.75rem; min-height: 1.75rem; height: 1.75rem; padding: 0; border-radius: 50%; }
 .kit-card-label--icon .kit-ico { --kit-ico-size: 0.95rem; }
-.kit-card[class*="kit-card--"] > .kit-card-body { display: flex; flex-direction: column; gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0 !important; padding: var(--wp--custom--kits--card--padding, var(--kit-space-4)); }
+.kit-card[class*="kit-card--"] > .kit-card-body { display: flex; flex-direction: column; gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0 !important; padding: 12px 16px !important; box-sizing: border-box; }
+@media (max-width: 767px) { .kit-card[class*="kit-card--"] > .kit-card-body { padding: 8px 10px !important; } }
 .kit-card-body > * { margin: 0 !important; max-width: none; }
-/* The meta row: date first, one line (owner, 13 Nov 2026; was wrapping, 11 Nov 2026). */
-.kit-card-meta { flex-wrap: nowrap; } /* one line (owner, 13 Nov 2026), see .kit-card-metarow */
-.kit-card-meta > .kit-meta-item { flex: none; max-width: 100%; }
+/* The meta row: date first, strictly one line, never wraps in two rows */
+.kit-card-meta { flex-wrap: nowrap !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+.kit-card-meta > .kit-meta-item { flex: none; max-width: 100%; white-space: nowrap !important; }
 .kit-card-meta .kit-date > .kit-ico { margin-right: 0; }
-.kit-card-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-4) var(--s-1, 4px); height: 1.75rem; overflow: hidden; }
-.kit-card-chips > * { flex: 0 1 auto; min-width: 0; max-width: 100%; }
-.kit-card-chips .kit-tag-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.kit-card-chips { display: flex; flex-wrap: nowrap !important; align-items: center; gap: var(--kit-space-4) var(--s-1, 4px); height: 1.75rem; overflow: hidden !important; white-space: nowrap !important; }
+.kit-card-chips > * { flex: 0 1 auto; min-width: 0; max-width: 100%; white-space: nowrap !important; }
+.kit-card-chips .kit-tag-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap !important; min-width: 0; }
 .kit-card-chips .kit-src-icon { width: var(--kit-icon-sm, 16px); height: var(--kit-icon-sm, 16px); flex: none; border-radius: var(--kit-radius-mark); object-fit: contain; }
-/* Meta and chips on one row (owner, 21 Oct 2026; 13 Nov 2026: "metarow - it is a single row - will always be a row"):
-   .kit-card-metarow is one line at every width, date first; it never wraps or stacks, and the date is never cut. The
-   meta items keep their size; the chips take the room left: the first chip ends in an ellipsis when it is too long,
-   and a chip with no room left drops out of sight whole (no empty slivers); with no chips, the last meta item ends in
-   an ellipsis. */
-.kit-card-metarow { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--kit-space-2); min-width: 0; overflow: hidden; white-space: nowrap; }
-.kit-card-metarow > .kit-card-meta { flex: none; min-width: 0; margin: 0; flex-wrap: nowrap !important; }
-.kit-card-metarow > .kit-card-meta:last-child { flex: 0 1 auto; overflow: hidden; }
-.kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: 0; margin: 0; }
-.kit-card-metarow .kit-meta-item { flex: none; white-space: nowrap; }
-.kit-card-metarow > .kit-card-meta:last-child > :last-child:not(.kit-date) { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* Meta and chips on one row: .kit-card-metarow is one line at every width, date first; it never wraps or stacks */
+.kit-card-metarow { display: flex; flex-wrap: nowrap !important; align-items: center; gap: var(--kit-space-2); min-width: 0; overflow: hidden !important; white-space: nowrap !important; }
+.kit-card-metarow > .kit-card-meta { flex: none; min-width: 0; margin: 0; flex-wrap: nowrap !important; white-space: nowrap !important; }
+.kit-card-metarow > .kit-card-meta:last-child { flex: 0 1 auto; overflow: hidden !important; text-overflow: ellipsis !important; }
+.kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: 0; margin: 0; flex-wrap: nowrap !important; }
+.kit-card-metarow .kit-meta-item { flex: none; white-space: nowrap !important; }
+.kit-card-metarow > .kit-card-meta:last-child > :last-child:not(.kit-date) { flex: 0 1 auto; min-width: 0; overflow: hidden !important; text-overflow: ellipsis !important; }
+:is(.kit-card, .kit-minicard) :is(.kit-card-metarow, .kit-card-meta, .kit-card-chips, .kit-meta-row) { flex-wrap: nowrap !important; white-space: nowrap !important; overflow: hidden !important; }
 .kit-card-chips-lead { display: inline-flex; flex-wrap: nowrap; gap: var(--s-1, 4px); min-width: 0; max-width: 100%; }
 .kit-card-chips-lead > * { min-width: 0; }
 .kit-card-chips-lead > .kit-card-label { flex: none; }
@@ -1314,34 +1328,25 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card--block-sm .kit-card-title { font-size: var(--kit-type-sm) !important; }
 .kit-card[class*="kit-card--block"] .kit-card-media { max-height: var(--kit-card-block-media-max); }
 /* Stacked: picture left, or none */
-.kit-card[class*="kit-card--stacked"] { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--wp--custom--kits--card--padding, var(--kit-space-4)); }
-.kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 0; flex: var(--kit-card-stacked-body-flex); min-width: var(--kit-card-stacked-body-min); }
-.kit-card[class*="kit-card--stacked"] > .kit-card-media { border-radius: var(--kit-radius-media); flex: var(--kit-card-stacked-media-flex); min-width: var(--kit-card-stacked-media-min); }
-/* The stacked card with a picture, one card across the theme and the product, every size (lg, md, sm) and every list
-   (owner's spec, 14 Nov 2026, "Fix Kits Stacked Card Component"; owner: "the stacked layout card will be same across
-   theme and product"; values changed by the owner, 14 Nov 2026). The card has no padding and no gap, a 16px radius, and
-   clips the picture. The picture keeps one shape, --kit-card-stacked-media-ratio (4:3), at the card's top left: 88px wide
-   on phones up to 390px and --kit-card-stacked-media-width (112px) by 475px, so 66 to 84px tall; when the words are
-   taller, the picture's column below it is the page grey (--kit-color-bg; --kit-color-surface is sand in Global Styles,
-   off brand). The words carry 16px padding on all four sides, start at the top beside the picture and set the height. The text column's basis is 238px: 88 + 238 = 326px, the inside of a card on a 360px phone, so from 360
-   the picture sits beside the words, and below 360 (or in any card too narrow for it) it goes on top, full width. Title
-   18px at every width (--kit-type-card-title), line-height 1.3, never clamped or cut; meta row and tags 12px
-   (--kit-meta-size), tags 24px tall. The meta row and tags wrap when they have no room, never overflowing. Card width
-   340 to 600px comes from the stacked list (aw.css). The :is(…, #kits-card-weight) adds an id's weight, so list and page
-   rules never stack on top of the card (fix the source, not another override layer), while Theme Options or an inline
-   style can still change it. */
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) { --kit-type-card-title: 1.125rem; --kit-meta-size: 12px; flex-direction: row; flex-wrap: wrap; align-items: stretch; gap: 0; height: auto; min-height: 0; overflow: hidden; padding: 0; border-radius: 16px; }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media { position: relative; overflow: hidden; flex: 1 1 clamp(88px, calc(28vw - 21px), var(--kit-card-stacked-media-width)); align-self: stretch; box-sizing: border-box; width: auto; height: auto; max-width: none; min-width: 0; margin: 0; aspect-ratio: auto !important; border-radius: 0; background: var(--kit-color-bg); }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media > a { display: block; }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media img { position: static; display: block; width: 100%; height: auto; aspect-ratio: var(--kit-card-stacked-media-ratio); object-fit: cover; border-radius: 0; }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-body { flex: 999 1 238px; min-width: 0; box-sizing: border-box; align-self: flex-start; padding: var(--kit-space-4); }
+.kit-card[class*="kit-card--stacked"] { flex-direction: row; align-items: stretch; gap: 0; padding: 0 !important; margin: 0 !important; height: auto; min-height: 0; }
+.kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 12px 16px !important; flex: var(--kit-card-stacked-body-flex); min-width: var(--kit-card-stacked-body-min); box-sizing: border-box; }
+@media (max-width: 767px) { .kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 8px 10px !important; } }
+.kit-card[class*="kit-card--stacked"] > .kit-card-media { align-self: stretch !important; margin: 0 !important; border-radius: 0 !important; flex: var(--kit-card-stacked-media-flex); min-width: var(--kit-card-stacked-media-min); height: 100% !important; }
+.kit-card[class*="kit-card--stacked"] > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover !important; border-radius: 0 !important; }
+/* The stacked card with a picture, flush against left, top, bottom edges. Container has zero padding. Independent content padding: desktop 12px 16px, mobile 8px 10px. Meta row strictly one line. */
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) { --kit-type-card-title: 1.125rem; --kit-meta-size: 12px; flex-direction: row; flex-wrap: nowrap; align-items: stretch; gap: 0; height: auto; min-height: 0; overflow: hidden; padding: 0 !important; margin: 0 !important; border-radius: 16px; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media { position: relative; overflow: hidden; flex: 1 1 clamp(88px, calc(28vw - 21px), var(--kit-card-stacked-media-width)); align-self: stretch !important; box-sizing: border-box; width: auto; height: 100% !important; max-width: none; min-width: 0; margin: 0 !important; aspect-ratio: auto !important; border-radius: 0 !important; background: var(--kit-color-bg); }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media > a { display: block; height: 100%; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media img { position: static; display: block; width: 100%; height: 100% !important; aspect-ratio: var(--kit-card-stacked-media-ratio); object-fit: cover; border-radius: 0 !important; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-body { flex: 999 1 238px; min-width: 0; box-sizing: border-box; align-self: stretch; padding: 12px 16px !important; }
+@media (max-width: 767px) { .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-body { padding: 8px 10px !important; } }
 .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(h3, h4).kit-card-title.kit-card-title { font-size: var(--kit-type-card-title) !important; line-height: 1.3 !important; }
 .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(h3, h4).kit-card-title.kit-card-title a { display: inline; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; font-size: inherit !important; line-height: inherit !important; }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(.kit-card-metarow, .kit-card-meta, .kit-card-chips) { flex-wrap: wrap; height: auto; overflow: visible; row-gap: var(--kit-space-1); font-size: var(--kit-meta-size); }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-card-metarow > :is(.kit-card-meta, .kit-card-chips) { flex: 0 1 auto; max-width: 100%; }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-card-chips > * { max-width: 100%; }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-tag { height: auto; min-height: 24px; padding-block: 0; font-size: var(--kit-meta-size) !important; white-space: normal; }
-.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(.kit-card-metarow, .kit-card-meta, .kit-card-chips) { flex-wrap: nowrap !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; height: auto; row-gap: var(--kit-space-1); font-size: var(--kit-meta-size); }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-card-metarow > :is(.kit-card-meta, .kit-card-chips) { flex: 0 1 auto; max-width: 100%; white-space: nowrap !important; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-card-chips > * { max-width: 100%; white-space: nowrap !important; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-tag { height: auto; min-height: 24px; padding-block: 0; font-size: var(--kit-meta-size) !important; white-space: nowrap; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-tag-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kit-card:is(.kit-card--stacked-md, .kit-card--stacked-sm, .kit-card--block-sm) .kit-card-sum { display: none; }
 .kit-card--stacked-sm:not(:has(> .kit-card-media)) { align-items: center !important; gap: var(--kit-space-3) !important; }
 .kit-card--stacked-sm:not(:has(> .kit-card-media)) .kit-card-title { font-size: var(--kit-type-sm) !important; }
@@ -1350,20 +1355,18 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card--stacked-sm:has(> .kit-card-media)::before { content: none; }
 
 /* Mini card (kit-minicard, on a kit-card): a small card for a short list of related items (kit-minicard-list: one
-   column, three from 768). A 4:3 picture (kit-minicard-media; --logo shows a logo whole on the raised surface) or a
-   logo box in the placard shape (kit-minicard-logo, with kit-minicard-initials when there is no logo), then the meta
-   row, the title (its link covers the card) and one line. It is not a kit-card state (kit-card--*): it has no hover
-   shadow and no three-line title. */
+   column, three from 768). Zero container padding, independent content padding desktop 12px 16px, mobile 8px 10px */
 .kit-minicard-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
 @media (min-width: 768px) { .kit-minicard-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 .kit-minicard-list > li { margin: 0; }
-.kit-minicard { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.kit-minicard { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); padding: 0 !important; margin: 0 !important; }
 .kit-minicard .kit-minicard-media { margin: 0; aspect-ratio: var(--kit-card-media-ratio); border-radius: 0; }
 .kit-minicard .kit-minicard-media img { width: 100%; height: 100%; object-fit: cover; }
 .kit-minicard .kit-minicard-media--logo { background: var(--kit-color-raised); }
 .kit-minicard .kit-minicard-media--logo img { object-fit: contain; padding: var(--kit-space-4); box-sizing: border-box; }
-.kit-minicard-body { padding: var(--kit-space-5); }
-.kit-minicard-meta { margin: 0 0 var(--kit-space-2); } /* after .kit-meta-row (margin: 0) */
+.kit-minicard-body { padding: 12px 16px !important; box-sizing: border-box; }
+@media (max-width: 767px) { .kit-minicard-body { padding: 8px 10px !important; } }
+.kit-minicard-meta { margin: 0 0 var(--kit-space-1); flex-wrap: nowrap !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
 .kit-minicard-title { margin: 0; font-size: var(--kit-type-h3); line-height: 1.25; }
 .kit-minicard-title a::after { content: ""; position: absolute; inset: 0; }
 .kit-minicard-line { margin: var(--kit-space-1) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }

@@ -53,3 +53,18 @@ themes/kits-by-wugweb/assets/site/css/aw-single.css | height | .aw-ad-box | min-
 themes/kits-by-wugweb/assets/site/css/aw-single.css | height | .aw-ad-slot--rail .aw-ad-box | min-height: 600px  # News ad slot rail: reserved height for the desktop sticky ad box (14 Nov 2026)
 themes/kits-by-wugweb/assets/site/campaign/css/campaign.css | pad | .aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card:not([class*="kit-card--stacked"]) > .kit-card-body | padding: 0  # body inside a card padded 24px
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) | padding: 0  # owner 14 Nov 2026: the stacked card has no padding; the picture is flush to the card's edges and the words carry their own padding
+# Card padding overhaul (owner, 23 Nov 2026: card container zero padding, flush media, independent content padding desktop 12px 16px, mobile 8px 10px):
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--"] | padding: 0 !important  # owner 23 Nov 2026: card container zero padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--"] > .kit-card-body | padding: 8px 10px !important  # owner 23 Nov 2026: independent mobile card body padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"] | padding: 0 !important  # owner 23 Nov 2026: card container zero padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"] > .kit-card-body | padding: 8px 10px !important  # owner 23 Nov 2026: independent mobile card body padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) | padding: 0 !important  # owner 23 Nov 2026: card container zero padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-body | padding: 8px 10px !important  # owner 23 Nov 2026: independent mobile card body padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-minicard | padding: 0 !important  # owner 23 Nov 2026: card container zero padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-minicard-body | padding: 12px 16px !important  # owner 23 Nov 2026: independent desktop card body padding
+themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-minicard-body | padding: 8px 10px !important  # owner 23 Nov 2026: independent mobile card body padding
+themes/kits-by-wugweb/assets/site/css/aw-home.css | pad | .aw-ed-learn .aw-tasks.is-three .kit-card | padding: 0 !important  # owner 23 Nov 2026: card container zero padding
+themes/kits-by-wugweb/assets/site/css/aw-home.css | pad | .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body | padding: 8px 10px !important  # owner 23 Nov 2026: independent mobile card body padding
+themes/kits-by-wugweb/assets/site/css/aw-single.css | pad | .aw-more-card | padding: 0 !important  # owner 23 Nov 2026: cross nav stacked card container zero padding
+themes/kits-by-wugweb/assets/site/css/aw-single.css | pad | .aw-more-card .kit-card-body, .aw-more-card .kit-minicard-body | padding: 12px 16px !important  # owner 23 Nov 2026: cross nav stacked card desktop padding
+themes/kits-by-wugweb/assets/site/css/aw-single.css | pad | .aw-more-card .kit-card-body, .aw-more-card .kit-minicard-body | padding: 8px 10px !important  # owner 23 Nov 2026: cross nav stacked card mobile padding

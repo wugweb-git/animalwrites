@@ -477,7 +477,7 @@ function aw_listing_press_card( $pid ) {
 	$ext  = 'aw_press' === $type;
 	$ts   = function_exists( 'aw_item_date_ts' ) ? aw_item_date_ts( $pid ) : (int) get_post_time( 'U', true, $pid );
 	$name = defined( 'AW_FEATURED_TYPES' ) ? ( AW_FEATURED_TYPES[ $type ] ?? '' ) : '';
-	return '<li><article class="kit-card kit-minicard aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? kits_date( $ts, null, 'aw-date' ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
+	return '<li><article class="kit-card kit-card--stacked-md kit-minicard aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="kit-card-body kit-minicard-body aw-more-body"><p class="kit-card-metarow kit-card-meta kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? kits_date( $ts, null, 'aw-date' ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
 		. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( $url ) . '"' . ( $ext ? ' rel="noopener nofollow" target="_blank"' : '' ) . '>' . esc_html( html_entity_decode( get_the_title( $pid ), ENT_QUOTES ) ) . '</a></h3></div></article></li>';
 }
 

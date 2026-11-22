@@ -107,6 +107,21 @@ Checked on `wordpress-dev` at `7e98b691`, plus this session's changes.
   - All plugins and theme files are 100% byte-for-byte identical to Claude's PR #170 release (`4151ad25`).
   - All documentation, research notes, and audit reports (`docs/master-roadmap-audit.md`, `docs/ui-spacing-audit.md`, `docs/kits-audit-architecture-deliverables.md`, rabies research notes) remain committed and tracked in Git.
 
+### UI Layout Normalization & Card Spacing Overhaul (completed 23 Nov 2026)
+- **Implemented sitewide card spacing & padding overhaul per owner directive:**
+  - Card containers strictly enforced to zero padding (`padding: 0 !important; margin: 0 !important;`).
+  - Independent content padding applied to all card bodies: desktop `12px 16px !important;`, mobile (`max-width: 767px`) `8px 10px !important;`.
+  - Media & thumbnail images flush against card's left, top, and bottom edges (`align-self: stretch !important; margin: 0 !important; border-radius: 0 !important;`).
+  - Meta row (`.kit-card-metarow`, `.kit-card-meta`, `.kit-card-chips`, `.kit-meta-row`) strictly enforced to never wrap into two rows (`flex-wrap: nowrap !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;`).
+- **Section Spacing & Vertical Rhythm Normalization (`docs/ui-spacing-audit.md`):**
+  - Adjacent section dead space eliminated: `.is-style-kits-section` sharing canvas backgrounds now collapse top padding (`padding-top: 0 !important;`).
+  - Cover story bands (`.wp-block-cover.kit-section.aw-ed-story`) given explicit symmetric vertical padding (`var(--kit-space-section)`), eliminating content clipping on mobile and tablet.
+  - FAQ block nesting normalized: `.is-style-kits-section > .kit-faq` padding reset to `0` to prevent compounding wrapper margins.
+  - Hub list (`.aw-system`) into `.aw-hub-faq` and `.kit-nl-band` transitions streamlined with `margin-top: var(--kit-space-6)`.
+- **Cross-Navigation & Directory Related NGO Stacked Cards:**
+  - Single page cross navigation (`aw-more` / `.aw-more-list` / `item-more`) converted to responsive stacked cards (`kit-card--stacked-md`).
+  - Directory related NGO cross-navigation converted to stacked profile card layout (`.aw-more-card--org`, `.aw-card-profile`) with flush logo/initials on left, and single-line meta row, title, and summary on right.
+
 ### UI & Section Spacing Normalization Audit (completed 21 Nov 2026, docs `docs/ui-spacing-audit.md` and `docs/master-roadmap-audit.md`)
 - **Full audit conducted across live production (`/`, `/directory/`, `/library/`, `/news/`, single listings, campaigns):**
   - Identified adjacent `.is-style-kits-section` blocks producing cumulative 192px dead space on desktop (96px on mobile) when sharing identical canvas backgrounds. Normalization rule specified: `.is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) + .is-style-kits-section:not(.has-background):not(.kit-bg-kraft):not(.kit-surface-section) { padding-top: 0 !important; }`.
