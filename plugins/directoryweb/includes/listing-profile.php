@@ -310,7 +310,7 @@ function aw_block_org_details( $a, $id ) {
 	if ( $photos ) {
 		directoryweb_use_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
 	}
-	directoryweb_use_style( 'aw-listing' ); // aw-org-details, aw-org-facts, aw-org-phones
+	directoryweb_use_style( 'dw-listing' ); // aw-org-details, aw-org-facts, aw-org-phones
 	return '<section class="aw-org-details" aria-label="About the organisation">'
 		. ( $links ? '<div class="aw-org-details-links">' . $links . '</div>' : '' )
 		. ( $photos ? '<div class="aw-org-gallery">' . $photos . '</div>' : '' )

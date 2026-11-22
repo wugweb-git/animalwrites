@@ -150,10 +150,15 @@ function directoryweb_tel_url( $raw ): string {
  * This page loads one of the theme's component stylesheets (Kits by Wugweb's kits_use_component_style(); nothing
  * under another theme).
  *
- * @param string $handle Component style handle (aw-directory, aw-single, aw-listing...).
+ * @param string $handle Component style handle (aw-directory, aw-single, dw-listing...).
  */
 function directoryweb_use_style( string $handle ): void {
 	if ( function_exists( 'kits_use_component_style' ) ) {
 		kits_use_component_style( $handle );
+		if ( 'dw-listing' === $handle ) {
+			kits_use_component_style( 'aw-listing' );
+		} elseif ( 'aw-listing' === $handle ) {
+			kits_use_component_style( 'dw-listing' );
+		}
 	}
 }

@@ -26,8 +26,8 @@ KITS_CSS = ROOT / "themes/kits-by-wugweb/assets/css"
 
 
 def pairs():
-    """Each source with its .min.css: every aw*.css (not *.min.css) in AW_CSS, and the three Kits files."""
-    aw = [f for f in sorted(AW_CSS.glob("aw*.css")) if not f.name.endswith(".min.css")]
+    """Each source with its .min.css: every aw*.css or dw*.css (not *.min.css) in AW_CSS, and the three Kits files."""
+    aw = [f for f in sorted(list(AW_CSS.glob("aw*.css")) + list(AW_CSS.glob("dw*.css"))) if not f.name.endswith(".min.css")]
     kits = [KITS_CSS / (n + ".css") for n in ("kit-tokens", "kit", "kit-primitives")]
     return [(f, f.with_name(f.name[: -len(".css")] + ".min.css")) for f in aw + kits]
 

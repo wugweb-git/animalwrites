@@ -1139,6 +1139,34 @@ function aw_schema_nodes() {
 			'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
 			'mainEntity' => array( '@id' => home_url( '/#organization' ) ), // the publisher node carries the email and contact point
 		);
+	} elseif ( is_page( 'claim' ) ) {
+		$listing = function_exists( 'directoryweb_form_page_listing' ) ? directoryweb_form_page_listing() : null;
+		if ( $listing ) {
+			$nodes[] = array(
+				'@type'      => 'ItemPage',
+				'@id'        => get_permalink() . '?listing=' . $listing->ID . '#webpage',
+				'url'        => add_query_arg( 'listing', $listing->ID, get_permalink() ),
+				'name'       => 'Claim Listing: ' . rankweb_plain_text( get_the_title( $listing ) ),
+				'inLanguage' => 'en-IN',
+				'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
+				'mainEntity' => function_exists( 'aw_listing_schema' ) ? aw_listing_schema( $listing->ID ) : array( '@type' => 'NGO', 'name' => rankweb_plain_text( get_the_title( $listing ) ) ),
+			);
+		} else {
+			$nodes[] = array(
+				'@type'           => 'SearchResultsPage',
+				'@id'             => get_permalink() . '#webpage',
+				'url'             => get_permalink(),
+				'name'            => 'Claim Your Organisation Listing',
+				'description'     => 'Search and claim your animal welfare organisation, veterinary clinic, or shelter listing in India.',
+				'inLanguage'      => 'en-IN',
+				'isPartOf'        => array( '@id' => home_url( '/#website' ) ),
+				'potentialAction' => array(
+					'@type'       => 'SearchAction',
+					'target'      => home_url( '/claim/?org={search_term_string}' ),
+					'query-input' => 'required name=search_term_string',
+				),
+			);
+		}
 	} elseif ( is_page( 'about' ) ) {
 		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => rankweb_plain_text( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
 	} elseif ( is_page( 'categories' ) ) {
@@ -1329,7 +1357,41 @@ function aw_hub_schema_build( $type, $url, $view ) {
 		if ( aw_is_noindex_item( $p->ID ) || in_array( (int) $p->ID, aw_seo_preview_ids(), true ) ) {
 			continue; // not indexed (or preview only), so not listed
 		}
-		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => rankweb_plain_text( get_the_title( $p ) ) );
+		$item_data = array(
+			'@type'    => 'ListItem',
+			'position' => $start + $i + 1,
+			'url'      => get_permalink( $p ),
+			'name'     => rankweb_plain_text( get_the_title( $p ) ),
+		);
+		if ( 'aw_listing' === $type ) {
+			$place = function_exists( 'aw_listing_place' ) ? array_filter( array_reverse( (array) aw_listing_place( $p->ID ) ) ) : array();
+			$phone = function_exists( 'directoryweb_listing_first_phone' ) ? directoryweb_listing_first_phone( $p->ID ) : '';
+			$ngo   = array(
+				'@type' => 'NGO',
+				'@id'   => get_permalink( $p ) . '#organization',
+				'name'  => rankweb_plain_text( get_the_title( $p ) ),
+				'url'   => get_permalink( $p ),
+			);
+			if ( $place ) {
+				$ngo['address'] = array(
+					'@type'           => 'PostalAddress',
+					'addressCountry'  => 'IN',
+					'addressRegion'   => $place[1] ?? ( $place[0] ?? '' ),
+					'addressLocality' => $place[0] ?? '',
+				);
+			}
+			if ( $phone ) {
+				$ngo['telephone'] = $phone;
+			}
+			if ( has_post_thumbnail( $p->ID ) ) {
+				$thumb = get_the_post_thumbnail_url( $p->ID, 'thumbnail' );
+				if ( $thumb ) {
+					$ngo['image'] = $thumb;
+				}
+			}
+			$item_data['item'] = $ngo;
+		}
+		$items[] = $item_data;
 	}
 	$name  = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
 	$name  = $view && 'aw_listing' !== $type ? $view['name'] . ' – ' . get_the_title( get_queried_object_id() ) : $name; // "Wildlife – News"

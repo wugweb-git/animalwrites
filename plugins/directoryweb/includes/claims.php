@@ -80,7 +80,14 @@ function aw_claim_current( $lid, $key ) {
 	if ( 'aw_phone' === $key || 'aw_whatsapp' === $key ) {
 		return directoryweb_listing_first_phone( $lid, 'aw_whatsapp' === $key );
 	}
-	return (string) get_post_meta( $lid, $key, true );
+	$val = (string) get_post_meta( $lid, $key, true );
+	if ( in_array( $key, array( 'aw_about', 'l_about', 'post_content', 'aw_area', 'aw_services' ), true ) ) {
+		// Strip tags and convert kit-date time chips to plain text (Plan 19 Nov B1)
+		$val = preg_replace( '/<time[^>]*>(.*?)<\/time>/is', '$1', $val );
+		$val = wp_strip_all_tags( $val );
+		$val = html_entity_decode( $val, ENT_QUOTES, 'UTF-8' );
+	}
+	return trim( $val );
 }
 
 /** The claim form for a listing: the Fluent Forms form. */

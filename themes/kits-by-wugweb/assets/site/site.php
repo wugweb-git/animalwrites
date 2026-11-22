@@ -144,8 +144,12 @@ function kits_site_component_files(): array {
 				'core/post-template' => 'aw-orgs', // the Directory list pattern, placed elsewhere
 			),
 		),
-		'aw-listing' => array( // Directory listing pages and the claim page.
-			'file' => 'css/aw-listing.css',
+		'dw-listing' => array( // Directory listing pages and the claim page (dw-listing.css).
+			'file' => 'css/dw-listing.css',
+			'when' => fn() => is_singular( 'aw_listing' ) || is_page( 'claim' ),
+		),
+		'aw-listing' => array( // Back-compat alias for dw-listing.
+			'file' => 'css/dw-listing.css',
 			'when' => fn() => is_singular( 'aw_listing' ) || is_page( 'claim' ),
 		),
 		'aw-hubs' => array( // Hub pages, the category hub and index, term chips, the adoption page; flags print it elsewhere.

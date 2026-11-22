@@ -644,6 +644,63 @@ function aw_directory_filter( $type = '' ) {
 	$n_active = count( array_filter( array( $district ? $district : $state, $cur_type, $service && aw_request_services(), $verified, $gov ) ) );
 	$checks   = ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
 		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
+
+	// Active filter chips (WPBDP / modern directory faceted search standard)
+	$active_chips = array();
+	$hub_url      = directoryweb_hub_url();
+	if ( '' !== $text ) {
+		$active_chips[] = array(
+			'label' => 'Search: “' . $text . '”',
+			'url'   => remove_query_arg( 'q' ),
+		);
+	}
+	if ( $district ) {
+		$active_chips[] = array(
+			'label' => 'District: ' . $district->name,
+			'url'   => remove_query_arg( 'district' ),
+		);
+	} elseif ( $state ) {
+		$active_chips[] = array(
+			'label' => 'State: ' . $state->name,
+			'url'   => remove_query_arg( array( 'state', 'district' ) ),
+		);
+	}
+	if ( '' !== $cur_type ) {
+		$active_chips[] = array(
+			'label' => 'Type: ' . aw_listing_type_name( $cur_type ),
+			'url'   => remove_query_arg( array( 'tag', 'aw_type_slug', 'aw_dir_type' ) ),
+		);
+	}
+	if ( $verified ) {
+		$active_chips[] = array(
+			'label' => 'Claimed only',
+			'url'   => remove_query_arg( 'verified' ),
+		);
+	}
+	if ( $gov ) {
+		$active_chips[] = array(
+			'label' => 'Verified only',
+			'url'   => remove_query_arg( 'gov' ),
+		);
+	}
+
+	$chips_html = '';
+	if ( ! empty( $active_chips ) ) {
+		$chips_html .= '<div class="aw-dir-active-filters" role="region" aria-label="Active filters">'
+			. '<span class="aw-dir-active-heading">Active filters:</span>'
+			. '<div class="aw-dir-active-list">';
+		foreach ( $active_chips as $c ) {
+			$chips_html .= '<span class="aw-dir-active-chip">'
+				. '<span class="aw-dir-active-text">' . esc_html( $c['label'] ) . '</span>'
+				. '<a href="' . esc_url( $c['url'] ) . '" class="aw-dir-active-remove" aria-label="' . esc_attr( 'Remove filter ' . $c['label'] ) . '">'
+				. '<span class="kit-ico kit-ico--x" aria-hidden="true"></span>'
+				. '</a></span>';
+		}
+		$chips_html .= '</div>'
+			. '<a href="' . esc_url( $hub_url ) . '" class="kit-btn kit-btn--ghost kit-btn--xs aw-dir-active-clear">Clear all</a>'
+			. '</div>';
+	}
+
 	directoryweb_use_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
 	// Row 1: search and Search. Then the filters: inline rows from 768, a "Filters" bottom sheet on phones (the Kits
 	// sheet, kit.js), applied only with "Apply filters". On phones Filters and Near me share one row under the search
@@ -663,7 +720,8 @@ function aw_directory_filter( $type = '' ) {
 		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( directoryweb_hub_url() ) . '" data-aw-sheet-reset>Reset</a><button type="submit" class="kit-btn">Apply filters</button></div>'
 		. '</div></details><button type="button" class="kit-btn kit-btn--secondary kit-btn--ico-map-pin aw-near-proxy" aria-controls="aw-near" hidden>Near me</button></div>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'sheet' ) : '' ) // a sheet before the first paint on phones (no layout shift)
 		. '<input type="hidden" name="aw_filter" value="1">'
-		. '</form>';
+		. '</form>'
+		. $chips_html;
 }
 add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );
 
