@@ -1,0 +1,33 @@
+name: "WordPress Plugin Check"
+
+on:
+  push:
+    branches: [ "wordpress", "wordpress-dev" ]
+  pull_request:
+    branches: [ "wordpress", "wordpress-dev" ]
+  workflow_dispatch:
+
+jobs:
+  plugin-check:
+    name: "Plugin Check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: WordPress Plugin Check
+        uses: WordPress/plugin-check-action@v1.1.9
+        continue-on-error: true
+        with:
+          build-dir: ./plugins/directoryweb
+          slug: directoryweb
+          ignore-warnings: true
+          ignore-errors: true
+
+      - name: WordPress.org Plugin Validator
+        uses: jazzsequence/action-wporg-validator@1.0.0
+        continue-on-error: true
+        with:
+          build-dir: ./plugins/directoryweb
+          slug: directoryweb
+          fail-on: none
