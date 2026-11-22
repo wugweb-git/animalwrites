@@ -318,6 +318,41 @@ add_action(
 	}
 );
 
+/* ---------- Webhook compatibility aliases ---------- */
+
+add_action(
+	'rest_api_init',
+	function () {
+		if ( ! function_exists( 'mailweb_in' ) ) {
+			return;
+		}
+		register_rest_route(
+			'aw/v1',
+			'/mail-in',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => 'mailweb_webhook_permission',
+				'callback'            => 'mailweb_in',
+			)
+		);
+		register_rest_route(
+			'aw/v1',
+			'/mail-in',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => '__return_true',
+				'callback'            => fn() => new WP_REST_Response(
+					array(
+						'status' => 'ready',
+						'method' => 'POST',
+					),
+					200
+				),
+			)
+		);
+	}
+);
+
 /* ---------- Kits → Home → Email sending (Check site without Kits) ---------- */
 
 add_filter( 'mailweb_pause_notice_always', fn( $always, $id ) => $always || str_ends_with( (string) $id, '_page_aw-site-check' ) || 'toplevel_page_kits' === (string) $id, 10, 2 );
