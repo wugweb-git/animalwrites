@@ -530,12 +530,24 @@ function aw_verified_count() {
  */
 /** Services choice: only services that at least 3 listings offer (the rest would lead to near-empty lists). */
 function aw_directory_service_field( $field ) {
-	$cur  = (string) current( aw_request_services() ?: array( '' ) );
-	$opts = '';
-	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => directoryweb_service_slugs(), 'hide_empty' => true ) ) as $t ) {
-		if ( (int) $t->count >= 3 ) {
-			$opts .= '<option value="' . esc_attr( $t->slug ) . '"' . selected( $cur, $t->slug, false ) . '>' . esc_html( $t->name . ' (' . number_format_i18n( $t->count ) . ')' ) . '</option>';
+	$cur      = (string) current( aw_request_services() ?: array( '' ) );
+	$services = get_transient( 'directoryweb_facet_services' );
+	if ( false === $services || ! is_array( $services ) ) {
+		$services = array();
+		foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => directoryweb_service_slugs(), 'hide_empty' => true ) ) as $t ) {
+			if ( (int) $t->count >= 3 ) {
+				$services[] = array(
+					'slug'  => (string) $t->slug,
+					'name'  => (string) $t->name,
+					'count' => (int) $t->count,
+				);
+			}
 		}
+		set_transient( 'directoryweb_facet_services', $services, 12 * HOUR_IN_SECONDS );
+	}
+	$opts = '';
+	foreach ( (array) $services as $s ) {
+		$opts .= '<option value="' . esc_attr( $s['slug'] ) . '"' . selected( $cur, $s['slug'], false ) . '>' . esc_html( $s['name'] . ' (' . number_format_i18n( $s['count'] ) . ')' ) . '</option>';
 	}
 	return $opts ? $field( 'aw-dir-service', 'Service', '<select id="aw-dir-service" name="tag[]"><option value="">All services</option>' . $opts . '</select>', 'service' ) : '';
 }
@@ -598,17 +610,22 @@ function aw_directory_filter( $type = '' ) {
 	$verified = ! empty( $_GET['verified'] ); // phpcs:ignore WordPress.Security.NonceVerification
 	$gov      = ! empty( $_GET['gov'] ); // phpcs:ignore WordPress.Security.NonceVerification
 
-	// States and districts with listings, with their counts (stored counts, places.php).
-	$states = array_filter( aw_place_states(), 'aw_place_count' );
-	$all    = array();
-	foreach ( $states as $st ) {
-		foreach ( aw_place_districts( $st->code ) as $k ) {
-			$n = aw_place_count( $k );
-			if ( $n ) {
-				$all[ $st->term_id ][] = array( $k->slug, $k->name, $n );
+	// States and districts with listings, with their counts (cached transient, places.php).
+	$all = get_transient( 'directoryweb_facet_districts' );
+	if ( false === $all || ! is_array( $all ) ) {
+		$states = array_filter( aw_place_states(), 'aw_place_count' );
+		$all    = array();
+		foreach ( $states as $st ) {
+			foreach ( aw_place_districts( $st->code ) as $k ) {
+				$n = aw_place_count( $k );
+				if ( $n ) {
+					$all[ $st->term_id ][] = array( $k->slug, $k->name, $n );
+				}
 			}
 		}
+		set_transient( 'directoryweb_facet_districts', $all, 12 * HOUR_IN_SECONDS );
 	}
+	$states = array_filter( aw_place_states(), 'aw_place_count' );
 	$d_opts = '<option value="" data-none="Choose a state first" data-all="All districts">' . ( $state ? 'All districts' : 'Choose a state first' ) . '</option>';
 	foreach ( $states as $st ) {
 		$kids = $all[ $st->term_id ] ?? array();
@@ -620,14 +637,18 @@ function aw_directory_filter( $type = '' ) {
 			$d_opts .= '</optgroup>';
 		}
 	}
-	// Types that have listings, with counts; the veterinary types are one "Veterinary" choice.
-	$opts = array();
-	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => directoryweb_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
-		$key             = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
-		$opts[ $key ][0] = 'veterinary' === $key ? 'Veterinary' : $t->name;
-		$opts[ $key ][1] = ( $opts[ $key ][1] ?? 0 ) + (int) $t->count;
+	// Types that have listings, with counts; the veterinary types are one "Veterinary" choice (cached transient).
+	$opts = get_transient( 'directoryweb_facet_types' );
+	if ( false === $opts || ! is_array( $opts ) ) {
+		$opts = array();
+		foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => directoryweb_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
+			$key             = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
+			$opts[ $key ][0] = 'veterinary' === $key ? 'Veterinary' : $t->name;
+			$opts[ $key ][1] = ( $opts[ $key ][1] ?? 0 ) + (int) $t->count;
+		}
+		uasort( $opts, fn( $a, $b ) => strcmp( $a[0], $b[0] ) );
+		set_transient( 'directoryweb_facet_types', $opts, 12 * HOUR_IN_SECONDS );
 	}
-	uasort( $opts, fn( $a, $b ) => strcmp( $a[0], $b[0] ) );
 	$cur_type = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : ( false !== strpos( $cur_type, ',' ) ? 'veterinary' : $cur_type ) );
 	$t_opts   = '<option value="">All types</option>';
 	foreach ( $opts as $slug => $o ) {

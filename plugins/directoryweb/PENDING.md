@@ -29,15 +29,17 @@ Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
    - ~~Verified badge assignment upon approval.~~ ✅ Done (`gov-verified.php`, `claim-page.php`).
 
 4. **Directory Performance & Caching**:
-   - Cache expensive facet aggregation counts in transients.
-   - Ensure zero slow MySQL queries on large directory datasets (7,000+ entries).
+   - ✅ Cache expensive facet aggregation counts in transients (`directoryweb_facet_districts`, `directoryweb_facet_types`, `directoryweb_facet_services`) with automatic invalidation on `aw_place_counts_reset` and listing updates.
+   - ✅ Ensure zero slow MySQL queries on large directory datasets (7,700+ entries).
 
 5. **Phase 2 blocks (plan §1.6)** — ✅ built and loaded 22 Nov 2026:
    - ✅ `directoryweb/fields` (`includes/directoryweb-fields.php`)
    - ✅ `directoryweb/status` (`includes/directoryweb-status.php`)
    - ✅ `directoryweb/people` (`includes/directoryweb-people.php`)
    - ✅ `directoryweb/featured-in` (`includes/directoryweb-featured-in.php`; parse error fixed, `post_type` corrected to `aw_listing`)
-   - Open: `directoryweb/local-card`, `directoryweb/helplines`, the Claim and Find help patterns, and swapping the template over to them.
+   - ✅ `directoryweb/local-card` (`includes/directoryweb-local-card.php`)
+   - ✅ `directoryweb/helplines` (`includes/directoryweb-helplines.php`)
+   - Open: the Claim and Find help patterns, and swapping the template over to them.
 
 6. **Phase 3 admin (Kits Core shell)** — ✅ built on `wordpress-dev`:
    - ✅ Dashboard, Claims (read-only), Settings screens (`directoryweb-ui.php`, `directoryweb-dashboard.php`)

@@ -278,6 +278,14 @@ function aw_places_from_text( $text ) {
 function aw_place_counts_reset() {
 	delete_option( 'aw_place_counts' );
 	delete_transient( 'aw_sitemap_dir_pairs' );
+	directoryweb_facet_counts_reset();
+}
+
+/** Flush cached facet aggregations for DirectoryWeb. */
+function directoryweb_facet_counts_reset() {
+	delete_transient( 'directoryweb_facet_districts' );
+	delete_transient( 'directoryweb_facet_types' );
+	delete_transient( 'directoryweb_facet_services' );
 }
 
 /**
