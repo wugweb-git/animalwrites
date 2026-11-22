@@ -73,10 +73,12 @@ function directoryweb_local_card_render( $attributes = array() ) {
 	$head = sprintf( __( 'Few listings in %s yet', 'directoryweb' ), $d->name );
 	/* translators: %s: district name. */
 	$line = sprintf( __( 'If there\'s no group near you, you can volunteer to help animals in %s, or tell us about one we\'ve missed.', 'directoryweb' ), $d->name );
+	/* translators: %s: state name. */
+	$see_all = sprintf( __( 'See all in %s', 'directoryweb' ), $state->name );
 
 	$actions = '<a class="kit-btn" href="' . esc_url( home_url( '/volunteer/' ) ) . '">' . esc_html__( 'Volunteer near you', 'directoryweb' ) . '</a>'
 		. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">' . esc_html__( 'Add an organisation', 'directoryweb' ) . '</a>'
-		. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( aw_directory_url( $state->slug ) ) . '">' . esc_html( sprintf( __( 'See all in %s', 'directoryweb' ), $state->name ) ) . '</a>';
+		. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( aw_directory_url( $state->slug ) ) . '">' . esc_html( $see_all ) . '</a>';
 
 	return function_exists( 'aw_local_card' ) ? aw_local_card( $head, $line, $actions ) : '<aside class="aw-local-card"><h2>' . esc_html( $head ) . '</h2><p>' . esc_html( $line ) . '</p><div class="aw-local-card-actions">' . $actions . '</div></aside>';
 }

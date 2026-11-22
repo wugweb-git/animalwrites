@@ -266,6 +266,7 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 ### 2.4 Requests to Kits Core: parts the design system may lack
 
 Before DirectoryWeb's admin phase, these are asked of Kits Core. DirectoryWeb does not build them itself.
+
 1. **A field-by-field review view** for one row of the working list: the current value beside the proposed value, a tick per field, apply the ticked fields, Undo per applied field. Claims need it; SourceWeb's Enrichment review would use the same part.
 2. **A row status that says why an action is off**, for example "Undo needs SourceWeb", inside the list.
 3. **A data-file service row:** a bundled file with its date and counts (the place file), with no account to connect.
