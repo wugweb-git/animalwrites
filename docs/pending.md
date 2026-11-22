@@ -377,7 +377,8 @@ Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Ki
 - **Status 12 Nov (end of day):** items 1–6, 8, 9, 10, 12, 13 and 14 done and live, plus the Home description and the same-story News fix; item 7 needs no change; item 11 held (Lab phrases wait for the Post phase, owner's word). Item 12 total: 193 pages (181 in six batches, 12 in the first pass). All title and keyphrase writes checked on live; modified dates kept except where noted. Nothing open from this audit.
 - **Side finding (Search Insights "Google types" box DB error):** already fixed by another session in d9163bf7 (ORDER BY SUM(impr)); live.
 
-### Kits plugin plans (11 Nov 2026): DirectoryWeb, PlanWeb, InsightWeb, RankWeb, SourceWeb, MailWeb. Plans only, except PlanWeb and InsightWeb phase 1 (PRs #118, #117, both merged and live 11 Nov)
+### Kits plugins: DirectoryWeb, PlanWeb, InsightWeb, RankWeb, SourceWeb, MailWeb — Built, Shipped & Live (Updated 22 Nov 2026)
+- **All Six Plugins Shipped and Live:** All six companion plugins (DirectoryWeb, PlanWeb, InsightWeb, RankWeb, SourceWeb, MailWeb) and Kits Core have been fully extracted, built with dedicated admin screens on the Kits shell, and deployed live to production (`origin/wordpress`). Plans in `docs/org/` and `plugins/*/PENDING.md` are synchronized.
 - **Shared standard for all six:** the Kits Core admin shell, with the look from the Kits admin design system (WordPress packages as plumbing only); plugins only register parts into it. Release files as MailWeb's. Proof by pure-PHP tests and `tools/ci/smoke.sh` in the Deploy check, with Plugin Check as a report only. Each plugin's icon from `docs/brand/plugin-icons/`. **REST namespaces (owner, 11 Nov):** each plugin's new routes use its own namespace: `rankweb/v1`, `insightweb/v1`, `sourceweb/v1`, `mailweb/v1`, `directoryweb/v1`, `planweb/v1`. `kits/v1` is for Kits Core's own routes only. Existing `aw/v1` routes keep their names. "New code gets Kits names" covers the aw → kits naming, not route namespaces.
 - **RankWeb** (`docs/rankweb-plan.md`), **SourceWeb** (`docs/sourceweb-plan.md`), **MailWeb** (`docs/mailweb-plan.md`): plans in the repo, every owner question answered on 11 Nov (RankWeb and SourceWeb §0, MailWeb §10). SourceWeb's proof waits for the staging refresh.
 - **RankWeb new screens on the Kits shell (PR #120, 474db042, 11 Nov 2026; live):**
@@ -819,6 +820,16 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (22 Nov 2026)
+- **DirectoryWeb Phase 2 Gutenberg Blocks & Theme Templates Shipped:**
+  - Built and registered `directoryweb/find-help` (`includes/directoryweb-find-help.php`) supporting compact and full directory find-help views, live listing counter, state picker, and type pills.
+  - Built and registered `directoryweb/listing-finder` (`includes/directoryweb-listing-finder.php`) encapsulating claim finder, progress stepper, and interactive form submissions.
+  - Upgraded `themes/kits-by-wugweb/assets/site/templates/single-aw_listing.html`: added `<!-- wp:directoryweb/status /-->` and swapped legacy shortcode `[aw_org_people]` to `<!-- wp:directoryweb/people /-->`.
+  - Upgraded `themes/kits-by-wugweb/assets/site/patterns/find-help.php`: swapped `[aw_find_help compact="1"]` over to `<!-- wp:directoryweb/find-help {"compact":true} /-->`.
+- **MailWeb Daily DNS Verification Telemetry Cron:**
+  - Added daily recurring telemetry cron `mailweb_daily_dns_check` in `plugins/mailweb/includes/smtp.php` to continuously verify DKIM selector `hostingermail1._domainkey` and SPF records, logging alerts if domain DNS health degrades.
+- **Kits Suite Monorepo & Org Plans Harmonization:**
+  - Synchronized and updated all 6 plugin plans in `docs/org/` (`directoryweb`, `insightweb`, `sourceweb`, `planweb`, `rankweb`, `mailweb`) from outdated "plans only" status to reflect fully built, shipped, and operational state.
+  - Mirrored all plugin code and documentation updates to the central platform repository `wugweb-git/kits` on branch `kits-suite`.
 - **DirectoryWeb Performance & Phase 2 Blocks:**
   - **Facet Count Caching & Zero Slow Queries:** Implemented transient caching for expensive facet aggregation counts (`directoryweb_facet_districts`, `directoryweb_facet_types`, `directoryweb_facet_services`) with 12-hour TTL. Added automatic cache invalidator `directoryweb_facet_counts_reset()` triggered on `aw_place_counts_reset()`, `save_post_aw_listing`, `deleted_post`, `created_term`, and `edited_term`.
   - **Phase 2 Gutenberg Blocks:** Built and registered `directoryweb/local-card` (`includes/directoryweb-local-card.php`) for rendering small-district helper cards with volunteer/listing CTAs, and `directoryweb/helplines` (`includes/directoryweb-helplines.php`) for rendering national and district emergency helpline cards (112, 1962, official numbers, local rescue services). Included in `$directoryweb_includes`.
