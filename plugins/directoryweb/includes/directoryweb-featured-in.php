@@ -4,7 +4,13 @@
  * Shows listings "Featured in" (News, Library, Resources, Press mentioning an org).
  * Based on plan §1.6: "Query Loop variations (directoryweb/featured-in, /opportunities, /campaigns),
  * with the query set through query_loop_block_query_vars from aw_featured_items() and the aw_organisation / partner meta."
+ *
+ * @package directoryweb
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Register the directoryweb/featured-in query loop variation.

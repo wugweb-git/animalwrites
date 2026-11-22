@@ -6,7 +6,13 @@
  * Based on plan §1.6: "One custom block, directoryweb/fields, with a group attribute."
  * WordPress has no native "print the filled fields of this group, skip the empty ones" block.
  * Rows come from the listing type's fields (Settings), so a new listing type needs no new block.
+ *
+ * @package directoryweb
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Register the directoryweb/fields block.
@@ -42,7 +48,8 @@ function directoryweb_fields_block_render( $attributes ) {
     $group_fields = get_option( $group_key, array() );
 
     if ( empty( $group_fields ) ) {
-        return '<p>' . esc_html__( 'No fields found for group: ' . $group, 'directoryweb' ) . '</p>';
+        /* translators: %s: the field group key (for example "about"). */
+        return '<p>' . esc_html( sprintf( __( 'No fields found for group: %s', 'directoryweb' ), $group ) ) . '</p>';
     }
 
     $output = '<div class="directoryweb-fields-group"><h3>' . esc_html( $group ) . '</h3>';

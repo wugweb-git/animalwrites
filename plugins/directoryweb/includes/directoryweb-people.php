@@ -4,7 +4,13 @@
  * Displays people of an organisation from FluentCRM.
  * Phase 2 block for DirectoryWeb.
  * Guarded with function_exists so it never fatals without FluentCRM.
+ *
+ * @package directoryweb
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Register the directoryweb/people block.
@@ -36,7 +42,8 @@ function directoryweb_people_render( $attributes ) {
 
     // Guard: FluentCRM must be active
     if ( function_exists( 'fluent_crm' ) || class_exists( 'FluentCRM' ) ) {
-        $output .= '<p>' . esc_html__( 'People for: ' . $org, 'directoryweb' ) . '</p>';
+        /* translators: %s: the organisation's name. */
+        $output .= '<p>' . esc_html( sprintf( __( 'People for: %s', 'directoryweb' ), $org ) ) . '</p>';
         $output .= '<!-- Query FluentCRM for org people here -->';
     } else {
         $output .= '<p>' . esc_html__( 'FluentCRM not active', 'directoryweb' ) . '</p>';

@@ -6,7 +6,13 @@
  * so the title stays plain.
  * Based on plan §1.6: "Custom block directoryweb/status, placed after the title
  * in the card and the profile. It replaces four title filters, so the title stays plain."
+ *
+ * @package directoryweb
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Register the directoryweb/status block.
