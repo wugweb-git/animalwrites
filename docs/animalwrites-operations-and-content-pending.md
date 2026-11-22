@@ -37,7 +37,7 @@
 ## 2. Directory Data, Verification & Claim Flow (7,738 Listings)
 
 ### A. Listing Claim Flow (B5 / B6 implementation from `docs/cc-master-plan-19-nov.md`)
-- **Status**: B4 completed live (Nawabi Tails Darpan ID merged, post 18308 trashed, 301 redirect active).
+- **Status**: B4, C1, C3 completed live (Nawabi Tails Darpan ID merged, post 18308 trashed, 301 redirect active, mail-in webhook alias secured, crawler tel: paths redirected to guides).
 - **Pending Tasks**:
   - B5 (3-step claim modal): Owner confirmation to launch frontend modal on single listing profiles.
   - B6: Verification badge display and shelter administrator claim notification dispatch via `MailWeb`.
