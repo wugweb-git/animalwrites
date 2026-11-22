@@ -1,6 +1,6 @@
 {
   "name": "animalwrites/tenant-site",
-  "description": "Animal Writes tenant site — consumes Wugweb Kits platform packages as versioned dependencies",
+  "description": "Animal Writes tenant site \u2014 consumes Wugweb Kits platform packages as versioned dependencies",
   "type": "project",
   "license": "MIT",
   "repositories": [
@@ -23,14 +23,30 @@
   },
   "extra": {
     "installer-paths": {
-      "wp-content/themes/kits-by-wugweb": ["wugweb/kits-by-wugweb"],
-      "wp-content/plugins/kits-core": ["wugweb/kits-core"],
-      "wp-content/plugins/directoryweb": ["wugweb/directoryweb"],
-      "wp-content/plugins/rankweb": ["wugweb/rankweb"],
-      "wp-content/plugins/mailweb": ["wugweb/mailweb"],
-      "wp-content/plugins/sourceweb": ["wugweb/sourceweb"],
-      "wp-content/plugins/insightweb": ["wugweb/insightweb"],
-      "wp-content/plugins/planweb": ["wugweb/planweb"]
+      "wp-content/themes/kits-by-wugweb": [
+        "wugweb/kits-by-wugweb"
+      ],
+      "wp-content/plugins/kits-core": [
+        "wugweb/kits-core"
+      ],
+      "wp-content/plugins/directoryweb": [
+        "wugweb/directoryweb"
+      ],
+      "wp-content/plugins/rankweb": [
+        "wugweb/rankweb"
+      ],
+      "wp-content/plugins/mailweb": [
+        "wugweb/mailweb"
+      ],
+      "wp-content/plugins/sourceweb": [
+        "wugweb/sourceweb"
+      ],
+      "wp-content/plugins/insightweb": [
+        "wugweb/insightweb"
+      ],
+      "wp-content/plugins/planweb": [
+        "wugweb/planweb"
+      ]
     }
   },
   "scripts": {
