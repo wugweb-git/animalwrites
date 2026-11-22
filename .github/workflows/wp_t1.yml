@@ -1,78 +1,33 @@
-- name: WordPress Plugin Check
-  # You may pin to the exact commit or the version.
-  # uses: WordPress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e
-  uses: WordPress/plugin-check-action@v1.1.9
-  with:
-    # The GITHUB_TOKEN secret
-    repo-token: # optional, default is ${{ github.token }}
-    # Build directory
-    build-dir: # optional, default is ./
-    # Only run specific checks
-    checks: # optional, default is 
-    # Checks to exclude
-    exclude-checks: # optional, default is 
-    # Limit checks to specific categories
-    categories: # optional, default is 
-    # Exclude certain files from checks
-    exclude-files: # optional, default is 
-    # Exclude certain directories from checks
-    exclude-directories: # optional, default is 
-    # Error codes to ignore
-    ignore-codes: # optional, default is 
-    # Ignore warnings
-    ignore-warnings: # optional, default is false
-    # Ignore errors
-    ignore-errors: # optional, default is false
-    # Include experimental checks
-    include-experimental: # optional, default is false
-    # WordPress version to use
-    wp-version: # optional, default is latest
-    # Severity level
-    severity: # optional, default is 
-    # Error severity level
-    error-severity: # optional, default is 
-    # Warning severity level
-    warning-severity: # optional, default is 
-    # Include errors with lower severity than the threshold as other type.
-    include-low-severity-errors: # optional, default is 
-    # Include warnings with lower severity than the threshold as other type.
-    include-low-severity-warnings: # optional, default is 
-    # Slug to override the default
-    slug: # optional, default is 
-    # Treat everything as an error
-    strict: # optional, default is false
+name: "WordPress Plugin Check"
 
-    - name: WordPress.org Plugin Validator
-  # You may pin to the exact commit or the version.
-  # uses: jazzsequence/action-wporg-validator@a4edf0d45da945b2601d71082ac73913b110b53a
-  uses: jazzsequence/action-wporg-validator@1.0.0
-  with:
-    # Plugin slug (directory name inside wp-content/plugins). Defaults to the repository name.
-    slug: # optional, default is 
-    # Directory containing the plugin to check, relative to the workspace.
-    build-dir: # optional, default is .
-    # PHP version used to run WordPress and the checker.
-    php-version: # optional, default is 8.2
-    # WordPress version to install (e.g. "latest", "nightly", "6.8").
-    wp-version: # optional, default is latest
-    # Space-separated plugin slugs to install and activate alongside Plugin Check (e.g. dependencies).
-    extra-plugins: # optional, default is 
-    # Comma-separated list of checks to run. Empty runs all default checks.
-    checks: # optional, default is 
-    # Comma-separated list of checks to skip.
-    exclude-checks: # optional, default is 
-    # Comma-separated check categories to run (e.g. "plugin_repo,security").
-    categories: # optional, default is 
-    # Comma-separated directories to exclude from checking.
-    exclude-directories: # optional, default is vendor,node_modules,tests,bin,.github
-    # Comma-separated files to exclude from checking.
-    exclude-files: # optional, default is .gitignore,.distignore
-    # Newline-separated rsync exclude patterns applied when copying the plugin into WordPress. Keeps the checked tree small and fast.
-    copy-excludes: # optional, default is .git
-node_modules
+on:
+  push:
+    branches: [ "wordpress", "wordpress-dev" ]
+  pull_request:
+    branches: [ "wordpress", "wordpress-dev" ]
+  workflow_dispatch:
 
-    # Run experimental checks.
-    include-experimental: # optional, default is false
-    # Fail the step on "error", on "warning" (errors and warnings), or never ("none").
-    fail-on: # optional, default is warning
-    
+jobs:
+  plugin-check:
+    name: "Plugin Check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: WordPress Plugin Check
+        uses: WordPress/plugin-check-action@v1.1.9
+        continue-on-error: true
+        with:
+          build-dir: ./plugins/directoryweb
+          slug: directoryweb
+          ignore-warnings: true
+          ignore-errors: true
+
+      - name: WordPress.org Plugin Validator
+        uses: jazzsequence/action-wporg-validator@1.0.0
+        continue-on-error: true
+        with:
+          build-dir: ./plugins/directoryweb
+          slug: directoryweb
+          fail-on: none
