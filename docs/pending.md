@@ -804,6 +804,22 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 - **404 and error tracking (31 Oct):** the 404 page answers with status 404 and sends `404_view` with the path; form errors are tracked as `form_error`; 500 and 503 cannot be tracked in GA4, so they are covered by the branded error pages and the daily count of PHP fatal errors.
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
+## Done (22 Nov 2026)
+- **Directory & Claim Listing Pages Overhaul — Points 1, 2, 4 (shipped & deployed live `475ff2e9` and `23d2d5dd`):**
+  - **Point 2 (`/claim/`):** Built modern Claim Finder in `plugins/directoryweb/includes/claim-page.php`. Hero search box, rich directory result cards (`.aw-claim-card`) with logo/initials avatar, badges ("Unclaimed Listing" vs "Verified"), category chips, place with map pin, direct CTA "Claim this listing →", empty state, 3 onboarding benefit cards, and `SearchResultsPage` JSON-LD schema with `potentialAction: SearchAction`.
+  - **Point 1 (`/claim/?listing=<ID>`):** Added Claimed Listing Summary Preview Card (`.aw-claim-preview`) showing listing logo, title, unclaimed status badge, district/state, category chips, live link, and manual verification notice. Added 3-step accessible progress stepper (`.aw-claim-stepper`). Added pre-fill text cleaning in `plugins/directoryweb/includes/claims.php` stripping raw HTML tags and date chips.
+  - **Point 4 (`/directory/`):** Added Active Filter Chips bar (`.aw-dir-active-filters`) in `plugins/directoryweb/includes/directory.php` with dismiss links for each active parameter (`q`, `state`, `district`, `tag`, `verified`, `gov`) and a "Clear all" button. Enriched directory `ItemList` schema in `plugins/rankweb/includes/schema.php` with nested `NGO` item entities.
+  - **Asset Migration (`aw-listing.css` → `dw-listing.css`):** Created `themes/kits-by-wugweb/assets/site/css/dw-listing.css` and compiled `dw-listing.min.css`. Registered `'dw-listing'` in `themes/kits-by-wugweb/assets/site/site.php` with fallback alias for `'aw-listing'`. Updated `directoryweb_use_style( string $handle )` to request both `dw-listing` and `aw-listing`. Updated `tools/ci/css_min.py` to compile `dw*.css`.
+  - **Legacy Token Sanitization & Mobile Input Zoom Protection:** Replaced legacy `--r-4` and `--s-10` with standard design tokens (`var(--kit-radius-card, 16px)` and `var(--kit-space-6, 2rem)`). Added `font-size: 16px !important;` on mobile inputs/selects/textareas under 768px in `aw-forms.css`.
+- **Wugweb Kits PHP SDK Built (`packages/shared-php/`):** Standalone zero-dependency library with `TokenEngine`, `ExternalServiceRegistry`, and `NonceGuard` passing 5/5 test suites.
+- **Hostinger Mail API SDK Integration in MailWeb (`plugins/mailweb/`):** Real `hostinger/mail-api-php-sdk` (v1.18.7) integration with `Hostinger\Configuration` and `Hostinger\Api\SendApi` alongside `wp_remote_request()`.
+- **iKAN & iKAN2 Comprehensive Audit & 100% Parity Sync (shipped & deployed live `6e204aeb`):**
+  - Audited all 23 endpoints across WordPress/Vite site (`ikanhealth.in`) and member PWA (`app.ikanhealth.in`).
+  - Added 2 new articles (*Mental Health Has a Personal Cost and It Is High* and *The Pros and Pros of Tracking Your Mood*) with full HTML, charts, tables, and sources to `resources.json`.
+  - Synced `mood-tracker.webp` and article cover images in `covers/`.
+  - Updated `header.php` to dynamically resolve active Vite production CSS bundle from `manifest.json`.
+  - Enforced 16px input font protection on mobile viewports. All 11 smoke test endpoints passed live on Hostinger.
+
 ## Done (20 Nov 2026)
 - **Claim form: plain-text pre-fill, 8 MB uploads, error summary — B1 to B3 (shipped, PR #164 merged, deployed live `6230ac51`, 20 Nov 2026):** About and every pre-filled field now plain text (the short bio held rendered date chips); file uploads accept up to 8 MB with one error message per cause (file name, size, Remove); a failed submit shows an "N things to fix" summary at the top. All 40+ CI checks passed. Still to verify on live: `upload_max_filesize` / `post_max_size` server values, a 3 MB photo upload, layout at 375 px.
 - **Kits by Wugweb & Kits Core: Full Ecosystem Audit & Architectural Improvement (shipped & deployed live, commit `aaa99282` via PR #166):**
