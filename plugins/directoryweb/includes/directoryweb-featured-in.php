@@ -21,7 +21,7 @@ add_action( 'init', 'directoryweb_register_featured_in_variation' );
  */
 function directoryweb_featured_in_render( $attributes ) {
     $query_args = get_option( 'directoryweb_featured_in_query_args', array(
-        'post_type'      => 'directoryweb_listing',
+        'post_type'      => 'aw_listing',
         'posts_per_page' => get_option( 'directoryweb_featured_count', 10 ),
         'meta_query' => array(
             array(
@@ -57,3 +57,4 @@ function directoryweb_featured_in_render( $attributes ) {
     wp_reset_postdata();
 
     return $output;
+}

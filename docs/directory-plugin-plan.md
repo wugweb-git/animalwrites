@@ -1,6 +1,6 @@
 # DirectoryWeb: the Directory as its own Kits plugin (plan, 11 Nov 2026)
 
-**Status:** plan only, waiting on the owner. No code until the owner approves it.
+**Status:** ~~plan only, waiting on the owner. No code until the owner approves it.~~ ✅ **Approved and in progress (22 Nov 2026).** Phase 1 and Phase 2 are built and on `wordpress-dev`; Phase 3's screens and REST routes are built too. See the status block at the end of §4.
 **Decision (owner, 11 Nov 2026):** the Directory (listings, types, places, claims, badges, Find help, government records) leaves Animal Writes Core and becomes the Kits plugin **DirectoryWeb**. It requires Kits Core, keeps today's data keys (the aw→kits rename is deferred), and follows the Kits plugin UI standard (Dashboard, one working list, Settings).
 **Checked against:** `origin/wordpress-dev` at `b0512a4e` (live `wordpress` is `637e9e64`). Every file:line below was read on that commit.
 
@@ -388,8 +388,14 @@ Each phase is complete before the next. Each ships on the owner's yes, through t
   2. The Kits Core shell is piloted on InsightWeb only after that extraction passes its before/after check.
   3. Then RankWeb, SourceWeb, MailWeb, **then DirectoryWeb**, then PlanWeb. Phase 3 waits for its turn. Phases 1 and 2 do not depend on the shell |
 
-## 5. Not in this plan (recorded, not done)
+### Status, 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`)
 
+- ✅ **Phase 1 — moved and wired.** The plugin folder exists with `directoryweb.php`, the eight SCF groups (`DIRECTORYWEB_SCF_GROUPS`), `acf-json/`, `data/`, `languages/`, `readme.txt`, tests and build. All includes load through the one `$directoryweb_includes` array. `Requires Plugins: kits-core` is in the header; the `KITS_CORE_LOADED` runtime check stays.
+- ✅ **Phase 2 — the first four blocks are built and now loaded.** `directoryweb/fields`, `directoryweb/status`, `directoryweb/people` and `directoryweb/featured-in` are in `includes/` and are added to `$directoryweb_includes` (before this change they were not loaded at all). `directoryweb-featured-in.php` had an unclosed brace and the wrong post type (`directoryweb_listing`); both are fixed (`aw_listing`). `php -l` is clean on all four and on `directoryweb.php`. Still open in Phase 2: `directoryweb/local-card`, `directoryweb/helplines`, the Claim and Find help patterns, the template swap, and deleting `org-details` and `contact`.
+- ✅ **Phase 3 — screens and routes are built.** Dashboard, Claims (read-only by the owner's 11 Nov decision) and Settings draw from `directoryweb-ui.php`, `directoryweb-dashboard.php`, `directoryweb-listings.php` and `directoryweb-caps.php` (`manage_directoryweb` with grant and fallback). `directoryweb-rest.php` registers `dashboard`, `dashboard/count`, `stats/<tile>`, `claims`, `claims/<id>`, `settings`, `settings/claim-form` and `listings` under `directoryweb/v1`, each behind `kits_shell_rest_can()`. Still open: the §2.4 requests to Kits Core, and the old Claims address 301 redirect.
+- ⏳ **Deploy:** the branch needs the Deploy check green, then `tools/kits-ship.sh`.
+
+## 5. Not in this plan (recorded, not done)
 - The aw→kits rename of keys, block names and routes (deferred by the owner).
 - `aw_org_people_from_claim()` missing (§1.7): being fixed now in its own fix on `wordpress-dev`, with a dry-run backfill of past approvals before anything is written; the move keeps it.
 - `aw_cdn_purge_post()` missing (§1.5).

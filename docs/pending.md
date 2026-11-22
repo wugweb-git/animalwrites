@@ -27,6 +27,16 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### DirectoryWeb: phases 1–3 wired, blocks fixed and loaded (22 Nov 2026)
+
+Checked on `wordpress-dev` at `7e98b691`, plus this session's changes.
+
+- ✅ **Blocks were dead code; now loaded.** `directoryweb/fields`, `directoryweb/status`, `directoryweb/people` and `directoryweb/featured-in` existed in `plugins/directoryweb/includes/` but were missing from `$directoryweb_includes` in `directoryweb.php`; they are in the array now and load in that order (after `bootstrap`).
+- ✅ **`directoryweb-featured-in.php` fixed.** It ended without the closing brace of `directoryweb_featured_in_render()` (`php -l` reported `Unclosed '{' on line 22 … on line 59`) and queried `directoryweb_listing`; both fixed, the post type is `aw_listing`. `php -l` is clean on all four blocks and on `directoryweb.php`.
+- ✅ **Phase 3 is already built on the branch** (not a skeleton to write): Dashboard, read-only Claims and Settings draw from `directoryweb-ui.php`, `directoryweb-dashboard.php`, `directoryweb-listings.php` and `directoryweb-caps.php`; `directoryweb-rest.php` registers `dashboard`, `dashboard/count`, `stats/<tile>`, `claims`, `claims/<id>`, `settings`, `settings/claim-form` and `listings` under `directoryweb/v1` behind `kits_shell_rest_can()`. `manage_directoryweb` is granted on activation and after upgrades, with a `user_has_cap` fallback.
+- ✅ **Docs updated:** `docs/directory-plugin-plan.md` (§ status block and the plan status line) and `plugins/directoryweb/PENDING.md`.
+- ⏳ **Open:** Phase 2's remaining blocks and patterns (`directoryweb/local-card`, `directoryweb/helplines`, Claim and Find help patterns, template swap, delete `org-details` and `contact`); Kits Core's `kits/collection-filter` (the `[aw_directory_filter]` shortcode stays until it ships); the §2.4 shell requests; the old Claims address 301; a green Deploy check, then `tools/kits-ship.sh`.
+
 ### Wugweb Kits PHP SDK Built (`packages/shared-php/`, 22 Nov 2026)
 - **Standalone PHP SDK (`packages/shared-php/`):**
   - Built zero-dependency PHP SDK providing contracts (`PluginInterface`, `TokenEngineInterface`, `ServiceRegistryInterface`).
