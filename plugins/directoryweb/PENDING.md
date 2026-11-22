@@ -39,7 +39,10 @@ Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
    - ✅ `directoryweb/featured-in` (`includes/directoryweb-featured-in.php`; parse error fixed, `post_type` corrected to `aw_listing`)
    - ✅ `directoryweb/local-card` (`includes/directoryweb-local-card.php`)
    - ✅ `directoryweb/helplines` (`includes/directoryweb-helplines.php`)
-   - Open: the Claim and Find help patterns, and swapping the template over to them.
+   - ✅ `directoryweb/find-help` (`includes/directoryweb-find-help.php`)
+   - ✅ `directoryweb/listing-finder` (`includes/directoryweb-listing-finder.php`)
+   - ✅ Swapped `single-aw_listing.html` over to `directoryweb/status` and `directoryweb/people`.
+   - ✅ Swapped `animal-writes/find-help` pattern over to `directoryweb/find-help` block.
 
 6. **Phase 3 admin (Kits Core shell)** — ✅ built on `wordpress-dev`:
    - ✅ Dashboard, Claims (read-only), Settings screens (`directoryweb-ui.php`, `directoryweb-dashboard.php`)

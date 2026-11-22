@@ -10,15 +10,20 @@ The email and delivery management plugin owns:
 
 ---
 
-## Open Tasks & Enhancements
+## Built & Operational (22 Nov 2026)
 
 1. **Hostinger Mail API Transport**:
-   - Ensure seamless fallback from API SDK to native `wp_mail` / SMTP if API key is invalid or quota exceeded.
-   - Rate limiting and retry queue in database for failed outbound emails.
+   - ✅ Seamless fallback from Hostinger Mail API SDK (`hostinger/mail-api-php-sdk`) to native `wp_mail` / SMTP SSL (port 465).
+   - ✅ Test email utility directly from `MailWeb > Settings > Site sending` (`do=test`) with instant error feedback.
 
 2. **DNS & Deliverability Telemetry**:
-   - Background cron checking DKIM and SPF records every 24 hours, surfacing admin warning if DNS records drop.
-   - Test email sending utility directly from the `MailWeb > Settings` admin screen.
+   - ✅ Real-time DKIM (`hostingermail1._domainkey`) and SPF DNS verification card.
+   - ✅ Background cron (`mailweb_daily_dns_check`) checking DKIM records every 24 hours, alerting administrators if DNS verification fails.
 
-3. **Multi-Tenant Mail Sending**:
+---
+
+## Open Tasks & Enhancements
+
+1. **Multi-Tenant Mail Sending**:
    - Allow tenants to define separate sender profiles (e.g. `alerts@tenant.com` vs `newsletter@tenant.com`).
+   - Rate limiting and retry queue in database for failed outbound emails.

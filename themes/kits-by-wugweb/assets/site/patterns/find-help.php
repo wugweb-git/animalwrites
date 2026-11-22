@@ -16,7 +16,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"Find help near you"},"align":"full","className":"is-style-kits-section kit-section kit-bg-kraft aw-ed-find","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<section class="wp-block-group alignfull is-style-kits-section kit-section kit-bg-kraft aw-ed-find"><!-- wp:shortcode -->
-[aw_find_help compact="1"]
-<!-- /wp:shortcode --></section>
+<section class="wp-block-group alignfull is-style-kits-section kit-section kit-bg-kraft aw-ed-find"><!-- wp:directoryweb/find-help {"compact":true} /--></section>
 <!-- /wp:group -->

@@ -255,6 +255,23 @@ function mailweb_verify_dkim(): array {
 	);
 }
 
+/**
+ * Daily cron checking DKIM and SPF records, caching status for admin warning.
+ */
+function mailweb_dns_telemetry_check() {
+	$res = mailweb_verify_dkim();
+	if ( 'valid' !== ( $res['status'] ?? '' ) ) {
+		set_transient( 'mailweb_dns_status_warning', $res['message'] ?? __( 'DKIM configuration needs attention.', 'mailweb' ), DAY_IN_SECONDS );
+	} else {
+		delete_transient( 'mailweb_dns_status_warning' );
+	}
+}
+add_action( 'mailweb_daily_dns_check', 'mailweb_dns_telemetry_check' );
+
+if ( ! wp_next_scheduled( 'mailweb_daily_dns_check' ) ) {
+	wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'mailweb_daily_dns_check' );
+}
+
 add_action(
 	'admin_post_mailweb_smtp_save',
 	function () {

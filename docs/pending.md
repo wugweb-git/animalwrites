@@ -38,7 +38,8 @@ Checked on `wordpress-dev` at `7e98b691`, plus this session's changes.
 - ✅ **`directoryweb/local-card` and `directoryweb/helplines` built & registered.** `directoryweb/local-card` renders district cards for low-inventory districts with state links and action cards; `directoryweb/helplines` renders national emergency numbers (112, 1962), official animal husbandry helplines, and local ambulance services.
 - ✅ **Transient facet caching implemented.** Cached facet counts for `directoryweb_facet_districts`, `directoryweb_facet_types`, and `directoryweb_facet_services` with 12-hour TTL and automated invalidation hooked into `aw_place_counts_reset` and listing lifecycle events.
 - ✅ **Deploy check green & shipped.** Tagged release `release-20261122-1526-d51da157` live on `origin/wordpress` (`animalwrites.in`).
-- ⏳ **Open:** Claim and Find help patterns, template swap, delete `org-details` and `contact`; Kits Core's `kits/collection-filter` (the `[aw_directory_filter]` shortcode stays until it ships); the §2.4 shell requests; the old Claims address 301.
+- ✅ **Phase 2 blocks & templates complete:** `directoryweb/find-help` and `directoryweb/listing-finder` blocks registered; `single-aw_listing.html` swapped over to `directoryweb/status` and `directoryweb/people`; `animal-writes/find-help` pattern swapped over to `directoryweb/find-help` block.
+- ⏳ **Open:** Kits Core's `kits/collection-filter` (the `[aw_directory_filter]` shortcode stays until it ships); the §2.4 shell requests; the old Claims address 301.
 
 ### Wugweb Kits PHP SDK Built (`packages/shared-php/`, 22 Nov 2026)
 - **Standalone PHP SDK (`packages/shared-php/`):**
