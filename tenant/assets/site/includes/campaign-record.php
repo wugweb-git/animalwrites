@@ -1,0 +1,364 @@
+<?php
+/**
+ * Campaign record, the parts campaign-tools.php does not hold (Campaign Content Standard v1.0, Notion, approved
+ * 17 Oct 2026): metric records for a campaign's own figures, the Real-world impact module, and the editor-only
+ * blocks of a campaign page. Lifecycle state, action window, outcome and its "as of" date are campaign-tools.php's
+ * (aw_camp_state, aw_camp_window, aw_camp_outcome, [aw_camp_status]); this file only reads them.
+ *
+ * Post meta on an aw_campaign:
+ *   aw_campaign_metrics          JSON list of {key, label, value, attribution, source_label, source_url, verified
+ *                                (Y-m-d), threshold (number, 0 = none), count (number compared with the threshold),
+ *                                stale_days (0 = never stale)}. For fixed figures such as a closed campaign's results;
+ *                                the live letter count stays [aw_campaign_count].
+ *   aw_campaign_impact_state     verified|no-change|pending|inconclusive|na   the Real-world impact module (D4.2):
+ *                                verified = evidence shows the intended change happened; no-change = evidence shows
+ *                                it did not; pending = not yet known; inconclusive = evidence can't settle it; na = hidden
+ *   aw_campaign_impact_evidence  int     the item (usually a Library record) that is the evidence
+ *
+ * Shortcodes:
+ *   [aw_campaign_metric key="letters"]  one metric record: hidden when unverified or below its threshold, with its
+ *                                       source and "as of" date. Hero and impact use the same record.
+ *   [aw_campaign_impact]                the Real-world impact state and its evidence link (hidden when Not applicable)
+ *   [aw_campaign_outcome]               the outcome alone, with its "as of" date (for the Campaign goal section)
+ *
+ * Editor-only blocks (never rendered on the site):
+ *   aw-owner-copy      a note where the owner's copy goes; a section with class aw-camp-needs-copy that still holds
+ *                      one is hidden as a whole
+ *   aw-unused-review   blocks kept for the owner's review after a page was restructured
+ *
+ * @package kits-by-wugweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const AW_CAMP_IMPACT = array(
+	'verified'     => 'Verified change',
+	'no-change'    => 'No change (verified)', // owner, 17 Oct 2026 (standard D4): evidence shows the change did not happen
+	'pending'      => 'Pending verification',
+	'inconclusive' => 'Inconclusive',
+	'na'           => 'Not applicable',
+);
+
+add_action(
+	'init',
+	function () {
+		foreach ( array( 'aw_campaign_metrics' => 'string', 'aw_campaign_impact_state' => 'string', 'aw_campaign_impact_evidence' => 'integer' ) as $k => $t ) {
+			register_post_meta(
+				'aw_campaign',
+				$k,
+				array(
+					'type'          => $t,
+					'single'        => true,
+					'show_in_rest'  => true,
+					'auth_callback' => fn( $allowed, $key, $post_id ) => current_user_can( 'edit_post', $post_id ),
+					'sanitize_callback' => 'integer' === $t ? 'absint' : null, // the string keys hold stored JSON and states: left as written
+
+				)
+			);
+		}
+	}
+);
+
+/** A date as the site shows dates (calendar icon), through the theme's helper when it is there. */
+function aw_camp_record_date( $day ) {
+	if ( function_exists( 'kits_date' ) ) {
+		return kits_date( $day );
+	}
+	$ts = strtotime( $day . ' 12:00:00 Asia/Kolkata' );
+	return $ts ? '<span class="kit-date aw-date"><span class="kit-ico kit-ico--calendar" aria-hidden="true"></span><time datetime="' . esc_attr( $day ) . '">' . esc_html( wp_date( 'j M Y', $ts ) ) . '</time></span>' : '';
+}
+
+/** The metric records of a campaign, by key. */
+function aw_camp_metrics( $id ) {
+	$list = json_decode( (string) get_post_meta( $id, 'aw_campaign_metrics', true ), true );
+	$out  = array();
+	foreach ( is_array( $list ) ? $list : array() as $m ) {
+		if ( is_array( $m ) && ! empty( $m['key'] ) ) {
+			$out[ (string) $m['key'] ] = $m;
+		}
+	}
+	return $out;
+}
+
+add_shortcode(
+	'aw_campaign_metric',
+	function ( $a ) {
+		$a  = shortcode_atts( array( 'key' => '' ), $a );
+		$id = aw_camp_id();
+		$m  = $id ? ( aw_camp_metrics( $id )[ $a['key'] ] ?? null ) : null;
+		if ( ! $m || empty( $m['verified'] ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $m['verified'] ) ) {
+			return ''; // unverified: not shown
+		}
+		if ( ! empty( $m['threshold'] ) && (float) ( $m['count'] ?? 0 ) < (float) $m['threshold'] ) {
+			return ''; // below its display threshold
+		}
+		$stale = ! empty( $m['stale_days'] ) && time() - strtotime( $m['verified'] . ' 00:00:00 Asia/Kolkata' ) > (int) $m['stale_days'] * DAY_IN_SECONDS;
+		$src   = esc_html( (string) ( $m['source_label'] ?? '' ) );
+		if ( '' !== $src && ! empty( $m['source_url'] ) ) {
+			$src = '<a href="' . esc_url( $m['source_url'] ) . '">' . $src . '</a>';
+		}
+		$note = implode( ' · ', array_filter( array( esc_html( (string) ( $m['attribution'] ?? '' ) ), $src ) ) );
+		return '<div class="aw-camp-metric' . ( $stale ? ' is-stale' : '' ) . '">'
+			. '<span class="aw-camp-metric-value">' . esc_html( (string) $m['value'] ) . '</span>'
+			. '<span class="aw-camp-metric-label">' . esc_html( (string) ( $m['label'] ?? '' ) ) . '</span>'
+			. '<span class="aw-camp-metric-note">' . $note . ( '' !== $note ? ' · ' : '' ) . 'As of ' . aw_camp_record_date( (string) $m['verified'] ) . '</span>'
+			. '</div>';
+	}
+);
+
+add_shortcode(
+	'aw_campaign_impact',
+	function () {
+		$id = aw_camp_id();
+		if ( ! $id ) {
+			return '';
+		}
+		$state = (string) get_post_meta( $id, 'aw_campaign_impact_state', true );
+		if ( ! isset( AW_CAMP_IMPACT[ $state ] ) || 'na' === $state ) {
+			return ''; // Not applicable: hidden
+		}
+		$ev   = (int) get_post_meta( $id, 'aw_campaign_impact_evidence', true );
+		$link = $ev && 'publish' === get_post_status( $ev ) ? ' Evidence: <a href="' . esc_url( get_permalink( $ev ) ) . '">' . esc_html( get_the_title( $ev ) ) . '</a>' : '';
+		// Plain text, like the hero's outcome line: no status pills on campaigns (owner, 2 Nov 2026)
+		return '<p class="aw-camp-status aw-camp-impact is-' . esc_attr( $state ) . '"><strong>' . esc_html( AW_CAMP_IMPACT[ $state ] ) . '.</strong>' . $link . '</p>';
+	}
+);
+
+add_shortcode(
+	'aw_campaign_outcome',
+	function () {
+		$id = aw_camp_id();
+		if ( ! $id || ! function_exists( 'aw_camp_outcome' ) || 'closed' !== aw_camp_window( $id ) ) {
+			return '';
+		}
+		list( $key, $label, $asof ) = aw_camp_outcome( $id );
+		// The same plain line as [aw_camp_status] in the hero: no status pills on campaigns (owner, 2 Nov 2026)
+		return '<p class="aw-camp-status is-' . esc_attr( $key ) . '">Outcome: ' . esc_html( $label ) . ( $asof ? '. As of ' . aw_camp_record_date( $asof ) : '' ) . '</p>';
+	}
+);
+
+/* ---------- The record lists of a closed campaign ---------- */
+
+/*
+ * A closed campaign's record lists (sections press, library and news, Campaign Content Standard C3) show their first four
+ * items; the rest wait in a closed Show more fold, the theme's .aw-more (a core Details, the words Home uses), at every
+ * width, so each section stays one screen on phones and within 720px from 768 (docs/design-system.md, Layout rules 5).
+ * Nothing is removed: the folded items stay in the page, and a list across two queries (News, then guides) folds as one.
+ */
+const AW_CAMP_RECORD_SHOWN = 4;
+
+/** The section's HTML with every list item after the first AW_CAMP_RECORD_SHOWN in one closed fold, or unchanged. */
+function aw_camp_record_fold( $html ) {
+	$at = 0;
+	for ( $i = 0; $i <= AW_CAMP_RECORD_SHOWN; $i++ ) {
+		$at = strpos( $html, '<li class="wp-block-post ', $i ? $at + 1 : 0 );
+		if ( false === $at ) {
+			return $html; // four items or fewer: nothing to fold
+		}
+	}
+	// The list and the query block the fifth item sits in: closed before the fold, opened again inside it, so every
+	// original closing tag still has its opening tag.
+	$ul = strrpos( substr( $html, 0, $at ), '<ul class="' );
+	$q  = strrpos( substr( $html, 0, $at ), '<div class="wp-block-query' );
+	$end = strrpos( $html, '</' ); // the section's own closing tag
+	if ( false === $ul || false === $q || $q > $ul || false === $end || $end < $at ) {
+		return $html;
+	}
+	$ul_tag = substr( $html, $ul, strpos( $html, '>', $ul ) - $ul + 1 );
+	$q_tag  = substr( $html, $q, strpos( $html, '>', $q ) - $q + 1 );
+	aw_use_component_style( 'aw-single' ); // aw-more
+	$open   = '</ul></div><details open class="wp-block-details aw-more aw-camp-record-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary>' . $q_tag . $ul_tag;
+	return substr( $html, 0, $at ) . $open . substr( $html, $at, $end - $at ) . '</details>' . substr( $html, $end );
+}
+
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		$id = aw_camp_id();
+		if ( ! $id || ! in_array( (string) ( $block['attrs']['anchor'] ?? '' ), array( 'press', 'library', 'news' ), true ) || 'closed' !== aw_camp_window( $id ) || false !== strpos( $html, 'aw-camp-record-more' ) ) {
+			return $html;
+		}
+		return aw_camp_record_fold( $html );
+	},
+	20,
+	2
+);
+
+/*
+ * Community dogs timeline (section context): ten dates made a 1,100px column on phones. Five dates that carry the story
+ * stay in view, in date order: the launch, the removal order, the day of posting, the delivery and the final judgment.
+ * The other five wait behind the same Show more fold as the record lists (a closed Details after the list; while it is
+ * closed, CSS hides the li without .is-shown). Browsers without :has() show all ten. Nothing is removed from the page.
+ */
+const AW_CAMP_TIMELINE_SHOWN = array( '2025-11-01', '2025-11-07', '2025-11-29', '2025-12-02', '2026-05-19' );
+
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		$id = aw_camp_id();
+		if ( ! $id || 'context' !== ( $block['attrs']['anchor'] ?? '' ) || 'closed' !== aw_camp_window( $id ) || 'india-writes-for-its-community-dogs' !== get_post_field( 'post_name', $id )
+			|| false !== strpos( $html, 'aw-camp-timeline-more' ) || ! preg_match( '/<ol\b[^>]*\baw-camp-timeline\b[^>]*>(.*?)<\/ol>/s', $html, $ol, PREG_OFFSET_CAPTURE ) ) {
+			return $html;
+		}
+		$shown = 0;
+		$list  = preg_replace_callback(
+			'/<li\b([^>]*)>(.*?)<\/li>/s',
+			function ( $li ) use ( &$shown ) {
+				if ( ! preg_match( '/<time datetime="([^"]+)"/', $li[2], $t ) || ! in_array( $t[1], AW_CAMP_TIMELINE_SHOWN, true ) ) {
+					return $li[0];
+				}
+				++$shown;
+				$attrs = preg_match( '/\bclass="/', $li[1] ) ? preg_replace( '/\bclass="/', 'class="is-shown ', $li[1], 1 ) : $li[1] . ' class="is-shown"';
+				return '<li' . $attrs . '>' . $li[2] . '</li>';
+			},
+			$ol[0][0]
+		);
+		if ( $shown < 1 || substr_count( $list, '<li' ) <= $shown ) {
+			return $html; // nothing to fold
+		}
+		aw_use_component_style( 'aw-single' ); // aw-more
+		$fold = '<details open class="wp-block-details aw-more aw-camp-record-more aw-camp-timeline-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary></details>';
+		return substr_replace( $html, $list . $fold, $ol[0][1], strlen( $ol[0][0] ) );
+	},
+	20,
+	2
+);
+
+/*
+ * The Community dogs hero photo (the stamp) is stored with no width, height or srcset, so phones downloaded the 683px
+ * JPEG (70 KB) for a stamp about 150px wide and its box could shift on load. Give the img the attachment's width,
+ * height and srcset, sized to the stamp (campaign-record.css: 112px below 768, 200px to 1199, 320px from 1200). Front end
+ * only; the stored block is not changed. The stored block has no id attribute, so the id is read from its wp-image-N class
+ * (without it the filter never ran and core gave phones "100vw", a 768px-plus file for the stamp).
+ */
+add_filter(
+	'render_block_core/image',
+	function ( $html, $block ) {
+		$att = (int) ( $block['attrs']['id'] ?? ( preg_match( '/\bwp-image-(\d+)\b/', $html, $c ) ? $c[1] : 0 ) );
+		if ( ! $att || is_admin() || ! is_singular( 'aw_campaign' ) || 'india-writes-for-its-community-dogs' !== get_post_field( 'post_name', get_queried_object_id() ) || false !== strpos( $html, ' srcset=' ) || ! preg_match( '/<img\b[^>]*\bwp-image-' . $att . '\b[^>]*>/', $html, $m ) ) {
+			return $html;
+		}
+		if ( (int) get_post_thumbnail_id( get_queried_object_id() ) !== $att ) {
+			return $html; // the hero photo only (the campaign's featured image)
+		}
+		$meta   = wp_get_attachment_metadata( $att );
+		$srcset = (string) wp_get_attachment_image_srcset( $att, 'large' );
+		$src    = wp_get_attachment_image_src( $att, 'large' );
+		if ( '' === $srcset || ! $src || empty( $meta['width'] ) ) {
+			return $html;
+		}
+		$img = preg_replace( '/\s(sizes|width|height)="[^"]*"/', '', $m[0] );
+		$img = str_replace( '<img ', '<img width="' . (int) $src[1] . '" height="' . (int) $src[2] . '" srcset="' . esc_attr( $srcset ) . '" sizes="(min-width: 1200px) 320px, (min-width: 768px) 200px, 112px" ', $img );
+		return str_replace( $m[0], $img, $html );
+	},
+	10,
+	2
+);
+
+/* ---------- Editor-only blocks ---------- */
+
+/** Whether a parsed block, or any block inside it, has the class. */
+function aw_camp_block_has_class( $block, $cls ) {
+	if ( preg_match( '/(^|\s)' . preg_quote( $cls, '/' ) . '(\s|$)/', (string) ( $block['attrs']['className'] ?? '' ) ) ) {
+		return true;
+	}
+	foreach ( (array) ( $block['innerBlocks'] ?? array() ) as $b ) {
+		if ( aw_camp_block_has_class( $b, $cls ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+add_filter(
+	'render_block', // runs for nested blocks too (pre_render_block only sees top-level ones)
+	function ( $html, $block ) {
+		if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+			return $html;
+		}
+		$cls = (string) ( $block['attrs']['className'] ?? '' );
+		if ( preg_match( '/(^|\s)(aw-owner-copy|aw-unused-review)(\s|$)/', $cls ) ) {
+			return ''; // editor only
+		}
+		if ( preg_match( '/(^|\s)aw-camp-needs-copy(\s|$)/', $cls ) && aw_camp_block_has_class( $block, 'aw-owner-copy' ) ) {
+			return ''; // the section waits for the owner's copy
+		}
+		return $html;
+	},
+	5,
+	2
+);
+
+/* The editor shows those blocks outlined and labelled, so the owner sees what waits for copy or review. */
+add_action(
+	'enqueue_block_editor_assets',
+	function () {
+		if ( 'aw_campaign' !== get_post_type() ) {
+			return;
+		}
+		wp_register_style( 'aw-campaign-record-editor', false, array(), (string) wp_get_theme( get_template() )->get( 'Version' ) );
+		wp_enqueue_style( 'aw-campaign-record-editor' );
+		wp_add_inline_style(
+			'aw-campaign-record-editor',
+			'.aw-owner-copy{outline:2px dashed #b45309;outline-offset:4px;background:#fff7ed}'
+			. '.aw-owner-copy::before{content:"Owner copy (not shown on the site)";display:block;font:600 12px/1.4 sans-serif;color:#9a3412;margin-bottom:4px}'
+			. '.aw-unused-review{outline:2px dashed #64748b;outline-offset:6px;opacity:.75}'
+			. '.aw-unused-review::before{content:"Unused (review): not shown on the site";display:block;font:600 12px/1.4 sans-serif;color:#334155;margin-bottom:6px}'
+		);
+	}
+);
+
+/* ---------- Styles on the site ---------- */
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		if ( ! is_singular( 'aw_campaign' ) && ! is_front_page() && ! is_page( 'campaigns' ) ) { // the campaign story block shows on Home and the Campaigns page
+			return;
+		}
+		$deps = wp_style_is( 'aw-campaign', 'registered' ) ? array( 'aw-campaign' ) : ( wp_style_is( 'aw-camp-band', 'registered' ) ? array( 'aw-camp-band' ) : array() ); // after campaign.css (Home: the band's file), so a campaign's colours win
+		$home = 'campaign/css/campaign-record-home.css';
+		if ( is_front_page() && is_readable( kits_site_path( $home ) ) ) {
+			// Home: only the story's rules, inline in campaign-record.css's place, so nothing blocks the first paint (owner,
+			// 22 Oct 2026; tools/campaign-home-css). The story (pattern aw1-story) is part of the home template.
+			wp_register_style( 'aw-campaign-record', false, $deps, (string) filemtime( kits_site_path( $home ) ) );
+			wp_enqueue_style( 'aw-campaign-record' );
+			wp_add_inline_style( 'aw-campaign-record', (string) file_get_contents( kits_site_path( $home ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			return;
+		}
+		wp_enqueue_style( 'aw-campaign-record', kits_site_uri( 'campaign/css/campaign-record.css' ), $deps, (string) filemtime( kits_site_path( 'campaign/css/campaign-record.css' ) ) );
+		if ( is_singular( 'aw_campaign' ) ) { // the campaign marks: motif icons and the timeline's nodes, after every campaign stylesheet (aw-camp-marks.css)
+			wp_enqueue_style( 'aw-camp-marks', kits_site_uri( 'campaign/css/aw-camp-marks.css' ), array( 'aw-campaign-record' ), (string) filemtime( kits_site_path( 'campaign/css/aw-camp-marks.css' ) ) );
+		}
+	},
+	30
+);
+
+/* ---------- WP Admin: Real-world impact (in the Outcome box, campaign-tools.php) ---------- */
+function aw_camp_record_box( $post ) {
+	wp_nonce_field( 'aw_camp_record', 'aw_camp_record_nonce' );
+	$cur = (string) get_post_meta( $post->ID, 'aw_campaign_impact_state', true );
+	echo '<p><label for="aw-camp-impact">Real-world impact</label><br><select id="aw-camp-impact" name="aw_campaign_impact_state" style="width:100%"><option value="">—</option>';
+	foreach ( AW_CAMP_IMPACT as $k => $l ) {
+		echo '<option value="' . esc_attr( $k ) . '"' . selected( $cur, $k, false ) . '>' . esc_html( $l ) . '</option>';
+	}
+	echo '</select></p>';
+	echo '<p><label for="aw-camp-evidence">Impact evidence (item ID)</label><br><input type="number" id="aw-camp-evidence" name="aw_campaign_impact_evidence" value="' . esc_attr( (string) get_post_meta( $post->ID, 'aw_campaign_impact_evidence', true ) ) . '" style="width:100%"></p>';
+	echo '<p class="description">Verified change only with evidence that the intended change happened (policy, a court decision, practice or conditions); No change (verified) when the evidence shows it did not. Never results (letters, events, coverage).</p>';
+	if ( function_exists( 'kits_edit_fields_metrics_box' ) ) {
+		kits_edit_fields_metrics_box( $post ); // Metrics (edit-fields.php)
+	}
+}
+
+add_action(
+	'save_post_aw_campaign',
+	function ( $id ) {
+		if ( ! isset( $_POST['aw_camp_record_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aw_camp_record_nonce'] ) ), 'aw_camp_record' ) || ! current_user_can( 'edit_post', $id ) ) {
+			return;
+		}
+		$imp = sanitize_key( wp_unslash( $_POST['aw_campaign_impact_state'] ?? '' ) );
+		update_post_meta( $id, 'aw_campaign_impact_state', isset( AW_CAMP_IMPACT[ $imp ] ) ? $imp : '' );
+		update_post_meta( $id, 'aw_campaign_impact_evidence', absint( $_POST['aw_campaign_impact_evidence'] ?? 0 ) );
+	}
+);

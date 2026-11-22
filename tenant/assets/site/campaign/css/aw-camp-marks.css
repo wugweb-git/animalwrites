@@ -1,0 +1,30 @@
+/* aw-camp-marks.css: the campaign marks (owner, 13 Nov 2026: "find good interesting designed icons or shapes and recycle
+   for each campaign and sitewide"). Loaded on every campaign page after its own stylesheets (campaign-record.php).
+
+   1. The motif: one line icon per campaign (--camp-motif), white strokes, used as a picture on a filled mark or as a mask
+      in currentColor (.aw-camp-motif). Brand default: the feather (Animal Writes). Lab rules: the flask. Diwali: the flame.
+      Supreme Court stray dogs: the scales. Community dogs: the paw. A new campaign sets --camp-motif next to its tokens.
+      Icons: Lucide (ISC licence).
+   2. The timelines are the one timeline calendar (kit-primitives.css: .kit-datecard, .kit-dateline); the motif is the
+      badge of a key date still to come. */
+
+.aw-camp { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M12.67%2019a2%202%200%200%200%201.416-.588l6.154-6.172a6%206%200%200%200-8.49-8.49L5.586%209.914A2%202%200%200%200%205%2011.328V18a1%201%200%200%200%201%201z%22/%3E%3Cpath%20d=%22M16%208%202%2022%22/%3E%3Cpath%20d=%22M17.5%2015H9%22/%3E%3C/svg%3E"); --camp-check: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M20%206%209%2017l-5-5%22/%3E%3C/svg%3E"); }
+.aw-camp--lab-rules { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M10%202v7.527a2%202%200%200%201-.211.896L4.72%2020.55a1%201%200%200%200%20.9%201.45h12.76a1%201%200%200%200%20.9-1.45l-5.069-10.127A2%202%200%200%201%2014%209.527V2%22/%3E%3Cpath%20d=%22M8.5%202h7%22/%3E%3Cpath%20d=%22M7%2016h10%22/%3E%3C/svg%3E"); }
+.aw-camp--diwali { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M8.5%2014.5A2.5%202.5%200%200%200%2011%2012c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054%202-6%20.5%202.5%202%204.9%204%206.5%202%201.6%203%203.5%203%205.5a7%207%200%201%201-14%200c0-1.153.433-2.294%201-3a2.5%202.5%200%200%200%202.5%202.5z%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22m16%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d=%22m2%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d=%22M7%2021h10%22/%3E%3Cpath%20d=%22M12%203v18%22/%3E%3Cpath%20d=%22M3%207h2c2%200%205-1%207-2%202%201%205%202%207%202h2%22/%3E%3C/svg%3E"); }
+.aw-camp--community-dogs { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Ccircle%20cx=%2211%22%20cy=%224%22%20r=%222%22/%3E%3Ccircle%20cx=%2218%22%20cy=%228%22%20r=%222%22/%3E%3Ccircle%20cx=%2220%22%20cy=%2216%22%20r=%222%22/%3E%3Cpath%20d=%22M9%2010a5%205%200%200%201%205%205v3.5a3.5%203.5%200%200%201-6.84%201.045Q6.52%2017.48%204.46%2016.84A3.5%203.5%200%200%201%205.5%2010Z%22/%3E%3C/svg%3E"); }
+
+/* The motif as an icon in text colour, for headings, chips and cards (aria-hidden span). */
+.aw-camp-motif { display: inline-block; flex: none; width: 1em; height: 1em; vertical-align: -0.125em; background-color: currentColor; -webkit-mask: var(--camp-motif) center / contain no-repeat; mask: var(--camp-motif) center / contain no-repeat; }
+
+/* Timelines: the one timeline calendar (.kit-dateline, kit-primitives.css) on every campaign and Home. */
+.aw-camp ol.aw-camp-dates.kit-dateline { margin: var(--kit-space-5) 0; }
+
+/* Checkboxes and radios on a campaign page take the campaign's colour, and so does a choice card's hover and chosen edge
+   (owner, 14 Nov 2026: "checkbox in campaign to be campaign brand color, same goes for hover accent"). The chosen card
+   keeps its 2px edge and the tick, so the state never rests on colour alone. */
+:is(.aw-camp, .aw-camp-end, .aw-nl-band--camp) :is(input[type=checkbox], input[type=radio]) { accent-color: var(--camp-mark, var(--kit-color-ink)); }
+@media (hover: hover) { :is(.aw-camp, .aw-camp-end) .aw-letter-ground.kit-checkbox:hover { border-color: var(--camp-mark, var(--kit-color-ink)); } }
+:is(.aw-camp, .aw-camp-end) .aw-letter-ground.kit-checkbox:has(input:checked) { border-color: var(--camp-mark, var(--kit-color-ink)); box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }
+/* Community dogs: its --camp-mark is the light orange #ffa500 on the page (under 3:1 on white), so its boxes take the darker #9a5b00 (owner, 14 Nov 2026). */
+.aw-camp--community-dogs :is(input[type=checkbox], input[type=radio]) { accent-color: var(--camp-accent, var(--kit-color-ink)); }

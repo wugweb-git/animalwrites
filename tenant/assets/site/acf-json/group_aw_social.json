@@ -1,0 +1,384 @@
+{
+    "key": "group_aw_social",
+    "title": "Social post",
+    "fields": [
+        {
+            "key": "field_aw_social_url",
+            "label": "Post link",
+            "name": "aw_social_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "The link to the post itself. Each post is saved once: a link already saved (or rejected) is refused.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_social_platform",
+            "label": "Platform",
+            "name": "aw_social_platform",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Set from the link for X, YouTube and Bluesky.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "x": "X",
+                "youtube": "YouTube",
+                "bluesky": "Bluesky",
+                "mastodon": "Mastodon",
+                "instagram": "Instagram",
+                "facebook": "Facebook",
+                "linkedin": "LinkedIn",
+                "other": "Other"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 1,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_social_format",
+            "label": "Format",
+            "name": "aw_social_format",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "video": "Video",
+                "picture": "Picture",
+                "text": "Text"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 1,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_social_person",
+            "label": "Person",
+            "name": "aw_social_person",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "The name the account shows.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_social_handle",
+            "label": "Handle",
+            "name": "aw_social_handle",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. @name",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_social_date",
+            "label": "Post date",
+            "name": "aw_social_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_social_summary",
+            "label": "Summary",
+            "name": "aw_social_summary",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "One line in our words, written by a person. Never copy the post's own text. Shown on the card.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "maxlength": 160,
+            "default_value": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_social_views",
+            "label": "Views at import",
+            "name": "aw_social_views",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Optional.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": 0,
+            "max": "",
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_social_reposts",
+            "label": "Reposts at import",
+            "name": "aw_social_reposts",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Optional.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": 0,
+            "max": "",
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_social_likes",
+            "label": "Likes at import",
+            "name": "aw_social_likes",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Optional.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": 0,
+            "max": "",
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_social_replies",
+            "label": "Replies at import",
+            "name": "aw_social_replies",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Optional.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": 0,
+            "max": "",
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_social_seen_on",
+            "label": "Numbers seen on",
+            "name": "aw_social_seen_on",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "The day the numbers above were read.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_social_poster",
+            "label": "Poster image",
+            "name": "aw_social_poster",
+            "aria-label": "",
+            "type": "image",
+            "instructions": "Our copy in the Media Library (for a later reel tile). Not shown yet.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "library": "all",
+            "min_width": "",
+            "min_height": "",
+            "min_size": "",
+            "max_width": "",
+            "max_height": "",
+            "max_size": "",
+            "mime_types": "",
+            "preview_size": "thumbnail"
+        },
+        {
+            "key": "field_aw_social_related",
+            "label": "Related items",
+            "name": "aw_social_related",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "News, Library and Directory items the post is about. Its campaigns are the Linked campaigns box.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "aw_news",
+                "aw_legal",
+                "aw_listing"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "taxonomy": "",
+            "filters": [
+                "search",
+                "post_type"
+            ],
+            "return_format": "id",
+            "min": "",
+            "max": 20,
+            "elements": ""
+        },
+        {
+            "key": "field_aw_social_text",
+            "label": "Post text at import",
+            "name": "aw_social_text",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "Staff only, from an import. Never shown on the site and never the summary.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "readonly": 1,
+            "default_value": "",
+            "maxlength": "",
+            "rows": 3,
+            "placeholder": "",
+            "new_lines": ""
+        },
+        {
+            "key": "field_aw_social_hashtags",
+            "label": "Hashtags at import",
+            "name": "aw_social_hashtags",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Staff only, from an import.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "readonly": 1,
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_social"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Other people's public post about a campaign or an item: link, who posted it, when, our one-line summary, numbers at import.",
+    "show_in_rest": 0,
+    "modified": 1793577600
+}

@@ -1,0 +1,80 @@
+{
+    "key": "group_aw_legal",
+    "title": "Source",
+    "fields": [
+        {
+            "key": "field_aw_legal_source_url",
+            "label": "Source URL",
+            "name": "aw_source_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_legal_source_name",
+            "label": "Source name",
+            "name": "aw_source_name",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_legal_source_date",
+            "label": "Source date",
+            "name": "aw_source_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_legal"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Library item source, filled by sourcing.",
+    "show_in_rest": 0,
+    "modified": 1792108800
+}

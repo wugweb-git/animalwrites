@@ -1,0 +1,41 @@
+{
+  "name": "animalwrites/tenant-site",
+  "description": "Animal Writes tenant site — consumes Wugweb Kits platform packages as versioned dependencies",
+  "type": "project",
+  "license": "MIT",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/wugweb-git/kits.git",
+      "branch": "kits-suite"
+    }
+  ],
+  "require": {
+    "php": ">=8.0",
+    "wugweb/kits-by-wugweb": "dev-kits-suite",
+    "wugweb/kits-core": "dev-kits-suite",
+    "wugweb/directoryweb": "dev-kits-suite",
+    "wugweb/rankweb": "dev-kits-suite",
+    "wugweb/mailweb": "dev-kits-suite",
+    "wugweb/sourceweb": "dev-kits-suite",
+    "wugweb/insightweb": "dev-kits-suite",
+    "wugweb/planweb": "dev-kits-suite"
+  },
+  "extra": {
+    "installer-paths": {
+      "wp-content/themes/kits-by-wugweb": ["wugweb/kits-by-wugweb"],
+      "wp-content/plugins/kits-core": ["wugweb/kits-core"],
+      "wp-content/plugins/directoryweb": ["wugweb/directoryweb"],
+      "wp-content/plugins/rankweb": ["wugweb/rankweb"],
+      "wp-content/plugins/mailweb": ["wugweb/mailweb"],
+      "wp-content/plugins/sourceweb": ["wugweb/sourceweb"],
+      "wp-content/plugins/insightweb": ["wugweb/insightweb"],
+      "wp-content/plugins/planweb": ["wugweb/planweb"]
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "tools/package-ingest.sh --verify"
+    ]
+  }
+}

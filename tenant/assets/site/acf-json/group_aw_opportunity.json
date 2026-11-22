@@ -1,0 +1,319 @@
+{
+    "key": "group_aw_opportunity",
+    "title": "Opportunity details",
+    "fields": [
+        {
+            "key": "field_aw_opportunity_tab_organisation",
+            "label": "Organisation",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_opportunity_org_name",
+            "label": "Organisation",
+            "name": "aw_org_name",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "The name shown as \"Posted by\". Link the Directory profile in the Related box. Type: Tags.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_opportunity_tab_dates",
+            "label": "Dates",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_opportunity_deadline",
+            "label": "Deadline",
+            "name": "aw_deadline",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "Last day to apply. Shown as \"Apply by\" and used as validThrough in the JobPosting data. Leave empty when there is none.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_opportunity_review_until",
+            "label": "Review date",
+            "name": "aw_review_until",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "With no deadline: the listing closes after this date unless you move it. Set to 30 days after posting when empty.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_aw_opportunity_deadline",
+                        "operator": "==empty"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_opportunity_event_date",
+            "label": "Event date",
+            "name": "aw_event_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "For an event on one day, as the source states it. Leave empty for a role or a call.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_opportunity_event_schedule",
+            "label": "Repeats",
+            "name": "aw_event_schedule",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "For an event the source says repeats, in its words as: week of the month, day, monthly, start-end time. E.g. \"second Saturday monthly 14:00-16:00\" or \"last Sunday monthly 10:00-16:00\". Leave empty otherwise.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "last Sunday monthly 10:00-16:00",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_opportunity_tab_apply",
+            "label": "Apply",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_opportunity_apply_url",
+            "label": "Apply URL",
+            "name": "aw_apply_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Where people apply or sign up (the Apply button).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_opportunity_website",
+            "label": "Website",
+            "name": "aw_website",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_opportunity_employment_type",
+            "label": "Employment type",
+            "name": "aw_employment_type",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Only as the source states it (e.g. \"Type: Full time\"). Leave empty when it does not say. Internship, volunteer and fellowship come from the Opportunity type.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "FULL_TIME": "Full time",
+                "PART_TIME": "Part time",
+                "CONTRACTOR": "Contract",
+                "TEMPORARY": "Temporary",
+                "PER_DIEM": "Per day",
+                "INTERN": "Internship",
+                "VOLUNTEER": "Volunteer",
+                "OTHER": "Other"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 1,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_opportunity_tab_source",
+            "label": "Source",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_opportunity_source_url",
+            "label": "Source URL",
+            "name": "aw_source_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_opportunity_source_name",
+            "label": "Source name",
+            "name": "aw_source_name",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_opportunity_source_date",
+            "label": "Source date",
+            "name": "aw_source_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_opportunity"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Opportunity details on the existing meta keys.",
+    "show_in_rest": 0,
+    "modified": 1793514517
+}

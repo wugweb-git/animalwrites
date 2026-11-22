@@ -1,0 +1,78 @@
+/* Share section: one simple section on every campaign and Home (owner, 13 Nov 2026: "one version one size one
+   content"; one surface, no cards). One markup (block animal-writes/share, campaign-tools.php), one size, one order;
+   only the words and the branding change: the campaign's share picture under its dark wash (--camp-share-pic, wash
+   colour --camp-share-rgb, position --camp-share-pos / -pos-sm) and the button's colour (--aw-share-btn, its text
+   --aw-share-btn-ink, its edge --aw-share-btn-edge).
+   - One surface: the picture under the dark wash, everything on it in white. No cards and no second surface inside
+     the band (mixed surfaces are for bentos only). Every wash keeps white text at least 5:1 over the picture's lightest
+     pixels (WCAG AA): 0.72 or more where text can sit; from 1200 it opens to 0.35 on the right, past the text.
+   - Heading, the one line (60ch at most), then one row: the "Share this page" button, 48px (--kit-size-control), in the
+     campaign colour (the phone's share sheet, share.js; where there is none it copies the link). No row of network
+     icons: kits_share_html's own Copy link button is hidden, the one button copies.
+   - Follow us on the same band: the label, then our own account icons (Instagram, Threads, X, Facebook, LinkedIn, and
+     Reddit, Discord once set), white, 44px (--kit-size-target), each with its aria-label and title.
+   - Phones (to 767): the button across the column; Follow us under it, the label on its own line. From 768: the
+     button and Follow us on one row.
+   - The column: 1120px on campaign pages (the campaign bands' column, campaign.css) and --kit-width-wide on Home.
+   Older Share sections still written into a page's content (.aw-camp-section, its line .aw-camp-lede) take the same
+   rules until the page uses the block. */
+
+/* Branding */
+.aw-camp { --aw-share-col: 1120px; }
+.aw-camp--sc-stray-dogs { --camp-share-pic: url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-share.jpg"); --camp-share-rgb: 58 23 48; --camp-share-pos: 60% 40%; --camp-share-pos-sm: 80% 50%; --aw-share-btn: var(--kit-color-accent); --aw-share-btn-ink: #3a1730; } /* the site yellow on plum (owner, 1 Nov 2026), 9.4:1 */
+.aw-camp--lab-rules { --camp-share-pic: url("/wp-content/uploads/2026/10/lab-rules-2026-illustration.avif"); --camp-share-rgb: 107 15 34; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 85% 50%; --aw-share-btn: #a3122f; --aw-share-btn-ink: #ffffff; --aw-share-btn-edge: #ffffff; } /* crimson, white text 7.8:1; crimson on its own dark wash is 1.6:1, so a white edge */
+.aw-camp--diwali { --camp-share-pic: url("/wp-content/uploads/2026/11/diwali-share-woman-giving-water-to-street-dog.jpg"); --camp-share-rgb: 27 22 54; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 78% 50%; --aw-share-btn: #ffb547; --aw-share-btn-ink: #1b1636; } /* marigold on night sky, 9.8:1 */
+.aw-camp--community-dogs { --camp-share-pic: url("/wp-content/uploads/2026/10/animal-writes-1-hero-1024x1536.jpg"); --camp-share-rgb: 22 19 14; --camp-share-pos: 50% 72%; --camp-share-pos-sm: 40% 72%; --aw-share-btn: #ffa500; --aw-share-btn-ink: #16130e; } /* the campaign orange, 9.4:1 */
+#share.aw-share-sec--home { --aw-share-col: var(--kit-width-wide); --camp-share-pic: url("/wp-content/uploads/2026/10/aw-category-street-dog.jpg"); --camp-share-rgb: 25 25 25; --camp-share-pos: 35% 50%; --camp-share-pos-sm: 30% 50%; --aw-share-btn: var(--kit-color-on-ink); --aw-share-btn-ink: var(--kit-color-ink); } /* black, white and grey */
+
+/* The band */
+#share:is(.aw-share-sec, .aw-camp-section) { box-sizing: border-box; padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-section-end); background: linear-gradient(160deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.88) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.78) 50%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 100%), var(--camp-share-pic, none) var(--camp-share-pos-sm, 50% 50%) / cover no-repeat, rgb(var(--camp-share-rgb, 0 0 0)); color: var(--kit-color-on-ink); --kit-color-focus: var(--kit-color-on-ink); }
+@media (min-width: 768px) { #share:is(.aw-share-sec, .aw-camp-section) { background-position: 0 0, var(--camp-share-pos, 50% 50%); } }
+@media (min-width: 1200px) { #share:is(.aw-share-sec, .aw-camp-section) { background-image: linear-gradient(90deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.9) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.8) 45%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 65%, rgb(var(--camp-share-rgb, 0 0 0) / 0.35) 100%), var(--camp-share-pic, none); } }
+#share.aw-share-sec--home { background-blend-mode: normal, luminosity, normal; } /* Home in black, white and grey: the picture greyed on the ink */
+@media (min-width: 1200px) { .aw-camp--sc-stray-dogs #share:is(.aw-share-sec, .aw-camp-section) { background-position: 0 0, 40% 20%; background-size: auto, 125% auto; } } /* the Supreme Court picture's yellow corner out of the band */
+/* Community dogs: its picture is tall, so from 768 it stands at the band's right (46% wide, the dog in view) and its dark
+   left side runs into the campaign's ash black, under the same wash */
+@media (min-width: 768px) { .aw-camp--community-dogs #share:is(.aw-share-sec, .aw-camp-section) { background: linear-gradient(160deg, rgb(22 19 14 / 0.88) 0%, rgb(22 19 14 / 0.78) 50%, rgb(22 19 14 / 0.74) 100%), linear-gradient(90deg, rgb(22 19 14) 56%, rgb(22 19 14 / 0) 66%), var(--camp-share-pic) 100% 82% / 46% auto no-repeat, rgb(22 19 14); } }
+@media (min-width: 1200px) { .aw-camp--community-dogs #share:is(.aw-share-sec, .aw-camp-section) { background-image: linear-gradient(90deg, rgb(22 19 14 / 0.9) 0%, rgb(22 19 14 / 0.8) 45%, rgb(22 19 14 / 0.74) 60%, rgb(22 19 14 / 0.3) 100%), linear-gradient(90deg, rgb(22 19 14) 56%, rgb(22 19 14 / 0) 66%), var(--camp-share-pic); } }
+
+/* The text */
+#share:is(.aw-share-sec, .aw-camp-section) > * { box-sizing: border-box; max-width: var(--aw-share-col, 1120px); margin-inline: auto; }
+#share:is(.aw-share-sec, .aw-camp-section) :is(h2, p) { color: var(--kit-color-on-ink); }
+#share:is(.aw-share-sec, .aw-camp-section) h2 { display: block; margin-block: 0 !important; font-size: var(--kit-type-h2) !important; line-height: var(--kit-leading-heading); }
+#share:is(.aw-share-sec, .aw-camp-section) h2::before { content: none; }
+#share:is(.aw-share-sec, .aw-camp-section) :is(.aw-share-line, .aw-camp-lede) { max-width: 60ch; margin-block: var(--kit-space-head-sub) 0; margin-inline: max(0px, (100% - var(--aw-share-col, 1120px)) / 2) auto !important; font-size: var(--kit-type-lead); } /* at most 60ch, its left edge on the heading's (!important: core's constrained layout centres children with auto !important) */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-note { display: none; }
+/* older Diwali content: the text column across the band, the picture column out (the picture is under the band) */
+#share.aw-camp-section .aw-camp-split > .wp-block-column:has(> .aw-camp-art) { display: none; }
+#share.aw-camp-section .aw-camp-split > .wp-block-column:not(:has(> .aw-camp-art)) { flex: 1 1 100%; }
+
+/* The row: the button, then Follow us */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-5) var(--kit-space-6); margin: var(--kit-space-6) auto 0; }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0; padding-top: unset; border: 0; background: none; box-shadow: none; } /* not a card: the kit bar's top rule and its space above it out */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share:not(.kit-follow) > :is(.kit-share-label, .kit-share-copy, .kit-share-btn:not(.kit-share-native)) { display: none !important; }
+
+/* The button */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main { width: auto; height: auto; min-height: var(--kit-size-control); padding-inline: var(--kit-space-5); gap: var(--kit-space-2); border: 2px solid var(--aw-share-btn-edge, var(--aw-share-btn)); background: var(--aw-share-btn); color: var(--aw-share-btn-ink); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main .kit-share-name { display: inline; color: inherit; }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main:focus-visible { background: var(--aw-share-btn); color: var(--aw-share-btn-ink); outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main:active { background: var(--aw-share-btn); color: var(--aw-share-btn-ink); opacity: .8; }
+@media (hover: hover) {
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main:hover { background: var(--aw-share-btn); color: var(--aw-share-btn-ink); box-shadow: var(--kit-elevation-2); }
+}
+
+/* Follow us: white on the wash */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow > .kit-share-label { display: block !important; margin: 0 var(--kit-space-2) 0 0; color: var(--kit-color-on-ink); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn { width: var(--kit-size-target); height: var(--kit-size-target); padding: 0; border-color: transparent; background: transparent; color: var(--kit-color-on-ink); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn .kit-share-name { display: none !important; }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn:focus-visible { background: rgb(255 255 255 / 0.16); border-color: transparent; outline-color: var(--kit-color-on-ink); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn:active { background: rgb(255 255 255 / 0.24); }
+@media (hover: hover) {
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn:hover { background: rgb(255 255 255 / 0.16); }
+}
+
+@media (max-width: 767px) {
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share { flex: 1 1 100%; }
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main { flex: 1 1 100%; justify-content: center; }
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow > .kit-share-label { flex: 1 1 100%; margin: 0 0 var(--kit-space-1); }
+}

@@ -1,0 +1,101 @@
+{
+    "key": "group_aw_news",
+    "title": "Source",
+    "fields": [
+        {
+            "key": "field_aw_news_source_url",
+            "label": "Source URL",
+            "name": "aw_source_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Filled by sourcing; change only to correct it. The publisher key follows this link.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_news_source_name",
+            "label": "Publisher name",
+            "name": "aw_source_name",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_news_source_date",
+            "label": "Source date",
+            "name": "aw_source_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_news_publisher",
+            "label": "Publisher key",
+            "name": "aw_publisher",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Worked out from the source URL (used by the Publisher filter). Read only.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": "",
+            "readonly": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_news"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "News source details, filled by sourcing.",
+    "show_in_rest": 0,
+    "modified": 1792108800
+}
