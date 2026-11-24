@@ -2243,7 +2243,7 @@
                     },
                     "settings": {
                         "label": "Logo",
-                        "help_message": "PNG, JPG or WebP, up to 2 MB.",
+                        "help_message": "PNG, JPG or WebP, up to 8 MB.",
                         "container_class": "",
                         "html_codes": "<p>Logo (Animal Writes private upload)</p>",
                         "conditional_logics": []
@@ -2263,7 +2263,7 @@
                     },
                     "settings": {
                         "label": "Photos (up to 5)",
-                        "help_message": "PNG, JPG or WebP, up to 2 MB each.",
+                        "help_message": "PNG, JPG or WebP, up to 8 MB each.",
                         "container_class": "",
                         "html_codes": "<p>Logo (Animal Writes private upload)</p>",
                         "conditional_logics": []
@@ -2303,7 +2303,7 @@
                     },
                     "settings": {
                         "label": "A document that shows you work there",
-                        "help_message": "Registration certificate, letterhead or a letter from the organisation. It speeds up our check. PNG, JPG or WebP, up to 2 MB. Only our team sees it.",
+                        "help_message": "Registration certificate, letterhead or a letter from the organisation. It speeds up our check. PNG, JPG or WebP, up to 8 MB. Only our team sees it.",
                         "container_class": "",
                         "html_codes": "<p>Proof that you work there (Animal Writes private upload)</p>",
                         "conditional_logics": []
