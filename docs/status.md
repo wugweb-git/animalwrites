@@ -1,21 +1,37 @@
 # Animal Writes: status
 
-**This file is a snapshot of 7 Oct 2026, kept as history.** Current state: [pending.md](pending.md) (open and done work) and [plugin-map.md](plugin-map.md) (what each file does). What changed since, in short (31 Oct 2026):
-- Plugins: Animal Writes Core, AW Sourcing, AW SEO extras (with Rank Math, the SEO system; sitemap `/sitemap_index.xml`), Kits Core (reusable parts only), Mailweb 3.2, Fluent Forms + FluentCRM, Advanced Ads (switched off on live), LiteSpeed Cache, Site Kit.
-- Deploys: bigger work (a new plugin or function, restructuring) goes as a pull request into `wordpress-dev`, merged by the owner; small changes (data, docs, small fixes) go straight onto `wordpress-dev`. Then the Deploy check moves `wordpress` → Hostinger pulls (`kits-ship.sh`); the cache is purged after every deploy.
-- Mail: replies from support@ (Mailweb); site forms send no email; Report a mistake and Remove my data are reasons on the Contact form; the newsletter is the FluentCRM list "Newsletter".
-- Sourcing has its own menu (since 25 Oct 2026; it was Settings → Sourcing): Overview, To review, Enrichment review, the settings screens, the reports and jobs, Settings; 18 workflows on Sourcing → Workers.
-- Indexing: directory profiles with no contact are noindex and out of the sitemap unless they have Search Console impressions; `?state=` lists and claim forms are noindex; the Directory map and Near me are built.
-- Breakpoints 768 / 1200 (640 retired).
-- Claim form (20 Nov 2026): About and every pre-filled box are plain text; uploads up to 8 MB with one message per cause; a list of what to fix after a failed send (PR #164). Listing 18308 merged into 43 (B4). Details: [pending.md](pending.md), [cc-master-plan-19-nov.md](cc-master-plan-19-nov.md).
+**Current status as of 24 Nov 2026.** Authoritative open and finished work is tracked in [pending.md](pending.md), [animalwrites-operations-and-content-pending.md](animalwrites-operations-and-content-pending.md), and [animalwrites-monorepo-migration-inventory.md](animalwrites-monorepo-migration-inventory.md).
 
-**Site and stack**
-- **Live:** https://animalwrites.in · **Admin:** /wp-admin · **old archive:** old.animalwrites.in (cancelled; the old site will be deleted).
-- **Stack:** WordPress 7.1.3 + PHP/MySQL on Hostinger.
-  - **Themes:** Kits by Wugweb (master), Animal Writes (child).
-  - **Plugins:** Animal Writes Core (also loads Kits Core), LiteSpeed Cache, Site Kit.
-- **Workers:** GitHub Actions (`animal-writes-workers`, private).
-- **Deploys:** branch `wordpress` deploys automatically to `public_html/aw_deploy`.
+### Current System & Stack (24 Nov 2026)
+- **Live Production:** `https://animalwrites.in` (release tag `release-20261124-1418-f503e578`, commit `8ece22e2` / `3459a705`).
+- **Stack:** WordPress 7.1.5 + PHP 8.3 / MySQL on Hostinger.
+- **Theme:** `themes/kits-by-wugweb` (universal FSE theme) with Animal Writes site layer overrides (`assets/site/`) and brand style variation (`styles/animal-writes.json`).
+- **Plugins:** Universal Kits Suite companion plugins:
+  - `kits-core`: Core primitives, brand tokens, onboarding wizard, scripts manager, ops & cache purge.
+  - `directoryweb`: Faceted directory engine, search, filters, and 7,738 listing records.
+  - `rankweb`: SEO titles, breadcrumbs, JSON-LD schema, dynamic sitemaps, focus keywords.
+  - `mailweb`: Transactional mail router, Hostinger Mail API SDK, SMTP/IMAP/POP3, DKIM/SPF telemetry.
+  - `sourceweb`: Ingestion engine, RSS syndication, external content scrapers.
+  - `insightweb`: Analytics dashboard, telemetry, search insights.
+  - `planweb`: Content and editorial calendar.
+  - Companion plugins: Fluent Forms + FluentCRM (volunteer contacts & newsletter), LiteSpeed Cache, Site Kit.
+  - **Retired:** `animal-writes-core` was permanently deleted on 19 Nov 2026; zero custom tenant plugins remain.
+- **UI & Design System Contract (Live):**
+  - **Card Spacing:** Zero container padding (`padding: 0 !important; margin: 0 !important;`); independent content padding: desktop `12px 16px !important;`, mobile `8px 10px !important;`; images/logos flush against left, top, bottom edges.
+  - **Single-Row Meta:** `.kit-card-metarow`, `.kit-card-meta`, `.kit-card-chips`, `.kit-meta-row`, `.aw-more-meta` strictly enforced to never wrap into two rows.
+  - **Section Spacing Normalization:** Adjacent identical-background `.is-style-kits-section` blocks collapse top padding (`padding-top: 0 !important;`), eliminating 192px desktop / 96px mobile dead space. Symmetric vertical padding on cover story bands (`.aw-ed-story`).
+  - **Cross-Navigation:** Responsive stacked cards (`kit-card--stacked-md`) on single pages and stacked profile cards (`.aw-more-card--org`) for directory related NGOs.
+- **Content & Guides (Live):**
+  - 12 core evergreen rescue and statutory guides confirmed live on `https://animalwrites.in` (all return HTTP 200 OK): 1962 Veterinary Helpline, Who to Call Emergency Hub, Cruelty Law (PCA §11 & BNS §325), How to Report Cruelty, Community Dog Feeding & ABC Rule 20, Injured Animal Protocols, Avian Helplines by City, ABC Rules Explained, AWBI Guide, Dog Bite Rabies PEP Vaccine, NGO Darpan Registration, and World Animal Day.
+- **Directory Operations:**
+  - 7,738 total entries (6,872 published, 866 pending/draft, 3,677 verified).
+  - Listing 18308 merged into Post 43 (Nawabi Tails Darpan ID `UP/2026/1159491` added, 301 redirect live).
+  - Duplicate queue: 33 duplicate website pairs and 61 duplicate email groups logged for future merge.
+  - **Claim Listing Flow (B5 & B6):** Placed on **HOLD** pending upstream Kits platform maturation (owner decision, 24 Nov 2026).
+- **Platform vs Tenant Repository Partitioning:**
+  - **Kits Monorepo (`wugweb-git/kits@kits-suite`):** Master repository for universal theme `kits-by-wugweb` and the 7 companion plugins. Upstream tasks (e.g. form engine polish B1–B3, day/night anti-FOUC, `kits/collection-filter` block) are forwarded and tracked there.
+  - **Animal Writes (`wugweb-git/animalwrites@wordpress-dev`):** Tenant repository owning site operations, advocacy campaigns (`/lab/`, `/sc/`, `/diwali/`, `/community-dogs/`), content, and directory data.
+- **Deploys:** Strict gating via GitHub Actions Deploy check runner on `origin/wordpress-dev`. Hostinger deploys via `tools/kits-ship.sh` with automated LiteSpeed cache purge. Single deploy session at a time.
 
 ## 1. Decisions taken
 
