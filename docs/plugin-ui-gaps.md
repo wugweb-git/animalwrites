@@ -93,7 +93,7 @@ Home, Settings, Tools and Help show the same content in both looks; nothing was 
 
 | Item | Problem | How to add |
 |---|---|---|
-| Keys, Modules, Dates | no new look; not linked from Settings | PHP: add links to the "Connected services and modules" card; to draw them in the frame, add them to `kits_frame_screens()` |
+| Keys, Modules, Dates | Modules is drawn in the frame since 20 Nov 2026 (`aw-modules`, joined through the `kits_frame_extra_screens` filter). Keys is retired (each plugin keeps its own); Dates is PlanWeb's own screen. Not linked from Settings | PHP: add a link to the "Connected services and modules" card; another screen joins the frame with the same filter |
 | Settings card wording | says keys are in RankWeb → Settings, but RankWeb says keys stay in Kits → Keys | PHP copy fix |
 | Theme Options → Cards | the read-only Card style values (corners, colours, token values) are gone | (a) RefTable fed by the existing `kits_admin_app_data` |
 | Theme Options → Layout | prints an empty "Spacing" form | PHP: remove `layout-spacing` (`admin-app.php:72`, `:219`) |

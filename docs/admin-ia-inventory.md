@@ -21,12 +21,12 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Library › Library, Add Library item, Linked campaigns | Core (CPT `aw_legal`) | keep; Linked campaigns **done** |
 | Opportunities › …, Linked campaigns | Core (CPT `aw_opportunity`) | keep; Linked campaigns **done** |
 | Campaigns › Campaigns, Add Campaign, Linked campaigns | Core (CPT `aw_campaign`) | keep; Linked campaigns **done** |
-| Campaigns › Letter report | Core `campaign-letters.php:267` | keep (it belongs to Campaigns) |
+| Campaigns › Letter report | Core `campaign-letters.php` | keep (it belongs to Campaigns); drawn in the Kits frame since 20 Nov 2026 |
 | Press coverage › All coverage, Add coverage, Linked campaigns | Core (CPT `aw_press`; menu set twice: `press.php:108`, `admin-ia.php:95`) | **done 12 Nov**: menu defined once (`press.php`); Linked campaigns under Classification |
 | Pages | core | keep |
 | Media › Library, Add Media File | core | keep |
 | Media › Media groups | Core (taxonomy `kits_media_group`) | keep |
-| Media › Make WebP, Duplicate files, Reuse pictures | Core `media-webp.php`, `media-merge.php`, `media-reuse.php` | keep (core convention: media tools under Media) |
+| Media › Make WebP, Duplicate files, Reuse pictures | Core `media-webp.php`, `media-merge.php`, `media-reuse.php` | keep (core convention: media tools under Media); drawn in the Kits frame under the Tools tab since 20 Nov 2026 |
 | Classification › Categories, Tags, Linked campaigns | Core `admin-ia.php:135` | keep (Linked campaigns added 12 Nov) |
 | Appearance › Themes, Editor, Fonts | core | keep |
 | Kits | Kits Core `admin-home.php:22` | **done 12 Nov**: its own top-level menu, first in the Wugweb block |
