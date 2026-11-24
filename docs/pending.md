@@ -175,7 +175,9 @@ Checked on `wordpress-dev` at `7e98b691`, plus this session's changes.
 
 ### Claim flow and clean-ups (plan `docs/cc-master-plan-19-nov.md`, 19 Nov 2026)
 - **B4 (merge 18308 into 43, Darpan data): COMPLETED LIVE on 20 Nov 2026.** Post 43 updated with Nawabi Tails Rescue Foundation Darpan ID `UP/2026/1159491`, Kanpur Nagar registration notes, phone, head, area, and 2021 founding date. Post 18308 trashed. 301 redirection active and verified via curl (`directory/org/nawabi-tails-rescue-lucknow` -> `https://animalwrites.in/directory/org/nawabi-tails-rescue/`). Live duplicate scan identified 33 duplicate website pairs and 61 duplicate email groups (logged, left untouched per plan).
-- **C1 (old mail route) & C3 (crawler tel: 301 redirects): COMPLETED LIVE on 22 Nov 2026 (`b7b61d32`).** `aw/v1/mail-in` route aliased alongside `mailweb/v1/mail-in` and smoke-tested in CI; crawler path hits like `/tel:1962` redirected 301 to canonical guide URLs in `plugins/rankweb/includes/redirects.php`. B5 (3-step form): waits for the owner's go. B6 after B5 is live.
+- **C1 (old mail route): NOT removed.** `c3534dbc` retired it and `b7b61d32` (22 Nov) restored it as an alias beside `mailweb/v1/mail-in`, smoke-tested in CI. Checked on live 24 Nov: both `/wp-json/aw/v1/mail-in` and `/wp-json/mailweb/v1/mail-in` answer 200. Removing the old route still waits for the `aw_mail_in_old_seen` read on live (no delivery after 18 Nov 09:44 UTC, support@ only).
+- **C3 (crawler `tel:` paths): shipped in code, NOT working on live.** The 301 rules are in `plugins/rankweb/includes/redirects.php` (on `wordpress` since `b7b61d32`), but on 24 Nov `/tel:1962`, `/tel:112`, `/tel:01292555700` and `/tel:9999` all still answer 404, also with a cache-busting query. Cause not yet found (first check: whether that file is loaded on live). The other C3 findings stand: old asset paths return 404 and nothing prints them (propose a CDN purge); `https://animalwrites.in` as a path and `aw_opportunity-sitemap.xml` are report only.
+- **B5 (3-step form): waits for the owner's go. B6 after B5 is live.**
 ### Native Blocks, Schema Consumer & A11y Polish (done 20 Nov 2026, PR #169, commit `86c8ea2d` live)
 - **Built, merged and live (PR #169, commit `86c8ea2d`, tag `release-20261120-1303-86c8ea2d`):**
   - Registered native Gutenberg block `directoryweb/map` and shortcode `[directoryweb_map]` calling `directoryweb_render_map_block()` in `plugins/directoryweb/includes/directory-map.php`.
@@ -864,8 +866,8 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 
 ## Done (22 Nov 2026)
 - **Clean-ups & SEO 404 Resolution (C1 & C3 from `docs/cc-master-plan-19-nov.md`):**
-  - **C1 (Legacy Webhook Route Retired):** Removed outdated `aw/v1/mail-in` route from `plugins/mailweb/includes/website-forms.php`. All webhooks now route exclusively to the canonical `mailweb/v1/mail-in` endpoint.
-  - **C3 (Crawler Helpline Path 301 Redirects):** Resolved 404 hits from scrapers requesting `tel:` links as paths in `plugins/rankweb/includes/redirects.php`. `/tel:1962` redirects 301 to `/resources/1962-helpline-mobile-veterinary-units/`, `/tel:112` redirects 301 to `/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/`, `/tel:01292555700` redirects 301 to `/resources/animal-cruelty-law-india/`, and all other telephone links redirect 301 to `/directory/`.
+  - **C1 (old webhook route):** retired in `c3534dbc`, then restored as an alias in `b7b61d32` the same day; both routes answer 200 on live (24 Nov). See the C1 line under Open.
+  - **C3 (crawler `tel:` paths):** 301 rules added in `plugins/rankweb/includes/redirects.php`; on live 24 Nov the paths still answer 404. See the C3 line under Open.
 - **DirectoryWeb Phase 2 Gutenberg Blocks & Theme Templates Shipped:**
   - Built and registered `directoryweb/find-help` (`includes/directoryweb-find-help.php`) supporting compact and full directory find-help views, live listing counter, state picker, and type pills.
   - Built and registered `directoryweb/listing-finder` (`includes/directoryweb-listing-finder.php`) encapsulating claim finder, progress stepper, and interactive form submissions.
