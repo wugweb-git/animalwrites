@@ -35,6 +35,8 @@ Checked with `git merge-base --is-ancestor` against `origin/wordpress` (live bra
 - ✅ **Claim-form bugs B1 to B3 (PR #164) are live** (head `0e444860` is an ancestor of `origin/wordpress`; release `6230ac51`, 20 Nov). PR #165 (C2) merged 19 Nov. No open PRs on 24 Nov.
 - ⏳ **Kits Core open work (unchanged):** theme.json layer-3 injection check + transient cache, Cloudflare Worker two-way relay, 4-step onboarding wizard, Scripts Manager hardening. Detail in `plugins/kits-core/PENDING.md`.
 - ⏳ **DirectoryWeb open (unchanged):** `kits/collection-filter` (the `[aw_directory_filter]` shortcode stays until it ships), the §2.4 shell requests, the old Claims address 301.
+- ⚠️ **Not audited:** `origin/feat/repo-restructure-tenant-consumer` (last commit 22 Nov). Under rule 1 it needs the stale-branch audit and the owner's yes before any merge.
+- 📝 **Notion "8. Status & Pending"** carries a 24 Nov evening entry with the same sync (and corrects live `wordpress` to `f503e578`).
 - ⚠️ **Untracked in the main checkout, not committed by any session:** `.vscode/` and `themes/kits-by-wugweb/theme-dark.json`. Owner to say whether `theme-dark.json` belongs to the Day/Night work in `themes/kits-by-wugweb/PENDING.md`.
 
 ### Research Notes & SEO Knowledge Centre Guides Confirmed Live (24 Nov 2026)
