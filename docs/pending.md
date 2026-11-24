@@ -1,4 +1,4 @@
-# Pending (10 Nov 2026, Harmonized 22 Nov 2026)
+# Pending (10 Nov 2026, Harmonized 24 Nov 2026)
 
 Check this list against git and the live site before acting on it. Refer to items by their bold title (owner, 24 Oct 2026). Failing AI keys are the owner's own job: never list them. This file is the list of open and finished work.
 
@@ -26,6 +26,14 @@ As part of the Wugweb Monorepo and Kits Suite standardization, pending tasks are
 Theme and WordPress items are tracked by Animal Writes WordPress. Code requests from Martech go to it.
 
 ## Open
+
+### Session sync, checked on git (24 Nov 2026)
+Checked with `git merge-base --is-ancestor` against `origin/wordpress` (live branch at `f503e578`, tag `release-20261124-1418-f503e578`); the live site was not re-read this turn.
+- ✅ **Brand Customizer + multi-tenant token engine (`403b9eaa`) is on `origin/wordpress`**, first shipped in `release-20261121-2051-e400fd65`. The branch `claude/brand-customizer-multi-tenant` has nothing left to merge. It exists in this repo as well as on `wugweb-git/kits` `kits-suite` (see the 21 Nov entry below).
+- ✅ **Card spacing overhaul (`c77bcb3f`) is live** in `release-20261122-2024-c77bcb3f`.
+- ⏳ **Kits Core open work (unchanged):** theme.json layer-3 injection check + transient cache, Cloudflare Worker two-way relay, 4-step onboarding wizard, Scripts Manager hardening. Detail in `plugins/kits-core/PENDING.md`.
+- ⏳ **DirectoryWeb open (unchanged):** `kits/collection-filter` (the `[aw_directory_filter]` shortcode stays until it ships), the §2.4 shell requests, the old Claims address 301.
+- ⚠️ **Untracked in the main checkout, not committed by any session:** `.vscode/` and `themes/kits-by-wugweb/theme-dark.json`. Owner to say whether `theme-dark.json` belongs to the Day/Night work in `themes/kits-by-wugweb/PENDING.md`.
 
 ### Research Notes & SEO Knowledge Centre Guides Confirmed Live (24 Nov 2026)
 Validated directly on live production `https://animalwrites.in` (all 12 return HTTP 200) and verified in git:
