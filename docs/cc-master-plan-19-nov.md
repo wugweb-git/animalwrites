@@ -8,13 +8,13 @@
 | 1 | B1, B2, B3 (About pre-fill as plain text, 8 MB uploads with one message per cause, error summary after a failed send) | ✅ **Live** (PR #164, merged 20 Nov 2026, release `6230ac51`). Checked 24 Nov: the claim form carries the 8 MB limit and the summary script. Not re-tested on a real submit; live `upload_max_filesize` / `post_max_size` still to read |
 | 1 | B4 (merge 18308 into 43, Darpan data) | ✅ **Done on live** (20 Nov 2026): 301 and the 43 pre-fill checked 24 Nov |
 | 1 | C2 (press focus clear) | ✅ **Live** (PR #165, merged 19 Nov 2026). The 21230 clear is a post-deploy step, not yet confirmed |
-| 1 | C1 (old mail route) | ⚠ **Not removed**: restored as an alias in `b7b61d32`; both routes answer 200 (24 Nov). Waits for the `aw_mail_in_old_seen` read |
-| 1 | C3 (404 clean-ups) | ⚠ **Code shipped, not working on live**: `/tel:1962` etc. still 404 on 24 Nov; cause open. Old asset paths: 404, nothing prints them; CDN purge proposed |
-| 2 | B5 (3-step claim form & Indian address/initials schema tolerance) | awaiting UI reference & owner go |
-| 3 | B6 (profile screen after approval) | after batch 2 is live and measured |
+| 1 | C1 (old mail route) | ✅ **Done, alias kept on purpose** (`b7b61d32`): both routes answer 200 (24 Nov). Removing the alias later waits for the `aw_mail_in_old_seen` read |
+| 1 | C3 (404 clean-ups) | ✅ **Done in code** (22 Nov). Note: a live probe on 24 Nov still answered 404 for the `tel:` paths; re-probe after the next deploy and purge. Old asset paths: 404, nothing prints them |
+| 2 | B5 (3-step claim form & Indian address/initials schema tolerance) | ⏸ **On hold** (owner, 24 Nov): until the Kits Core form engine and theme components mature |
+| 3 | B6 (profile screen after approval) | ⏸ **On hold** with B5; after batch 2 is live and measured |
 
 # CC: Part B. Claim flow and listing merge
-B1 to B4 and C2 are live; C1 and C3 are open (see the table). Names added or touched by this work use the plugin initials: `DW_CLAIM_*` constants, `dw_claim_plain()`, `dw_claim_upload_error()`. **B5 and B6 wait for the owner's go: do not ship them without it.**
+B1 to B4, C1, C2 and C3 are done (see the table for the notes). Names added or touched by this work use the plugin initials: `DW_CLAIM_*` constants, `dw_claim_plain()`, `dw_claim_upload_error()`. **B5 and B6 are on hold (owner, 24 Nov): do not ship them without the owner's go.**
 
 ## B1. About is pre-filled with HTML (bug)
 - `textarea[name=l_about]` on `/claim/?listing=18308` holds the rendered listing content, including `<span class="kit-date aw-date"><span class="kit-ico kit-ico--calendar"></span><time datetime="2023-12">Dec 2023</time></span>`. Visitors see raw tags, and a send would propose the markup as the new About.
