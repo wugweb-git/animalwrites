@@ -27,6 +27,24 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Research Notes & SEO Knowledge Centre Guides Confirmed Live (24 Nov 2026)
+Validated directly on live production `https://animalwrites.in` (all 12 return HTTP 200) and verified in git:
+- ✅ **12 core evergreen guides active and live:**
+  - 1962 Veterinary Helpline & MVUs (`/resources/1962-helpline-mobile-veterinary-units/`, post 13798)
+  - Emergency Who to Call Hub (`/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/`, post 9031)
+  - Cruelty Law: PCA §11 & BNS §325 (`/resources/animal-cruelty-law-india/`)
+  - How to Report Animal Cruelty (`/resources/how-to-report-animal-cruelty/`)
+  - Community Dogs & Feeding: ABC Rule 20 (`/resources/caring-for-community-dogs-in-your-area/`, post 9029)
+  - Injured Animal Protocol (`/resources/found-an-injured-animal-what-to-do/`, post 126)
+  - Avian / Bird Helplines by City (`/resources/injured-bird-helpline-numbers-by-city/`, post 13843)
+  - Animal Birth Control (ABC) Explained (`/resources/animal-birth-control-abc-explained/`, post 9032)
+  - AWBI Role & Contact (`/resources/animal-welfare-board-of-india-awbi-explained/`, post 13800)
+  - Rabies PEP & Dog Bite Vaccine Schedule (`/resources/dog-bite-rabies-vaccine/`, post 17307)
+  - NGO Darpan Registration & Search (`/resources/ngo-darpan-registration/`, post 17308)
+  - World Animal Day (`/resources/world-animal-day-4-october/`, post 13797)
+- ✅ **Background research preserved:** Fact-checking files in `research_notes/` (`helpline_1962.md`, `cruelty_law.md`, `feeding_law.md`, `rabies_pep.md`, `cpcsea_iaec_awbi.md`, `ngo_darpan.md`, `bird_helplines.md`, `observance_days.md`) remain tracked as verified source references.
+- ✅ **Brand OS & tokens compiled:** `tenant/assets/site/tokens/tokens.json` validated; compiled cleanly via `python3 tools/build-tokens.py` (240 Kits tokens, 23 Animal Writes tokens; presets in sync).
+
 ### DirectoryWeb: phases 1–3 wired, blocks fixed and loaded (22 Nov 2026)
 
 Checked on `wordpress-dev` at `7e98b691`, plus this session's changes.

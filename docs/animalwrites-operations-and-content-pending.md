@@ -53,8 +53,21 @@
 
 ## 3. Content, SEO & Help-Now Guides
 
-### A. Help-Now Rescue Action Guides
-- **Status**: Initial guides live on `/library/`.
+### A. Help-Now Rescue Action & Regulatory Guides
+- **Status**: ✅ **12 core evergreen guides confirmed live (24 Nov 2026)**. Validated directly on `https://animalwrites.in` (all return HTTP 200) and in git:
+  1. **1962 Veterinary Helpline & MVUs**: `/resources/1962-helpline-mobile-veterinary-units/` (200 OK)
+  2. **Emergency Who to Call**: `/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/` (200 OK)
+  3. **Cruelty Law (PCA §11 & BNS §325)**: `/resources/animal-cruelty-law-india/` (200 OK)
+  4. **How to Report Animal Cruelty**: `/resources/how-to-report-animal-cruelty/` (200 OK)
+  5. **Community Dogs & Feeding (ABC Rule 20)**: `/resources/caring-for-community-dogs-in-your-area/` (200 OK)
+  6. **Injured Animal Protocol**: `/resources/found-an-injured-animal-what-to-do/` (200 OK)
+  7. **Avian / Bird Helplines by City**: `/resources/injured-bird-helpline-numbers-by-city/` (200 OK)
+  8. **Animal Birth Control Explained**: `/resources/animal-birth-control-abc-explained/` (200 OK)
+  9. **AWBI Role & Contact**: `/resources/animal-welfare-board-of-india-awbi-explained/` (200 OK)
+  10. **Rabies PEP & Dog Bite Vaccine Schedule**: `/resources/dog-bite-rabies-vaccine/` (200 OK)
+  11. **NGO Darpan Registration & Search**: `/resources/ngo-darpan-registration/` (200 OK)
+  12. **World Animal Day**: `/resources/world-animal-day-4-october/` (200 OK)
+- **Reference Notes**: Preserved in `research_notes/` (`helpline_1962.md`, `cruelty_law.md`, `feeding_law.md`, `rabies_pep.md`, etc.) as background research and audit trail.
 - **Pending Tasks**:
   - Emergency protocols: Canine Distemper isolation, Parvovirus care, snakebite rescue, abandoned newborn pup feeding.
   - State FIR filing guides: Step-by-step FIR procedures under PCA Act 1960 and BNS provisions across all 28 states.
