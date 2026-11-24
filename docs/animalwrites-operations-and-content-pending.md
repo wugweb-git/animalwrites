@@ -37,11 +37,11 @@
 ## 2. Directory Data, Verification & Claim Flow (7,738 Listings)
 
 ### A. Listing Claim Flow (B5 / B6 implementation from `docs/cc-master-plan-19-nov.md`)
-- **Status**: B4, C1, C3 completed live (Nawabi Tails Darpan ID merged, post 18308 trashed, 301 redirect active, mail-in webhook alias secured, crawler tel: paths redirected to guides).
-- **Pending Tasks**:
-  - B5 (3-step claim modal): Owner confirmation to launch frontend modal on single listing profiles.
-  - B6: Verification badge display and shelter administrator claim notification dispatch via `MailWeb`.
-  - Duplicate clean-up: Review logged queue of 33 duplicate website pairs and 61 duplicate email groups (preserve data; merge or mark aliases).
+- **Status**: ⏸️ **Placed on HOLD pending upstream Kits platform maturation** (owner decision, 24 Nov 2026). B4, C1, C2, C3 completed live.
+- **Held Tasks**:
+  - B5 (3-step claim form & Indian address/initials schema tolerance): Held until upstream Kits Core form engine and theme components mature.
+  - B6 (Post-approval profile completion portal): Held until B5 is live and measured.
+  - Duplicate clean-up: Review logged queue of 33 duplicate website pairs and 61 duplicate email groups (preserve data; merge or mark aliases when resumed).
 
 ### B. India Local Government Directory (LGD) Normalization
 - **Status**: State and district taxonomy mapped via `tools/lgd/`.
