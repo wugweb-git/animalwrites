@@ -1,9 +1,9 @@
 # UI, Spacing & Vertical Rhythm Audit
 
 **Scope:** Sitewide Section Padding, Hub Layouts, Responsive Spacing & Container Rhythm  
-**Date:** 21 November 2026  
+**Date:** 21 November 2026 (Updated & Resolved 23 Nov 2026)  
 **Auditor:** Design Systems & Frontend Engineering Specialist  
-**Status:** Audit Complete & Normalization Fixes Specified  
+**Status:** ✅ Completed & Shipped Live (`c77bcb3f`, tag `release-20261122-2024-c77bcb3f`; synced to Kits monorepo `92345bc`)  
 
 ---
 
@@ -101,3 +101,23 @@ To establish consistent vertical rhythm sitewide without altering custom contras
 | **Home Story Band** | Tablet (768px) | 0px vertical padding | 70px symmetric padding | Verified |
 | **Directory (`/directory/`)**| Desktop (1280px) | 136px FAQ to Newsletter gap | 64px compact transition | Verified |
 | **Library (`/library/`)** | Mobile (390px) | Excessive scrolling past FAQ | Balanced compact footer | Verified |
+
+---
+
+## 5. Card Spacing Overhaul & Cross-Nav Stacked Cards (23 Nov 2026)
+
+Shipped in commit `c77bcb3f` (release `release-20261122-2024-c77bcb3f`) and synchronized upstream to Kits monorepo `wugweb-git/kits@kits-suite` (commit `92345bc`):
+
+1. **Card Container Zero-Padding Contract:**
+   - Outer card containers enforced to zero padding (`padding: 0 !important; margin: 0 !important;`).
+   - Independent content padding applied to all card bodies: desktop `12px 16px !important;`, mobile (`max-width: 767px`) `8px 10px !important;`.
+   - Media, logos, and thumbnails flush against card's left, top, and bottom edges (`align-self: stretch !important; margin: 0 !important; border-radius: 0 !important;`).
+2. **Single-Row Meta Rule:**
+   - Meta rows (`.kit-card-metarow`, `.kit-card-meta`, `.kit-card-chips`, `.kit-meta-row`, `.aw-more-meta`) strictly enforced to never wrap into two rows (`flex-wrap: nowrap !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;`).
+3. **Cross-Navigation Stacked Cards:**
+   - Single item cross-navigation (`aw-more` / `.aw-more-list` / `aw_item_more_card`) converted into responsive stacked cards (`kit-card kit-card--stacked-md kit-minicard aw-more-card`).
+   - Directory related NGO cross-navigation converted into stacked profile card layout (`.aw-more-card--org`, `.aw-card-profile`) with flush logo/initials on left, and single-line meta row, title, and summary on right.
+4. **Section Spacing Normalization:**
+   - Adjacent `.is-style-kits-section` blocks collapse top padding (`padding-top: 0 !important;`).
+   - Cover story bands (`.wp-block-cover.kit-section.aw-ed-story`) given symmetric vertical padding (`var(--kit-space-section)`).
+   - FAQ nested section wrapper padding reset to `0 !important;`.

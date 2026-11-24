@@ -5,12 +5,13 @@
 ## Order of work
 | Batch | Items | Status |
 |---|---|---|
-| 1 (go now) | B1, B2, B3 (claim bugs), B4 (merge 18308 into 43 and add Darpan data), C1, C2, C3 (clean-ups) | approved |
-| 2 | B5 (3-step claim form) | owner's go required, do not ship before |
+| 1 | B4 (merge 18308 into 43), C1 (retire old mail route), C2 (press focus clear), C3 (tel: 301 redirects) | ✅ **Completed & Live** (20–22 Nov 2026) |
+| 1.1 | B1, B2, B3 (About prefill sanitization, 8 MB upload limits/diagnostics, multi-step error summary) | approved, next in line |
+| 2 | B5 (3-step claim form & Indian address/initials schema tolerance) | awaiting UI reference & owner go |
 | 3 | B6 (profile screen after approval) | after batch 2 is live and measured |
 
 # CC: Part B. Claim flow and listing merge
-B1 to B4 are approved. **B5 and B6 wait for the owner's go: do not ship them without it.**
+B4, C1, C2, and C3 are completed and live. B1 to B3 are approved. **B5 and B6 wait for the owner's go: do not ship them without it.**
 
 ## B1. About is pre-filled with HTML (bug)
 - `textarea[name=l_about]` on `/claim/?listing=18308` holds the rendered listing content, including `<span class="kit-date aw-date"><span class="kit-ico kit-ico--calendar"></span><time datetime="2023-12">Dec 2023</time></span>`. Visitors see raw tags, and a send would propose the markup as the new About.

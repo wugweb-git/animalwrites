@@ -45,20 +45,54 @@ All documentation, pending task lists, and research reports are tracked directly
   * Automated dataLayer push (`kits_experiment_impression`) for Google Analytics 4 and Microsoft Clarity integration.
   * 11/11 passing unit tests in `plugins/kits-core/tests/ab-testing-tests.php`.
 
+### E. UI Layout Normalization & Card Spacing Overhaul (Live, Commit `c77bcb3f`, Release Tag `release-20261122-2024-c77bcb3f`)
+* **Card Spacing Contract:** Container padding strictly zero (`padding: 0 !important; margin: 0 !important;`). Independent content padding: desktop `12px 16px !important;`, mobile `8px 10px !important;`. Flush media against left, top, and bottom edges (`align-self: stretch !important;`).
+* **Single-Row Meta Rule:** Meta row (`.kit-card-metarow`, `.kit-card-meta`, `.kit-card-chips`, `.kit-meta-row`, `.aw-more-meta`) strictly enforced to never wrap into two rows.
+* **Section Rhythm Normalization:** Adjacent `.is-style-kits-section` blocks sharing canvas backgrounds collapse top padding (`padding-top: 0 !important;`), eliminating 192px desktop / 96px mobile dead space. Symmetric vertical padding applied to `.wp-block-cover.kit-section.aw-ed-story`. Nested `.is-style-kits-section > .kit-faq` padding reset to `0 !important;`.
+* **Cross-Navigation Stacked Cards:** Single item cross-nav converted to stacked cards (`kit-card--stacked-md`). Directory related NGO cross-nav converted to stacked profile cards (`.aw-more-card--org`, `.aw-card-profile`).
+
+### F. Kits Monorepo Synchronization (Live, Commit `92345bc` on `wugweb-git/kits@kits-suite`)
+* Synchronized updated `kit.css` and `kit.min.css` directly to the central Kits suite platform repository on branch `kits-suite`.
+
+### G. 12 Core Evergreen Guides Confirmed Live (Live, Commit `f503e578`, Release Tag `release-20261124-1418-f503e578`)
+* Validated directly on `https://animalwrites.in` (all 12 return HTTP 200 OK):
+  * 1962 Helpline (`/resources/1962-helpline-mobile-veterinary-units/`)
+  * Who to Call Emergency Hub (`/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/`)
+  * Cruelty Law PCA §11 & BNS §325 (`/resources/animal-cruelty-law-india/`)
+  * How to Report Animal Cruelty (`/resources/how-to-report-animal-cruelty/`)
+  * Community Dog Feeding & ABC Rule 20 (`/resources/caring-for-community-dogs-in-your-area/`)
+  * Injured Animal Protocol (`/resources/found-an-injured-animal-what-to-do/`)
+  * Bird Helplines by City (`/resources/injured-bird-helpline-numbers-by-city/`)
+  * Animal Birth Control Explained (`/resources/animal-birth-control-abc-explained/`)
+  * AWBI Guide (`/resources/animal-welfare-board-of-india-awbi-explained/`)
+  * Dog Bite Rabies PEP Vaccine (`/resources/dog-bite-rabies-vaccine/`)
+  * NGO Darpan Registration (`/resources/ngo-darpan-registration/`)
+  * World Animal Day (`/resources/world-animal-day-4-october/`)
+* Verified background research in `research_notes/` preserved for audit.
+* Brand OS tokens verified and compiled via `python3 tools/build-tokens.py` (240 Kits tokens, 23 Animal Writes tokens; presets in sync).
+
+### H. Platform Boundary Rule Clarification (Owner Directive)
+* Platform, theme engine, and companion plugin development belongs strictly to `wugweb-git/kits` (forwarded to Kits session).
+* Animal Writes repository owns tenant-specific site operations, directory data, content, campaigns, and site-level integration.
+
 ---
 
 ## 3. Pending Roadmap Batches (Master Plan)
 
-### Batch 1: Claim Flow Quality & Upload Polish (Items B1–B3)
-* **B1. About Field Prefill Sanitization:**
-  * Clean raw HTML/date tags (e.g. `<span class="kit-date">`, `<time>`) from `textarea[name=l_about]` on `/claim/?listing=ID`. Pre-fill from clean text; strip tags in `claims-review.php` before applying.
-* **B2. Upload Limit & Clear Messaging:**
-  * Raise upload limit in `kits_ff_upload()` and `claims.php` to 8 MB with client-side downscaling.
-  * Replace generic error with exact diagnostics: file size limit vs file type (`PNG, JPG, WebP`).
-* **B3. Multi-Step Validation Error Summary:**
-  * In `forms.js`, when validation fails on a previous step, show a clickable error summary banner on the active step rather than silently jumping steps without context.
+### Completed from Master Plan:
+* **B4 (Listing Merge):** Completed live (Post 43 merged, 18308 trashed, 301 verified).
+* **C1 (Old Mail-in Webhook):** Completed live (Commit `b7b61d32`).
+* **C2 (Press Keyphrase Clear):** Completed live (Supported in `plugins/rankweb/includes/focus-keywords.php`).
+* **C3 (Crawler Tel Redirects):** Completed live (Commit `b7b61d32`).
 
-### Batch 2: 3-Step Claim Form (Item B5 - Owner Gated)
+### Next in Line:
+### Batch 1: Claim Flow Quality & Upload Polish (Items B1–B3)
+* **B1. About Field Prefill Sanitization:** Clean raw HTML/date tags (e.g. `<span class="kit-date">`, `<time>`) from `textarea[name=l_about]` on `/claim/?listing=ID`. Pre-fill from clean text; strip tags in `claims-review.php` before applying.
+* **B2. Upload Limit & Clear Messaging:** Raise upload limit in `kits_ff_upload()` and `claims.php` to 8 MB with client-side downscaling. Replace generic error with exact diagnostics: file size limit vs file type (`PNG, JPG, WebP`).
+* **B3. Multi-Step Validation Error Summary:** In `forms.js`, when validation fails on a previous step, show a clickable error summary banner on the active step rather than silently jumping steps without context.
+
+### Batch 2: 3-Step Claim Form & Indian Address Schema Tolerance (Item B5)
+* **Indian Address & Initials Schema Tolerance:** Update address parsing and worker validation rules so PIN codes (`^[1-9][0-9]{5}$`) and personal/address initials (`Dr.`, `V.`, `St.`, `P.O. Box`, `C/o`, `Plot No.`, `Sy. No.`) are preserved and acknowledged without false rejections.
 * **Global Form Specs:** 16px inputs, 44px tap targets, mobile-sticky Next/Back buttons, red asterisks for mandatory fields, no site-wide newsletter distraction on `/claim/`.
 * **Step 1 (Who you are):** Name, Role, Email, Mobile (10 digits), WhatsApp tick, Show name toggle, Volunteer opt-in checkbox.
 * **Step 2 (Proof):** Document upload (PDF/image, 8 MB max), NGO Darpan ID, Registration year, Notes.
