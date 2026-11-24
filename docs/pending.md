@@ -59,7 +59,7 @@ Checked with `git merge-base --is-ancestor` against `origin/wordpress` (live bra
   - **Option C Duplicates Executed:** Merged 20 duplicate NGO clusters into their canonical listings. 26 secondary listings trashed (preserving data history), missing contact/registration data transferred to primary posts, and 20 active 301 regex redirections created in `wp_rank_math_redirections` (all verified returning HTTP 301). LiteSpeed cache purged (HTTP 200).
 - ⚠️ **Not audited:** `origin/feat/repo-restructure-tenant-consumer` (last commit 22 Nov). Under rule 1 it needs the stale-branch audit and the owner's yes before any merge.
 - 📝 **Notion "8. Status & Pending"** carries a 24 Nov evening entry with the same sync (and corrects live `wordpress` to `f503e578`).
-- ⚠️ **Untracked in the main checkout, not committed by any session:** `.vscode/` and `themes/kits-by-wugweb/theme-dark.json`. Owner to say whether `theme-dark.json` belongs to the Day/Night work in `themes/kits-by-wugweb/PENDING.md`.
+- ✅ **Untracked cleanup (24 Nov 2026):** Removed empty `.vscode/` (`{}`) and truncated draft `themes/kits-by-wugweb/theme-dark.json` (superseded by `themes/kits-by-wugweb/styles/dark.json` in `Kits`); working tree is clean.
 
 ### Research Notes & SEO Knowledge Centre Guides Confirmed Live (24 Nov 2026)
 Validated directly on live production `https://animalwrites.in` (all 12 return HTTP 200) and verified in git:
