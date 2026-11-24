@@ -7,6 +7,7 @@
 - Sourcing has its own menu (since 25 Oct 2026; it was Settings → Sourcing): Overview, To review, Enrichment review, the settings screens, the reports and jobs, Settings; 18 workflows on Sourcing → Workers.
 - Indexing: directory profiles with no contact are noindex and out of the sitemap unless they have Search Console impressions; `?state=` lists and claim forms are noindex; the Directory map and Near me are built.
 - Breakpoints 768 / 1200 (640 retired).
+- Claim form (20 Nov 2026): About and every pre-filled box are plain text; uploads up to 8 MB with one message per cause; a list of what to fix after a failed send (PR #164). Listing 18308 merged into 43 (B4). Details: [pending.md](pending.md), [cc-master-plan-19-nov.md](cc-master-plan-19-nov.md).
 
 **Site and stack**
 - **Live:** https://animalwrites.in · **Admin:** /wp-admin · **old archive:** old.animalwrites.in (cancelled; the old site will be deleted).

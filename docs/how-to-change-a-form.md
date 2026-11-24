@@ -96,7 +96,8 @@ Where they appear: the volunteer banner is the theme pattern `plugins/animal-wri
 | Behaviour (checks on send and when leaving a field, focus the first problem) | `themes/kits-by-wugweb/assets/js/kit.js` |
 | PIN code → State and District; District follows State | the custom field "PIN code, State and District" (`aw_ff_render_places()` in `forms-fluentforms.php`), `aw.js` and `places.php` (`aw_pin_lookup()`) |
 | Spam check (ALTCHA), timing and honeypot | the custom field "Spam check (ALTCHA)" (`aw_ff_render_check()`); checked in the `fluentform/validation_errors` filter, with the per-form limit (`AW_FF_FORMS`) |
-| Claim logo and proof | the custom field "Private upload" (`aw_ff_render_logo()`, `aw_ff_upload()`; checks in `claims.php`) |
+| Claim logo and proof | the custom field "Private upload" (`aw_ff_render_logo()`, `aw_ff_upload()`; checks in `claims.php`: `dw_claim_upload_error()`; the browser says the same in `kitsFileProblem()` in `kits-core/assets/js/forms.js`; a chosen file shows name, size and Remove in the theme's `aw.js`) |
+| Errors after a failed send | `forms.js` lists "N things to fix" on the last step and on the step it jumps to; each item opens its step and focuses the field; the list goes when anything in the form changes |
 
 ## Examples
 
