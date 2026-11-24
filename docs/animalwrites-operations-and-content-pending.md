@@ -41,7 +41,7 @@
 - **Held Tasks**:
   - B5 (3-step claim form & Indian address/initials schema tolerance): Held until upstream Kits Core form engine and theme components mature.
   - B6 (Post-approval profile completion portal): Held until B5 is live and measured.
-  - Duplicate clean-up: Review logged queue of 33 duplicate website pairs and 61 duplicate email groups (preserve data; merge or mark aliases when resumed).
+  - Duplicate clean-up (Option C): Comprehensive live DB audit completed 24 Nov 2026 (see `docs/directory-duplicates-audit.md`). 58 government listings protected; 20 top NGO duplicate clusters mapped with canonical IDs and draft/redirect targets. Ready for owner approval.
 
 ### B. India Local Government Directory (LGD) Normalization
 - **Status**: State and district taxonomy mapped via `tools/lgd/`.
