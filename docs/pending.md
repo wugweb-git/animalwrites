@@ -27,6 +27,20 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Plan files, checked on git (24 Nov 2026; owner: "update docs, pending, status")
+
+Eight open plans are kept in [`docs/plans/`](plans/) (index: [`docs/plans/README.md`](plans/README.md)). Done plans were deleted. When a plan is finished it moves to `docs/plans/archive/`. Status below is from git on 24 Nov; nothing was shipped for this entry.
+
+- **Help-now keyword and content strategy** (`concurrent-orbiting-taco`): partly done. `help-now-keywords-2026-11-01.csv` exists; no content-strategy file found; per-page briefs not confirmed.
+- **Technical to-dos, 1 Nov** (`enchanted-wondering-clover`): mostly done (modified-date guard, keyphrase owner guard, quick-win flag, monitoring cadence). Open: `docs/seo/cdn-hpanel-proposal.md` not written.
+- **Master search plan and quick fixes** (`fuzzy-prancing-finch`, `rustling-crafting-glade`): partly done; the copy items wait for the owner's yes.
+- **AW SEO Plus and Search Insights** (`pasted…54bc`): partly done (one quick-win rule, one writer, one CLI root). The 7-tab Settings and the Ubersuggest, vidIQ and OpenSEO imports are not confirmed.
+- **Edit screens** (audit plus 7-step plan): partly done. The legal Document group, the Place box restriction and the split campaign groups are in. Step 7 (the map) is open, and the listing split is not found in Core (it may have moved to DirectoryWeb).
+- **Workers audit, remaining changes** (`deep-sparking-harbor`; copy also in `animal-writes-workers/docs/plans`): open. The window default is still 2 days, there is no `tools.yml`, and the old one-off workflows still exist. Needs the owner's go-ahead.
+- **Directory official import** (plan file not kept): dry-run stage. The importer writes `post_tag`; `match.py`, `build_dataful.py`, `build_name_types.py`, `build_gujarat_birds.py`, `build_dlsa2.py` and `undo_import.php` exist; `find_datagov.py` is missing. No live run; no Dataful CSVs yet.
+- **Skill plans** (`wugweb_site/docs/plans`): the wugweb-work handoff and test tables, and the wugweb-voice plan. Tracked in that repo.
+- **RAK SME** (own repos, not this one): the events fix is on `raksme` `main_prod` (cherry-pick `f5463d7`). The one-photo About section (`d0332e8`) is on `main_test` only; `main_prod` still renders the back image. Photo-folder ownership on the server is not checked.
+
 ### Session sync, checked on git (24 Nov 2026)
 Checked with `git merge-base --is-ancestor` against `origin/wordpress` (live branch at `f503e578`, tag `release-20261124-1418-f503e578`); the live site was not re-read this turn.
 - ✅ **Brand Customizer + multi-tenant token engine (`403b9eaa`) is on `origin/wordpress`**, first shipped in `release-20261121-2051-e400fd65`. The branch `claude/brand-customizer-multi-tenant` has nothing left to merge. It exists in this repo as well as on `wugweb-git/kits` `kits-suite` (see the 21 Nov entry below).
