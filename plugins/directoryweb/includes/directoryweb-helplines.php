@@ -55,7 +55,7 @@ function directoryweb_helplines_render( $attributes = array() ) {
 		return '<!-- directoryweb/helplines: no district active -->';
 	}
 
-	$place = function_exists( 'aw_place_by_code' ) ? aw_place_by_code( $code, 'district' ) : null;
+	$place = function_exists( 'aw_place_district' ) ? aw_place_district( $code ) : null; // the district by its LGD code (aw_place_by_code() never existed)
 	if ( ! $place && function_exists( 'aw_current_place' ) ) {
 		$place = aw_current_place();
 	}
