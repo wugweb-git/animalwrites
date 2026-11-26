@@ -64,6 +64,18 @@ add_action(
 		$body   = isset( $_POST['kits_body_scripts'] ) ? wp_unslash( $_POST['kits_body_scripts'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$footer = isset( $_POST['kits_footer_scripts'] ) ? wp_unslash( $_POST['kits_footer_scripts'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+		// Nothing is saved when a box has an unclosed or stray tag: one bad paste would break every page.
+		$bad = array();
+		foreach ( array( 'header' => $header, 'body' => $body, 'footer' => $footer ) as $which => $html ) {
+			if ( '' !== kits_scripts_problem( (string) $html ) ) {
+				$bad[] = $which;
+			}
+		}
+		if ( $bad ) {
+			wp_safe_redirect( add_query_arg( array( 'page' => 'kits-scripts', 'invalid' => implode( ',', $bad ) ), admin_url( 'admin.php' ) ) );
+			exit;
+		}
+
 		update_option( 'kits_header_scripts', $header );
 		update_option( 'kits_body_scripts', $body );
 		update_option( 'kits_footer_scripts', $footer );
@@ -72,6 +84,58 @@ add_action(
 		exit;
 	}
 );
+
+/**
+ * What is wrong with a pasted block of tags: an unclosed or unopened script, style, noscript or iframe, a tag that
+ * never ends, or a PHP tag. Comments are ignored. Empty string = fine.
+ *
+ * @param string $html The pasted code.
+ * @return string The problem, or ''.
+ */
+function kits_scripts_problem( $html ) {
+	$html = preg_replace( '/<!--.*?-->/s', '', $html );
+	if ( false !== strpos( $html, '<?' ) ) {
+		return 'PHP tag';
+	}
+	$pos   = 0;
+	$stack = array();
+	while ( preg_match( '~<(/?)(script|style|noscript|iframe)\b([^>]*)>?~i', $html, $m, PREG_OFFSET_CAPTURE, $pos ) ) {
+		$tag    = strtolower( $m[2][0] );
+		$close  = '/' === $m[1][0];
+		$end    = $m[0][1] + strlen( $m[0][0] );
+		if ( '>' !== substr( $m[0][0], -1 ) ) {
+			return 'a <' . $tag . '> tag that never ends';
+		}
+		if ( ! $close && in_array( $tag, array( 'script', 'style' ), true ) ) {
+			if ( '/' === substr( rtrim( substr( $m[0][0], 0, -1 ) ), -1 ) ) {
+				$pos = $end; // <script ... />
+				continue;
+			}
+			$stop = stripos( $html, '</' . $tag, $end ); // raw text: only its own closing tag ends it
+			if ( false === $stop ) {
+				return 'an unclosed <' . $tag . '>';
+			}
+			$gt = strpos( $html, '>', $stop );
+			if ( false === $gt ) {
+				return 'a </' . $tag . '> that never ends';
+			}
+			$pos = $gt + 1;
+			continue;
+		}
+		if ( $close ) {
+			if ( ! $stack || array_pop( $stack ) !== $tag ) {
+				return 'a </' . $tag . '> with no matching opening tag';
+			}
+		} else {
+			$stack[] = $tag;
+		}
+		$pos = $end;
+	}
+	if ( $stack ) {
+		return 'an unclosed <' . end( $stack ) . '>';
+	}
+	return '';
+}
 
 /**
  * Render Header & Footer Scripts page.
@@ -90,6 +154,12 @@ function kits_scripts_page() {
 
 	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Scripts saved successfully.', 'kits-core' ) . '</p></div>';
+	}
+	if ( isset( $_GET['invalid'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$raw   = sanitize_text_field( wp_unslash( $_GET['invalid'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$which = array_intersect( array_map( 'sanitize_key', explode( ',', $raw ) ), array( 'header', 'body', 'footer' ) );
+		/* translators: %s: the boxes that have a problem, such as header, footer */
+		echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Nothing was saved. Check the tags in: %s (an unclosed or stray script, style, noscript or iframe tag, or a PHP tag).', 'kits-core' ), implode( ', ', $which ) ) ) . '</p></div>';
 	}
 
 	echo '<p class="description">' . esc_html__( 'Inject analytics, tracking pixels, meta tags, and custom verification code directly into your site layout without editing theme files.', 'kits-core' ) . '</p>';
