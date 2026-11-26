@@ -65,6 +65,10 @@ add_action(
 		if ( is_admin() ) {
 			return;
 		}
+		// An item's own page is not a list: an item with no sort key yet (ingested, not yet synced) must still open, not 404.
+		if ( $q->is_main_query() && $q->is_singular() ) {
+			return;
+		}
 		$types = (array) $q->get( 'post_type' );
 		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal' ) ) ) {
 			return;
