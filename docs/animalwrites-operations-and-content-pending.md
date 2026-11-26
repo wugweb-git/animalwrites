@@ -21,9 +21,9 @@
   - Maintain FAQ schema nodes for legal rights of community animal caretakers.
 
 ### C. Laboratory Animals Rules 2026 (`/lab/`)
-- **Status**: Draft rules analysis published in Library.
+- **Status**: Draft rules analysis published in Library; consultation closed 5 Nov 2026 (`tools/content/lab-animals-campaign-page.php`, renamed from `campaign2-page.php`).
 - **Pending Tasks**:
-  - Update campaign timeline based on public comments submission to CPCSEA / Ministry of Fisheries, Animal Husbandry and Dairying.
+  - Update `rank_math_title` / `rank_math_description` to post-consultation wording and ship pending Share/Date-card edits.
   - Expand alternative non-animal testing models directory.
 
 ### D. Community Dogs Rights & ABC Rules (`/community-dogs/`)
@@ -31,6 +31,12 @@
 - **Pending Tasks**:
   - Standardized legal notices template for feeders facing RWA harassment.
   - Municipal corporation complaint escalation numbers.
+
+### E. Rabies Awareness & Prevention (`/campaigns/rabies-awareness-india/`)
+- **Status**: Standalone campaign builder added 26 Nov 2026 (`tools/content/rabies-campaign-page.php`, no petition/letter tool).
+- **Pending Tasks**:
+  - Run `wp eval-file tools/content/rabies-campaign-page.php`, review draft, and publish in `wp-admin`.
+  - Update `tenant/assets/site/patterns/rabies-card.php` on Home to link to `/campaigns/rabies-awareness-india/` once published.
 
 ---
 
