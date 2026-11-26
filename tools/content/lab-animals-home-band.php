@@ -1,9 +1,9 @@
 <?php
 /**
- * Campaign 2.0 home band (16 Oct 2026): puts [aw_campaign_band] right after the home hero. The band shows only while
+ * Lab Animals Rules 2026 home band (16 Oct 2026): puts [aw_campaign_band] right after the home hero. The band shows only while
  * the campaign is published and open (campaign-tools.php), so it can be placed while the campaign is a draft.
  * Re-running changes nothing once the band is there. WordPress keeps the previous version as a revision.
- * Run: wp eval-file campaign2-home-band.php
+ * Run: wp eval-file tools/content/lab-animals-home-band.php
  */
 $front = (int) get_option( 'page_on_front' );
 $old   = (string) get_post_field( 'post_content', $front );

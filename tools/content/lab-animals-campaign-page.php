@@ -1,10 +1,10 @@
 <?php
 /**
- * Campaign 2.0 page (draft lab animal rules 2026), 16 Oct 2026. Creates the campaign as a DRAFT; re-running updates the
+ * Lab Animals Rules 2026 campaign page (draft lab animal rules 2026), 16 Oct 2026. Creates the campaign as a DRAFT; re-running updates the
  * same item (by slug) and never publishes it. Copy: Claude outputs/campaign2/campaign2-copy.md (letter grounds checked
  * against G.S.R. 864(E), the 1998 Rules with the 2001 and 2006 amendments, and the PCA Act). Sections follow the
  * Campaign Content Standard v1.0 (Notion, 17 Oct 2026); partners only from the owner's list (none yet).
- * Run: wp eval-file campaign2-page.php
+ * Run: wp eval-file tools/content/lab-animals-campaign-page.php
  */
 
 $doc = get_page_by_path( 'draft-laboratory-animals-rules-2026', OBJECT, 'aw_legal' );

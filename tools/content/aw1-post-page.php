@@ -67,7 +67,7 @@ $take = function ( $i ) use ( &$blocks, &$used ) {
 };
 $ser = fn( $b ) => serialize_block( $b ) . "\n\n";
 
-/* Builders (same markup as tools/content/campaign2-page.php). */
+/* Builders (same markup as tools/content/lab-animals-campaign-page.php). */
 function a1p( $t, $cls = '' ) {
 	$a = $cls ? ' {"className":"' . $cls . '"}' : '';
 	$c = $cls ? ' class="' . $cls . '"' : '';

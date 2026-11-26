@@ -3,7 +3,7 @@
 Page: `/campaigns/lab-animals-rules-2026/` (campaign 13848; short link `/lab`).
 Subject: the Draft Laboratory Animals Rules, 2026 (G.S.R. 864(E)), published in the Gazette on 6 Oct 2026; objections to `cpcsea-mef@gov.in` until 5 Nov 2026.
 Library draft: 13844 (PDF 13845). Guides: 13854–13858, 13869. Campaign link term: 1077.
-Build script: `tools/content/campaign2-page.php`. Styles and scripts: `plugins/animal-writes-core/assets/css/campaign-lab.css`, `assets/js/campaign-lab.js`; lifecycle, counters and shortcodes in `includes/campaign-tools.php`, `campaigns.php`, `campaign-letters.php`.
+Build script: `tools/content/lab-animals-campaign-page.php`. Styles and scripts: `plugins/animal-writes-core/assets/css/campaign-lab.css`, `assets/js/campaign-lab.js`; lifecycle, counters and shortcodes in `includes/campaign-tools.php`, `campaigns.php`, `campaign-letters.php`.
 
 Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page order.
 
@@ -150,7 +150,7 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - Sticky "Send your objection" bar after the hero, with days to go. 482990d1, 16 Oct; 9b5d34f4, 17 Oct
 - Keeps its height free when scrolling to a focused control. 69972b62, e78e13ec, 2 Nov
 
-## Build script (`tools/content/campaign2-page.php`)
+## Build script (`tools/content/lab-animals-campaign-page.php`)
 - The page is rebuilt from the script; it carries the section order, keyphrases, summary, share line and search title and description. 58b78491, 3f42e475, 21 Oct; c9b93a3b, 08f608f6, 2 Nov
 - Guide row shows 8. 4138f7cd, 1 Nov
 - Guides stay in In the news; What people are saying after On social media. cb905419, 2e978ca7, 3 Nov
