@@ -26,7 +26,7 @@ function aw_news_ad_slot( string $pos ): string {
 		return '';
 	}
 	$label = (string) aw_binding_value( 'sponsored_label', get_the_ID() ); // "Sponsored by X" when the item itself is sponsored
-	$label = '' !== $label ? $label : __( 'Advertisement', 'animal-writes-core' );
+	$label = '' !== $label ? $label : __( 'Advertisement', 'kits-by-wugweb' );
 	return '<aside class="aw-ad-slot aw-ad-slot--' . esc_attr( $pos ) . '" aria-label="' . esc_attr( $label ) . '"><p class="aw-ad-label">' . esc_html( $label ) . '</p><div class="aw-ad-box">' . $ad . '</div></aside>';
 }
 
@@ -64,9 +64,9 @@ add_filter(
 /** The key-facts card for a News item, or '' when none of the three fields is filled. */
 function aw_news_key_facts( int $post_id ): string {
 	$rows = array(
-		__( 'What happened', 'animal-writes-core' ) => (string) get_post_meta( $post_id, 'aw_news_happened', true ),
-		__( 'Why it matters', 'animal-writes-core' ) => (string) get_post_meta( $post_id, 'aw_news_matters', true ),
-		__( 'What is next', 'animal-writes-core' )   => (string) get_post_meta( $post_id, 'aw_news_next', true ),
+		__( 'What happened', 'kits-by-wugweb' ) => (string) get_post_meta( $post_id, 'aw_news_happened', true ),
+		__( 'Why it matters', 'kits-by-wugweb' ) => (string) get_post_meta( $post_id, 'aw_news_matters', true ),
+		__( 'What is next', 'kits-by-wugweb' )   => (string) get_post_meta( $post_id, 'aw_news_next', true ),
 	);
 	$html = '';
 	foreach ( $rows as $label => $text ) {
@@ -75,7 +75,7 @@ function aw_news_key_facts( int $post_id ): string {
 			$html .= '<li><strong>' . esc_html( $label ) . '</strong> ' . esc_html( $text ) . '</li>';
 		}
 	}
-	return '' === $html ? '' : '<aside class="aw-keyfacts" aria-label="' . esc_attr__( 'Key facts', 'animal-writes-core' ) . '"><ul>' . $html . '</ul></aside>';
+	return '' === $html ? '' : '<aside class="aw-keyfacts" aria-label="' . esc_attr__( 'Key facts', 'kits-by-wugweb' ) . '"><ul>' . $html . '</ul></aside>';
 }
 
 add_filter(

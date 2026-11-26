@@ -400,7 +400,7 @@ function aw_block_result_head() {
 	}
 	$q     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$where = array_filter( array( $q ? '“' . $q . '”' : '', aw_current_place() ? aw_current_place()->name : '', aw_current_type_name() ) );
-	$line  = $where ? sprintf( /* translators: 1: number of results, 2: what was searched for. */ _n( '%1$s result for %2$s', '%1$s results for %2$s', $n, 'animal-writes-core' ), number_format_i18n( $n ), implode( ', ', $where ) ) : sprintf( /* translators: %s: number of organisations. */ _n( '%s organisation', '%s organisations', $n, 'animal-writes-core' ), number_format_i18n( $n ) );
+	$line  = $where ? sprintf( /* translators: 1: number of results, 2: what was searched for. */ _n( '%1$s result for %2$s', '%1$s results for %2$s', $n, 'kits-by-wugweb' ), number_format_i18n( $n ), implode( ', ', $where ) ) : sprintf( /* translators: %s: number of organisations. */ _n( '%s organisation', '%s organisations', $n, 'kits-by-wugweb' ), number_format_i18n( $n ) );
 	$sort  = 'details' === sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
 	$here  = add_query_arg( map_deep( array_diff_key( wp_unslash( $_GET ), array( 'sort' => 1, 'paged' => 1, 'query-106-page' => 1 ) ), 'rawurlencode' ), strtok( aw_hub_base_url(), '?' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	// Phones: Sort is a menu beside List / Map (owner's Directory mobile spec, 14 Nov 2026). aw.js shows it and hides the
@@ -555,7 +555,7 @@ function aw_card_meta( $id ) {
 	$ts   = aw_card_ts( $id );
 	$diff = time() - $ts;
 	/* translators: %s: time difference, e.g. 3 hours. */
-	$when  = ( $diff >= 0 && $diff < 7 * DAY_IN_SECONDS ) ? ( $diff < 2 * MINUTE_IN_SECONDS ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) ) ) : wp_date( AW_DATE_FORMAT, $ts );
+	$when  = ( $diff >= 0 && $diff < 7 * DAY_IN_SECONDS ) ? ( $diff < 2 * MINUTE_IN_SECONDS ? __( 'Just now', 'kits-by-wugweb' ) : sprintf( __( '%s ago', 'kits-by-wugweb' ), human_time_diff( $ts, time() ) ) ) : wp_date( AW_DATE_FORMAT, $ts );
 	$out   = '<span class="kit-meta-item kit-date aw-date">' . kits_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
 	$place = in_array( get_post_type( $id ), array( 'aw_legal', 'aw_opportunity' ), true ) && function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
 	if ( 'aw_opportunity' === get_post_type( $id ) && function_exists( 'aw_opp_line_place' ) ) {

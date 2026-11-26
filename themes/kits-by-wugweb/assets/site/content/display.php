@@ -17,7 +17,7 @@ add_filter(
 	'gettext',
 	function ( $translation, $text, $domain ) {
 		if ( 'kits-by-wugweb' === $domain && 'Try another search or browse the latest updates.' === $text ) {
-			return __( 'New items appear here after review. Know something that belongs here? Write to contact@animalwrites.in.', 'animal-writes-core' );
+			return __( 'New items appear here after review. Know something that belongs here? Write to contact@animalwrites.in.', 'kits-by-wugweb' );
 		}
 		return $translation;
 	},

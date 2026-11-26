@@ -150,7 +150,7 @@ function kits_site_theme_parts_file_rows(): array {
 /** The screen. */
 function kits_site_theme_parts_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'animal-writes-core' ), 403 );
+		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'kits-by-wugweb' ), 403 );
 	}
 	$intro = 'What the Animal Writes child theme held, where each part lives now that Kits by Wugweb runs on its own, and where to change it. The Kits theme serves these parts from its site folder (assets/site/), which the distributed theme leaves out.';
 	if ( function_exists( 'kits_admin_head' ) ) {

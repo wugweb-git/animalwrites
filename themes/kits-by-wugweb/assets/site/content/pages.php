@@ -216,7 +216,7 @@ add_shortcode(
 			}
 			$out .= '</section>';
 		}
-		$html .= '<p class="aw-search-count" role="status">' . esc_html( sprintf( /* translators: %s: number of results. */ _n( '%s result', '%s results', $total, 'animal-writes-core' ), number_format_i18n( $total ) ) ) . '</p>' . $out;
+		$html .= '<p class="aw-search-count" role="status">' . esc_html( sprintf( /* translators: %s: number of results. */ _n( '%s result', '%s results', $total, 'kits-by-wugweb' ), number_format_i18n( $total ) ) ) . '</p>' . $out;
 		if ( ! $total ) { // empty result: what to do next
 			$html .= '<div class="kit-empty"><p>Nothing matched “' . esc_html( $q ) . '”. Try fewer or different words, or go to a section.</p><nav class="kit-error-links" aria-label="Sections"><ul><li><a href="/directory/">Directory</a></li><li><a href="/news/">News</a></li><li><a href="/resources/">Resources</a></li><li><a href="/library/">Library</a></li><li><a href="/opportunities/">Opportunities</a></li></ul></nav></div>';
 		}

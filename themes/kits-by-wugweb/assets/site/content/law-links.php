@@ -45,7 +45,7 @@ const AW_LAW_NAMES = array(
 
 /** Heading of the list (owner's words in the 12 Nov 2026 brief). */
 function aw_law_index_head() {
-	return __( 'Acts and Rules', 'animal-writes-core' );
+	return __( 'Acts and Rules', 'kits-by-wugweb' );
 }
 
 /**

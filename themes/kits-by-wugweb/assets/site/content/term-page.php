@@ -73,21 +73,21 @@ function aw_block_term_share() {
  */
 function aw_term_siblings( $term ) {
 	if ( 'category' === $term->taxonomy ) {
-		return array( __( 'Other categories', 'animal-writes-core' ), '' );
+		return array( __( 'Other categories', 'kits-by-wugweb' ), '' );
 	}
 	$types = function_exists( 'aw_listing_type_slugs' ) ? aw_listing_type_slugs() : array();
 	if ( in_array( $term->slug, $types, true ) ) {
-		return array( __( 'Other organisation types', 'animal-writes-core' ), $types );
+		return array( __( 'Other organisation types', 'kits-by-wugweb' ), $types );
 	}
 	$services = function_exists( 'aw_service_slugs' ) ? aw_service_slugs() : array();
 	if ( in_array( $term->slug, $services, true ) ) {
-		return array( __( 'Other services', 'animal-writes-core' ), $services );
+		return array( __( 'Other services', 'kits-by-wugweb' ), $services );
 	}
 	if ( defined( 'AW_LEGAL_KINDS' ) && isset( AW_LEGAL_KINDS[ $term->slug ] ) ) {
-		return array( __( 'Other document types', 'animal-writes-core' ), array_keys( AW_LEGAL_KINDS ) );
+		return array( __( 'Other document types', 'kits-by-wugweb' ), array_keys( AW_LEGAL_KINDS ) );
 	}
 	$sec = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
-	return array( __( 'Related tags', 'animal-writes-core' ), $sec ? array_values( array_diff( aw_section_tags( $sec ), $types, $services ) ) : array() );
+	return array( __( 'Related tags', 'kits-by-wugweb' ), $sec ? array_values( array_diff( aw_section_tags( $sec ), $types, $services ) ) : array() );
 }
 
 /** Related: the term's group, as chips (most items first; empty terms left out). A category page first lists its Acts and Rules (law-links.php). */

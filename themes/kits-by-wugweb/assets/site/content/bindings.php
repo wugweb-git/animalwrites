@@ -84,7 +84,7 @@ function aw_binding_value( $key, $post_id ) {
 		case 'source_link_label':
 			$name = $m( 'aw_source_name' );
 			/* translators: %s: source name. */
-			return $m( 'aw_source_url' ) ? ( $name ? sprintf( __( 'Read at %s', 'animal-writes-core' ), $name ) : __( 'Read at source', 'animal-writes-core' ) ) : '';
+			return $m( 'aw_source_url' ) ? ( $name ? sprintf( __( 'Read at %s', 'kits-by-wugweb' ), $name ) : __( 'Read at source', 'kits-by-wugweb' ) ) : '';
 		case 'source_meta':
 			return trim( implode( ', ', array_filter( array( $m( 'aw_source_name' ), aw_format_date( $m( 'aw_source_date' ) ) ) ) ) ); // no typed "·" (owner, 20 Oct 2026)
 		case 'sponsored_label':
@@ -93,19 +93,19 @@ function aw_binding_value( $key, $post_id ) {
 			}
 			$sponsor = $m( 'aw_sponsor_name' );
 			/* translators: %s: sponsor name. */
-			return $sponsor ? sprintf( __( 'Sponsored by %s', 'animal-writes-core' ), $sponsor ) : __( 'Sponsored', 'animal-writes-core' );
+			return $sponsor ? sprintf( __( 'Sponsored by %s', 'kits-by-wugweb' ), $sponsor ) : __( 'Sponsored', 'kits-by-wugweb' );
 		case 'verified_label':
 			if ( ! get_post_meta( $post_id, 'aw_verified', true ) ) {
 				return '';
 			}
 			if ( get_post_meta( $post_id, 'aw_needs_reverify', true ) ) {
-				return __( 'Needs re-check', 'animal-writes-core' );
+				return __( 'Needs re-check', 'kits-by-wugweb' );
 			}
 			$on = aw_format_date( $m( 'aw_verified_on' ) );
 			/* translators: %s: date. */
-			return $on ? sprintf( __( 'Claimed on %s', 'animal-writes-core' ), $on ) : __( 'Claimed', 'animal-writes-core' ); // aw_verified = an approved claim
+			return $on ? sprintf( __( 'Claimed on %s', 'kits-by-wugweb' ), $on ) : __( 'Claimed', 'kits-by-wugweb' ); // aw_verified = an approved claim
 		case 'blacklisted_label':
-			return get_post_meta( $post_id, 'aw_darpan_blacklisted_on', true ) ? __( 'Blacklisted on NGO Darpan', 'animal-writes-core' ) : ''; // the trust panel says by whom and from when
+			return get_post_meta( $post_id, 'aw_darpan_blacklisted_on', true ) ? __( 'Blacklisted on NGO Darpan', 'kits-by-wugweb' ) : ''; // the trust panel says by whom and from when
 		case 'area':
 			// Cards show the town, district and state only, never the street address (owner, 12 Oct 2026); the full
 			// address is on the profile.
@@ -146,16 +146,16 @@ function aw_binding_value( $key, $post_id ) {
 		case 'deadline_label':
 			$d = aw_format_date( $m( 'aw_deadline' ) );
 			/* translators: %s: date. */
-			return $d ? sprintf( __( 'Apply by %s', 'animal-writes-core' ), $d ) : '';
+			return $d ? sprintf( __( 'Apply by %s', 'kits-by-wugweb' ), $d ) : '';
 		case 'deadline':
 			// "Apply by" with the one date component (aw_date: calendar icon directly before the date). HTML, kept by
 			// the source's wp_kses_post. Empty without a deadline, so the bound block is removed.
 			$d = $m( 'aw_deadline' );
 			if ( $d && function_exists( 'aw_date' ) && function_exists( 'aw_retention_state' ) && 'closed' === aw_retention_state( $post_id ) ) {
 				// Past its deadline: a visible "Closed" tag and the date it closed (owner, 18 Oct 2026).
-				return '<span class="kit-tag kit-tag--closed">' . esc_html__( 'Closed', 'animal-writes-core' ) . '</span> ' . __( 'Applications closed on', 'animal-writes-core' ) . ' ' . aw_date( $d . ' 12:00:00' );
+				return '<span class="kit-tag kit-tag--closed">' . esc_html__( 'Closed', 'kits-by-wugweb' ) . '</span> ' . __( 'Applications closed on', 'kits-by-wugweb' ) . ' ' . aw_date( $d . ' 12:00:00' );
 			}
-			return $d ? __( 'Apply by', 'animal-writes-core' ) . ' ' . kits_date( $d . ' 12:00:00', AW_DATE_FORMAT, 'aw-date' ) : '';
+			return $d ? __( 'Apply by', 'kits-by-wugweb' ) . ' ' . kits_date( $d . ' 12:00:00', AW_DATE_FORMAT, 'aw-date' ) : '';
 		case 'file_url':
 			return $m( 'aw_file_url' );
 	}
@@ -215,7 +215,7 @@ add_action(
 		register_block_bindings_source(
 			'animal-writes/field',
 			array(
-				'label'              => __( 'Animal Writes field', 'animal-writes-core' ),
+				'label'              => __( 'Animal Writes field', 'kits-by-wugweb' ),
 				'uses_context'       => array( 'postId' ),
 				'get_value_callback' => fn( $args, $block ) => kits_post_field_output( (string) ( $args['key'] ?? '' ), kits_post_field_post_id( $block ) ),
 			)
