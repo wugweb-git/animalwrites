@@ -21,13 +21,13 @@
 |---------|----------|
 | **Company** | Wugweb |
 | **Contact** | admin@wugweb.com |
-| **Wordmark** | `tenant/assets/site/wordmark-light.svg` / `wordmark-dark.svg` |
-| **Mark** | `tenant/assets/site/site-icon.png` |
+| **Wordmark** | `themes/kits-by-wugweb/assets/site/wordmark-light.svg` / `wordmark-dark.svg` |
+| **Mark** | `themes/kits-by-wugweb/assets/site/site-icon.png` |
 | **Primary accent** | `#c15a3a` (terracotta) |
 | **Background** | Bone cream |
 | **License** | MIT |
 
-The Wugweb brand OS is defined as a system of **design tokens**, not fixed values. Tokens live in `tenant/assets/site/tokens/tokens.json` and are compiled into `tokens.compiled.json`. They map to CSS custom properties (`--kit-*`) and Gutenberg `theme.json` palettes.
+The Wugweb brand OS is defined as a system of **design tokens**, not fixed values. Tokens live in `themes/kits-by-wugweb/assets/site/tokens/tokens.json` and are compiled into `tokens.compiled.json`. They map to CSS custom properties (`--kit-*`) and Gutenberg `theme.json` palettes.
 
 ---
 
@@ -68,7 +68,7 @@ Each profile exports/imports as JSON for zero-downtime replication across tenant
 | Muted | `--kit-color-muted` | — | Captions, metadata |
 | Line | `--kit-color-line` | — | Borders, dividers |
 
-Animal Writes tenant override palette (`tenant/styles/animal-writes.json`):
+Animal Writes tenant override palette (`themes/kits-by-wugweb/styles/animal-writes.json`):
 - Terracotta accent `#c15a3a`
 - Forest green
 - Warm slate
@@ -91,14 +91,14 @@ Inter is the primary typeface (`themes/kits-by-wugweb/assets/fonts/inter/`).
 
 | Component | Location | Notes |
 |-----------|----------|-------|
-| Wordmark (light) | `tenant/assets/site/wordmark-light.svg` | Use on dark backgrounds |
-| Wordmark (dark) | `tenant/assets/site/wordmark-dark.svg` | Use on light backgrounds |
-| Site icon / favicon | `tenant/assets/site/site-icon.png` | Favicon and app icon |
-| Brand CSS | `tenant/assets/site/css/aw-site.css` | Tenant brand stylesheet |
-| Pattern CSS | `tenant/assets/site/css/aw-patterns.css` | Campaign and component rules |
-| Theme style variation | `tenant/styles/animal-writes.json` | Gutenberg `theme.json` style variation |
+| Wordmark (light) | `themes/kits-by-wugweb/assets/site/wordmark-light.svg` | Use on dark backgrounds |
+| Wordmark (dark) | `themes/kits-by-wugweb/assets/site/wordmark-dark.svg` | Use on light backgrounds |
+| Site icon / favicon | `themes/kits-by-wugweb/assets/site/site-icon.png` | Favicon and app icon |
+| Brand CSS | `themes/kits-by-wugweb/assets/site/css/aw-site.css` | Tenant brand stylesheet |
+| Pattern CSS | `themes/kits-by-wugweb/assets/site/css/aw-patterns.css` | Campaign and component rules |
+| Theme style variation | `themes/kits-by-wugweb/styles/animal-writes.json` | Gutenberg `theme.json` style variation |
 
-Do not modify files in `themes/kits-by-wugweb/` or `plugins/` directly — those are platform code consumed from `wugweb-git/kits`. All tenant brand overrides live in `tenant/`.
+Do not modify files in `themes/kits-by-wugweb/` or `plugins/` directly — those are platform code consumed from `wugweb-git/kits`. The Animal Writes brand files live in `themes/kits-by-wugweb/assets/site/` and `themes/kits-by-wugweb/styles/` (the separate `tenant/` copy was removed on 26 Nov 2026; nothing read it).
 
 ---
 
@@ -106,7 +106,7 @@ Do not modify files in `themes/kits-by-wugweb/` or `plugins/` directly — those
 
 | Do | Don't |
 |----|-------|
-| Edit brand tokens in `tenant/assets/site/tokens/tokens.json` | Hard-code colors in tenant CSS |
+| Edit brand tokens in `themes/kits-by-wugweb/assets/site/tokens/tokens.json` | Hard-code colors in tenant CSS |
 | Use the 4 built-in tenant profiles via the Brand Customizer (`Appearance > Brand Tokens`) | Create ad-hoc brand variants |
 | Export/Import brand JSON for tenant replication | Duplicate brand assets across repos |
 | Reference platform assets via `wp_theme_json_data_theme` filter | Modify `themes/kits-by-wugweb/` directly |
@@ -116,7 +116,7 @@ Do not modify files in `themes/kits-by-wugweb/` or `plugins/` directly — those
 ## Files in this repo
 
 ```
-tenant/
+themes/kits-by-wugweb/
   assets/site/
     tokens/tokens.json          # Design token source of truth
     tokens/tokens.compiled.json # Compiled token output
@@ -135,6 +135,6 @@ composer.json                   # Declares Kits packages as dependencies
 
 ## Maintenance
 
-- Token changes: edit `tenant/assets/site/tokens/tokens.json`, then run `python3 tools/build-tokens.py` to regenerate `tokens.compiled.json` and `theme.json` files.
-- Brand CSS changes: edit `tenant/assets/site/css/aw-site.css` and `aw-patterns.css`; run CI contrast and css_min checks before deploying.
+- Token changes: edit `themes/kits-by-wugweb/assets/site/tokens/tokens.json`, then run `python3 tools/build-tokens.py` to regenerate `tokens.compiled.json` and `theme.json` files.
+- Brand CSS changes: edit `themes/kits-by-wugweb/assets/site/css/aw-site.css` and `aw-patterns.css`; run CI contrast and css_min checks before deploying.
 - Platform updates: run `tools/package-ingest.sh --pull` to fetch the latest Kits platform from `wugweb-git/kits@kits-suite`.
