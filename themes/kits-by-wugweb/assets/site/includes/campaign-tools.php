@@ -789,13 +789,37 @@ foreach ( AW_CAMP_BOXES as $aw_camp_key => $aw_camp_fn ) {
 }
 unset( $aw_camp_key, $aw_camp_fn );
 
+/*
+ * Without SCF the same five boxes are plain WordPress meta boxes (same markup, same save), so the campaign screen
+ * still works with SCF off (26 Nov 2026: plugins do not depend on SCF for editing).
+ */
+add_action(
+	'add_meta_boxes_aw_campaign',
+	function () {
+		if ( function_exists( 'acf_add_local_field_group' ) ) {
+			return; // SCF shows them (the field groups above).
+		}
+		$boxes = array(
+			'aw_camp_dates_box'    => 'Dates and state',
+			'aw_camp_document_box' => 'Document',
+			'aw_camp_orgs_box'     => 'Organisations',
+			'aw_camp_outcome_box'  => 'Outcome',
+			'aw_camp_share_box'    => 'Letters and share',
+		);
+		foreach ( $boxes as $fn => $title ) {
+			add_meta_box( $fn, $title, $fn, 'aw_campaign', 'normal', 'default' );
+		}
+	}
+);
+
 /**
- * Are all five campaign groups on? The save below writes every field, so it may only run when every box is on the
- * screen: a group switched off in SCF would otherwise save its fields as empty or default.
+ * Are all five campaign boxes on? The save below writes every field, so it may only run when every box is on the
+ * screen: a group switched off in SCF would otherwise save its fields as empty or default. Without SCF the five plain
+ * meta boxes above are always on.
  */
 function aw_camp_boxes_all_on() {
 	if ( ! function_exists( 'acf_get_field_group' ) ) {
-		return false;
+		return true;
 	}
 	foreach ( array( 'dates', 'document', 'orgs', 'outcome', 'share' ) as $g ) {
 		$group = acf_get_field_group( 'group_aw_campaign_' . $g );
