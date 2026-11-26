@@ -103,12 +103,12 @@ From the web (Lab campaign, not Vishakha): Google News results for the draft Lab
 | 3 | Add tag **Profile** to Resource types; build the profile pattern, Home block and About block; register them | Claude | own branch, code-review skill, PHPCS, Deploy check, owner's yes before shipping |
 | 4 | Draft Vishakha's profile text (English) | Claude, with the content skills | owner's explicit yes |
 | 5 | Evidence table with archive links | Claude | owner's yes |
-| 6 | Contact Vishakha or confirm public-reporting only | Owner | decision |
+| 6 | ~~Contact Vishakha~~ (she supplied the links); owner asks her for a photo and her approval of the draft | Owner | her approval |
 | 7 | Publish as draft, check Rich Results Test and URL Inspection, then publish | Claude | owner's yes |
 | 8 | SourceWeb ingests more coverage; add rows to the evidence table | Owner and SourceWeb | none |
 
-## 11. Open questions for the owner
+## 11. Open questions (owner, 26 Nov 2026)
 
-1. Contact her first, or public reporting only?
-2. Photo: do we have permission, or none for now?
-3. Menu entry or not (the Resources list with a Profile filter may be enough).
+1. ~~Contact her first, or public reporting only?~~ **Settled:** Vishakha is in touch and gave the owner the links herself. The profile is made with her, so the draft still goes to her for approval before it goes live (section 9).
+2. Photo: use a photo she supplies, with her permission and credit. None until she sends one.
+3. Menu entry: none for now; the Resources list with the Profile tag is enough.
