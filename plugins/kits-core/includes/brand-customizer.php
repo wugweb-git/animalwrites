@@ -330,3 +330,78 @@ function kits_brand_customizer_render_page() {
 	</div>
 	<?php
 }
+
+/**
+ * Colour overrides from the saved brand tokens, as theme.json palette entries (cached).
+ *
+ * Only tokens that name a colour preset (--wp--preset--color--<slug>) and differ from their default are returned.
+ * The cache is the transient kits_brand_theme_data; it is dropped whenever the brand option changes.
+ *
+ * @return array<int, array{slug: string, name: string, color: string}>
+ */
+function kits_brand_theme_palette(): array {
+	$cached = get_transient( 'kits_brand_theme_data' );
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
+
+	$tokens  = kits_get_brand_tokens();
+	$palette = array();
+	foreach ( kits_brand_token_definitions() as $key => $def ) {
+		$val = isset( $tokens[ $key ] ) ? (string) $tokens[ $key ] : '';
+		if ( '' === $val || 'inherit' === $val || $val === $def['default'] || empty( $def['wp_preset'] ) ) {
+			continue;
+		}
+		if ( ! preg_match( '/^--wp--preset--color--([a-z0-9-]+)$/', $def['wp_preset'], $m ) ) {
+			continue;
+		}
+		$color = sanitize_hex_color( $val );
+		if ( ! $color ) {
+			continue;
+		}
+		$palette[] = array(
+			'slug'  => $m[1],
+			'name'  => $def['label'],
+			'color' => $color,
+		);
+	}
+
+	set_transient( 'kits_brand_theme_data', $palette, DAY_IN_SECONDS );
+	return $palette;
+}
+
+/**
+ * Layer 3 of theme.json: the owner's brand colours replace the theme palette entries of the same slug,
+ * so the editor, the Styles screen and the generated preset classes follow the Brand Customizer.
+ *
+ * @param WP_Theme_JSON_Data $theme_json Theme layer data.
+ * @return WP_Theme_JSON_Data
+ */
+add_filter(
+	'wp_theme_json_data_theme',
+	function ( $theme_json ) {
+		$palette = kits_brand_theme_palette();
+		if ( ! $palette || ! $theme_json instanceof WP_Theme_JSON_Data ) {
+			return $theme_json;
+		}
+		return $theme_json->update_with(
+			array(
+				'version'  => 3,
+				'settings' => array( 'color' => array( 'palette' => $palette ) ),
+			)
+		);
+	}
+);
+
+/**
+ * Drops the cached palette (and the theme.json cache) when the brand tokens are saved, added or removed.
+ */
+function kits_brand_theme_cache_clear() {
+	delete_transient( 'kits_brand_theme_data' );
+	if ( class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+		WP_Theme_JSON_Resolver::clean_cached_data();
+	}
+}
+add_action( 'update_option_' . KITS_BRAND_OPTION, 'kits_brand_theme_cache_clear' );
+add_action( 'add_option_' . KITS_BRAND_OPTION, 'kits_brand_theme_cache_clear' );
+add_action( 'delete_option_' . KITS_BRAND_OPTION, 'kits_brand_theme_cache_clear' );
