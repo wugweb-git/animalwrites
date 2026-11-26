@@ -189,6 +189,38 @@ function aw_sort_dates_missing() {
 	);
 }
 
+/**
+ * A Library item published from the review queue gets its sort key then, and any item still without one (ingested before
+ * this ran) is filled in the admin, at most every 12 hours and 50 of each kind per run. The same values `wp aw sort-dates --fix`
+ * writes; without the key an item is left out of every list.
+ */
+add_action(
+	'transition_post_status',
+	function ( $new, $old, $post ) {
+		if ( 'publish' === $new && $post && 'aw_legal' === $post->post_type ) {
+			aw_doc_sort_sync( $post->ID );
+		}
+	},
+	10,
+	3
+);
+add_action(
+	'admin_init',
+	function () {
+		if ( wp_doing_ajax() || wp_doing_cron() || get_transient( 'aw_sort_heal' ) ) {
+			return;
+		}
+		set_transient( 'aw_sort_heal', 1, 12 * HOUR_IN_SECONDS );
+		$missing = aw_sort_dates_missing();
+		foreach ( array_slice( $missing['legal'], 0, 50 ) as $id ) {
+			aw_doc_sort_sync( $id );
+		}
+		foreach ( array_slice( $missing['news'], 0, 50 ) as $id ) {
+			aw_news_sort_sync( $id );
+		}
+	}
+);
+
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
 	 * Fills the list sort dates: `wp aw sort-dates` reports what is missing (read-only); `--fix` writes them.

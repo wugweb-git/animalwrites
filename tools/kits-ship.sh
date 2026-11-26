@@ -44,7 +44,24 @@ done
 if [ "$live" != "$sha" ]; then
   gated=$(git rev-parse origin/wordpress)
   if [ "$gated" = "$sha" ]; then
-    live=$("${server[@]}" "cd ~/domains/animalwrites.in/public_html/aw_deploy && test -z \"\$(git status --short)\" && git fetch -q origin wordpress && test \"\$(git rev-parse FETCH_HEAD)\" = $sha && git checkout -q --detach FETCH_HEAD && git rev-parse HEAD" 2>/dev/null | tail -1)
+    # SCF writes a group's JSON file back into this folder whenever a group is saved in wp-admin. Those files (and only those) are
+    # copied to ~/aw_scf_saved/<time>/ and cleared; any other local change still stops the deploy.
+    live=$("${server[@]}" bash -s -- "$sha" 2>/dev/null <<'REMOTE' | tail -1
+set -e
+cd ~/domains/animalwrites.in/public_html/aw_deploy
+sha=$1
+dirty=$(git status --short)
+if [ -n "$dirty" ]; then
+  if echo "$dirty" | grep -qvE '^ M .*/acf-json/[^/]+\.json$'; then exit 1; fi
+  dest=~/aw_scf_saved/$(date -u +%Y%m%dT%H%M%SZ)
+  echo "$dirty" | awk '{print $2}' | while read -r f; do mkdir -p "$dest/$(dirname "$f")"; cp "$f" "$dest/$f"; git checkout -q -- "$f"; done
+fi
+git fetch -q origin wordpress
+test "$(git rev-parse FETCH_HEAD)" = "$sha"
+git checkout -q --detach FETCH_HEAD
+git rev-parse HEAD
+REMOTE
+)
     echo "Hostinger did not pull; checked out on the server: ${live:0:7}"
   fi
 fi
