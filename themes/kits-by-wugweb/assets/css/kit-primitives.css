@@ -621,8 +621,7 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
    - Connectors take the state of the step they leave: past solid in the mark; present a highlighted solid (twice as
      thick); ongoing the same thick line with a soft band either side (the period under way); future dashed in a tint
      of the text; undated dotted. Centred on the page; they stop a --kit-space-1 short of a page (below its sheet) and clear of its rings and badge.
-   - Phones (to 767): one column, the page beside its words, one vertical line down the pages' centre.
-   - 768 to 1199: two steps a row, each page above its words; the line joins the two steps of a row only.
+   - Phones and tablets (to 1199): two steps a row (2 x 2 for four), each page above its words; the line joins the two steps of a row only.
    - From 1200: one row, the pages aligned, the line across their middles, the words under them.
    The step's word when it has no date ("Now", "No date set") is printed above its words (.kit-dateline-word).
    Markup: ol or div.kit-dateline > a step (data-state) > its page holder first (kit-dateline-when),
@@ -644,15 +643,14 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 .kit-dateline > *::after { content: none; }
 .kit-dateline > *::before { content: ""; display: block; position: absolute; left: calc(var(--dl-w) / 2 - var(--dl-t) / 2); top: calc(var(--kit-space-2) + var(--dl-h) + var(--kit-space-1) * 2); bottom: var(--kit-space-1); width: 0; border-left: var(--dl-t) var(--dl-style) var(--dl-c); box-shadow: 0 0 0 var(--kit-border-width) var(--dl-band); }
 .kit-dateline > :last-child::before { content: none; }
-@media (min-width: 768px) {
-	.kit-dateline { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--dl-gap); row-gap: var(--kit-space-6); }
-	.kit-dateline > * { grid-template-columns: minmax(0, 1fr); padding: 0; }
-	.kit-dateline.kit-dateline > * > :first-child { grid-row: auto; }
-	.kit-dateline.kit-dateline > * > :not(:first-child) { grid-column: 1; }
-	.kit-dateline.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-3); }
-	.kit-dateline > *::before { content: none; left: calc(var(--dl-w) + var(--kit-space-2) + var(--kit-space-1)); right: calc(var(--kit-space-2) - var(--dl-gap)); top: calc(var(--kit-space-2) + var(--dl-h) / 2 - var(--dl-t) / 2); bottom: auto; width: auto; height: 0; border-left: 0; border-top: var(--dl-t) var(--dl-style) var(--dl-c); }
-	.kit-dateline > :nth-child(odd):not(:last-child)::before { content: ""; }
-}
+/* Phones and tablets: two steps a row (owner, 26 Nov 2026: "should be in 2 x 2"). */
+.kit-dateline { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--dl-gap); row-gap: var(--kit-space-6); }
+.kit-dateline > * { grid-template-columns: minmax(0, 1fr); padding: 0; }
+.kit-dateline.kit-dateline > * > :first-child { grid-row: auto; }
+.kit-dateline.kit-dateline > * > :not(:first-child) { grid-column: 1; }
+.kit-dateline.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-3); }
+.kit-dateline > *::before { content: none; left: calc(var(--dl-w) + var(--kit-space-2) + var(--kit-space-1)); right: calc(var(--kit-space-2) - var(--dl-gap)); top: calc(var(--kit-space-2) + var(--dl-h) / 2 - var(--dl-t) / 2); bottom: auto; width: auto; height: 0; border-left: 0; border-top: var(--dl-t) var(--dl-style) var(--dl-c); }
+.kit-dateline > :nth-child(odd):not(:last-child)::before { content: ""; }
 @media (min-width: 1200px) {
 	.kit-dateline { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
 	.kit-dateline > :not(:last-child)::before { content: ""; }
