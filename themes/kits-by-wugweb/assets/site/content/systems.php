@@ -112,7 +112,7 @@ const AW_LIST_SORTS = array(
 function aw_active_filters( $type ) {
 	$out = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
-		$raw = wp_unslash( $_GET[ $f[0] ] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		$raw = wp_unslash( $_GET[ $f[0] ] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- every value is run through sanitize_title() on the next line
 		$v   = array_values( array_unique( array_filter( array_map( 'sanitize_title', is_array( $raw ) ? $raw : explode( ',', (string) $raw ) ) ) ) );
 		if ( $v ) {
 			$out[ $f[0] ] = $v;
