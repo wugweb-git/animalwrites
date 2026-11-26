@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
-<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/resources/rabies-after-a-bite-india/">Rabies injection: timing and cost</a></div>
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/campaigns/rabies-awareness-india/">Rabies injection: timing and cost</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
