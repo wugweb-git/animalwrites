@@ -435,7 +435,9 @@ add_action(
 				$rows  = array();
 				$r     = (array) ( $run['php'] ?? array() );
 				$ok    = 'ok' === ( $r['status'] ?? '' );
-				$files = array_map( 'wp_basename', array_keys( (array) ( $r['files'] ?? array() ) ) );
+				$files = array_values( array_unique( array_map( function ( $f ) {
+					return 'wp-admin' === wp_basename( dirname( $f ) ) ? 'wp-admin/' . wp_basename( $f ) : wp_basename( $f ); // two logs both named error_log read as one name otherwise
+				}, array_keys( (array) ( $r['files'] ?? array() ) ) ) ) );
 				foreach ( kits_error_count_kinds() as $k => $name ) {
 					$kind  = kits_error_count_kind( $r, $k );
 					$label = kits_error_count_label( $r, $k );
