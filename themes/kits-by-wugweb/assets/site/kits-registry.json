@@ -3433,6 +3433,221 @@
         "alt": "none",
         "schema": "none"
       }
+    },
+    {
+      "name": "News list",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "aw-hub-list",
+        "aw-hub-news",
+        "aw-news-list"
+      ],
+      "states": [
+        "default: the list on the news hub page: a Query Loop of the section's items as cards (the page points at this pattern, not at a database block)"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (hub page list)",
+        "aria": "none",
+        "keyboard": "links only",
+        "focus": "browser default",
+        "target": "n/a",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/hub-news"
+    },
+    {
+      "name": "Resources list",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "aw-hub-list",
+        "aw-hub-resources",
+        "aw-tasks"
+      ],
+      "states": [
+        "default: the list on the resources hub page: a Query Loop of the section's items as cards (the page points at this pattern, not at a database block)"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (hub page list)",
+        "aria": "none",
+        "keyboard": "links only",
+        "focus": "browser default",
+        "target": "n/a",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/hub-resources"
+    },
+    {
+      "name": "Library list",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "aw-cases",
+        "aw-hub-library",
+        "aw-hub-list"
+      ],
+      "states": [
+        "default: the list on the library hub page: a Query Loop of the section's items as cards (the page points at this pattern, not at a database block)"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (hub page list)",
+        "aria": "none",
+        "keyboard": "links only",
+        "focus": "browser default",
+        "target": "n/a",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/hub-library"
+    },
+    {
+      "name": "Opportunities list",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "aw-hub-list",
+        "aw-hub-opportunities",
+        "aw-opps"
+      ],
+      "states": [
+        "default: the list on the opportunities hub page: a Query Loop of the section's items as cards (the page points at this pattern, not at a database block)"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (hub page list)",
+        "aria": "none",
+        "keyboard": "links only",
+        "focus": "browser default",
+        "target": "n/a",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/hub-opportunities"
+    },
+    {
+      "name": "Campaigns list",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "aw-camp-more",
+        "aw-hide-empty",
+        "aw-hub-campaigns",
+        "aw-hub-list"
+      ],
+      "states": [
+        "default: the list on the campaigns hub page: a Query Loop of the section's items as cards (the page points at this pattern, not at a database block)"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (hub page list)",
+        "aria": "none",
+        "keyboard": "links only",
+        "focus": "browser default",
+        "target": "n/a",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/hub-campaigns"
+    },
+    {
+      "name": "Directory list",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "aw-hub-directory",
+        "aw-hub-list",
+        "aw-org",
+        "aw-org-body",
+        "aw-org-meta",
+        "aw-org-name",
+        "aw-orgs"
+      ],
+      "states": [
+        "default: the list on the directory hub page: a Query Loop of the section's items as cards (the page points at this pattern, not at a database block)"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (hub page list)",
+        "aria": "none",
+        "keyboard": "links only",
+        "focus": "browser default",
+        "target": "n/a",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/hub-directory"
+    },
+    {
+      "name": "Press list",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "aw-hub-list",
+        "aw-hub-media",
+        "aw-news-grid"
+      ],
+      "states": [
+        "default: the list on the press hub page: a Query Loop of the section's items as cards (the page points at this pattern, not at a database block)"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (hub page list)",
+        "aria": "none",
+        "keyboard": "links only",
+        "focus": "browser default",
+        "target": "n/a",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/hub-press"
     }
   ],
   "nav_status": {
