@@ -157,94 +157,6 @@
             "append": ""
         },
         {
-            "key": "field_aw_social_views",
-            "label": "Views at import",
-            "name": "aw_social_views",
-            "aria-label": "",
-            "type": "number",
-            "instructions": "Optional.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "25",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "min": 0,
-            "max": "",
-            "placeholder": "",
-            "step": 1,
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_aw_social_reposts",
-            "label": "Reposts at import",
-            "name": "aw_social_reposts",
-            "aria-label": "",
-            "type": "number",
-            "instructions": "Optional.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "25",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "min": 0,
-            "max": "",
-            "placeholder": "",
-            "step": 1,
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_aw_social_likes",
-            "label": "Likes at import",
-            "name": "aw_social_likes",
-            "aria-label": "",
-            "type": "number",
-            "instructions": "Optional.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "25",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "min": 0,
-            "max": "",
-            "placeholder": "",
-            "step": 1,
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_aw_social_replies",
-            "label": "Replies at import",
-            "name": "aw_social_replies",
-            "aria-label": "",
-            "type": "number",
-            "instructions": "Optional.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "25",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "min": 0,
-            "max": "",
-            "placeholder": "",
-            "step": 1,
-            "prepend": "",
-            "append": ""
-        },
-        {
             "key": "field_aw_social_seen_on",
             "label": "Numbers seen on",
             "name": "aw_social_seen_on",
@@ -339,27 +251,6 @@
             "rows": 3,
             "placeholder": "",
             "new_lines": ""
-        },
-        {
-            "key": "field_aw_social_hashtags",
-            "label": "Hashtags at import",
-            "name": "aw_social_hashtags",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "Staff only, from an import.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "readonly": 1,
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
         }
     ],
     "location": [
@@ -380,5 +271,5 @@
     "active": true,
     "description": "Other people's public post about a campaign or an item: link, who posted it, when, our one-line summary, numbers at import.",
     "show_in_rest": 0,
-    "modified": 1793577600
+    "modified": 1795689430
 }

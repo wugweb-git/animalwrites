@@ -8,7 +8,7 @@
  * FAQ: the topic questions approved for the term (faq.php), rendered by aw_faq_html(); the FAQPage schema is parsed from
  * the same HTML. Only organisation types, services and categories have one.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -5,7 +5,7 @@
  *
  *   Lists         the hub Pages' Query Loops (hubs.php, hub-blocks.php); the filters below drive them.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

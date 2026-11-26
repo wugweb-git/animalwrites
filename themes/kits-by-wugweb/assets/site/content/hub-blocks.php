@@ -10,7 +10,7 @@
  * contact (icons only when the contact exists) · org-actions · result-head (count + sort) · browse-states ·
  * press-media · press-meta (date + format tag).
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

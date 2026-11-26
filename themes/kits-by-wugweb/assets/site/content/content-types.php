@@ -2,7 +2,7 @@
 /**
  * Post types and taxonomies. Each pillar keeps its own URL space for SEO.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -13,7 +13,7 @@
  *   Writes core first and SCF can be deactivated as usual. listing-profile.php and pages.php still keep a box for
  *   the case SCF is missing.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

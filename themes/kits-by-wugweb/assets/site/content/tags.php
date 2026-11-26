@@ -11,7 +11,7 @@
  * ?kind=, ?type= and ?service= on a list → ?tag=; ?category= → ?category_name=; /?cat=N of an old Resource type →
  * /resources/?tag={slug}.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

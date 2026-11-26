@@ -3,7 +3,7 @@
  * Animal Writes blocks in their states, on the states sheet (/kits-demo/, administrators only): each block rendered
  * from a real item that is in that state, so the sheet shows what visitors see. A state with no such item yet says so.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

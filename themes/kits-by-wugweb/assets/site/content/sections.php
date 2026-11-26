@@ -3,7 +3,7 @@
  * Section header for archives: [aw_section_head]. Title, one-line description, live count and a
  * three-image visual built from real content in that section.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

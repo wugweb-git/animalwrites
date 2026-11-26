@@ -2,7 +2,7 @@
 /**
  * Small front-end display tweaks.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

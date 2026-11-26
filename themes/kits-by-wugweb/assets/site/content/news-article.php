@@ -11,7 +11,7 @@
  * reserved height and an "Advertisement" label, only when a filter gives it content. Not above the headline, no fixed bottom banner,
  * no popup. The two positions are at least 600px apart.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

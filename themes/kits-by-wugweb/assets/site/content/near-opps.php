@@ -6,7 +6,7 @@
  * their own browser only). Rows are the same Query Loop markup as the pattern (the Opportunities list's card); fewer than two local items are
  * filled with the newest.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

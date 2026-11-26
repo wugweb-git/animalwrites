@@ -7,7 +7,7 @@
  * - /?cat=N of an old Resource type: tags.php.
  * - /topics/ → /categories/ is in Rank Math → Redirections (added once by tools/categories/migrate.php, removed 25 Oct 2026; see git history).
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

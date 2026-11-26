@@ -15,7 +15,7 @@
  * An Act or Rule is a published Library item tagged `act` or `rule`. The guide map is cached for 12 hours and worked
  * out again when a guide or a Library item is saved.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

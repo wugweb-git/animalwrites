@@ -12,7 +12,7 @@
  *   one (the heading is not printed either).
  * - A person asks to be taken off through the Contact form (Remove my data), as for every other detail.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

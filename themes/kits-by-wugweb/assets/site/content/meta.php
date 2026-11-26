@@ -2,7 +2,7 @@
 /**
  * Post meta. Registered natively (no ACF) and exposed to the block editor + REST.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

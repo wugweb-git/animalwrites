@@ -3,7 +3,7 @@
  * "Also reported by": publisher logos in an item's source row (meta aw_also_reported, written by the same-story fold
  * in aw-sourcing). Kept in core because it is part of the item template.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

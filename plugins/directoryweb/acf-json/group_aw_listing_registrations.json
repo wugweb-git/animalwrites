@@ -239,26 +239,6 @@
             "append": ""
         },
         {
-            "key": "field_aw_listing_sectors",
-            "label": "Sectors (NGO Darpan)",
-            "name": "aw_sectors",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "Sectors of work as NGO Darpan lists them, comma separated. Not shown on the listing.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "100",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "placeholder": "",
-            "maxlength": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
             "key": "field_aw_listing_awbi_recognised",
             "label": "AWBI recognised on",
             "name": "aw_awbi_recognised",
@@ -313,5 +293,5 @@
     "active": true,
     "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
     "show_in_rest": 0,
-    "modified": 1793506771
+    "modified": 1795689430
 }

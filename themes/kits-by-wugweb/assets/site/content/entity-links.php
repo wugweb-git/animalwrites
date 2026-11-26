@@ -10,7 +10,7 @@
  * - Only to a published page: a law or organisation whose item is published, a place with listings.
  * - Never to the page itself.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

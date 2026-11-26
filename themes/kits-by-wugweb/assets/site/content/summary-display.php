@@ -3,7 +3,7 @@
  * An item's own page (News, Library, research) shows its whole summary. The summary rules themselves are SourceWeb's
  * (aw-sourcing/includes/summary-rules.php); this is the site's display of them.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

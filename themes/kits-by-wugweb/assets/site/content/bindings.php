@@ -10,7 +10,7 @@
  * Blocks bound to an empty value are removed from the output, except the contact buttons on organisation pages, which
  * show greyed out (aria-disabled, not a link).
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

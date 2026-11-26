@@ -5,7 +5,7 @@
  * The FAQ questions built from them, and the rest of the site's FAQ rules, moved to RankWeb on 18 Nov 2026
  * (aw-seo-extras/includes/faq-data.php); the meta keys are unchanged.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -17,7 +17,7 @@
  *   same as on the lists. Card titles are h3 under the group's h2.
  * - The picked IDs are cached for 12 hours per item (a transient); the page itself is cached by LiteSpeed.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

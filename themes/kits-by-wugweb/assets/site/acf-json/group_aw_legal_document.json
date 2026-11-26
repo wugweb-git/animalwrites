@@ -139,26 +139,6 @@
             "message": "",
             "new_lines": "wpautop",
             "esc_html": 0
-        },
-        {
-            "key": "field_aw_legal_requires_email",
-            "label": "Ask for an email before download",
-            "name": "aw_requires_email",
-            "aria-label": "",
-            "type": "true_false",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "message": "",
-            "default_value": 0,
-            "ui": 1,
-            "ui_on_text": "Yes",
-            "ui_off_text": "No"
         }
     ],
     "location": [
@@ -179,5 +159,5 @@
     "active": true,
     "description": "Library item document: file, official number, short name, parent Act, key sections and issuer.",
     "show_in_rest": 0,
-    "modified": 1792108800
+    "modified": 1795689430
 }

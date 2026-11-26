@@ -14,7 +14,7 @@
  * - "Animal Writes" internal organisation: a private listing (meta aw_internal), so it can organise campaigns while
  *   staying out of the directory, search, the sitemap and every count.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

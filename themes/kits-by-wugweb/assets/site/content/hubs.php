@@ -11,7 +11,7 @@
  * - Directory places (/directory/{state}/…) are LGD-routed (directory.php) to the Directory Page.
  * - Canonical: the Page URL (with /page/N/), without filters. Schema: CollectionPage + ItemList + BreadcrumbList.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

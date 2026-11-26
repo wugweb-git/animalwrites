@@ -10,7 +10,7 @@
  *   aw_message posts (Inbox > Contact messages), still registered and listed.
  * - /search/ is not indexed.
  *
- * @package animal-writes-core
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
