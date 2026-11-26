@@ -73,12 +73,13 @@ Owner will check the unread ones later; SourceWeb will ingest the coverage.
 
 From the web (Lab campaign, not Vishakha): Google News results for the draft Laboratory Animals Rules 2026 (Rising Kashmir, Education Times, New Indian Express, OC Academy, The Scientist, Humane World for Animals, Scroll, PETA India, Mongabay India, TheWire) and Google's structured-data pages (search gallery, Profile page, Article). Search Console figures are in `docs/pending.md`.
 
-## 7. Insights check (open)
+## 7. Insights check (done 26 Nov 2026, Search Console 27 Oct to 23 Nov unless stated)
 
-1. Search Console (Animal Writes project in OpenSEO): the Resources section today: impressions, clicks, position by page; which Resource types rank.
-2. Keywords for the profile: "Vishakha Shukla Lucknow dog shelter", "Nawabi Tails Rescue Foundation", "women feeders stray dogs", "Lucknow stray dogs Supreme Court"; check volume and current ranking.
-3. InsightWeb: what it reports for Resources and News; connect Search Console enhancement data after launch.
-4. After launch: URL Inspection, Rich Results Test, and a 28-day comparison.
+1. **Her organisation is already in the Directory:** `/directory/org/nawabi-tails-rescue/`. The profile links to it (a "founded by" link on the listing is the reverse link).
+2. **Resources already rank:** twelve pages hold positions 4 to 7. Best: Draft Lab animal rules rule-by-rule (155 clicks, position 4.2), Animal testing laws India (127 clicks, 5,949 impressions), How to object to a draft rule (127 clicks, position 4.0), 1962 helpline (106 clicks, 8,630 impressions), CPCSEA full form (10,451 impressions, 0.58% CTR). A Profile page inherits that section's standing; guides and how-tos carry the traffic, so a profile will not lead on traffic.
+3. **Lucknow demand is small and we rank around 10:** "animal rescue lucknow" (116 impressions, position 10.3), "animal helpline number lucknow" (97, 9.1), "animal rescue lucknow contact number 24 hours" (108, 9.6). A Lucknow profile plus the Lucknow Directory lists can support these; the profile should link to the Lucknow list.
+4. **Her name has no impressions yet** (no query for her in the Lucknow set). It would be a new keyword for us. Targets: "Vishakha Shukla Lucknow", "Nawabi Tails Rescue Foundation", "women feeders stray dogs".
+5. **Still to do after launch:** URL Inspection and Rich Results Test on the profile; 28-day comparison; InsightWeb review of Resources and News.
 
 ## 8. SourceWeb ingestion (owner's step)
 
@@ -97,7 +98,7 @@ From the web (Lab campaign, not Vishakha): Google News results for the draft Lab
 
 | # | Step | Who | Gate |
 |---|---|---|---|
-| 1 | ~~Confirm NDTV "Dr Vishakha" and HT "Vishakha Shukla" are one person~~ (confirmed by owner); check for her organisation in the Directory | Claude | none |
+| 1 | ~~Confirm NDTV "Dr Vishakha" and HT "Vishakha Shukla" are one person~~ (confirmed by owner); Directory listing found (`nawabi-tails-rescue`) | Claude | done |
 | 2 | Insights check (section 7) | Claude | none |
 | 3 | Add tag **Profile** to Resource types; build the profile pattern, Home block and About block; register them | Claude | own branch, code-review skill, PHPCS, Deploy check, owner's yes before shipping |
 | 4 | Draft Vishakha's profile text (English) | Claude, with the content skills | owner's explicit yes |
