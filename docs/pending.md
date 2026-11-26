@@ -27,6 +27,12 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Plugins do not own data; SCF check (owner, 26 Nov 2026)
+- **Principle:** plugins hold code, not data. Content and settings live in WordPress itself (post meta, term meta, options, the plugin's own tables), under unchanged keys, so a value stays readable if a plugin or SCF is deactivated, replaced or retired. Field definitions are Local JSON in Git (`acf-json/`). Reason: WordPress and SCF are not stable enough to tie data to them.
+- **Checked in Git on 26 Nov (not live; no SCF function is fully replaced):** SCF still supplies the edit boxes and field groups. Values are read and written as plain post meta. Only listings have a non-SCF fallback editor (DirectoryWeb `listing-profile.php`, runs when SCF is off). SourceWeb rules, the campaign tools and the Kits Core edit-screen layer call SCF functions directly and stop without SCF.
+- **Fields nothing reads:** `aw_sectors` (no code at all). Written or declared only, never shown: `aw_requires_email`, `aw_upi`, `aw_social_views`, `aw_social_likes`, `aw_social_replies`, `aw_social_reposts`, `aw_social_hashtags`. Written by claims and enrichment but never read on the front end or in schema: `aw_donate_url`, `aw_reg_authority`, `aw_reg_act`, `aw_awbi_recognised`, `aw_awbi_renewed`. Nothing removed.
+- **Open, owner to choose:** (1) leave as is; (2) fallback boxes for the non-listing groups (branch and PR); (3) SourceWeb rules and the campaign tools read the JSON files directly, not through SCF (suggested first).
+
 _Finished sections (done or completed, 20 to 23 Nov 2026) moved to [`docs/archive/pending-done-2026-11.md`](archive/pending-done-2026-11.md) on 25 Nov 2026._
 
 ### Plan files, checked on git (24 Nov 2026; owner: "update docs, pending, status")
