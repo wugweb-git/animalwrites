@@ -36,7 +36,13 @@ Pending tasks are strictly partitioned by domain:
 - **Principle:** plugins hold code, not data. Content and settings live in WordPress (`post_meta`, `term_meta`, `options`, custom tables), with field definitions in `acf-json/`.
 - **SCF database groups must stay:** The 6 database copies (Organisation, Campaign, Library, Resource, Opportunity, Source details) are required alongside JSON groups (21 served, 126 fields). Do not trash an SCF group that has a JSON file; sync it instead.
 - **Leftover inactive rows:** Three inactive-theme Global Styles rows (`29981`, `25164`, `8868`) and the 38-byte `material-design-google` custom CSS row (cannot be deleted via REST).
-- **Open, owner to choose:** (1) leave as is; (2) add non-SCF fallback boxes for non-listing groups; (3) have SourceWeb rules and campaign tools read JSON files directly without SCF (recommended first).
+- **SCF, 26 Nov 2026 (owner: "do it"):** the six server-written group JSON files were discarded and `aw_campaign_close` / `aw_campaign_doc` added to the repo campaign group (`b0a1d890`). Database groups block same-key JSON groups even when deactivated (tested on Source, rolled back); any group toggle in wp-admin makes SCF rewrite its JSON on the server and the next ship refuses until that file is reset. **Open, owner to choose:** permanently delete the six database groups (JSON then loads) or leave them and keep the JSON identical to them. Campaign edit screen already falls back to native boxes when SCF is off.
+
+### Directory search & people section (26 Nov 2026)
+- **Shipped (`a5192622`):** a place at either end of a longer search opens that place's list; words that only name a kind of organisation (shelter, vet, gaushala, ...) pick that Directory type. Live check: "animal shelter new delhi" lists 4 shelters, so the gap is data (many shelters are typed Animal Welfare NGO or Rescue Group).
+- **Idea, owner (26 Nov 2026): a People / "warriors" section** with one profile per person (Person + ProfilePage schema, links to the original reports, no copied text, no addresses). First cluster Lucknow: Vishakha Shukla (Nawabi Tails Rescue Foundation; HT op-ed 12 Jan 2026, NDTV 22 Aug 2025 "Dr Vishakha", same person not yet confirmed). Needs: section name, first 3-5 people, consent or public-reporting-only, then a branch for the new type. Owner will send further links later; SourceWeb will ingest coverage.
+- **Search Console, Lab page:** position steady (3-5), demand fell after 5 Nov; "animal lab testing bill" ranks 5.4. Copy for title/description/NMC update awaits owner's yes. Diwali page 0.9% CTR and the old `/campaigns/diwali/` URL need a look; Kukur Tihar news item has 17k impressions, 7 clicks.
+- **Hub list swap:** seven hub patterns are on the server; the 11 page references to blocks 8934-8946, 12749, 12750 are not swapped yet (owner reply "ND" unclear).
 
 ### Plan files (`docs/plans/`, checked 24 Nov 2026)
 Eight open plans remain in [`docs/plans/`](plans/) (index: [`docs/plans/README.md`](plans/README.md)):
@@ -50,7 +56,7 @@ Eight open plans remain in [`docs/plans/`](plans/) (index: [`docs/plans/README.m
 - **Skill plans:** tracked in `wugweb_site/docs/plans`.
 
 ### Platform & Branch Sync
-- **Kits Core open:** `theme.json` layer-3 injection check + transient cache, Cloudflare Worker two-way relay, 4-step onboarding wizard, Scripts Manager hardening (`plugins/kits-core/PENDING.md`).
+- **Kits Core open:** Cloudflare Worker two-way relay and 4-step onboarding wizard. Done 26 Nov 2026: `theme.json` layer-3 brand-colour filter with the `kits_brand_theme_data` transient (not yet tried with a saved token), Scripts Manager validator, error-count "Read from" fix.
 - **DirectoryWeb open:** `kits/collection-filter` block (keeps `[aw_directory_filter]` until shipped), §2.4 shell requests, old Claims address 301.
 - **Claim Listing Flow & Profile Completion (B5 & B6):** ⏸️ On HOLD pending upstream Kits platform maturation (owner decision, 24 Nov 2026).
 - **Taxonomy rename:** `taxonomy-rename.php` (`aw_campaign_link` → `kits_campaign_link` via **Tools → Taxonomy rename**) not run yet.
