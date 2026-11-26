@@ -394,10 +394,18 @@ add_action(
 			}
 			// A district, state or known city name in the search box ("Jhansi", "Kerala", "Kochi") opens that place's list.
 			$place = aw_search_place( (string) ( $g['q'] ?? '' ) );
+			$rest  = '';
+			if ( ! $place ) {
+				// "animal shelter new delhi": the place at either end of the words opens its list, the other words stay as the search.
+				$split = aw_search_split_place( (string) ( $g['q'] ?? '' ) );
+				if ( $split ) {
+					list( $place, $rest ) = $split;
+				}
+			}
 			if ( $place ) {
 				$g['state']     = 'district' === $place->kind ? aw_place_parent_state( $place )->slug : $place->slug;
 				$g['district']  = 'district' === $place->kind ? $place->slug : '';
-				$g['q']         = '';
+				$g['q']         = $rest;
 				$g['aw_filter'] = 1;
 			}
 		}
@@ -474,6 +482,37 @@ function aw_search_place( $text ) {
 		$d = aw_place_district_by_name( AW_PLACE_DETECT_CITIES[ $key ] );
 	}
 	return $d ? $d : aw_place_state_by_name( $text );
+}
+
+/**
+ * A place named at the start or the end of a longer search ("animal shelter new delhi", "kochi vet"): the longest run of
+ * up to three words at either end that aw_search_place() knows, with the other words (minus "in", "near", "at", "around")
+ * as the rest of the search. Null when no end of the text is a place, or when nothing would be left to search.
+ *
+ * @param string $text The search box text.
+ * @return array{0: object, 1: string}|null The place and the remaining words.
+ */
+function aw_search_split_place( $text ) {
+	$words = preg_split( '/\s+/', trim( (string) $text ), -1, PREG_SPLIT_NO_EMPTY );
+	$n     = count( $words );
+	if ( $n < 2 || $n > 8 ) {
+		return null;
+	}
+	for ( $len = min( 3, $n - 1 ); $len >= 1; $len-- ) {
+		foreach ( array( 'end', 'start' ) as $side ) {
+			$head  = 'end' === $side ? array_slice( $words, 0, $n - $len ) : array_slice( $words, $len );
+			$named = 'end' === $side ? array_slice( $words, $n - $len ) : array_slice( $words, 0, $len );
+			$place = aw_search_place( implode( ' ', $named ) );
+			if ( ! $place ) {
+				continue;
+			}
+			$rest = trim( implode( ' ', array_filter( $head, function ( $w ) {
+				return ! in_array( strtolower( $w ), array( 'in', 'near', 'at', 'around', 'of' ), true );
+			} ) ) );
+			return array( $place, $rest );
+		}
+	}
+	return null;
 }
 
 /**
