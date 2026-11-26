@@ -146,11 +146,11 @@
 	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > :is(h3, p) { grid-column: 2; }
 }
 .aw-bento-tile { container-type: inline-size; position: relative; display: flex; flex-direction: column; gap: var(--kit-space-3); min-width: 0; min-height: var(--kit-size-target); padding: var(--kit-space-5); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent); border-radius: var(--kit-radius-card); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 7%, transparent), color-mix(in srgb, var(--kit-color-on-ink) 4%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent), 0 1px 2px rgb(0 0 0 / 30%); color: var(--kit-color-on-ink); transition: transform 240ms var(--kit-motion-ease), border-color 240ms var(--kit-motion-ease), box-shadow 240ms var(--kit-motion-ease); }
-.aw-bento-tile:hover { transform: translateY(var(--kit-motion-lift)); border-color: color-mix(in srgb, var(--kit-color-on-ink) 28%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 9%, transparent), color-mix(in srgb, var(--kit-color-on-ink) 5%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent), 0 14px 30px -12px rgb(0 0 0 / 70%); }
+@media (hover:hover){.aw-bento-tile:hover{ transform: translateY(var(--kit-motion-lift)); border-color: color-mix(in srgb, var(--kit-color-on-ink) 28%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 9%, transparent), color-mix(in srgb, var(--kit-color-on-ink) 5%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent), 0 14px 30px -12px rgb(0 0 0 / 70%); }}
 .aw-bento-tile:active { transform: scale(.98); transition-duration: 90ms; }
 .aw-bento-tile:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-bento-tile h3 { margin: 0; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
-.aw-bento-tile h3 a, .aw-bento-tile h3 a:hover { color: inherit !important; text-decoration: none; }
+.aw-bento-tile h3 a{ color: inherit !important; text-decoration: none; }@media (hover:hover){.aw-bento-tile h3 a:hover{ color: inherit !important; text-decoration: none; }}
 .aw-bento-tile h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
 .aw-bento-tile h3 a:focus-visible { outline: none; }
 .aw-bento-tile p { margin: 0; font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
@@ -164,7 +164,7 @@
 .aw-bento-tile .aw-bento-num a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); margin-block: calc((1lh - var(--kit-size-target)) / 2); }
 .aw-bento-tile > :first-child { margin-bottom: auto; }
 .aw-bento-tile.aw-bento--sos { border-color: transparent; background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-accent) 82%, var(--kit-color-on-ink)), color-mix(in srgb, var(--kit-color-accent) 90%, var(--color-peach))); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent), 0 10px 30px -8px color-mix(in srgb, var(--kit-color-accent) 45%, transparent); color: var(--kit-color-on-accent); }
-.aw-bento-tile.aw-bento--sos:hover { transform: translateY(calc(var(--kit-motion-lift) - 2px)) scale(1.01); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-accent) 74%, var(--kit-color-on-ink)), var(--kit-color-accent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent), 0 20px 48px -12px color-mix(in srgb, var(--kit-color-accent) 70%, transparent); }
+@media (hover:hover){.aw-bento-tile.aw-bento--sos:hover{ transform: translateY(calc(var(--kit-motion-lift) - 2px)) scale(1.01); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-accent) 74%, var(--kit-color-on-ink)), var(--kit-color-accent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent), 0 20px 48px -12px color-mix(in srgb, var(--kit-color-accent) 70%, transparent); }}
 .aw-bento-tile.aw-bento--sos:active { transform: scale(.98); }
 .aw-bento-tile.aw-bento--sos .aw-bento-eyebrow { gap: var(--kit-space-3); }
 .aw-bento--sos .aw-bento-eyebrow .kit-ico { --kit-ico-size: calc(var(--kit-icon-xl) + var(--kit-space-1)); }
@@ -173,7 +173,7 @@
 .aw-bento-tile.aw-bento--sos .aw-bento-num { font-size: var(--kit-type-display); font-weight: var(--kit-weight-display); }
 .aw-bento--sos:has(a:focus-visible) { outline-color: var(--kit-color-on-ink); }
 .aw-bento-cta { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-on-accent); color: var(--kit-color-accent); font-weight: var(--kit-weight-strong); box-shadow: var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), background-color var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
-.aw-bento--sos:hover .aw-bento-cta { transform: scale(1.04); background: color-mix(in srgb, var(--kit-color-on-accent) 60%, black); box-shadow: 0 6px 16px -4px rgb(20 20 20 / 45%); }
+@media (hover:hover){.aw-bento--sos:hover .aw-bento-cta{ transform: scale(1.04); background: color-mix(in srgb, var(--kit-color-on-accent) 60%, black); box-shadow: 0 6px 16px -4px rgb(20 20 20 / 45%); }}
 .aw-bento--sos:active .aw-bento-cta { transform: scale(.96); box-shadow: none; }
 .aw-bento-cta .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
 /* Bento surfaces (owner, 13 Nov 2026): a mix, never one dark tile with the rest white. 112 is the yellow lead; Injured
@@ -183,19 +183,19 @@
    white text keeps AA on the photo's lightest pixel; plain ink until the grid nears the screen (.is-near, aw.js), so the
    photos never load with the hero. Focus ring: the yellow accent, on the ink section around every tile (112 keeps white). */
 .aw-bento-tile:not(.aw-bento--sos):has(a:focus-visible) { outline-color: var(--kit-color-accent); }
-.aw-bento-tile:is(.aw-bento--injured, .aw-bento--vets), .aw-bento-tile:is(.aw-bento--injured, .aw-bento--vets):hover { background: var(--kit-color-ink) center / cover no-repeat; }
-.aw-bento.is-near .aw-bento--injured, .aw-bento.is-near .aw-bento--injured:hover { background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-injured-dog-water-bowls.webp); }
-.aw-bento.is-near .aw-bento--vets, .aw-bento.is-near .aw-bento--vets:hover { background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-vets-cow-quiet-road.webp); }
-.aw-bento-tile.aw-bento--vet1962, .aw-bento-tile.aw-bento--vet1962:hover { background: var(--kit-color-ink); }
+.aw-bento-tile:is(.aw-bento--injured, .aw-bento--vets){ background: var(--kit-color-ink) center / cover no-repeat; }@media (hover:hover){.aw-bento-tile:is(.aw-bento--injured, .aw-bento--vets):hover{ background: var(--kit-color-ink) center / cover no-repeat; }}
+.aw-bento.is-near .aw-bento--injured{ background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-injured-dog-water-bowls.webp); }@media (hover:hover){.aw-bento.is-near .aw-bento--injured:hover{ background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-injured-dog-water-bowls.webp); }}
+.aw-bento.is-near .aw-bento--vets{ background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-vets-cow-quiet-road.webp); }@media (hover:hover){.aw-bento.is-near .aw-bento--vets:hover{ background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-vets-cow-quiet-road.webp); }}
+.aw-bento-tile.aw-bento--vet1962{ background: var(--kit-color-ink); }@media (hover:hover){.aw-bento-tile.aw-bento--vet1962:hover{ background: var(--kit-color-ink); }}
 .aw-bento-tile.aw-bento--vet1962 { border-color: color-mix(in srgb, var(--kit-color-on-ink) 16%, transparent); }
-.aw-bento-tile.aw-bento--awbi, .aw-bento-tile.aw-bento--awbi:hover { background: color-mix(in srgb, var(--kit-color-ink), var(--kit-color-muted)); }
-.aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs), .aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs):hover { border-color: transparent; background: var(--kit-color-raised); color: var(--kit-color-ink); }
+.aw-bento-tile.aw-bento--awbi{ background: color-mix(in srgb, var(--kit-color-ink), var(--kit-color-muted)); }@media (hover:hover){.aw-bento-tile.aw-bento--awbi:hover{ background: color-mix(in srgb, var(--kit-color-ink), var(--kit-color-muted)); }}
+.aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs){ border-color: transparent; background: var(--kit-color-raised); color: var(--kit-color-ink); }@media (hover:hover){.aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs):hover{ border-color: transparent; background: var(--kit-color-raised); color: var(--kit-color-ink); }}
 .aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs) p { color: var(--kit-color-muted); }
 .aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs) .aw-bento-ico { background: var(--kit-surface-section-alt); color: var(--kit-color-ink); }
 .aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs) .aw-bento-ico--accent { background: var(--kit-color-accent); }
 @media (prefers-reduced-motion: reduce) {
 	.aw-bento-tile, .aw-bento-cta { transition: none; }
-	.aw-bento-tile:hover, .aw-bento-tile:active, .aw-bento-tile.aw-bento--sos:hover, .aw-bento-tile.aw-bento--sos:active, .aw-bento--sos:hover .aw-bento-cta, .aw-bento--sos:active .aw-bento-cta { transform: none; }
+	 .aw-bento-tile:active, .aw-bento-tile.aw-bento--sos:active, .aw-bento--sos:active .aw-bento-cta { transform: none; }@media (hover:hover){.aw-bento-tile:hover,.aw-bento-tile.aw-bento--sos:hover,.aw-bento--sos:hover .aw-bento-cta{ transform: none; }}
 }
 .aw-ed-find .kit-sec-head { margin-bottom: var(--kit-space-5); }
 .aw-ed-find .kit-sec-head p strong { color: var(--kit-color-ink); font-weight: var(--kit-weight-bold); }

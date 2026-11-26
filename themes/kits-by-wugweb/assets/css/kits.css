@@ -14,10 +14,12 @@
 	transition: opacity 0.2s ease;
 }
 
-.wp-block-button__link:hover,
+
 .wp-block-button__link:focus-visible {
 	opacity: 0.9;
-}
+}@media (hover:hover){.wp-block-button__link:hover{
+	opacity: 0.9;
+}}
 
 :where(a, button, input, select, textarea):focus-visible {
 	outline: 2px solid var(--wp--preset--color--primary);

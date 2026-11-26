@@ -18,7 +18,7 @@
 .aw-term-chips { list-style: none; margin: 0; padding: 0; }
 .aw-categories-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: var(--kit-space-4, 1rem); list-style: none; padding: 0; margin: 0; }
 .aw-categories-index a { display: grid; gap: var(--kit-space-2, .5rem); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); color: var(--kit-color-ink); text-decoration: none; min-height: var(--kit-size-target, 44px); }
-.aw-categories-index a:hover { border-color: var(--kit-color-ink); }
+@media (hover:hover){.aw-categories-index a:hover{ border-color: var(--kit-color-ink); }}
 .aw-categories-index a:focus-visible { outline: var(--kit-focus-outline) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-categories-index img { width: 100%; aspect-ratio: var(--kit-card-media-ratio); object-fit: cover; border-radius: var(--kit-radius-control); }
 .aw-categories-name { font-weight: var(--kit-weight-strong); }

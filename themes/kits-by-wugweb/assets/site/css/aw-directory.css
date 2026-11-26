@@ -7,7 +7,7 @@
 	border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); padding: var(--kit-space-5);
 	background: var(--kit-color-raised); transition: box-shadow var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease);
 }
-.aw-helpline:hover { box-shadow: var(--kit-elevation-2); transform: translateY(var(--kit-motion-lift)); }
+@media (hover:hover){.aw-helpline:hover{ box-shadow: var(--kit-elevation-2); transform: translateY(var(--kit-motion-lift)); }}
 .aw-helpline h3 { font-size: var(--kit-type-h4); margin: var(--kit-space-1) 0 var(--kit-space-2); }
 .aw-helpline p { margin: 0 0 var(--kit-space-2); }
 .aw-helpline-num { font-family: var(--kit-font-display); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-heading); font-size: var(--kit-type-stat); line-height: 1; text-decoration: none; color: var(--kit-color-ink); display: inline-block; min-height: var(--kit-size-target); }
@@ -22,18 +22,18 @@
 .aw-dh-row-name { overflow-wrap: anywhere; }
 .aw-dh-row-all { font-size: var(--kit-type-xs); }
 @media (prefers-reduced-motion: reduce) {
-	.aw-helpline:hover { transform: none; }
+	@media (hover:hover){.aw-helpline:hover{ transform: none; }}
 }
 .aw-orgs { border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-org { position: relative; display: grid; grid-template-columns: var(--kit-thumb-sm) 1fr auto; gap: var(--kit-space-4); align-items: center; padding: var(--kit-space-5) 0; border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-org-mark { width: var(--kit-thumb-sm); height: var(--kit-thumb-sm); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--kit-color-bg); border: var(--kit-border-width) solid var(--kit-color-line); font-weight: var(--kit-weight-bold); color: var(--kit-color-ink); }
 .aw-org-mark img { width: 100%; height: 100%; object-fit: contain; background: var(--kit-color-raised); padding: var(--kit-space-1); }
-.aw-org:hover .aw-org-name a { text-decoration: underline; text-underline-offset: var(--kit-underline-offset-sm); }
+@media (hover:hover){.aw-org:hover .aw-org-name a{ text-decoration: underline; text-underline-offset: var(--kit-underline-offset-sm); }}
 .aw-org-meta { display: flex; align-items: center; gap: var(--kit-space-1); margin: var(--kit-space-1) 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-org-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin: 0; }
 .aw-org-actions { position: relative; z-index: 1; display: flex; align-items: center; gap: var(--kit-space-2); }
 .aw-org-go { display: inline-flex; align-items: center; justify-content: center; width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: var(--kit-color-canvas); color: var(--kit-color-ink); transition: background-color var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-org:hover .aw-org-go { background: var(--kit-color-accent); }
+@media (hover:hover){.aw-org:hover .aw-org-go{ background: var(--kit-color-accent); }}
 @media (max-width: 767px) {
 	.aw-org { grid-template-columns: var(--kit-size-target) 1fr; }
 	.aw-org-mark { width: var(--kit-size-target); height: var(--kit-size-target); }
@@ -104,7 +104,7 @@
 .aw-dir-sheet.is-sheet .aw-dir-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-3); }
 .aw-dir-sheet-title { margin: 0; font-size: var(--kit-type-h4); font-weight: var(--kit-weight-bold); color: var(--kit-color-ink); }
 .aw-dir-sheet-x { display: grid; place-items: center; width: var(--kit-size-target); height: var(--kit-size-target); padding: 0; border: 0; border-radius: var(--kit-radius-pill); background: transparent; color: var(--kit-color-ink); cursor: pointer; }
-.aw-dir-sheet-x:hover { background: var(--kit-chip-hover); }
+@media (hover:hover){.aw-dir-sheet-x:hover{ background: var(--kit-chip-hover); }}
 .aw-dir-sheet-x:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-dir-sheet.is-sheet[open] .kit-filter-sheet-actions .kit-btn { justify-content: center; }
 /* Phones (owner's Directory mobile spec, 14 Nov 2026): search › Filters and Near me in one row › count › List / Map and
@@ -137,9 +137,9 @@
 .aw-dir-active-chip { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-2); background: var(--kit-color-canvas); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-xs); color: var(--kit-color-ink); }
 .aw-dir-active-text { font-weight: var(--kit-weight-medium); }
 .aw-dir-active-remove { display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; border-radius: 50%; color: var(--kit-color-muted); text-decoration: none; }
-.aw-dir-active-remove:hover { color: var(--kit-color-danger, #e53935); background: var(--kit-chip-hover); }
+@media (hover:hover){.aw-dir-active-remove:hover{ color: var(--kit-color-danger, #e53935); background: var(--kit-chip-hover); }}
 .aw-dir-active-clear { font-size: var(--kit-type-xs); margin-left: auto; color: var(--kit-color-muted); text-decoration: underline; }
-.aw-dir-active-clear:hover { color: var(--kit-color-ink); }
+@media (hover:hover){.aw-dir-active-clear:hover{ color: var(--kit-color-ink); }}
 
 @media (max-width: 767px) {
 	.aw-dir-active-filters { flex-direction: column; align-items: flex-start; }

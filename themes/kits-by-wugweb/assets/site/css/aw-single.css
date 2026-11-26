@@ -93,7 +93,7 @@
 .aw-side-camp.aw-camp .aw-side-camp-btns { display: flex; }
 .aw-side-camp.aw-camp .aw-side-camp-btns .kit-btn { width: auto; }
 .aw-side-camp.aw-camp .aw-side-camp-btn { align-self: flex-start; border-color: var(--aw-side-fill); background: var(--aw-side-fill); color: var(--aw-side-on-fill); }
-.aw-side-camp.aw-camp .aw-side-camp-btn:hover { --aw-side-hover: color-mix(in srgb, var(--aw-side-fill) 82%, var(--camp-dark)); border-color: var(--aw-side-hover); background: var(--aw-side-hover); }
+@media (hover:hover){.aw-side-camp.aw-camp .aw-side-camp-btn:hover{ --aw-side-hover: color-mix(in srgb, var(--aw-side-fill) 82%, var(--camp-dark)); border-color: var(--aw-side-hover); background: var(--aw-side-hover); }}
 .aw-side-camp.aw-camp .aw-side-camp-btn.kit-btn--secondary { display: none; } /* sm: one button */
 .aw-side-camp.aw-camp :is(.aw-side-camp-title a, .aw-side-camp-btn):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
 @media (prefers-reduced-motion: reduce) { .aw-side-camp.aw-camp .aw-side-camp-chip::before { animation: none; } }

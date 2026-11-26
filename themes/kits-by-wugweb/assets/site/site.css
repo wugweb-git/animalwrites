@@ -16,7 +16,7 @@
 .aw-band .wp-block-heading { color: var(--kit-color-on-ink); }
 .aw-band p { color: color-mix(in srgb, var(--neutral-0) 85%, transparent); }
 .aw-mosaic img { aspect-ratio: 3/4; object-fit: cover; border-radius: var(--kit-radius-media); transition: transform var(--kit-motion-slow) var(--kit-motion-ease); }
-.aw-mosaic figure:hover img { transform: scale(1.03) rotate(-0.5deg); }
+@media (hover:hover){.aw-mosaic figure:hover img{ transform: scale(1.03) rotate(-0.5deg); }}
 .aw-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); gap: var(--kit-space-5); }
 .aw-count { display: flex; flex-direction: column; }
 .aw-count strong { font-family: var(--kit-font-display); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-heading); font-size: var(--kit-type-stat); line-height: 1; color: var(--kit-color-accent); }
@@ -163,7 +163,7 @@
 }
 .aw-form-ff, .aw-newsletter-form { --fluentform-border-color: var(--kit-field-border); }
 .aw-org-opt { display: block; min-height: var(--kit-size-target, 44px); padding: var(--s-3); cursor: pointer; font-size: var(--fluid-body-sm); line-height: 1.25; }
-.aw-org-opt[aria-selected=true], .aw-org-opt:hover { background: var(--kit-color-surface); }
+.aw-org-opt[aria-selected=true]{ background: var(--kit-color-surface); }@media (hover:hover){.aw-org-opt:hover{ background: var(--kit-color-surface); }}
 .aw-org-place { margin-left: 0.25em; color: var(--kit-field-hint); }
 .aw-org-none { border-top: var(--kit-border-width) solid var(--kit-color-line); font-style: italic; }
 #report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
@@ -223,7 +223,7 @@
 .aw-about-act > * + * { margin-block-start: var(--kit-space-2); }
 .aw-about-act > .wp-block-buttons { margin-block-start: auto; padding-top: var(--kit-space-4); }
 .aw-about-act .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
-.aw-about-act:hover { border-color: var(--kit-color-ink); }
+@media (hover:hover){.aw-about-act:hover{ border-color: var(--kit-color-ink); }}
 .aw-about-act:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
 	.aw-about-what .is-style-kits-card, .aw-about-act { transition: none; }
@@ -277,7 +277,7 @@
 	.aw-about-principle > h3 { margin-block-start: 0 !important; }
 }
 .aw-about-what .is-style-kits-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
-.aw-about-what .is-style-kits-card:hover { background: color-mix(in srgb, var(--kit-color-ink) 6%, var(--kit-color-canvas)) !important; }
+@media (hover:hover){.aw-about-what .is-style-kits-card:hover{ background: color-mix(in srgb, var(--kit-color-ink) 6%, var(--kit-color-canvas)) !important; }}
 .aw-about-what .is-style-kits-card:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
 .aw-about-inner > .aw-adopt-towards { margin-block-start: var(--kit-space-7); }
 .aw-about-inner > .aw-adopt-note { margin-block-start: var(--kit-space-5); font-size: var(--kit-type-sm); color: color-mix(in srgb, var(--kit-color-on-ink) 70%, transparent); }

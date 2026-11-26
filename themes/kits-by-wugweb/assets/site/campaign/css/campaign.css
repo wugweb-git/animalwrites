@@ -52,7 +52,7 @@
 .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a:active) { transform: translateY(var(--kit-btn-press)); box-shadow: none; }
 @media (prefers-reduced-motion: reduce) {
 	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { transition: none; }
-	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):is(:hover, :active) { transform: none; }
+	@media (hover:hover){.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):is(:hover, :active){ transform: none; }}
 }
 /* High-contrast mode (forced colours) drops box-shadow, so the number rings and the step 6 card get real borders in the
    system text colour; the ring keeps its 44px (border-box) */
@@ -165,7 +165,7 @@
 .aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-status-window::before { content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.45em; border-radius: 50%; background: #b06a10; vertical-align: 0.1em; }
 .aw-camp--sc-stray-dogs .aw-camp-hero .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--camp-primary); color: var(--camp-primary-ink); }
 .aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link { background: rgb(251 238 231 / 0.85); }
-.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link:hover { background: var(--camp-primary); color: var(--camp-primary-ink); }
+@media (hover:hover){.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link:hover{ background: var(--camp-primary); color: var(--camp-primary-ink); }}
 /* The fact card: white paper, plum ink, thin rules; the case number with a scales mark, the date in a yellow pill */
 .aw-camp--sc-stray-dogs .aw-camp-poster { background: rgb(255 252 249 / 0.96); box-shadow: 0 1.5rem 3rem -1.5rem rgb(58 23 48 / 0.45); }
 .aw-camp--sc-stray-dogs .aw-camp-poster :is(p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-primary); }
@@ -497,7 +497,7 @@
 .aw-camp-closed .aw-camp-hero-summary { max-width: 1120px; padding-right: max(0px, calc(min(100%, 1120px) - 40rem)); box-sizing: border-box; } /* constrained layout centres a narrow paragraph: keep it full width, text on the left */
 .aw-camp-hero .wp-block-buttons { gap: var(--kit-space-3); }
 .aw-camp-ghost .wp-block-button__link { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); border: 0; }
-.aw-camp-ghost .wp-block-button__link:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
+@media (hover:hover){.aw-camp-ghost .wp-block-button__link:hover{ background: var(--camp-on-mark); color: var(--camp-mark); }}
 .aw-camp-poster {
 	position: relative; padding: var(--kit-space-5); border-radius: var(--kit-radius-card);
 	background: var(--camp-dark); color: var(--kit-color-on-ink);
@@ -607,7 +607,7 @@
 .aw-camp-brand { background: var(--camp-primary); color: var(--camp-primary-ink); }
 .aw-camp-brand :is(h2, p, strong, span) { color: var(--camp-primary-ink); }
 .aw-camp-brand .wp-block-button__link { background: var(--camp-primary-ink); color: var(--camp-primary); }
-.aw-camp-brand .wp-block-button__link:hover { background: var(--camp-dark); color: var(--kit-color-on-ink); }
+@media (hover:hover){.aw-camp-brand .wp-block-button__link:hover{ background: var(--camp-dark); color: var(--kit-color-on-ink); }}
 .aw-camp-tally-cols { gap: var(--kit-space-5) var(--kit-space-6, 3rem); }
 .aw-camp-tally p:not(.aw-camp-count) { max-width: 34rem; }
 .aw-camp-tally .aw-camp-count { margin: 0; padding: var(--kit-space-5) var(--kit-space-6, 2.5rem); border-radius: var(--kit-radius-card); background: var(--camp-primary-ink); box-shadow: 0 18px 40px rgb(40 4 14 / 0.28); font-size: var(--kit-type-lead); font-weight: 600; }
@@ -622,7 +622,7 @@
 @media (min-width: 768px) { .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(2, 1fr); } }
 .aw-camp-docs-q li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
 .aw-camp-docs-q li::before { content: ""; width: var(--kit-size-check); height: var(--kit-size-check); background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
-.aw-camp-docs-q li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
+@media (hover:hover){.aw-camp-docs-q li:hover{ box-shadow: inset 0 0 0 2px var(--camp-mark); }}
 /* aw.css sets card titles to h3 size with !important, and Kits gives card children inline margins; these are list rows */
 .aw-camp .aw-camp-docs-q .wp-block-post-title { margin: 0 !important; font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4; }
 .aw-camp .aw-camp-docs-q .wp-block-post-title a { color: var(--kit-color-text); text-decoration: none; }
@@ -651,7 +651,7 @@
 .aw-letter-share-lede { margin: var(--kit-space-2) 0 0; }
 .aw-letter-share { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin: var(--kit-space-4) 0 0; }
 .aw-letter-share .aw-camp-share-btn { text-decoration: none; border: 0; background: var(--kit-color-raised); font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); }
-.aw-letter-share .aw-camp-share-btn:hover { box-shadow: inset 0 0 0 1px currentColor; }
+@media (hover:hover){.aw-letter-share .aw-camp-share-btn:hover{ box-shadow: inset 0 0 0 1px currentColor; }}
 .aw-letter-share .aw-camp-share-btn.is-primary { background: var(--camp-primary); color: var(--camp-primary-ink); box-shadow: none; font-weight: 600; }
 .aw-letter-share-preview { margin: 0; overflow: hidden; border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: 0 0 0 1px var(--kit-color-line), 0 10px 28px rgb(29 20 24 / 0.10); }
 .aw-letter-share-preview img { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 630; object-fit: cover; }
@@ -668,12 +668,12 @@
 .aw-letter-share-pic--story img { aspect-ratio: 9 / 16; }
 .aw-letter-share-pic--post img { aspect-ratio: 4 / 5; }
 .aw-letter-share-pic--image img { aspect-ratio: 1; }
-.aw-letter-share-pic:hover img, .aw-letter-share-pic:focus-visible img { transform: translateY(-2px); }
+ .aw-letter-share-pic:focus-visible img { transform: translateY(-2px); }@media (hover:hover){.aw-letter-share-pic:hover img{ transform: translateY(-2px); }}
 .aw-letter-share-pic > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .aw-letter-share-pic img { transition: none; } }
 .aw-camp-share-note { margin-top: var(--kit-space-2); font-size: var(--kit-type-sm); }
 .aw-camp .aw-camp-share :is(a, button) { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
-.aw-camp .aw-camp-share :is(a, button):hover { background: var(--camp-mark); box-shadow: none; }
+@media (hover:hover){.aw-camp .aw-camp-share :is(a, button):hover{ background: var(--camp-mark); box-shadow: none; }}
 .aw-camp-share :is(a, button):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-camp-note { display: flex; align-items: center; gap: var(--kit-space-2); color: var(--camp-meta); font-size: var(--kit-type-sm); }
 
@@ -751,7 +751,7 @@
 }
 .aw-letter-ground label { cursor: pointer; }
 .aw-letter-ground label::after { content: ""; position: absolute; inset: 0; } /* the whole card toggles */
-.aw-letter-ground:hover { box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }
+@media (hover:hover){.aw-letter-ground:hover{ box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }}
 .aw-letter-ground:has(input:checked) { box-shadow: inset 0 0 0 2px var(--camp-mark, var(--kit-color-ink)); }
 .aw-letter-ground:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-letter-ground input { width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
@@ -815,7 +815,7 @@
 .aw-camp-partners { margin-top: var(--kit-space-7); }
 .aw-camp-partners ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
 .aw-camp-partners a { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
-.aw-camp-partners a:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
+@media (hover:hover){.aw-camp-partners a:hover{ box-shadow: inset 0 0 0 2px var(--camp-mark); }}
 .aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
 
 /* Closed (the wrapper gets is-closed after the close date): "What happens after 5 November?" leads the questions */
@@ -837,7 +837,7 @@
 .aw-letter-share-box.is-in-section .aw-letter-share-pics { padding-top: var(--kit-space-5); }
 .aw-letter-next { margin: var(--kit-space-3) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-primary) 7%, #fff); }
 .aw-camp .aw-letter .aw-letter-next a { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); color: var(--camp-primary); text-decoration: none; }
-.aw-camp .aw-letter .aw-letter-next a:hover strong { text-decoration: underline; }
+@media (hover:hover){.aw-camp .aw-letter .aw-letter-next a:hover strong{ text-decoration: underline; }}
 
 /* Lab Rules on phones (mobile UX audit, 2 Nov 2026) */
 @media (max-width: 767px) {
@@ -1003,7 +1003,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
 	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li { transition: none; }
-	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:hover { transform: none; }
+	@media (hover:hover){.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:hover{ transform: none; }}
 }
 
 /* Campaign section templates (owner, 2 Nov 2026): one design for each section on every campaign, phones first, the
@@ -1039,7 +1039,7 @@
    row styles reset so the card carries the padding. Phones one column, from 768 two. */
 .aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li { display: block; padding: 0; background: none; box-shadow: none; border-radius: 0; }
 .aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li::before { content: none; }
-.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li:hover { box-shadow: none; }
+@media (hover:hover){.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li:hover{ box-shadow: none; }}
 .aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li > .kit-card:not([class*="kit-card--stacked"]) { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 
 /* In the news (#latest): stacked cards like the theme's kit-card--stacked-md (the picture --kit-thumb-lg wide, at most
@@ -1076,7 +1076,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
 	.aw-camp.aw-camp .aw-camp-grid > .aw-camp-card { transition: none; }
-	.aw-camp.aw-camp .aw-camp-grid > .aw-camp-card:hover { transform: none; }
+	@media (hover:hover){.aw-camp.aw-camp .aw-camp-grid > .aw-camp-card:hover{ transform: none; }}
 }
 
 /* Focus on the dark surfaces (WCAG 1.4.11, 3:1 for the focus ring): the site's blue ring (--kit-color-focus) is under

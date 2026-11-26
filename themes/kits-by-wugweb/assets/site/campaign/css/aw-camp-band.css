@@ -47,7 +47,7 @@
 .aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
 .aw-camp .aw-camp-band-ghost { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); }
-.aw-camp .aw-camp-band-ghost:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
+@media (hover:hover){.aw-camp .aw-camp-band-ghost:hover{ background: var(--camp-on-mark); color: var(--camp-mark); }}
 .aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
 
 /* Home band after closing: "Latest campaign", on paper */

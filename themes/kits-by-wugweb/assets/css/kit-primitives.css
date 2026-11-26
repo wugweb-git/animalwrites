@@ -638,7 +638,7 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 .kit-dateline.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-2); }
 .kit-dateline-word { display: block; margin-bottom: var(--kit-space-1); font-weight: var(--kit-weight-bold); }
 .kit-dateline-title, .kit-dateline-desc { display: block; }
-.kit-dateline-title, .kit-dateline-title a, .kit-dateline-title a:hover { text-decoration: none; } /* titles never underlined (owner, 14 Nov 2026) */
+.kit-dateline-title, .kit-dateline-title a{ text-decoration: none; }@media (hover:hover){.kit-dateline-title a:hover{ text-decoration: none; }} /* titles never underlined (owner, 14 Nov 2026) */
 .kit-dateline-media img { display: block; width: var(--kit-space-8); height: auto; margin-top: var(--kit-space-2); border-radius: var(--kit-radius-control); }
 .kit-dateline > *::after { content: none; }
 .kit-dateline > *::before { content: ""; display: block; position: absolute; left: calc(var(--dl-w) / 2 - var(--dl-t) / 2); top: calc(var(--kit-space-2) + var(--dl-h) + var(--kit-space-1) * 2); bottom: var(--kit-space-1); width: 0; border-left: var(--dl-t) var(--dl-style) var(--dl-c); box-shadow: 0 0 0 var(--kit-border-width) var(--dl-band); }
