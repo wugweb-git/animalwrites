@@ -51,7 +51,7 @@ No folds anywhere (owner rule). Brand cards black/white/grey. Sizes only from th
 | Founder, Nawabi Tails Rescue Foundation; women feeders face harassment and assault; court told to file FIRs | Hindustan Times HT Insight, **written by Vishakha Shukla** (her own words) | 12 Jan 2026 | Full text (first 5,000 characters) |
 | Lucknow dog lovers backed street dogs ("आवारा नहीं हमारा है") | News Nation, YouTube | about a year ago | Title and tags only |
 
-**Open:** the NDTV "Dr Vishakha" and the HT author "Vishakha Shukla" are very likely the same person (both Lucknow, both run dog care). **Not confirmed.** Confirm before the profile says so.
+**Confirmed by the owner (26 Nov 2026):** the NDTV "Dr Vishakha" and the HT author "Vishakha Shukla" are the same person. The profile may say so, citing both sources.
 Label rule: "reported by" for outlets, "in her own words" for the HT piece. Every claim has at least one source. Each source gets an archive link so the evidence survives link rot.
 
 ## 6. All links shared, with status
@@ -97,7 +97,7 @@ From the web (Lab campaign, not Vishakha): Google News results for the draft Lab
 
 | # | Step | Who | Gate |
 |---|---|---|---|
-| 1 | Confirm NDTV "Dr Vishakha" and HT "Vishakha Shukla" are one person; check for her organisation in the Directory | Claude | none |
+| 1 | ~~Confirm NDTV "Dr Vishakha" and HT "Vishakha Shukla" are one person~~ (confirmed by owner); check for her organisation in the Directory | Claude | none |
 | 2 | Insights check (section 7) | Claude | none |
 | 3 | Add tag **Profile** to Resource types; build the profile pattern, Home block and About block; register them | Claude | own branch, code-review skill, PHPCS, Deploy check, owner's yes before shipping |
 | 4 | Draft Vishakha's profile text (English) | Claude, with the content skills | owner's explicit yes |
