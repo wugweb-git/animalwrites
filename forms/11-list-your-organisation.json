@@ -1,0 +1,521 @@
+[
+  {
+    "id": "11",
+    "title": "List your organisation",
+    "status": "unpublished",
+    "appearance_settings": null,
+    "form_fields": {
+      "fields": [
+        {
+          "index": 1,
+          "element": "input_text",
+          "uniqElKey": "el_aw_name",
+          "attributes": {
+            "type": "text",
+            "name": "name",
+            "value": "",
+            "id": "",
+            "class": "",
+            "placeholder": "",
+            "autocomplete": "organization"
+          },
+          "settings": {
+            "container_class": "kit-field",
+            "label": "Organisation name",
+            "label_placement": "",
+            "admin_field_label": "Organisation name",
+            "help_message": "Only to reply about this report.",
+            "validation_rules": {
+              "required": {
+                "value": true,
+                "message": "This is needed",
+                "global_message": "This is needed",
+                "global": false
+              }
+            },
+            "conditional_logics": []
+          },
+          "editor_options": {
+            "title": "Simple Text",
+            "icon_class": "ff-edit-text",
+            "template": "inputText"
+          }
+        },
+        {
+          "index": 2,
+          "element": "input_text",
+          "uniqElKey": "el_aw_area",
+          "attributes": {
+            "type": "text",
+            "name": "area",
+            "value": "",
+            "id": "",
+            "class": "",
+            "placeholder": "e.g. Pune",
+            "autocomplete": ""
+          },
+          "settings": {
+            "container_class": "kit-field",
+            "label": "District",
+            "label_placement": "",
+            "admin_field_label": "District",
+            "help_message": "Only to reply about this report.",
+            "validation_rules": {
+              "required": {
+                "value": true,
+                "message": "This is needed",
+                "global_message": "This is needed",
+                "global": false
+              }
+            },
+            "conditional_logics": []
+          },
+          "editor_options": {
+            "title": "Simple Text",
+            "icon_class": "ff-edit-text",
+            "template": "inputText"
+          }
+        },
+        {
+          "index": 3,
+          "element": "textarea",
+          "uniqElKey": "el_aw_services",
+          "attributes": {
+            "name": "services",
+            "value": "",
+            "id": "",
+            "class": "",
+            "placeholder": "",
+            "maxlength": 1000,
+            "rows": 4
+          },
+          "settings": {
+            "container_class": "kit-field",
+            "label": "What you do",
+            "label_placement": "",
+            "admin_field_label": "What you do",
+            "help_message": "Tell us the correct details if you know them.",
+            "validation_rules": {
+              "required": {
+                "value": true,
+                "message": "Say what you do",
+                "global_message": "Say what you do",
+                "global": false
+              }
+            },
+            "conditional_logics": []
+          },
+          "editor_options": {
+            "title": "Text Area",
+            "icon_class": "ff-edit-text",
+            "template": "inputTextarea"
+          }
+        },
+        {
+          "index": 4,
+          "element": "input_email",
+          "uniqElKey": "el_aw_email",
+          "attributes": {
+            "type": "email",
+            "name": "email",
+            "value": "",
+            "id": "",
+            "class": "",
+            "placeholder": "",
+            "autocomplete": "email"
+          },
+          "settings": {
+            "container_class": "kit-field",
+            "label": "Email",
+            "label_placement": "",
+            "admin_field_label": "Email",
+            "help_message": "Only to reply about this report.",
+            "validation_rules": {
+              "required": {
+                "value": true,
+                "message": "This is needed",
+                "global_message": "This is needed",
+                "global": false
+              }
+            },
+            "conditional_logics": []
+          },
+          "editor_options": {
+            "title": "Email Field",
+            "icon_class": "ff-edit-text",
+            "template": "inputText"
+          }
+        },
+        {
+          "index": 5,
+          "element": "input_url",
+          "uniqElKey": "el_aw_website",
+          "attributes": {
+            "type": "url",
+            "name": "website",
+            "value": "",
+            "id": "",
+            "class": "",
+            "placeholder": "https://animalwrites.in/…"
+          },
+          "settings": {
+            "container_class": "kit-field",
+            "label": "Website <span class=\"kit-optional\">(optional)</span>",
+            "label_placement": "",
+            "admin_field_label": "Website",
+            "help_message": "The address of the page with the mistake.",
+            "validation_rules": {},
+            "conditional_logics": {
+              "type": "all",
+              "status": true,
+              "conditions": [
+                {
+                  "field": "item",
+                  "value": "",
+                  "operator": "="
+                }
+              ]
+            }
+          },
+          "editor_options": {
+            "title": "Website URL",
+            "icon_class": "ff-edit-text",
+            "template": "inputText"
+          }
+        },
+        {
+          "index": 6,
+          "element": "aw_check",
+          "uniqElKey": "el_aw_check",
+          "attributes": {
+            "name": "aw_check"
+          },
+          "settings": {
+            "label": "Spam check (ALTCHA)",
+            "container_class": "",
+            "html_codes": "<p>Spam check (ALTCHA) (Animal Writes)</p>",
+            "conditional_logics": []
+          },
+          "editor_options": {
+            "title": "Spam check (ALTCHA)",
+            "icon_class": "ff-edit-html",
+            "template": "customHTML"
+          }
+        },
+        {
+          "index": 7,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_page_id",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_page_id",
+            "value": "{embed_post.ID}"
+          },
+          "settings": {
+            "admin_field_label": "Page ID"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 8,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_page_title",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_page_title",
+            "value": "{embed_post.post_title}"
+          },
+          "settings": {
+            "admin_field_label": "Page title"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 9,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_referrer",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_referrer",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Referrer"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 10,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_utm_source",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_utm_source",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "UTM source"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 11,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_utm_medium",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_utm_medium",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "UTM medium"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 12,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_utm_campaign",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_utm_campaign",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "UTM campaign"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 13,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_ga",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_ga",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "GA4 client ID (with analytics consent)"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 14,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_clarity",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_clarity",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Clarity ID (with analytics consent)"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 15,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_screen",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_screen",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Screen size"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 16,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_lang",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_lang",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Language"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 17,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_tz",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_tz",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Time zone"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 18,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_secs",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_secs",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Seconds to fill in"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 19,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_first_visit",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_first_visit",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "First visit"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 20,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_v_visits",
+          "attributes": {
+            "type": "hidden",
+            "name": "v_visits",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Visit count"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        },
+        {
+          "index": 21,
+          "element": "input_hidden",
+          "uniqElKey": "el_aw_consent_version",
+          "attributes": {
+            "type": "hidden",
+            "name": "consent_version",
+            "value": ""
+          },
+          "settings": {
+            "admin_field_label": "Consent wording version"
+          },
+          "editor_options": {
+            "title": "Hidden Field",
+            "icon_class": "ff-edit-hidden-field",
+            "template": "inputHidden"
+          }
+        }
+      ],
+      "submitButton": {
+        "uniqElKey": "el_aw_submit",
+        "element": "button",
+        "attributes": {
+          "type": "submit",
+          "class": "kit-btn"
+        },
+        "settings": {
+          "align": "left",
+          "button_style": "",
+          "container_class": "",
+          "help_message": "",
+          "background_color": "",
+          "button_size": "md",
+          "color": "",
+          "button_ui": {
+            "type": "default",
+            "text": "Send for review",
+            "img_url": ""
+          }
+        },
+        "editor_options": {
+          "title": "Submit Button"
+        }
+      }
+    },
+    "has_payment": "0",
+    "type": "form",
+    "conditions": null,
+    "created_by": "1",
+    "metas": [
+      {
+        "meta_key": "_ff_selected_style",
+        "value": "ffs_inherit_theme"
+      },
+      {
+        "meta_key": "formSettings",
+        "value": "{\"confirmation\": {\"redirectTo\": \"samePage\", \"customPage\": null, \"samePageFormBehavior\": \"hide_form\", \"customUrl\": null, \"messageToShow\": \"<p class=\\\"aw-form-done-title\\\">Thanks \\u2014 we will review your listing.</p><p class=\\\"aw-form-ref\\\">Your reference: <strong data-aw-ref=\\\"AW-L-{submission.serial_number}\\\">AW-L-{submission.serial_number}</strong></p>\"}, \"restrictions\": {\"denyEmptySubmission\": {\"enabled\": false}}, \"layout\": {\"labelPlacement\": \"top\", \"helpMessagePlacement\": \"after_label\", \"errorMessagePlacement\": \"inline\", \"asteriskPlacement\": \"none\"}}"
+      },
+      {
+        "meta_key": "step_data_persistency_status",
+        "value": "no"
+      }
+    ]
+  }
+]
