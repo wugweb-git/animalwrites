@@ -408,6 +408,15 @@ add_action(
 				$g['q']         = $rest;
 				$g['aw_filter'] = 1;
 			}
+			// Words that only name a kind of organisation ("animal shelter", "vet", "gaushala") pick that type, with or without a place.
+			if ( empty( $g['tag'] ) ) {
+				$kind = aw_search_type( (string) ( $g['q'] ?? '' ) );
+				if ( $kind ) {
+					$g['tag']       = array( $kind );
+					$g['q']         = '';
+					$g['aw_filter'] = 1;
+				}
+			}
 		}
 		if ( ! isset( $g['aw_filter'] ) ) {
 			return;
@@ -482,6 +491,63 @@ function aw_search_place( $text ) {
 		$d = aw_place_district_by_name( AW_PLACE_DETECT_CITIES[ $key ] );
 	}
 	return $d ? $d : aw_place_state_by_name( $text );
+}
+
+/**
+ * Words people use for a kind of organisation, longest phrase first, with the Directory type each one picks.
+ */
+const AW_SEARCH_TYPE_WORDS = array(
+	'bird hospital'      => 'bird-hospital',
+	'wildlife rescue'    => 'wildlife-rescue',
+	'emergency rescue'   => 'emergency-rescue',
+	'animal ambulance'   => 'animal-ambulance',
+	'animal shelter'     => 'animal-shelter',
+	'animal shelters'    => 'animal-shelter',
+	'animal welfare'     => 'animal-welfare-organisation',
+	'animal ngo'         => 'animal-welfare-organisation',
+	'legal aid'          => 'legal-aid',
+	'abc centre'         => 'abc-centre',
+	'abc center'         => 'abc-centre',
+	'rescue group'       => 'rescue-group',
+	'shelter'            => 'animal-shelter',
+	'shelters'           => 'animal-shelter',
+	'gaushala'           => 'gaushala',
+	'goshala'            => 'gaushala',
+	'gaushalas'          => 'gaushala',
+	'ambulance'          => 'animal-ambulance',
+	'sanctuary'          => 'sanctuary',
+	'vet'                => 'veterinary',
+	'vets'               => 'veterinary',
+	'veterinary'         => 'veterinary',
+	'veterinarian'       => 'veterinary',
+	'clinic'             => 'veterinary',
+	'dispensary'         => 'veterinary',
+	'ngo'                => 'animal-welfare-organisation',
+	'ngos'               => 'animal-welfare-organisation',
+	'rescue'             => 'rescue-group',
+	'rescuers'           => 'rescue-group',
+);
+
+/**
+ * The Directory type a search names when every word of it is a type word ("animal shelter", "vet", "vet clinic");
+ * '' when any other word is left, so a name such as "Friendicoes shelter" is still searched as a name.
+ *
+ * @param string $text The search words left after any place is taken out.
+ * @return string A listing-type slug, or ''.
+ */
+function aw_search_type( $text ) {
+	$left = ' ' . trim( preg_replace( '/\s+/', ' ', strtolower( (string) $text ) ) ) . ' ';
+	if ( '  ' === $left || mb_strlen( $left ) > 40 ) {
+		return '';
+	}
+	$type = '';
+	foreach ( AW_SEARCH_TYPE_WORDS as $word => $slug ) {
+		if ( false !== strpos( $left, ' ' . $word . ' ' ) ) {
+			$type = '' === $type ? $slug : $type;
+			$left = str_replace( ' ' . $word . ' ', ' ', $left );
+		}
+	}
+	return '' === trim( $left ) && '' !== $type && aw_listing_type_ok( $type ) ? $type : '';
 }
 
 /**
