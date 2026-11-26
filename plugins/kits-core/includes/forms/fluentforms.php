@@ -716,6 +716,7 @@ function kits_ff_upload() {
 	if ( (int) get_transient( $rl ) >= 20 ) { // a claim can send 7 (logo, 5 photos, proof)
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
+	set_transient( $rl, (int) get_transient( $rl ) + 1, HOUR_IN_SECONDS ); // every try counts, not only the ones that work
 	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked in aw_claim_logo_ok()
 	$why = dw_claim_upload_error( $logo );
 	if ( '' !== $why ) {
@@ -730,7 +731,6 @@ function kits_ff_upload() {
 	if ( ! aw_claim_logo_store( $logo['tmp_name'], 'tmp-' . $token . '.png' ) ) {
 		wp_send_json_error( 'We could not read this picture. Try another file, or a smaller one.' );
 	}
-	set_transient( $rl, (int) get_transient( $rl ) + 1, HOUR_IN_SECONDS );
 	wp_send_json_success( array( 'token' => $token ) );
 }
 add_action( 'wp_ajax_nopriv_aw_ff_upload', 'kits_ff_upload' );
