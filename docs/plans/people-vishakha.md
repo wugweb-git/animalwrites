@@ -81,11 +81,13 @@ From the web (Lab campaign, not Vishakha): Google News results for the draft Lab
 4. **Her name has no impressions yet** (no query for her in the Lucknow set). It would be a new keyword for us. Targets: "Vishakha Shukla Lucknow", "Nawabi Tails Rescue Foundation", "women feeders stray dogs".
 5. **Still to do after launch:** URL Inspection and Rich Results Test on the profile; 28-day comparison; InsightWeb review of Resources and News.
 
-## 8. SourceWeb ingestion (owner's step)
+## 8. SourceWeb ingestion (done 26 Nov 2026)
 
-- Owner sends further coverage links; SourceWeb ingests them as News items (source link, date, publisher, no copied text).
-- The profile's evidence table links to those News items where we hold them, and to the original source otherwise.
-- Tag the campaign (Supreme Court stray dogs) with `aw_campaign_link`, not a post tag.
+- **Keywords added** (Sourcing, English, role Include, Google News search on): Vishakha Shukla (14837), Nawabi Tails Rescue (10021), Nawabi Tails Rescue Foundation (14838), Lucknow women feeders (14839). The workers use them from their next run. Tag **Vishakha Shukla** (`vishakha-shukla`, tag 1308) created for her coverage.
+- **Results arrive in** Sourcing, To review (Pending; nothing auto-publishes; Publish sends an item to News). The evidence table then links to those News items.
+- **Decision (owner, 26 Nov 2026): let go of Hindi news.** The Hindi news links (NDTV India, Navbharat Times e-paper, Samar Salil, Amar Ujala) are not ingested as News. They stay cited as sources in the evidence table only where a claim needs them (NDTV is the main source for the farmhouse and the 400 dogs).
+- **Hindi social media stays in.** Instagram, YouTube, X and Facebook items about her are added by hand as Media & PR items (Press coverage supports the formats Instagram post or reel, YouTube video, X post, Facebook post or video). Enter the link; the page's own details fill the empty fields. Tag `campaign-...` where it belongs to a campaign.
+- English items are found by the keywords above; anything else is entered by hand through the ingest endpoint (`POST /wp-json/aw/v1/ingest`, Application Password created by the owner), tag `vishakha-shukla`.
 
 ## 9. Approval and safety
 
