@@ -303,7 +303,12 @@ function kits_backup_problem( $now = null ) {
 	}
 	$run = (array) get_option( 'updraft_last_backup', array() );
 	if ( $run && ( empty( $run['success'] ) || ! empty( $run['errors'] ) ) ) {
-		return sprintf( 'The last UpdraftPlus backup run (%s) ended with errors%s', wp_date( 'j M, g:i a', (int) ( $run['backup_time'] ?? 0 ) ), ! empty( $run['errors'] ) && is_array( $run['errors'] ) ? ': ' . mb_substr( wp_strip_all_tags( (string) reset( $run['errors'] ) ), 0, 160 ) : '.' );
+		$first = ! empty( $run['errors'] ) && is_array( $run['errors'] ) ? reset( $run['errors'] ) : '';
+		if ( is_array( $first ) ) { // UpdraftPlus stores an error as an array (level, message) as well as a string.
+			$first = $first['message'] ?? implode( ' ', array_filter( $first, 'is_scalar' ) );
+		}
+		$first = is_scalar( $first ) ? (string) $first : '';
+		return sprintf( 'The last UpdraftPlus backup run (%s) ended with errors%s', wp_date( 'j M, g:i a', (int) ( $run['backup_time'] ?? 0 ) ), '' !== $first ? ': ' . mb_substr( wp_strip_all_tags( $first ), 0, 160 ) : '.' );
 	}
 	return '';
 }
