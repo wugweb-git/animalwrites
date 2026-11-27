@@ -114,6 +114,30 @@ function kits_profile_ext_link( $url, $text, $class = '' ) {
 }
 
 /**
+ * Who this is, first on the page: a plain initials tile (no photo until they send one and allow it), their role and city.
+ * The tile is decoration, so it is hidden from screen readers; the name is already the page heading.
+ *
+ * @param array $f Fields from kits_profile_fields().
+ * @return string
+ */
+function kits_profile_identity_html( $f ) {
+	if ( '' === $f['role'] && '' === $f['place'] ) {
+		return '';
+	}
+	$initials = '';
+	foreach ( array_slice( preg_split( '/\s+/', trim( $f['name'] ) ), 0, 2 ) as $word ) {
+		$initials .= '' !== $word ? mb_strtoupper( mb_substr( $word, 0, 1 ) ) : '';
+	}
+	$out  = '<div class="kit-profile-who">';
+	$out .= '' !== $initials ? '<span class="kit-profile-initials" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '';
+	$out .= '<p class="kit-profile-role">';
+	$out .= '' !== $f['role'] ? '<strong>' . esc_html( $f['role'] ) . '</strong>' : '';
+	$out .= '' !== $f['place'] ? '<span>' . esc_html( $f['place'] ) . '</span>' : '';
+	$out .= '</p></div>';
+	return $out;
+}
+
+/**
  * The action row and "At a glance", printed before the person's text.
  *
  * @param int $id Post ID.
@@ -122,7 +146,7 @@ function kits_profile_ext_link( $url, $text, $class = '' ) {
 function kits_profile_head_html( $id ) {
 	$f   = kits_profile_fields( $id );
 	$org = $f['org'] && 'publish' === get_post_status( $f['org'] ) ? $f['org'] : 0;
-	$out = '';
+	$out = kits_profile_identity_html( $f );
 
 	$acts = '';
 	if ( $org ) {
@@ -136,13 +160,7 @@ function kits_profile_head_html( $id ) {
 	}
 	$out .= '' !== $acts ? '<p class="kit-profile-actions">' . $acts . '</p>' : '';
 
-	$rows = array();
-	if ( '' !== $f['role'] ) {
-		$rows[ __( 'Role', 'kits-by-wugweb' ) ] = esc_html( $f['role'] );
-	}
-	if ( '' !== $f['place'] ) {
-		$rows[ __( 'Based in', 'kits-by-wugweb' ) ] = esc_html( $f['place'] );
-	}
+	$rows = array(); // role and place are in the identity row above, so they are not repeated here
 	if ( $org ) {
 		$rows[ __( 'Organisation', 'kits-by-wugweb' ) ] = '<a href="' . esc_url( get_permalink( $org ) ) . '">' . esc_html( get_the_title( $org ) ) . '</a>';
 		$founded = (string) get_post_meta( $org, 'aw_founded', true );

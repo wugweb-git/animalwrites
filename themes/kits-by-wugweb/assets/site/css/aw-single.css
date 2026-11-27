@@ -276,6 +276,11 @@
 
 /* Profile (includes/profile.php, owner 27 Nov 2026): a Resource tagged "profile". Phone first: one column, cards not a table,
    44px actions, nothing folded. Colours and sizes are the theme's tokens. */
+.kit-profile-who { display: flex; align-items: center; gap: var(--kit-space-4); margin: var(--kit-space-5) 0 0; }
+.kit-profile-initials { flex: none; display: grid; place-items: center; inline-size: var(--kit-thumb-md); block-size: var(--kit-thumb-md); border-radius: var(--kit-radius-media); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); line-height: 1; }
+.kit-profile-role { display: grid; gap: var(--kit-space-1); margin: 0; min-width: 0; }
+.kit-profile-role strong { font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+.kit-profile-role span { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .kit-profile-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); margin: var(--kit-space-5) 0; }
 .kit-profile-actions .kit-btn { justify-content: center; min-height: var(--kit-size-target); text-align: center; }
 .kit-profile-glance, .kit-evidence, .kit-profile-more { margin: var(--kit-space-6) 0; }
