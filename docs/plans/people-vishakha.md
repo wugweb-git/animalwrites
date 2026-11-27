@@ -114,3 +114,109 @@ From the web (Lab campaign, not Vishakha): Google News results for the draft Lab
 1. ~~Contact her first, or public reporting only?~~ **Settled:** Vishakha is in touch and gave the owner the links herself. The profile is made with her, so the draft still goes to her for approval before it goes live (section 9).
 2. Photo: use a photo she supplies, with her permission and credit. None until she sends one.
 3. Menu entry: none for now; the Resources list with the Profile tag is enough.
+
+## 12. Mobile UX (v2, 27 Nov 2026; skills: persona-builder, ux-discover, web-review, frontend-design, landing-page, draft-content)
+The page is judged as a phone page first (owner rule: mobile PWA/native first). Evidence base: a live render of a Resource page at 375px (no horizontal scroll; body 15px/24px; buttons 44px tall; chips only 28px tall; page height 8,099px, about 10 screens) plus Search Console (Lucknow queries around position 10). Everything below marked "assumption" needs the owner's check.
+
+### 12.1 Personas (behaviour first; max 3)
+| | Primary: "Shared-link checker" | Secondary: "Lucknow helper-seeker" | Tertiary: "Feeder who wants the law" |
+|---|---|---|---|
+| Who and context | Opens a WhatsApp or Instagram link to Vishakha's profile, often inside the app's browser, one hand, on mobile data; may be a journalist, partner or supporter checking who she is | In Lucknow with a stray or injured animal, or looking for a rescue group; arrives from search ("animal rescue lucknow") | A feeder or RWA member worried about the Supreme Court orders; arrives from the explainers |
+| Wants | Know who she is and trust it within 10 seconds; see the proof; share it | A listing or number now | Her position, the law, what to do |
+| Fears | Hype, no sources, a slow page | Wasted time, wrong or old contact | Being told off, legal jargon |
+| Best path on the page | Header, summary, evidence, share | Action row, Help in Lucknow | Her words, The law linked |
+| Evidence | Assumption (her name has no search impressions yet, so first visits come from shares) | Search Console: small Lucknow demand, position about 10 | Existing Resource traffic (guides carry it) |
+Priority: the checker is primary for the page; the helper-seeker is primary for the goal (listing and Lucknow help).
+
+### 12.2 Phone journey (shared link, 375px)
+1. Lands: sees name, role, city and one-line summary without scrolling past the first screen. 2. Wants proof: the evidence is the first thing after the story, as cards, not a table. 3. Taps a source: opens in a new tab with the outlet and date visible before the tap; archive copy beside it. 4. Acts: "Know more about {organisation}" and "Find help in Lucknow" are reachable without hunting. 5. Shares: native share sheet (owner rule, 13 Nov). Pain points to design out: horizontal tables, long page, tiny chips, hidden proof, any need to log in.
+
+### 12.3 Mobile section order and rules (changes section 3 order for phones; desktop keeps one column too)
+1. Breadcrumb (one line, truncates, not wrapped).
+2. Header: photo or initials tile first (fixed aspect ratio, no layout shift), then H1, then role and city, then one meta row (date first) with at most two chips (Profile, city).
+3. Summary (2 to 3 sentences, 40 to 50 words).
+4. **Action row** straight after the summary: two full-width buttons, 44px tall (existing button size): "Know more about {organisation}", "Find help in Lucknow". This puts the primary goal on the first screen or the second, with no sticky bar (no new behaviour invented).
+5. At a glance: a key/value list (label above value, one column; no table).
+6. What she does; 7. In her words.
+8. **Evidence as cards**, not a table: each card = claim line, then source and date, a label chip (Reported by / In her own words), then two links "Read" and "Archive copy". Cards stack full width; claim text 15/24 like body. This also serves as the Sources list (the separate Sources section is dropped to avoid saying everything twice; the page gets shorter).
+9. In the news (hidden until there is coverage); 10. The law, linked (links, not cards); 11. Part of a campaign (one card); 12. Help in Lucknow (repeat of the action row's second button plus the list link); 13. FAQ (open, 3 to 4 items); 14. Approval and corrections (one short block); 15. Share, tags, related.
+- Target page height: 5 to 6 screens (about 4,500px), against 8,099px for the Supreme Court guide.
+- Tap targets: every link, chip and button at least 44px by 44px including padding; the site's chips are 28px, so on this page chips are limited to two and given the 44px target (documented exception to fix in CSS, not a new size).
+- Type from tokens only: body 15/24 on phones; H1 from the heading token; lines stay under 75 characters (720px column, 16px gutters).
+- No fold, no accordion, no horizontal scroll at 320 to 767px; breakpoints 767/768 and 1199/1200 only.
+- Links: descriptive text ("Read the NDTV India report, 22 Aug 2025"), external links open in a new tab with "(opens in a new tab)" for screen readers; archive link text says "Archive copy".
+- Keyboard and screen reader: headings in order (H1, then H2 per section, H3 per evidence card); the evidence list is an ordered list; visible focus ring from the theme tokens; whole-card links on Home have one link per card, arrows `aria-hidden`.
+- Motion: none beyond the theme's existing hover and press states; reduced motion respected.
+- Speed: one photo only, `loading` set correctly (the header photo is above the fold so it is not lazy), width and height set, thumb_check passes; no new scripts.
+- Dark mode: the site has no dark theme in the theme files (only a colour named primary-dark), so nothing to check; keep the page free of hard-coded colours so one is possible later.
+- In-app browsers (WhatsApp, Instagram): share preview image is the logo or Home image until her photo is approved (owner rule: no pictures on policy pages does not apply; share image = brand until a permitted photo exists).
+
+### 12.4 Home on phones (correction to section 5)
+The Home row stacks: **profile card first, then the 2 by 2 grid block**. `docs/card-sizes.md` sets the card minimum width at 17rem (272px, `--kit-card-min`), so a true 2-column grid does not fit at 375px. Correction: **below 768px the 2 by 2 block becomes one column of four compact stacked cards** (icon tile left, title and one-line sum, arrow right: the existing `kit-card--stacked-*` state), and returns to 2 by 2 from 768px. About us on phones: one profile card; the row of cards becomes a single column with a "See all profiles" button.
+
+### 12.5 Visual direction (frontend-design, inside the existing system)
+No new aesthetic: black, white and grey cards, Inter, the reference card (icon tile, arrow, title, one line). The one memorable element is the **evidence card**: a quiet "receipt" with the source, date and archive link, so the proof is the design. No gradients, no decorative numbering, no stock photo, no all-caps eyebrow labels. Initials tile in a grey icon-tile style until a photo is approved.
+
+### 12.6 Copy for phones (draft, owner's yes needed)
+- H1 (SEO) stays option A; the card title on Home and About is just "Vishakha Shukla", role line "Doctor and founder, Nawabi Tails Rescue Foundation", sum "Cares for about 400 dogs in Lucknow, as NDTV reported".
+- Buttons say what happens: "Know more about {organisation}", "Find help in Lucknow", "Read the NDTV India report", "Archive copy", "Share this profile".
+- Evidence claims are one sentence each, past tense, with the outlet named ("NDTV India reported ...").
+- Empty states: "In the news" is hidden until it has items; no "coming soon".
+
+### 12.7 Success measures (no new tracking without the owner's OK)
+Read from what we already have: Search Console for her name, Nawabi Tails Rescue and Lucknow queries; existing GA4 events for outbound link clicks and share taps; Resources page depth. Targets to judge after 28 days: evidence and listing links are tapped; the page is not abandoned before the evidence; share taps occur. No GA4 test events on the live property (standing rule).
+
+### 12.8 Mobile review checklist for the build (web-review)
+Phone 375 and 320, tablet 768, desktop 1440; no horizontal scroll; tap targets 44px; contrast 4.5:1 (`contrast_check`); headings in order; alt text on the photo (or none for the initials tile); focus visible; keyboard-only pass through the action row, evidence links and share; layout shift (photo aspect ratio reserved); meta title, description and share image present; no dead links; no address, phone or location anywhere.
+
+## 13. Owner answers, 27 Nov 2026 (settle section 11 / 12)
+| Question | Answer | What it changes |
+|---|---|---|
+| Directory address | No address anywhere on the profile page. City and state only (Lucknow, Uttar Pradesh) | The profile shows city and state only. **The Directory listing is not changed** (owner, 27 Nov 2026: not asked for) |
+| Her photo | "Use from the sourced web?" | **No.** Photos in NDTV, HT and other outlets belong to them and to the photographers; copying one needs their licence. Allowed sources: a photo she sends (permission and credit), or one on her organisation's own site and socials that she says we may use. Until then the initials tile. The owner can ask her for one while she is in touch |
+| Copy yes | The owner will review the finished page by link | The page is built as a **draft** (not public) and the link is sent for the yes; Home and About stay hidden until publish |
+| Home row position | 4th from the top | Counting the hero as the first block: Hero, Need help now, Find help, **this row**, then the campaign cards row. (If the owner meant after the campaign row, the pattern line moves one place) |
+| 2 by 2 grid use case | The **current four small blocks** (Acts and Rules, Court orders and judgments, Circulars and notices, Letters and templates, from "The law, in plain words", `patterns/animal-law.php`) move into the grid | The right column of the new row = those four tiles (same links to `/library/?tag=...`). They are removed from the "The law, in plain words" section, which keeps its heading, its three Library cards and "Browse the Library". Below 768px: one column; from 768px: 2 by 2 |
+
+## 14. History and sources found, 27 Nov 2026 (her organisation's own site, the web, our SourceWeb)
+Read, not yet in the evidence table (rows need the owner's yes). Her own organisation's pages are labelled "in the organisation's own words".
+| When | What | Source | Label |
+|---|---|---|---|
+| 2020 | Began rescuing during the COVID-19 lockdown from a small apartment in Lucknow | nawabitailsrescue.org/about-me/ | Organisation's own words |
+| 2021 | Nawabi Tails Rescue Foundation registered (non-profit company, directors Vishaka Shukla and Vaibhav Shukla) | thecompanycheck.com registry listing | Registry aggregator, not primary |
+| 9 Apr 2022 | Adoption camp at One Awadh Centre, Gomti Nagar | nawabitailsrescue.org/events/ | Organisation's own words |
+| 2022 | About 1,306 animals rescued | Knocksense feature | Reported by |
+| 9 Apr 2023 | Hindustan Times, cruelty against stray dogs on the rise, say rescuers (listed on the organisation's events page) | HT, read the piece first | Reported by (unread) |
+| 22 Dec 2023 | "When you adopt, you save 3 lives": Knocksense feature on her and the foster home | knocksense.com | Reported by |
+| 15 and 20 Jul 2024 | Moving to a bigger shelter outside Lucknow (capacity 700 to 800 stated), opening first week of Aug 2024; adds cattle and livestock care | nawabitailsrescue.org/events/ | Organisation's own words |
+| 20 Jul 2024 | News18 Hindi story on her | listed on the events page, read first | Reported by (unread) |
+| about 2025 | Long-term partner of Humane World for Animals India in Lucknow; sterilisation work grew into a city-wide programme with the Lucknow Municipal Corporation | humaneworld.org blog "This city leads the way in helping street dogs" | Reported by (the partner) |
+| 17 Aug 2025 | Lucknow protest on the Supreme Court order | Amar Ujala video, Samar Salil | Reported by (unread) |
+| 22 Aug 2025 | NDTV India, "Dr Vishakha" | read | Reported by |
+| 5 and 8 Jan 2026 | NBT e-paper; TOI "Lucknow joins nationwide protest" (already on our India Writes for Its Community Dogs campaign) | NBT, TOI | Reported by |
+| 12 Jan 2026 | Her HT op-ed on women feeders | read | In her own words |
+
+**Differences to handle, not hide:** her profession is "dental surgeon" on her organisation's site, "surgeon" in Knocksense and "doctor" in NDTV, so the page says doctor and names the source for anything finer. Her site gives both 5,000 and 7,000+ animals rescued, and 350+ in care now (maximum 450); NDTV said about 400. Every figure is shown with its source and date, never merged. The registry lists a Kanpur registered address, which we do not use.
+**Photos on her site:** her media library holds a team photo (masked faces, cannot tell which person she is), shelter and dog pictures; none is a clear portrait of her. A portrait still needs her or her site's own choice.
+**SourceWeb (published and pending, searched 27 Nov):** no News item names her or Nawabi Tails yet; the only mention in our system is the supporter list on India Writes for Its Community Dogs. Her four keywords (added 26 Nov) have not produced items. Older coverage (2022 to 2024) will not appear through Google News keywords, so those links are added by hand through the ingest route with the tag `vishakha-shukla`.
+**Her own channels (from the listing):** Instagram @nawabitailsrescue, Facebook /nawabitailsrescue, YouTube @nawabitailsrescue. The Instagram post and one YouTube video the owner shared did not open earlier (suspended page, blank page).
+
+## 15. Her organisation's social channels, read 27 Nov 2026 (built-in browser)
+These are the organisation's own pages (Facebook page "Nawabi Tails Rescue", Lucknow; YouTube channel). They are the organisation's words, not independent reports; reaction counts are as read on 27 Nov and change. Captions only: the videos themselves were not watched. No phone number, address or exact location from the pages is used. Instagram would not open in the pane (it redirects to a "suspended" page for every address, so it is blocked for this browser, not read).
+**Facebook page, reels and posts (the feed reads back to 7 Jan 2026 in this pass; 2025 not reached yet):**
+| Date | Reel / post (caption) | Link | Subject |
+|---|---|---|---|
+| 7 Jan 2026 | "I played the Supreme Court hearing on my laptop today. My dog sat next to me and watched." | facebook.com/reel/1432322521623862 | Stray dogs case |
+| 13 Jan 2026 | "During the stray dogs hearing, the SC bench remarked, 'Keep them in your house', placing liability on feeders for bites and incidents. But street dogs are not pets." | facebook.com/reel/1239305421404389 | Feeders and the Supreme Court |
+| 13 Jan 2026 | Thanks the Delhi Chief Minister for a decision, comparing it with the Supreme Court | facebook.com/reel/1887252915485970 | Stray dogs policy |
+| 17 Jan 2026 | "Beware Honourable Supreme Court. We are sending reinforcements" | facebook.com/reel/1242988404373251 | Campaign |
+| 9 Feb 2026 | "Honourable Supreme Court, don't close your eyes to the other side." (555 reactions, 9 comments, 80 shares when read) | facebook.com/reel/1605248667294056 | Supreme Court case |
+| 24 Feb 2026 | "Feeding our community dogs isn't kindness alone. It's prevention." | facebook.com/reel/3383298101837674 | Feeding and safety |
+| 12 Oct 2026 | "Lucknow Flood Response: Animal Rescue and Feeding" | facebook.com/reel/1090971913549280 | Flood rescue, Lucknow |
+| 19 Oct 2026 | "Last Date: 5 Nov. Act Now. Save Them. Stop it from becoming a law." (matches our Laboratory Animals Rules campaign, objection deadline 5 Nov) | facebook.com/reel/30240516858881686 | Lab rules campaign |
+| 22 Oct 2026 | "Sterilisation = low population = fewer dog bites = better life for all" | facebook.com/reel/1157765563602773 | Sterilisation |
+The page posts almost daily (rescue stories, adoption, medicines, a fostering series). Donations are out of scope for the profile (owner, 27 Nov 2026: skip).
+**YouTube (@nawabitailsrescue, search 27 Nov):** two channel videos about five years old ("We don't just foster, we care", "Lost Labrador finds his way back home", about 2021); a third-party video "Pet Adoption Camp by One Awadh Centre Mall and Nawabi Tails for Street Dogs and Cats" (National Watch, about 2022, matches the 9 Apr 2022 camp); "Episode 2: Vishakha Shukla, Lucknow's Most Favourite, with Picker At Pace" (Shubhi Garg, about 2019, 278 views; same person not confirmed). A different YouTube creator called Vishakha Shukla posts self-improvement videos; not her, not used.
+**Still to read:** Instagram (needs the owner to open it, or the links sent), the Facebook feed before Jan 2026 (the 2025 stray-dogs campaign), her LinkedIn, the 2023 HT and 2024 News18 pieces, the Knocksense and Humane World pieces in full.
+
+**Name (owner, 27 Nov 2026):** her title is Dr. The page shows "Dr. Vishakha Shukla"; the field `kits_profile_prefix` holds "Dr." (page data: honorificPrefix), the name field holds "Vishakha Shukla".

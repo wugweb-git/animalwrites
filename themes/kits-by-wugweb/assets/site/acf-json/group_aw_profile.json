@@ -1,0 +1,529 @@
+{
+    "key": "group_aw_profile",
+    "title": "Profile details",
+    "fields": [
+        {
+            "key": "field_aw_profile_tab_person",
+            "label": "Person",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_profile_prefix",
+            "label": "Title before the name",
+            "name": "kits_profile_prefix",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "For example Dr. Shown with the name in the page data.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_aw_profile_name",
+            "label": "Name",
+            "name": "kits_profile_name",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "The person's name, for example Vishakha Shukla.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_aw_profile_role",
+            "label": "Role",
+            "name": "kits_profile_role",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "For example: Doctor and founder, Nawabi Tails Rescue Foundation.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_aw_profile_place",
+            "label": "City and state",
+            "name": "kits_profile_place",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "City and state only, for example Lucknow, Uttar Pradesh. Never a street address, phone or exact location.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_aw_profile_org",
+            "label": "Organisation (Directory listing ID)",
+            "name": "kits_profile_org",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "The Directory listing of their organisation.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "min": 0,
+            "step": 1
+        },
+        {
+            "key": "field_aw_profile_campaign",
+            "label": "Related campaign (campaign ID)",
+            "name": "kits_profile_campaign",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Optional.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "min": 0,
+            "step": 1
+        },
+        {
+            "key": "field_aw_profile_photo_credit",
+            "label": "Photo credit",
+            "name": "kits_profile_photo_credit",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Only with the person's permission. The featured image is the photo.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_aw_profile_tab_links",
+            "label": "Links",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_profile_instagram",
+            "label": "Instagram",
+            "name": "kits_profile_instagram",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_linkedin",
+            "label": "LinkedIn",
+            "name": "kits_profile_linkedin",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_facebook",
+            "label": "Facebook",
+            "name": "kits_profile_facebook",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_youtube",
+            "label": "YouTube",
+            "name": "kits_profile_youtube",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_x",
+            "label": "X",
+            "name": "kits_profile_x",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_whatsapp",
+            "label": "WhatsApp link",
+            "name": "kits_profile_whatsapp",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Only a wa.me or WhatsApp link they allow. Never a phone number.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_tab_approval",
+            "label": "Approval",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_profile_approval",
+            "label": "Approval",
+            "name": "kits_profile_approval",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Nothing is published without one of these.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "": "Not yet",
+                "approved": "Approved by the person",
+                "public-reporting": "Public reporting only (owner decided)"
+            },
+            "default_value": "",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_profile_approved_on",
+            "label": "Date",
+            "name": "kits_profile_approved_on",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "Date of the approval or the decision.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_profile_tab_evidence",
+            "label": "Sources",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_profile_evidence",
+            "label": "Sources (one row per claim)",
+            "name": "kits_profile_evidence",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "One row per claim on the page. Every claim needs a source, a date and an archive copy.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "pagination": 0,
+            "min": 0,
+            "max": 30,
+            "collapsed": "",
+            "button_label": "Add a claim",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_aw_profile_evidence_claim",
+                    "label": "Claim",
+                    "name": "claim",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "One sentence, as the source states it (\"NDTV India reported ...\").",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    },
+                    "maxlength": 240,
+                    "parent_repeater": "field_aw_profile_evidence"
+                },
+                {
+                    "key": "field_aw_profile_evidence_source",
+                    "label": "Source (outlet)",
+                    "name": "source",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "parent_repeater": "field_aw_profile_evidence"
+                },
+                {
+                    "key": "field_aw_profile_evidence_highlight",
+                    "label": "Highlight (optional)",
+                    "name": "highlight",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "A short figure to show big at the top of the page, e.g. About 400 dogs. It links down to this entry.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "parent_repeater": "field_aw_profile_evidence",
+                    "default_value": "",
+                    "placeholder": "About 400 dogs"
+                },
+                {
+                    "key": "field_aw_profile_evidence_label",
+                    "label": "Label",
+                    "name": "label",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "reported": "Reported by (an outlet)",
+                        "own-words": "In their own words",
+                        "org-words": "The organisation's own site"
+                    },
+                    "default_value": "reported",
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": "",
+                    "parent_repeater": "field_aw_profile_evidence"
+                },
+                {
+                    "key": "field_aw_profile_evidence_url",
+                    "label": "Link",
+                    "name": "url",
+                    "aria-label": "",
+                    "type": "url",
+                    "instructions": "The page that says it.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    },
+                    "parent_repeater": "field_aw_profile_evidence"
+                },
+                {
+                    "key": "field_aw_profile_evidence_archive",
+                    "label": "Archive copy",
+                    "name": "archive_url",
+                    "aria-label": "",
+                    "type": "url",
+                    "instructions": "An archive.org (or similar) copy, so the evidence survives link rot.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    },
+                    "parent_repeater": "field_aw_profile_evidence"
+                },
+                {
+                    "key": "field_aw_profile_evidence_date",
+                    "label": "Date",
+                    "name": "date",
+                    "aria-label": "",
+                    "type": "date_picker",
+                    "instructions": "Date the source was published.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    },
+                    "display_format": "j F Y",
+                    "return_format": "Y-m-d",
+                    "first_day": 1,
+                    "parent_repeater": "field_aw_profile_evidence"
+                },
+                {
+                    "key": "field_aw_profile_evidence_news",
+                    "label": "News or Media item on this site (ID)",
+                    "name": "item",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "Optional: the item in Animal Writes that covers it.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    },
+                    "min": 0,
+                    "step": 1,
+                    "parent_repeater": "field_aw_profile_evidence"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "post"
+            },
+            {
+                "param": "post_taxonomy",
+                "operator": "==",
+                "value": "post_tag:profile"
+            }
+        ]
+    ],
+    "menu_order": 20,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Shown on Resources tagged Profile.",
+    "show_in_rest": 0
+}

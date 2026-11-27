@@ -57,7 +57,7 @@ function aw_item_editor_preview( $label ) {
 }
 
 /**
- * What an item is: news | library | own-document | research | guide | opportunity | listing.
+ * What an item is: news | library | own-document | research | guide | profile | opportunity | listing.
  *
  * @param int $id Post ID.
  * @return string
@@ -69,6 +69,9 @@ function aw_item_kind( $id ) {
 		case 'aw_legal': // a document we wrote (templates) has no original to link to
 			return has_term( 'template', 'post_tag', $id ) || '' === (string) get_post_meta( $id, 'aw_source_url', true ) ? 'own-document' : 'library';
 		case 'post':
+			if ( has_term( 'profile', 'post_tag', $id ) ) { // a person's profile (includes/profile.php)
+				return 'profile';
+			}
 			return has_term( 'research', 'post_tag', $id ) ? 'research' : 'guide';
 		case 'aw_opportunity':
 			return 'opportunity';
@@ -184,7 +187,7 @@ function aw_block_item_meta( $a, $id ) {
 
 /** Whether the item shows its summary (guides and opportunities are their own text). */
 function aw_item_shows_summary( $id ) {
-	return in_array( aw_item_kind( $id ), array( 'news', 'library', 'own-document', 'research' ), true ) && '' !== trim( (string) get_post_field( 'post_excerpt', $id ) );
+	return in_array( aw_item_kind( $id ), array( 'news', 'library', 'own-document', 'research', 'profile' ), true ) && '' !== trim( (string) get_post_field( 'post_excerpt', $id ) );
 }
 
 // Guides and opportunities: no summary above the text (their excerpt is for search results and cards).
@@ -306,6 +309,7 @@ function aw_block_item_sources( $a, $id ) {
 	$logo   = get_site_icon_url( 64 );
 	$ours   = '<span class="aw-sources-by">' . ( $logo ? '<img class="aw-sources-logo" src="' . esc_url( $logo ) . '" alt="" width="20" height="20" loading="lazy">' : '' );
 	$sumnote = '<span>' . esc_html__( 'Summary written by Animal Writes. Read the original before relying on it.', 'kits-by-wugweb' ) . '</span>';
+	$plist = '';
 	switch ( $kind ) {
 		case 'news':
 		case 'library':
@@ -351,13 +355,20 @@ function aw_block_item_sources( $a, $id ) {
 			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
 			$read   = '';
 			break;
+		case 'profile': // who checked it; the evidence and each claim's source are in the page itself
+			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
+			$note   = function_exists( 'kits_profile_approval_line' ) ? kits_profile_approval_line( $id ) : '';
+			$plist  = function_exists( 'kits_profile_sources_html' ) ? kits_profile_sources_html( $id ) : '';
+			$links  = str_replace( esc_html__( 'Report a mistake', 'kits-by-wugweb' ), esc_html__( 'Suggest an update', 'kits-by-wugweb' ), $links );
+			$read   = '';
+			break;
 		case 'opportunity':
 			$credit = function_exists( 'aw_block_posted_by' ) ? str_replace( array( '<p class="aw-posted-by kit-meta-item">', '</p>' ), array( '<span class="aw-posted-by">', '</span>' ), aw_block_posted_by( array(), $id ) ) : '';
 			$apply  = (string) get_post_meta( $id, 'aw_apply_url', true );
 			$read   = $url && untrailingslashit( $url ) !== untrailingslashit( $apply ) ? $read : '';
 			break;
 	}
-	$refs = 'guide' === $kind ? (string) aw_item_state( 'refs' ) : '';
+	$refs = 'guide' === $kind ? (string) aw_item_state( 'refs' ) : $plist;
 	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'kits-by-wugweb' ) . '</h2>';
 	$out .= '' !== $credit ? '<div class="aw-sources-credit">' . $credit . '</div>' : '';
 	$out .= '' !== $read . $note ? '<p class="aw-sources-note">' . $read . $note . '</p>' : '';

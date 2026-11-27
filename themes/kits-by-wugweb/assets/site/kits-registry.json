@@ -661,6 +661,26 @@
       }
     },
     {
+      "name": "Profile page",
+      "type": "component",
+      "status": "live",
+      "classes": ["aw-profile", "aw-evidence"],
+      "states": ["default", "no photo", "no evidence rows (section not printed)"],
+      "tokens": ["--kit-size-target", "--kit-space-3", "--kit-space-5", "--kit-radius-card", "--kit-color-raised", "--kit-color-line"],
+      "a11y": {"element": "<section> with H2; evidence is an <ol> of cards with H3 claims; At a glance is a <dl>", "aria": "aria-labelledby on each section", "keyboard": "Tab", "focus": "3px ring in --kit-color-focus (:focus-visible)", "target": "44px", "motion": "none", "sr": "visible text; \"(opens in a new tab)\" on external links"},
+      "seo": {"heading": "H1 in the title block; H2 per section; H3 per evidence claim", "link": "sources: nofollow, new tab, with an archive copy link", "alt": "photo alt from the media library; none for text", "schema": "Article with the Person under about (rankweb schema.php)"}
+    },
+    {
+      "name": "Profile page",
+      "type": "component",
+      "status": "live",
+      "classes": ["kit-profile", "kit-evidence"],
+      "states": ["default", "no photo", "no evidence rows (section not printed)"],
+      "tokens": ["--kit-size-target", "--kit-space-3", "--kit-space-5", "--kit-radius-card", "--kit-color-raised", "--kit-color-line"],
+      "a11y": {"element": "<section> with H2; evidence is an <ol> of cards with H3 claims; At a glance is a <dl>", "aria": "aria-labelledby on each section", "keyboard": "Tab", "focus": "3px ring in --kit-color-focus (:focus-visible)", "target": "44px", "motion": "none", "sr": "visible text; \"(opens in a new tab)\" on external links"},
+      "seo": {"heading": "H1 in the title block; H2 per section; H3 per evidence claim", "link": "sources: nofollow, new tab, with an archive copy link", "alt": "photo alt from the media library; none for text", "schema": "Article with the Person under about (rankweb schema.php)"}
+    },
+    {
       "name": "Item page rows",
       "type": "component",
       "status": "live",

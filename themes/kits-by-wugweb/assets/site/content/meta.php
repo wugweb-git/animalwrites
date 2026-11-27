@@ -70,6 +70,23 @@ function aw_meta_schema() {
 		// Resources: the date a guide was last checked (schema lastReviewed).
 		'kits_last_reviewed' => array( 'string', array( 'post' ), 'Last reviewed (Y-m-d)' ),
 
+		// Profiles (a Resource tagged "profile": a person, their organisation and the evidence behind each claim).
+		'kits_profile_name'    => array( 'string', array( 'post' ), 'Profile: the person\'s name (as in the schema and the cards)' ),
+		'kits_profile_prefix'  => array( 'string', array( 'post' ), 'Profile: title before the name (e.g. Dr.)' ),
+		'kits_profile_role'    => array( 'string', array( 'post' ), 'Profile: role (e.g. Doctor and founder)' ),
+		'kits_profile_place'   => array( 'string', array( 'post' ), 'Profile: city and state only (never an address)' ),
+		'kits_profile_org'     => array( 'string', array( 'post' ), 'Profile: their organisation (Directory listing ID)' ),
+		'kits_profile_campaign' => array( 'string', array( 'post' ), 'Profile: related campaign (campaign ID)' ),
+		'kits_profile_instagram' => array( 'string', array( 'post' ), 'Profile: their Instagram page (a link)' ),
+		'kits_profile_linkedin' => array( 'string', array( 'post' ), 'Profile: their LinkedIn page (a link)' ),
+		'kits_profile_facebook' => array( 'string', array( 'post' ), 'Profile: their Facebook page (a link)' ),
+		'kits_profile_youtube' => array( 'string', array( 'post' ), 'Profile: their YouTube channel (a link)' ),
+		'kits_profile_x'       => array( 'string', array( 'post' ), 'Profile: their X page (a link)' ),
+		'kits_profile_whatsapp' => array( 'string', array( 'post' ), 'Profile: a WhatsApp link they allow (wa.me or a channel link; never a bare phone number)' ),
+		'kits_profile_photo_credit' => array( 'string', array( 'post' ), 'Profile: photo credit (the person or photographer who allowed it)' ),
+		'kits_profile_approval' => array( 'string', array( 'post' ), 'Profile: approved (the person checked it) or public-reporting (the owner decided to publish on public reporting only)' ),
+		'kits_profile_approved_on' => array( 'string', array( 'post' ), 'Profile: date of approval or of the decision (Y-m-d)' ),
+
 		// Resources.
 		'aw_file_url'        => array( 'string', array( 'aw_legal' ), 'Downloadable file URL' ),
 		'aw_file_id'         => array( 'string', array( 'aw_legal' ), 'Document file (attachment ID)' ),
@@ -105,8 +122,8 @@ function aw_sanitize_meta( $value, $key ) {
 	if ( function_exists( 'directoryweb_meta_schema' ) && isset( directoryweb_meta_schema()[ $key ] ) ) {
 		return directoryweb_sanitize_meta( $value, $key ); // the Directory's fields: DirectoryWeb's rules
 	}
-	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url' );
-	$date_keys = array( 'aw_source_date', 'aw_deadline', 'aw_review_until', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed' );
+	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'kits_profile_instagram', 'kits_profile_linkedin', 'kits_profile_facebook', 'kits_profile_youtube', 'kits_profile_x' );
+	$date_keys = array( 'aw_source_date', 'aw_deadline', 'aw_review_until', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed', 'kits_profile_approved_on' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );
@@ -118,8 +135,16 @@ function aw_sanitize_meta( $value, $key ) {
 	if ( 'aw_campaign_short' === $key ) { // one path segment (campaign-short.php)
 		return function_exists( 'aw_camp_short_clean' ) ? aw_camp_short_clean( $value ) : sanitize_title( (string) $value );
 	}
-	if ( 'aw_cover_image_id' === $key ) { // an attachment ID, or empty to clear
+	if ( in_array( $key, array( 'aw_cover_image_id', 'kits_profile_org', 'kits_profile_campaign' ), true ) ) { // an ID, or empty to clear
 		return (int) $value ? (string) (int) $value : '';
+	}
+	if ( 'kits_profile_whatsapp' === $key ) { // a link they allow on wa.me or whatsapp.com only, so a phone number is never published here
+		$url  = esc_url_raw( (string) $value );
+		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+		return in_array( strtolower( $host ), array( 'wa.me', 'chat.whatsapp.com', 'whatsapp.com', 'www.whatsapp.com' ), true ) ? $url : '';
+	}
+	if ( 'kits_profile_approval' === $key ) {
+		return in_array( (string) $value, array( 'approved', 'public-reporting' ), true ) ? (string) $value : '';
 	}
 	if ( 'aw_employment_type' === $key ) { // Google's JobPosting values only
 		$value = strtoupper( str_replace( array( '-', ' ' ), '_', trim( (string) $value ) ) );
