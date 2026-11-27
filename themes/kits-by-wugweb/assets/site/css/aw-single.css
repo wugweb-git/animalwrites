@@ -286,7 +286,6 @@
 .kit-profile-photo { position: absolute; inset: 0; display: block; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 18%; }
 .kit-profile-herotext { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
 .has-photo .kit-profile-herotext { align-content: center; padding: var(--kit-space-5); }
-.kit-profile-credit { margin: 0; font-size: var(--kit-type-xs); }
 .kit-profile-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin: 0; }
 .kit-profile-tag { display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding-inline: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-on-ink); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); }
 .kit-profile-tag.is-solid { background: var(--kit-color-on-ink); color: var(--kit-color-ink); }

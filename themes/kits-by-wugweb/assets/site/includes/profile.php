@@ -240,7 +240,6 @@ function kits_profile_hero_html( $id, $f ) {
 	}
 	$out .= '' !== $figs ? '<ul class="kit-profile-figures">' . $figs . '</ul>' : '';
 	$out .= kits_profile_follow_html( $f );
-	$out .= '' !== $photo && '' !== $f['credit'] ? '<p class="kit-profile-credit">' . esc_html( sprintf( /* translators: %s: who took or allowed the photo. */ __( 'Photo: %s', 'kits-by-wugweb' ), $f['credit'] ) ) . '</p>' : '';
 	return $out . '</div></section>';
 }
 
