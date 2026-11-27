@@ -418,26 +418,28 @@ function aw_card_item( $type, $state = '', $level = 2 ) {
 const AW_HOME_GUIDE_LINKS = array( 'rabies-after-a-bite-india' => '/campaigns/rabies-awareness-india/' );
 
 /**
- * Point the picture and title links of a Home Guides card to its campaign page (AW_HOME_GUIDE_LINKS).
+ * Point the picture and title links of a Home Guides card to its campaign page (AW_HOME_GUIDE_LINKS). Done on the
+ * Post Template of query 44 (the title and picture blocks do not know which query they sit in).
  *
- * @param string   $html     Rendered block.
+ * @param string   $html     Rendered Post Template.
  * @param array    $block    Parsed block (unused).
  * @param WP_Block $instance Block instance (query context).
- * @return string The block, with its link changed for a listed guide on the Home Guides row.
+ * @return string The list, with the listed guides linking to their campaign page.
  */
 function aw_home_guide_link( $html, $block, $instance ) {
 	unset( $block );
-	if ( 44 !== (int) ( $instance->context['queryId'] ?? 0 ) || empty( $instance->context['postId'] ) ) {
+	if ( 44 !== (int) ( $instance->context['queryId'] ?? 0 ) ) {
 		return $html;
 	}
-	$slug = get_post_field( 'post_name', (int) $instance->context['postId'] );
-	if ( ! isset( AW_HOME_GUIDE_LINKS[ $slug ] ) ) {
-		return $html;
+	foreach ( AW_HOME_GUIDE_LINKS as $slug => $path ) {
+		$guide = get_page_by_path( $slug, OBJECT, 'post' );
+		if ( $guide ) {
+			$html = str_replace( 'href="' . esc_url( get_permalink( $guide ) ) . '"', 'href="' . esc_url( home_url( $path ) ) . '"', $html );
+		}
 	}
-	return str_replace( esc_url( get_permalink( (int) $instance->context['postId'] ) ), esc_url( home_url( AW_HOME_GUIDE_LINKS[ $slug ] ) ), $html );
+	return $html;
 }
-add_filter( 'render_block_core/post-title', 'aw_home_guide_link', 10, 3 );
-add_filter( 'render_block_core/post-featured-image', 'aw_home_guide_link', 10, 3 );
+add_filter( 'render_block_core/post-template', 'aw_home_guide_link', 20, 3 );
 
 /** One Post Template item per hub. */
 function aw_hub_item( $type ) {
