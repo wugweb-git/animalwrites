@@ -280,7 +280,7 @@
 .kit-profile-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent) var(--kit-border-width), transparent var(--kit-border-width)) 0 0 / var(--kit-space-4) var(--kit-space-4); -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 70%); mask-image: linear-gradient(to bottom left, #000, transparent 70%); }
 .kit-profile-monogram { position: absolute; z-index: -1; inset-block-end: calc(-1 * var(--kit-space-5)); inset-inline-end: calc(-1 * var(--kit-space-3)); font-size: calc(var(--kit-type-display) * 3); font-weight: var(--kit-weight-display); line-height: .8; letter-spacing: -.04em; opacity: .1; pointer-events: none; user-select: none; }
 .kit-profile-initials { flex: none; display: grid; place-items: center; inline-size: var(--kit-thumb-md); block-size: var(--kit-thumb-md); border-radius: var(--kit-radius-media); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); line-height: 1; }
-.kit-profile-hero { min-height: var(--kit-hero-h, min(720px, 100svh)); }
+.kit-profile-hero { min-height: var(--kit-hero-h); }
 .kit-profile-hero.has-photo { gap: 0; padding: 0; grid-template-rows: minmax(var(--kit-thumb-lg), 1fr) auto; }
 .kit-profile-media { position: relative; margin: 0; overflow: hidden; }
 .kit-profile-photo { position: absolute; inset: 0; display: block; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 18%; }
