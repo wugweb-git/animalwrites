@@ -180,6 +180,22 @@ function kits_profile_sources( $id ) {
 	return $groups;
 }
 
+/** "Follow {first name}": their own pages, each a 44px link that opens in a new tab. */
+function kits_profile_follow_html( $f ) {
+	if ( ! $f['links'] ) {
+		return '';
+	}
+	$first = kits_profile_first( $f );
+	/* translators: %s: first name. */
+	$label = '' !== $first ? sprintf( __( '%s online', 'kits-by-wugweb' ), $first ) : __( 'Online', 'kits-by-wugweb' );
+	$out   = '<nav class="kit-profile-follow" aria-label="' . esc_attr( $label ) . '"><ul>';
+	$icons = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
+	foreach ( $f['links'] as $name => $url ) {
+		$out .= '<li><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me"><span class="kit-ico kit-ico--' . esc_attr( $icons[ $name ] ?? 'link' ) . '" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( $name ) . ' ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
+	}
+	return $out . '</ul></nav>';
+}
+
 /**
  * The hero banner: a dark block with a ghost monogram behind a plain initials tile (no photo until they send one and allow it),
  * their role and city, the figures worth seeing at once (each linking to the page that backs it) and where to follow them.
@@ -218,6 +234,7 @@ function kits_profile_hero_html( $id, $f ) {
 		}
 	}
 	$out .= '' !== $figs ? '<ul class="kit-profile-figures">' . $figs . '</ul>' : '';
+	$out .= kits_profile_follow_html( $f );
 	return $out . '</section>';
 }
 
