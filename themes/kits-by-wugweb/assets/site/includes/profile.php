@@ -210,9 +210,10 @@ function kits_profile_hero_html( $id, $f ) {
 		return '';
 	}
 	$initials = kits_profile_initials( $f['name'] );
-	$out      = '<section class="kit-profile-hero">';
-	$out     .= '' !== $initials ? '<span class="kit-profile-monogram" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '';
-	$out     .= '<p class="kit-profile-tags">';
+	$photo    = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'large', array( 'class' => 'kit-profile-photo', 'alt' => trim( $f['prefix'] . ' ' . $f['name'] ), 'loading' => 'eager', 'decoding' => 'async' ) ) : '';
+	$out      = '<section class="kit-profile-hero' . ( '' !== $photo ? ' has-photo' : '' ) . '">';
+	$out     .= '' !== $photo ? '<figure class="kit-profile-media">' . $photo . '</figure>' : ( '' !== $initials ? '<span class="kit-profile-monogram" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup for the featured image.
+	$out     .= '<div class="kit-profile-herotext"><p class="kit-profile-tags">';
 	$out     .= '' !== $f['role'] ? '<span class="kit-profile-tag">' . esc_html( $f['role'] ) . '</span>' : '';
 	$out     .= '' !== $f['place'] ? '<span class="kit-profile-tag is-solid">' . esc_html( $f['place'] ) . '</span>' : '';
 	$out     .= '</p>';
@@ -239,7 +240,8 @@ function kits_profile_hero_html( $id, $f ) {
 	}
 	$out .= '' !== $figs ? '<ul class="kit-profile-figures">' . $figs . '</ul>' : '';
 	$out .= kits_profile_follow_html( $f );
-	return $out . '</section>';
+	$out .= '' !== $photo && '' !== $f['credit'] ? '<p class="kit-profile-credit">' . esc_html( sprintf( /* translators: %s: who took or allowed the photo. */ __( 'Photo: %s', 'kits-by-wugweb' ), $f['credit'] ) ) . '</p>' : '';
+	return $out . '</div></section>';
 }
 
 /** Their organisation as a card: the Directory listing, with what the listing says about it. */
@@ -387,3 +389,13 @@ add_filter(
 	2
 );
 
+// The hero shows the photo, so the item template's own image row is left out on the profile's page (cards in lists are untouched).
+add_filter(
+	'render_block_core/post-featured-image',
+	function ( $html, $block ) {
+		$id = (int) ( $block['attrs']['postId'] ?? get_the_ID() );
+		return $id && function_exists( 'aw_item_here' ) && aw_item_here( $id ) && kits_is_profile( $id ) ? '' : $html;
+	},
+	30,
+	2
+);
