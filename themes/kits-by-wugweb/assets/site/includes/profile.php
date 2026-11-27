@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int $id Post ID.
  * @return bool
  */
-function aw_is_profile( $id ) {
+function kits_is_profile( $id ) {
 	return 'post' === get_post_type( $id ) && has_term( 'profile', 'post_tag', $id );
 }
 
@@ -38,31 +38,31 @@ function aw_is_profile( $id ) {
  * @param int $id Post ID.
  * @return array{name:string,role:string,place:string,org:int,campaign:int,credit:string,approval:string,approved_on:string}
  */
-function aw_profile_fields( $id ) {
+function kits_profile_fields( $id ) {
 	return array(
-		'name'        => (string) get_post_meta( $id, 'aw_profile_name', true ),
-		'role'        => (string) get_post_meta( $id, 'aw_profile_role', true ),
-		'place'       => (string) get_post_meta( $id, 'aw_profile_place', true ),
-		'org'         => (int) get_post_meta( $id, 'aw_profile_org', true ),
-		'campaign'    => (int) get_post_meta( $id, 'aw_profile_campaign', true ),
-		'credit'      => (string) get_post_meta( $id, 'aw_profile_photo_credit', true ),
-		'approval'    => (string) get_post_meta( $id, 'aw_profile_approval', true ),
-		'approved_on' => (string) get_post_meta( $id, 'aw_profile_approved_on', true ),
+		'name'        => (string) get_post_meta( $id, 'kits_profile_name', true ),
+		'role'        => (string) get_post_meta( $id, 'kits_profile_role', true ),
+		'place'       => (string) get_post_meta( $id, 'kits_profile_place', true ),
+		'org'         => (int) get_post_meta( $id, 'kits_profile_org', true ),
+		'campaign'    => (int) get_post_meta( $id, 'kits_profile_campaign', true ),
+		'credit'      => (string) get_post_meta( $id, 'kits_profile_photo_credit', true ),
+		'approval'    => (string) get_post_meta( $id, 'kits_profile_approval', true ),
+		'approved_on' => (string) get_post_meta( $id, 'kits_profile_approved_on', true ),
 	);
 }
 
 /**
- * A profile's evidence rows, from the repeater's stored meta (aw_profile_evidence = the row count, then
- * aw_profile_evidence_{n}_{field}). Rows with no claim are left out.
+ * A profile's evidence rows, from the repeater's stored meta (kits_profile_evidence = the row count, then
+ * kits_profile_evidence_{n}_{field}). Rows with no claim are left out.
  *
  * @param int $id Post ID.
  * @return array<int,array{claim:string,source:string,label:string,url:string,archive:string,date:string}>
  */
-function aw_profile_evidence( $id ) {
-	$n    = min( 30, max( 0, (int) get_post_meta( $id, 'aw_profile_evidence', true ) ) );
+function kits_profile_evidence( $id ) {
+	$n    = min( 30, max( 0, (int) get_post_meta( $id, 'kits_profile_evidence', true ) ) );
 	$rows = array();
 	for ( $i = 0; $i < $n; $i++ ) {
-		$p     = 'aw_profile_evidence_' . $i . '_';
+		$p     = 'kits_profile_evidence_' . $i . '_';
 		$claim = trim( (string) get_post_meta( $id, $p . 'claim', true ) );
 		if ( '' === $claim ) {
 			continue;
@@ -86,7 +86,7 @@ function aw_profile_evidence( $id ) {
  * @param string $place City and state.
  * @return string
  */
-function aw_profile_help_url( $place ) {
+function kits_profile_help_url( $place ) {
 	$parts = array_map( 'trim', explode( ',', $place ) );
 	if ( count( $parts ) < 2 || '' === $parts[0] || '' === $parts[1] ) {
 		return '';
@@ -108,7 +108,7 @@ function aw_profile_help_url( $place ) {
 }
 
 /** An external link that opens in a new tab, with the words for a screen reader. */
-function aw_profile_ext_link( $url, $text, $class = '' ) {
+function kits_profile_ext_link( $url, $text, $class = '' ) {
 	return '<a' . ( '' !== $class ? ' class="' . esc_attr( $class ) . '"' : '' ) . ' href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . esc_html( $text ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a>';
 }
 
@@ -118,8 +118,8 @@ function aw_profile_ext_link( $url, $text, $class = '' ) {
  * @param int $id Post ID.
  * @return string
  */
-function aw_profile_head_html( $id ) {
-	$f   = aw_profile_fields( $id );
+function kits_profile_head_html( $id ) {
+	$f   = kits_profile_fields( $id );
 	$org = $f['org'] && 'publish' === get_post_status( $f['org'] ) ? $f['org'] : 0;
 	$out = '';
 
@@ -127,12 +127,12 @@ function aw_profile_head_html( $id ) {
 	if ( $org ) {
 		$acts .= '<a class="wp-element-button kit-btn" href="' . esc_url( get_permalink( $org ) ) . '">' . esc_html__( "See the organisation's listing", 'kits-by-wugweb' ) . '</a>';
 	}
-	$help = aw_profile_help_url( $f['place'] );
+	$help = kits_profile_help_url( $f['place'] );
 	if ( '' !== $help ) {
 		/* translators: %s: city. */
 		$acts .= '<a class="wp-element-button kit-btn is-style-kits-ghost" href="' . esc_url( $help ) . '">' . esc_html( sprintf( __( 'Find help in %s', 'kits-by-wugweb' ), trim( explode( ',', $f['place'] )[0] ) ) ) . '</a>';
 	}
-	$out .= '' !== $acts ? '<p class="aw-profile-actions">' . $acts . '</p>' : '';
+	$out .= '' !== $acts ? '<p class="kit-profile-actions">' . $acts . '</p>' : '';
 
 	$rows = array();
 	if ( '' !== $f['role'] ) {
@@ -153,11 +153,11 @@ function aw_profile_head_html( $id ) {
 		}
 		$site = (string) get_post_meta( $org, 'aw_website', true );
 		if ( '' !== $site ) {
-			$rows[ __( 'Website', 'kits-by-wugweb' ) ] = aw_profile_ext_link( $site, preg_replace( '#^https?://(www\.)?#', '', untrailingslashit( $site ) ) );
+			$rows[ __( 'Website', 'kits-by-wugweb' ) ] = kits_profile_ext_link( $site, preg_replace( '#^https?://(www\.)?#', '', untrailingslashit( $site ) ) );
 		}
 	}
 	if ( $rows ) {
-		$out .= '<section class="aw-profile-glance" aria-labelledby="aw-profile-glance-h"><h2 id="aw-profile-glance-h">' . esc_html__( 'At a glance', 'kits-by-wugweb' ) . '</h2><dl>';
+		$out .= '<section class="kit-profile-glance" aria-labelledby="kit-profile-glance-h"><h2 id="kit-profile-glance-h">' . esc_html__( 'At a glance', 'kits-by-wugweb' ) . '</h2><dl>';
 		foreach ( $rows as $k => $v ) {
 			$out .= '<div><dt>' . esc_html( $k ) . '</dt><dd>' . $v . '</dd></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each value is escaped above.
 		}
@@ -172,30 +172,30 @@ function aw_profile_head_html( $id ) {
  * @param int $id Post ID.
  * @return string
  */
-function aw_profile_tail_html( $id ) {
-	$f   = aw_profile_fields( $id );
+function kits_profile_tail_html( $id ) {
+	$f   = kits_profile_fields( $id );
 	$out = '';
 
 	$cards = '';
-	foreach ( aw_profile_evidence( $id ) as $r ) {
+	foreach ( kits_profile_evidence( $id ) as $r ) {
 		$meta = '<span class="kit-chip">' . esc_html( 'own-words' === $r['label'] ? __( 'In their own words', 'kits-by-wugweb' ) : __( 'Reported by', 'kits-by-wugweb' ) ) . '</span>';
-		$meta .= ' <span class="aw-evidence-source">' . esc_html( $r['source'] ) . ( '' !== $r['source'] && '' !== $r['date'] ? ', ' : '' ) . ( '' !== $r['date'] ? kits_date( $r['date'] ) : '' ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_date() returns escaped markup.
+		$meta .= ' <span class="kit-evidence-source">' . esc_html( $r['source'] ) . ( '' !== $r['source'] && '' !== $r['date'] ? ', ' : '' ) . ( '' !== $r['date'] ? kits_date( $r['date'] ) : '' ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_date() returns escaped markup.
 		$links = '';
 		if ( '' !== $r['url'] ) {
 			/* translators: %s: outlet. */
-			$links .= aw_profile_ext_link( $r['url'], '' !== $r['source'] ? sprintf( __( 'Read the %s report', 'kits-by-wugweb' ), $r['source'] ) : __( 'Read the source', 'kits-by-wugweb' ) );
+			$links .= kits_profile_ext_link( $r['url'], '' !== $r['source'] ? sprintf( __( 'Read the %s report', 'kits-by-wugweb' ), $r['source'] ) : __( 'Read the source', 'kits-by-wugweb' ) );
 		}
 		if ( '' !== $r['archive'] ) {
-			$links .= aw_profile_ext_link( $r['archive'], __( 'Archive copy', 'kits-by-wugweb' ) );
+			$links .= kits_profile_ext_link( $r['archive'], __( 'Archive copy', 'kits-by-wugweb' ) );
 		}
-		$cards .= '<li class="aw-evidence-card"><h3 class="aw-evidence-claim">' . esc_html( $r['claim'] ) . '</h3><p class="aw-evidence-meta">' . $meta . '</p>' . ( '' !== $links ? '<p class="aw-evidence-links">' . $links . '</p>' : '' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
+		$cards .= '<li class="kit-evidence-card"><h3 class="kit-evidence-claim">' . esc_html( $r['claim'] ) . '</h3><p class="kit-evidence-meta">' . $meta . '</p>' . ( '' !== $links ? '<p class="kit-evidence-links">' . $links . '</p>' : '' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
 	}
 	if ( '' !== $cards ) {
-		$out .= '<section class="aw-evidence" aria-labelledby="aw-evidence-h"><h2 id="aw-evidence-h">' . esc_html__( 'Evidence', 'kits-by-wugweb' ) . '</h2><p class="aw-evidence-lead">' . esc_html__( 'Every claim on this page, with where it comes from.', 'kits-by-wugweb' ) . '</p><ol class="aw-evidence-list">' . $cards . '</ol></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$out .= '<section class="kit-evidence" aria-labelledby="kit-evidence-h"><h2 id="kit-evidence-h">' . esc_html__( 'Evidence', 'kits-by-wugweb' ) . '</h2><p class="kit-evidence-lead">' . esc_html__( 'Every claim on this page, with where it comes from.', 'kits-by-wugweb' ) . '</p><ol class="kit-evidence-list">' . $cards . '</ol></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	$more = '';
-	$help = aw_profile_help_url( $f['place'] );
+	$help = kits_profile_help_url( $f['place'] );
 	if ( '' !== $help ) {
 		/* translators: %s: city. */
 		$more .= '<li><a href="' . esc_url( $help ) . '">' . esc_html( sprintf( __( 'Animal help in %s', 'kits-by-wugweb' ), trim( explode( ',', $f['place'] )[0] ) ) ) . '</a></li>';
@@ -204,14 +204,14 @@ function aw_profile_tail_html( $id ) {
 		$more .= '<li><a href="' . esc_url( get_permalink( $f['campaign'] ) ) . '">' . esc_html( get_the_title( $f['campaign'] ) ) . '</a></li>';
 	}
 	if ( '' !== $more ) {
-		$out .= '<section class="aw-profile-more" aria-labelledby="aw-profile-more-h"><h2 id="aw-profile-more-h">' . esc_html__( 'Go further', 'kits-by-wugweb' ) . '</h2><ul>' . $more . '</ul></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$out .= '<section class="kit-profile-more" aria-labelledby="kit-profile-more-h"><h2 id="kit-profile-more-h">' . esc_html__( 'Go further', 'kits-by-wugweb' ) . '</h2><ul>' . $more . '</ul></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 	return $out;
 }
 
 /** The approval line for the Sources block: who checked it, or that it rests on public reporting. */
-function aw_profile_approval_line( $id ) {
-	$f    = aw_profile_fields( $id );
+function kits_profile_approval_line( $id ) {
+	$f    = kits_profile_fields( $id );
 	$when = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $f['approved_on'] ) ? kits_date( $f['approved_on'] ) : '';
 	if ( 'approved' === $f['approval'] ) {
 		return '<span>' . esc_html__( 'Checked with them on', 'kits-by-wugweb' ) . ' ' . $when . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -227,10 +227,10 @@ add_filter(
 	'render_block_core/post-content',
 	function ( $html, $block ) {
 		$id = (int) ( $block['attrs']['postId'] ?? get_the_ID() );
-		if ( ! $id || ! function_exists( 'aw_item_here' ) || ! aw_item_here( $id ) || ! aw_is_profile( $id ) ) {
+		if ( ! $id || ! function_exists( 'aw_item_here' ) || ! aw_item_here( $id ) || ! kits_is_profile( $id ) ) {
 			return $html;
 		}
-		return aw_profile_head_html( $id ) . $html . aw_profile_tail_html( $id );
+		return kits_profile_head_html( $id ) . $html . kits_profile_tail_html( $id );
 	},
 	30,
 	2

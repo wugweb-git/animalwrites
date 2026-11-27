@@ -71,14 +71,14 @@ function aw_meta_schema() {
 		'kits_last_reviewed' => array( 'string', array( 'post' ), 'Last reviewed (Y-m-d)' ),
 
 		// Profiles (a Resource tagged "profile": a person, their organisation and the evidence behind each claim).
-		'aw_profile_name'    => array( 'string', array( 'post' ), 'Profile: the person\'s name (as in the schema and the cards)' ),
-		'aw_profile_role'    => array( 'string', array( 'post' ), 'Profile: role (e.g. Doctor and founder)' ),
-		'aw_profile_place'   => array( 'string', array( 'post' ), 'Profile: city and state only (never an address)' ),
-		'aw_profile_org'     => array( 'string', array( 'post' ), 'Profile: their organisation (Directory listing ID)' ),
-		'aw_profile_campaign' => array( 'string', array( 'post' ), 'Profile: related campaign (campaign ID)' ),
-		'aw_profile_photo_credit' => array( 'string', array( 'post' ), 'Profile: photo credit (the person or photographer who allowed it)' ),
-		'aw_profile_approval' => array( 'string', array( 'post' ), 'Profile: approved (the person checked it) or public-reporting (the owner decided to publish on public reporting only)' ),
-		'aw_profile_approved_on' => array( 'string', array( 'post' ), 'Profile: date of approval or of the decision (Y-m-d)' ),
+		'kits_profile_name'    => array( 'string', array( 'post' ), 'Profile: the person\'s name (as in the schema and the cards)' ),
+		'kits_profile_role'    => array( 'string', array( 'post' ), 'Profile: role (e.g. Doctor and founder)' ),
+		'kits_profile_place'   => array( 'string', array( 'post' ), 'Profile: city and state only (never an address)' ),
+		'kits_profile_org'     => array( 'string', array( 'post' ), 'Profile: their organisation (Directory listing ID)' ),
+		'kits_profile_campaign' => array( 'string', array( 'post' ), 'Profile: related campaign (campaign ID)' ),
+		'kits_profile_photo_credit' => array( 'string', array( 'post' ), 'Profile: photo credit (the person or photographer who allowed it)' ),
+		'kits_profile_approval' => array( 'string', array( 'post' ), 'Profile: approved (the person checked it) or public-reporting (the owner decided to publish on public reporting only)' ),
+		'kits_profile_approved_on' => array( 'string', array( 'post' ), 'Profile: date of approval or of the decision (Y-m-d)' ),
 
 		// Resources.
 		'aw_file_url'        => array( 'string', array( 'aw_legal' ), 'Downloadable file URL' ),
@@ -116,7 +116,7 @@ function aw_sanitize_meta( $value, $key ) {
 		return directoryweb_sanitize_meta( $value, $key ); // the Directory's fields: DirectoryWeb's rules
 	}
 	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url' );
-	$date_keys = array( 'aw_source_date', 'aw_deadline', 'aw_review_until', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed', 'aw_profile_approved_on' );
+	$date_keys = array( 'aw_source_date', 'aw_deadline', 'aw_review_until', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed', 'kits_profile_approved_on' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );
@@ -128,10 +128,10 @@ function aw_sanitize_meta( $value, $key ) {
 	if ( 'aw_campaign_short' === $key ) { // one path segment (campaign-short.php)
 		return function_exists( 'aw_camp_short_clean' ) ? aw_camp_short_clean( $value ) : sanitize_title( (string) $value );
 	}
-	if ( in_array( $key, array( 'aw_cover_image_id', 'aw_profile_org', 'aw_profile_campaign' ), true ) ) { // an ID, or empty to clear
+	if ( in_array( $key, array( 'aw_cover_image_id', 'kits_profile_org', 'kits_profile_campaign' ), true ) ) { // an ID, or empty to clear
 		return (int) $value ? (string) (int) $value : '';
 	}
-	if ( 'aw_profile_approval' === $key ) {
+	if ( 'kits_profile_approval' === $key ) {
 		return in_array( (string) $value, array( 'approved', 'public-reporting' ), true ) ? (string) $value : '';
 	}
 	if ( 'aw_employment_type' === $key ) { // Google's JobPosting values only

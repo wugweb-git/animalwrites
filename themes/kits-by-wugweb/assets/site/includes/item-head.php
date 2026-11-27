@@ -356,7 +356,7 @@ function aw_block_item_sources( $a, $id ) {
 			break;
 		case 'profile': // who checked it; the evidence and each claim's source are in the page itself
 			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
-			$note   = function_exists( 'aw_profile_approval_line' ) ? aw_profile_approval_line( $id ) : '';
+			$note   = function_exists( 'kits_profile_approval_line' ) ? kits_profile_approval_line( $id ) : '';
 			$read   = '';
 			break;
 		case 'opportunity':

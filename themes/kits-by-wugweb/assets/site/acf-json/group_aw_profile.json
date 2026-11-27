@@ -23,7 +23,7 @@
         {
             "key": "field_aw_profile_name",
             "label": "Name",
-            "name": "aw_profile_name",
+            "name": "kits_profile_name",
             "aria-label": "",
             "type": "text",
             "instructions": "The person's name, for example Vishakha Shukla.",
@@ -38,7 +38,7 @@
         {
             "key": "field_aw_profile_role",
             "label": "Role",
-            "name": "aw_profile_role",
+            "name": "kits_profile_role",
             "aria-label": "",
             "type": "text",
             "instructions": "For example: Doctor and founder, Nawabi Tails Rescue Foundation.",
@@ -53,7 +53,7 @@
         {
             "key": "field_aw_profile_place",
             "label": "City and state",
-            "name": "aw_profile_place",
+            "name": "kits_profile_place",
             "aria-label": "",
             "type": "text",
             "instructions": "City and state only, for example Lucknow, Uttar Pradesh. Never a street address, phone or exact location.",
@@ -68,7 +68,7 @@
         {
             "key": "field_aw_profile_org",
             "label": "Organisation (Directory listing ID)",
-            "name": "aw_profile_org",
+            "name": "kits_profile_org",
             "aria-label": "",
             "type": "number",
             "instructions": "The Directory listing of their organisation.",
@@ -85,7 +85,7 @@
         {
             "key": "field_aw_profile_campaign",
             "label": "Related campaign (campaign ID)",
-            "name": "aw_profile_campaign",
+            "name": "kits_profile_campaign",
             "aria-label": "",
             "type": "number",
             "instructions": "Optional.",
@@ -102,7 +102,7 @@
         {
             "key": "field_aw_profile_photo_credit",
             "label": "Photo credit",
-            "name": "aw_profile_photo_credit",
+            "name": "kits_profile_photo_credit",
             "aria-label": "",
             "type": "text",
             "instructions": "Only with the person's permission. The featured image is the photo.",
@@ -135,7 +135,7 @@
         {
             "key": "field_aw_profile_approval",
             "label": "Approval",
-            "name": "aw_profile_approval",
+            "name": "kits_profile_approval",
             "aria-label": "",
             "type": "select",
             "instructions": "Nothing is published without one of these.",
@@ -162,7 +162,7 @@
         {
             "key": "field_aw_profile_approved_on",
             "label": "Date",
-            "name": "aw_profile_approved_on",
+            "name": "kits_profile_approved_on",
             "aria-label": "",
             "type": "date_picker",
             "instructions": "Date of the approval or the decision.",
@@ -198,7 +198,7 @@
         {
             "key": "field_aw_profile_evidence",
             "label": "Evidence rows",
-            "name": "aw_profile_evidence",
+            "name": "kits_profile_evidence",
             "aria-label": "",
             "type": "repeater",
             "instructions": "One row per claim on the page. Every claim needs a source, a date and an archive copy.",
