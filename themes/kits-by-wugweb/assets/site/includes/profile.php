@@ -189,8 +189,9 @@ function kits_profile_follow_html( $f ) {
 	/* translators: %s: first name. */
 	$label = '' !== $first ? sprintf( __( '%s online', 'kits-by-wugweb' ), $first ) : __( 'Online', 'kits-by-wugweb' );
 	$out   = '<nav class="kit-profile-follow" aria-label="' . esc_attr( $label ) . '"><ul>';
+	$icons = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
 	foreach ( $f['links'] as $name => $url ) {
-		$out .= '<li><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me">' . esc_html( $name ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
+		$out .= '<li><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me"><span class="kit-ico kit-ico--' . esc_attr( $icons[ $name ] ?? 'link' ) . '" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( $name ) . ' ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
 	}
 	return $out . '</ul></nav>';
 }
@@ -229,7 +230,7 @@ function kits_profile_hero_html( $id, $f ) {
 		}
 		if ( '' !== $h ) {
 			$line  = $g['source'] . ( '' !== $g['source'] && '' !== $g['date'] ? ', ' : '' ) . ( '' !== $g['date'] ? wp_date( 'M Y', strtotime( $g['date'] ) ) : '' );
-			$figs .= '<li><a href="#' . esc_attr( $g['id'] ) . '"><strong class="kit-profile-figure">' . esc_html( $h ) . '</strong><span class="kit-profile-line">' . esc_html( $line ) . '</span></a></li>';
+			$figs .= '<li><a href="#' . esc_attr( $g['id'] ) . '"><strong class="kit-profile-figure">' . esc_html( $h ) . '</strong><span class="screen-reader-text">' . esc_html( $line ) . '</span></a></li>';
 		}
 	}
 	$out .= '' !== $figs ? '<ul class="kit-profile-figures">' . $figs . '</ul>' : '';
@@ -271,17 +272,6 @@ function kits_profile_head_html( $id ) {
 	$org = $f['org'] && 'publish' === get_post_status( $f['org'] ) ? $f['org'] : 0;
 	$out = kits_profile_hero_html( $id, $f );
 
-	$acts = '';
-	if ( $org ) {
-		/* translators: %s: the organisation's name. */
-		$acts .= '<a class="wp-element-button kit-btn" href="' . esc_url( get_permalink( $org ) ) . '">' . esc_html( sprintf( __( 'Know more about %s', 'kits-by-wugweb' ), get_the_title( $org ) ) ) . '</a>';
-	}
-	$help = kits_profile_help_url( $f['place'] );
-	if ( '' !== $help ) {
-		/* translators: %s: city. */
-		$acts .= '<a class="wp-element-button kit-btn is-style-kits-ghost" href="' . esc_url( $help ) . '">' . esc_html( sprintf( __( 'Find help in %s', 'kits-by-wugweb' ), trim( explode( ',', $f['place'] )[0] ) ) ) . '</a>';
-	}
-	$out .= '' !== $acts ? '<p class="kit-profile-actions">' . $acts . '</p>' : '';
 	$out .= $org ? kits_profile_org_card( $org, $f ) : '';
 	return $out;
 }
