@@ -266,6 +266,24 @@
                     "parent_repeater": "field_aw_profile_evidence"
                 },
                 {
+                    "key": "field_aw_profile_evidence_highlight",
+                    "label": "Highlight (optional)",
+                    "name": "highlight",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "A short figure to show big at the top of the page, e.g. About 400 dogs. It links down to this entry.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "parent_repeater": "field_aw_profile_evidence",
+                    "default_value": "",
+                    "placeholder": "About 400 dogs"
+                },
+                {
                     "key": "field_aw_profile_evidence_label",
                     "label": "Label",
                     "name": "label",
