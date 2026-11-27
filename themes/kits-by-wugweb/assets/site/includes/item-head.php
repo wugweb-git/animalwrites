@@ -187,7 +187,7 @@ function aw_block_item_meta( $a, $id ) {
 
 /** Whether the item shows its summary (guides and opportunities are their own text). */
 function aw_item_shows_summary( $id ) {
-	return in_array( aw_item_kind( $id ), array( 'news', 'library', 'own-document', 'research' ), true ) && '' !== trim( (string) get_post_field( 'post_excerpt', $id ) );
+	return in_array( aw_item_kind( $id ), array( 'news', 'library', 'own-document', 'research', 'profile' ), true ) && '' !== trim( (string) get_post_field( 'post_excerpt', $id ) );
 }
 
 // Guides and opportunities: no summary above the text (their excerpt is for search results and cards).

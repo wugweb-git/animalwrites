@@ -75,8 +75,8 @@ function kits_profile_evidence( $id ) {
 	for ( $i = 0; $i < $n; $i++ ) {
 		$p     = 'kits_profile_evidence_' . $i . '_';
 		$claim = trim( (string) get_post_meta( $id, $p . 'claim', true ) );
-		if ( '' === $claim ) {
-			continue;
+		if ( '' === $claim || '' === trim( (string) get_post_meta( $id, $p . 'source', true ) ) ) {
+			continue; // a claim without a named source is not shown
 		}
 		$date   = (string) get_post_meta( $id, $p . 'date', true );
 		$rows[] = array(
@@ -352,6 +352,9 @@ function kits_profile_approval_line( $id ) {
 	$f    = kits_profile_fields( $id );
 	$when = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $f['approved_on'] ) ? kits_date( $f['approved_on'] ) : '';
 	if ( 'approved' === $f['approval'] ) {
+		if ( '' === $when ) {
+			return '<span>' . esc_html__( 'Checked with them.', 'kits-by-wugweb' ) . '</span>';
+		}
 		return '<span>' . esc_html__( 'Checked with them on', 'kits-by-wugweb' ) . ' ' . $when . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 	if ( 'public-reporting' === $f['approval'] ) {
