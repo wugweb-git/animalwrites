@@ -14,7 +14,7 @@
 
 const RB_SLUG  = 'rabies-awareness-india';
 const RB_TERM  = 'campaign-rabies-india';
-const RB_PHOTO = 23370; // world-rabies-day-health-centre-vaccine-table-2.webp (Media 23370)
+const RB_PHOTO = 23334; // world-rabies-day-health-centre-vaccine-table-wide (Media 23334); 23370 duplicates library item 143 and fails the thumbnail check
 
 if ( getenv( 'AW_RENDER' ) ) {
 	require getenv( 'AW_RENDER_SHIM' );
