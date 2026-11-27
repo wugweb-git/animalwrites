@@ -177,3 +177,26 @@ Phone 375 and 320, tablet 768, desktop 1440; no horizontal scroll; tap targets 4
 | Copy yes | The owner will review the finished page by link | The page is built as a **draft** (not public) and the link is sent for the yes; Home and About stay hidden until publish |
 | Home row position | 4th from the top | Counting the hero as the first block: Hero, Need help now, Find help, **this row**, then the campaign cards row. (If the owner meant after the campaign row, the pattern line moves one place) |
 | 2 by 2 grid use case | The **current four small blocks** (Acts and Rules, Court orders and judgments, Circulars and notices, Letters and templates, from "The law, in plain words", `patterns/animal-law.php`) move into the grid | The right column of the new row = those four tiles (same links to `/library/?tag=...`). They are removed from the "The law, in plain words" section, which keeps its heading, its three Library cards and "Browse the Library". Below 768px: one column; from 768px: 2 by 2 |
+
+## 14. History and sources found, 27 Nov 2026 (her organisation's own site, the web, our SourceWeb)
+Read, not yet in the evidence table (rows need the owner's yes). Her own organisation's pages are labelled "in the organisation's own words".
+| When | What | Source | Label |
+|---|---|---|---|
+| 2020 | Began rescuing during the COVID-19 lockdown from a small apartment in Lucknow | nawabitailsrescue.org/about-me/ | Organisation's own words |
+| 2021 | Nawabi Tails Rescue Foundation registered (non-profit company, directors Vishaka Shukla and Vaibhav Shukla) | thecompanycheck.com registry listing | Registry aggregator, not primary |
+| 9 Apr 2022 | Adoption camp at One Awadh Centre, Gomti Nagar | nawabitailsrescue.org/events/ | Organisation's own words |
+| 2022 | About 1,306 animals rescued | Knocksense feature | Reported by |
+| 9 Apr 2023 | Hindustan Times, cruelty against stray dogs on the rise, say rescuers (listed on the organisation's events page) | HT, read the piece first | Reported by (unread) |
+| 22 Dec 2023 | "When you adopt, you save 3 lives": Knocksense feature on her and the foster home | knocksense.com | Reported by |
+| 15 and 20 Jul 2024 | Moving to a bigger shelter outside Lucknow (capacity 700 to 800 stated), opening first week of Aug 2024; adds cattle and livestock care | nawabitailsrescue.org/events/ | Organisation's own words |
+| 20 Jul 2024 | News18 Hindi story on her | listed on the events page, read first | Reported by (unread) |
+| about 2025 | Long-term partner of Humane World for Animals India in Lucknow; sterilisation work grew into a city-wide programme with the Lucknow Municipal Corporation | humaneworld.org blog "This city leads the way in helping street dogs" | Reported by (the partner) |
+| 17 Aug 2025 | Lucknow protest on the Supreme Court order | Amar Ujala video, Samar Salil | Reported by (unread) |
+| 22 Aug 2025 | NDTV India, "Dr Vishakha" | read | Reported by |
+| 5 and 8 Jan 2026 | NBT e-paper; TOI "Lucknow joins nationwide protest" (already on our India Writes for Its Community Dogs campaign) | NBT, TOI | Reported by |
+| 12 Jan 2026 | Her HT op-ed on women feeders | read | In her own words |
+
+**Differences to handle, not hide:** her profession is "dental surgeon" on her organisation's site, "surgeon" in Knocksense and "doctor" in NDTV, so the page says doctor and names the source for anything finer. Her site gives both 5,000 and 7,000+ animals rescued, and 350+ in care now (maximum 450); NDTV said about 400. Every figure is shown with its source and date, never merged. The registry lists a Kanpur registered address, which we do not use.
+**Photos on her site:** her media library holds a team photo (masked faces, cannot tell which person she is), shelter and dog pictures; none is a clear portrait of her. A portrait still needs her or her site's own choice.
+**SourceWeb (published and pending, searched 27 Nov):** no News item names her or Nawabi Tails yet; the only mention in our system is the supporter list on India Writes for Its Community Dogs. Her four keywords (added 26 Nov) have not produced items. Older coverage (2022 to 2024) will not appear through Google News keywords, so those links are added by hand through the ingest route with the tag `vishakha-shukla`.
+**Her own channels (from the listing):** Instagram @nawabitailsrescue, Facebook /nawabitailsrescue, YouTube @nawabitailsrescue. The Instagram post and one YouTube video the owner shared did not open earlier (suspended page, blank page).
