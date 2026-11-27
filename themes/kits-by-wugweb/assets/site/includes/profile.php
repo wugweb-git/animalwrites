@@ -91,7 +91,20 @@ function aw_profile_help_url( $place ) {
 	if ( count( $parts ) < 2 || '' === $parts[0] || '' === $parts[1] ) {
 		return '';
 	}
-	return home_url( '/directory/' . sanitize_title( $parts[1] ) . '/' . sanitize_title( $parts[0] ) . '/' );
+	static $seen = array();
+	if ( ! isset( $seen[ $place ] ) ) { // only when the Directory has a listing in that city, so the link never leads to a missing page
+		$seen[ $place ] = (bool) get_posts(
+			array(
+				'post_type'     => 'aw_listing',
+				'post_status'   => 'publish',
+				'numberposts'   => 1,
+				'fields'        => 'ids',
+				'no_found_rows' => true,
+				'meta_query'    => array( array( 'key' => 'aw_area', 'value' => $parts[0], 'compare' => 'LIKE' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one listing, once per page
+			)
+		);
+	}
+	return $seen[ $place ] ? home_url( '/directory/' . sanitize_title( $parts[1] ) . '/' . sanitize_title( $parts[0] ) . '/' ) : '';
 }
 
 /** An external link that opens in a new tab, with the words for a screen reader. */
@@ -166,8 +179,7 @@ function aw_profile_tail_html( $id ) {
 	$cards = '';
 	foreach ( aw_profile_evidence( $id ) as $r ) {
 		$meta = '<span class="kit-chip">' . esc_html( 'own-words' === $r['label'] ? __( 'In their own words', 'kits-by-wugweb' ) : __( 'Reported by', 'kits-by-wugweb' ) ) . '</span>';
-		$line = trim( $r['source'] . ( '' !== $r['source'] && '' !== $r['date'] ? ', ' : '' ) );
-		$meta .= ' <span class="aw-evidence-source">' . esc_html( $line ) . ( '' !== $r['date'] ? kits_date( $r['date'] ) : '' ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_date() returns escaped markup.
+		$meta .= ' <span class="aw-evidence-source">' . esc_html( $r['source'] ) . ( '' !== $r['source'] && '' !== $r['date'] ? ', ' : '' ) . ( '' !== $r['date'] ? kits_date( $r['date'] ) : '' ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_date() returns escaped markup.
 		$links = '';
 		if ( '' !== $r['url'] ) {
 			/* translators: %s: outlet. */
