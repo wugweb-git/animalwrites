@@ -280,16 +280,17 @@
 .kit-profile-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent) var(--kit-border-width), transparent var(--kit-border-width)) 0 0 / var(--kit-space-4) var(--kit-space-4); -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 70%); mask-image: linear-gradient(to bottom left, #000, transparent 70%); }
 .kit-profile-monogram { position: absolute; z-index: -1; inset-block-end: calc(-1 * var(--kit-space-5)); inset-inline-end: calc(-1 * var(--kit-space-3)); font-size: calc(var(--kit-type-display) * 3); font-weight: var(--kit-weight-display); line-height: .8; letter-spacing: -.04em; opacity: .1; pointer-events: none; user-select: none; }
 .kit-profile-initials { flex: none; display: grid; place-items: center; inline-size: var(--kit-thumb-md); block-size: var(--kit-thumb-md); border-radius: var(--kit-radius-media); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); line-height: 1; }
-.kit-profile-hero.has-photo { gap: 0; padding: 0; }
-.kit-profile-media { margin: 0; aspect-ratio: 4 / 5; overflow: hidden; }
-.kit-profile-photo { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 18%; }
-.kit-profile-herotext { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-6); }
-.has-photo .kit-profile-herotext { align-content: center; padding: var(--kit-space-6) var(--kit-space-5); }
+.kit-profile-hero { min-height: var(--kit-hero-h, min(720px, 100svh)); }
+.kit-profile-hero.has-photo { gap: 0; padding: 0; grid-template-rows: minmax(var(--kit-thumb-lg), 1fr) auto; }
+.kit-profile-media { position: relative; margin: 0; overflow: hidden; }
+.kit-profile-photo { position: absolute; inset: 0; display: block; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 18%; }
+.kit-profile-herotext { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
+.has-photo .kit-profile-herotext { align-content: center; padding: var(--kit-space-5); }
 .kit-profile-credit { margin: 0; font-size: var(--kit-type-xs); }
 .kit-profile-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin: 0; }
 .kit-profile-tag { display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding-inline: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-on-ink); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); }
 .kit-profile-tag.is-solid { background: var(--kit-color-on-ink); color: var(--kit-color-ink); }
-.kit-profile-figures { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
+.kit-profile-figures { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .kit-profile-figures a { display: grid; gap: var(--kit-space-1); color: inherit; text-decoration: none; }
 .kit-profile-figure { margin: 0; font-size: var(--kit-type-display); font-weight: var(--kit-weight-display); line-height: 1; letter-spacing: -.03em; }
 h2.kit-profile-figure { font-size: var(--kit-type-h3); }
@@ -305,8 +306,8 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 .kit-profile-orgtext .kit-profile-orgmore { color: var(--kit-color-ink); font-weight: var(--kit-weight-medium); }
 @media (min-width: 768px) {
 	.kit-profile-hero { padding: var(--kit-space-7) var(--kit-space-6); }
-	.kit-profile-hero.has-photo { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); padding: 0; }
-	.has-photo .kit-profile-herotext { padding: var(--kit-space-7) var(--kit-space-6); }
+	.kit-profile-hero.has-photo { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: none; padding: 0; }
+	.has-photo .kit-profile-herotext { gap: var(--kit-space-6); padding: var(--kit-space-7) var(--kit-space-6); }
 	}
 .kit-profile-mosaic { margin: var(--kit-space-6) 0; }
 .kit-profile-mosaic h2 { margin: 0 0 var(--kit-space-4); }
