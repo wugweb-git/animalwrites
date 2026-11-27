@@ -273,3 +273,28 @@
 /* Related items (More): the list is one equal-height grid, the one-line under each title shows 2 lines, not 1 cut at a word. */
 .aw-more-list { align-items: stretch; }
 .aw-more-list .kit-minicard-line { -webkit-line-clamp: 2; }
+
+/* Profile (includes/profile.php, owner 27 Nov 2026): a Resource tagged "profile". Phone first: one column, cards not a table,
+   44px actions, nothing folded. Colours and sizes are the theme's tokens. */
+.aw-profile-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); margin: var(--kit-space-5) 0; }
+.aw-profile-actions .kit-btn { justify-content: center; min-height: var(--kit-size-target); text-align: center; }
+.aw-profile-glance, .aw-evidence, .aw-profile-more { margin: var(--kit-space-6) 0; }
+.aw-profile-glance h2, .aw-evidence h2, .aw-profile-more h2 { margin: 0 0 var(--kit-space-3); }
+.aw-profile-glance dl { margin: 0; display: grid; gap: 0; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-profile-glance dl > div { padding: var(--kit-space-3) var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-profile-glance dl > div:first-child { border-top: 0; }
+.aw-profile-glance dt { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-profile-glance dd { margin: 0; color: var(--kit-color-ink); overflow-wrap: anywhere; }
+.aw-profile-glance a, .aw-profile-more a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); }
+.aw-evidence-lead { margin: 0 0 var(--kit-space-4); color: var(--kit-color-muted); }
+.aw-evidence-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); }
+.aw-evidence-card { padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
+.aw-evidence-claim { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-body, 1rem); font-weight: var(--kit-weight-strong); line-height: 1.5; }
+.aw-evidence-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-evidence-links { display: flex; flex-wrap: wrap; gap: var(--kit-space-2) var(--kit-space-5); margin: 0; }
+.aw-evidence-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); font-size: var(--kit-type-sm); }
+.aw-profile-more ul { margin: 0; padding: 0; list-style: none; }
+@media (min-width: 768px) {
+	.aw-profile-actions { flex-direction: row; flex-wrap: wrap; }
+	.aw-profile-actions .kit-btn { justify-content: flex-start; }
+}

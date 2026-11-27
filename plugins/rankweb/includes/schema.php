@@ -582,6 +582,21 @@ function aw_article_nodes( $id ) {
 				)
 			);
 		}
+		if ( has_term( 'profile', 'post_tag', $id ) ) { // a person's profile (Animal Writes theme, includes/profile.php): the person is what the Article is about
+			$pname = trim( (string) get_post_meta( $id, 'aw_profile_name', true ) );
+			if ( '' !== $pname ) {
+				$org   = (int) get_post_meta( $id, 'aw_profile_org', true );
+				$place = array_map( 'trim', explode( ',', (string) get_post_meta( $id, 'aw_profile_place', true ) ) );
+				$person = array(
+					'@type'    => 'Person',
+					'name'     => $pname,
+					'jobTitle' => trim( (string) get_post_meta( $id, 'aw_profile_role', true ) ) ?: null,
+					'address'  => '' !== $place[0] ? array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $place[0], 'addressRegion' => $place[1] ?? null, 'addressCountry' => 'IN' ) ) : null, // city and state only
+					'worksFor' => $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'Organization', 'name' => rankweb_plain_text( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : null,
+				);
+				$article['about'] = array_merge( array( array_filter( $person, fn( $v ) => null !== $v && '' !== $v ) ), (array) ( $article['about'] ?? array() ) );
+			}
+		}
 		$nodes[] = $article;
 	}
 	return array_map( fn( $n ) => array_filter( $n, fn( $v ) => null !== $v && '' !== $v && array() !== $v ), $nodes );

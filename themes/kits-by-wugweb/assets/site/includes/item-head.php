@@ -57,7 +57,7 @@ function aw_item_editor_preview( $label ) {
 }
 
 /**
- * What an item is: news | library | own-document | research | guide | opportunity | listing.
+ * What an item is: news | library | own-document | research | guide | profile | opportunity | listing.
  *
  * @param int $id Post ID.
  * @return string
@@ -69,6 +69,9 @@ function aw_item_kind( $id ) {
 		case 'aw_legal': // a document we wrote (templates) has no original to link to
 			return has_term( 'template', 'post_tag', $id ) || '' === (string) get_post_meta( $id, 'aw_source_url', true ) ? 'own-document' : 'library';
 		case 'post':
+			if ( has_term( 'profile', 'post_tag', $id ) ) { // a person's profile (includes/profile.php)
+				return 'profile';
+			}
 			return has_term( 'research', 'post_tag', $id ) ? 'research' : 'guide';
 		case 'aw_opportunity':
 			return 'opportunity';
@@ -349,6 +352,11 @@ function aw_block_item_sources( $a, $id ) {
 				break;
 			}
 			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
+			$read   = '';
+			break;
+		case 'profile': // who checked it; the evidence and each claim's source are in the page itself
+			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
+			$note   = function_exists( 'aw_profile_approval_line' ) ? aw_profile_approval_line( $id ) : '';
 			$read   = '';
 			break;
 		case 'opportunity':

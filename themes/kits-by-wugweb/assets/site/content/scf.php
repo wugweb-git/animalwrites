@@ -61,7 +61,7 @@ add_action(
 );
 
 /** Our field groups (keys of the files in acf-json/). The Directory's eight listing groups are DirectoryWeb's (its own acf-json/); it adds them through aw_scf_group_keys(). */
-const AW_SCF_GROUPS = array( 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource', 'group_aw_social', 'group_aw_campaign_social' );
+const AW_SCF_GROUPS = array( 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource', 'group_aw_profile', 'group_aw_social', 'group_aw_campaign_social' );
 
 // Our acf-json/ folder, through Kits Core's bridge (kits-core/includes/scf.php): read, and our groups saved back to it.
 kits_scf_json_folder( kits_site_path( 'acf-json' ), AW_SCF_GROUPS );

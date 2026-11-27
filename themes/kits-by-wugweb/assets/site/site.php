@@ -23,7 +23,7 @@ if ( defined( 'KITS_CORE_LOADED' ) ) { // these files call Kits Core's functions
 		require_once __DIR__ . '/includes/' . $kits_site_module . '.php';
 	}
 	unset( $kits_site_module );
-	foreach ( array( 'campaigns', 'campaign-tools', 'campaign-record', 'item-head', 'home' ) as $kits_site_file ) {
+	foreach ( array( 'campaigns', 'campaign-tools', 'campaign-record', 'item-head', 'profile', 'home' ) as $kits_site_file ) {
 		require_once __DIR__ . '/includes/' . $kits_site_file . '.php';
 	}
 	unset( $kits_site_file );
