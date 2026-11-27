@@ -276,10 +276,10 @@
 
 /* Profile (includes/profile.php, owner 27 Nov 2026): a Resource tagged "profile". Phone first: one column, cards not a table,
    44px actions, nothing folded. Colours and sizes are the theme's tokens. */
-.kit-profile-who { display: flex; align-items: center; gap: var(--kit-space-4); margin: var(--kit-space-5) 0 0; }
+.kit-profile-who { display: flex; align-items: center; gap: var(--kit-space-4); margin: var(--kit-space-5) 0 0; padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
 .kit-profile-initials { flex: none; display: grid; place-items: center; inline-size: var(--kit-thumb-md); block-size: var(--kit-thumb-md); border-radius: var(--kit-radius-media); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); line-height: 1; }
 .kit-profile-role { display: grid; gap: var(--kit-space-1); margin: 0; min-width: 0; }
-.kit-profile-role strong { font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+.kit-profile-role strong { font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); font-size: var(--kit-type-h4, 1.125rem); line-height: 1.3; }
 .kit-profile-role span { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .kit-profile-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); margin: var(--kit-space-5) 0; }
 .kit-profile-actions .kit-btn { justify-content: center; min-height: var(--kit-size-target); text-align: center; }
@@ -300,6 +300,7 @@
 .kit-evidence-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); font-size: var(--kit-type-sm); }
 .kit-profile-more ul { margin: 0; padding: 0; list-style: none; }
 @media (min-width: 768px) {
+	.kit-profile-initials { inline-size: var(--kit-thumb-lg); block-size: var(--kit-thumb-lg); }
 	.kit-profile-actions { flex-direction: row; flex-wrap: wrap; }
 	.kit-profile-actions .kit-btn { justify-content: flex-start; }
 }

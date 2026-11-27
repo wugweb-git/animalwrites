@@ -108,6 +108,12 @@ function kits_profile_help_url( $place ) {
 	return $seen[ $place ] ? home_url( '/directory/' . sanitize_title( $parts[1] ) . '/' . sanitize_title( $parts[0] ) . '/' ) : '';
 }
 
+/** First name, for headings that speak about the person ("Vishakha's organisation"). */
+function kits_profile_first( $f ) {
+	$w = preg_split( '/\s+/', trim( $f['name'] ) );
+	return $w[0] ?? '';
+}
+
 /** An external link that opens in a new tab, with the words for a screen reader. */
 function kits_profile_ext_link( $url, $text, $class = '' ) {
 	return '<a' . ( '' !== $class ? ' class="' . esc_attr( $class ) . '"' : '' ) . ' href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . esc_html( $text ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a>';
@@ -177,7 +183,7 @@ function kits_profile_head_html( $id ) {
 		}
 	}
 	if ( $rows ) {
-		$out .= '<section class="kit-profile-glance" aria-labelledby="kit-profile-glance-h"><h2 id="kit-profile-glance-h">' . esc_html__( 'At a glance', 'kits-by-wugweb' ) . '</h2><dl>';
+		$out .= '<section class="kit-profile-glance" aria-labelledby="kit-profile-glance-h"><h2 id="kit-profile-glance-h">' . esc_html( '' !== kits_profile_first( $f ) ? sprintf( /* translators: %s: first name. */ __( '%s’s organisation', 'kits-by-wugweb' ), kits_profile_first( $f ) ) : __( 'Their organisation', 'kits-by-wugweb' ) ) . '</h2><dl>';
 		foreach ( $rows as $k => $v ) {
 			$out .= '<div><dt>' . esc_html( $k ) . '</dt><dd>' . $v . '</dd></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each value is escaped above.
 		}
@@ -198,12 +204,12 @@ function kits_profile_tail_html( $id ) {
 
 	$cards = '';
 	foreach ( kits_profile_evidence( $id ) as $r ) {
-		$meta = '<span class="kit-chip">' . esc_html( 'own-words' === $r['label'] ? __( 'In their own words', 'kits-by-wugweb' ) : __( 'Reported by', 'kits-by-wugweb' ) ) . '</span>';
+		$meta = '<span class="kit-chip">' . esc_html( 'own-words' === $r['label'] ? ( '' !== kits_profile_first( $f ) ? sprintf( /* translators: %s: first name. */ __( '%s’s own words', 'kits-by-wugweb' ), kits_profile_first( $f ) ) : __( 'In their own words', 'kits-by-wugweb' ) ) : __( 'Reported by', 'kits-by-wugweb' ) ) . '</span>';
 		$meta .= ' <span class="kit-evidence-source">' . esc_html( $r['source'] ) . ( '' !== $r['source'] && '' !== $r['date'] ? ', ' : '' ) . ( '' !== $r['date'] ? kits_date( $r['date'] ) : '' ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_date() returns escaped markup.
 		$links = '';
 		if ( '' !== $r['url'] ) {
 			/* translators: %s: outlet. */
-			$links .= kits_profile_ext_link( $r['url'], '' !== $r['source'] ? sprintf( __( 'Read the %s report', 'kits-by-wugweb' ), $r['source'] ) : __( 'Read the source', 'kits-by-wugweb' ) );
+			$links .= kits_profile_ext_link( $r['url'], '' !== $r['source'] ? sprintf( __( 'Read it on %s', 'kits-by-wugweb' ), $r['source'] ) : __( 'Read the source', 'kits-by-wugweb' ) );
 		}
 		if ( '' !== $r['archive'] ) {
 			$links .= kits_profile_ext_link( $r['archive'], __( 'Archive copy', 'kits-by-wugweb' ) );
@@ -211,20 +217,17 @@ function kits_profile_tail_html( $id ) {
 		$cards .= '<li class="kit-evidence-card"><h3 class="kit-evidence-claim">' . esc_html( $r['claim'] ) . '</h3><p class="kit-evidence-meta">' . $meta . '</p>' . ( '' !== $links ? '<p class="kit-evidence-links">' . $links . '</p>' : '' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
 	}
 	if ( '' !== $cards ) {
-		$out .= '<section class="kit-evidence" aria-labelledby="kit-evidence-h"><h2 id="kit-evidence-h">' . esc_html__( 'Evidence', 'kits-by-wugweb' ) . '</h2><p class="kit-evidence-lead">' . esc_html__( 'Every claim on this page, with where it comes from.', 'kits-by-wugweb' ) . '</p><ol class="kit-evidence-list">' . $cards . '</ol></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$out .= '<section class="kit-evidence" aria-labelledby="kit-evidence-h"><h2 id="kit-evidence-h">' . esc_html__( 'Where this comes from', 'kits-by-wugweb' ) . '</h2><p class="kit-evidence-lead">' . esc_html__( 'Each claim on this page, and the page it was taken from.', 'kits-by-wugweb' ) . '</p><ol class="kit-evidence-list">' . $cards . '</ol></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
-	$more = '';
 	$help = kits_profile_help_url( $f['place'] );
 	if ( '' !== $help ) {
+		$city = trim( explode( ',', $f['place'] )[0] );
 		/* translators: %s: city. */
-		$more .= '<li><a href="' . esc_url( $help ) . '">' . esc_html( sprintf( __( 'Animal help in %s', 'kits-by-wugweb' ), trim( explode( ',', $f['place'] )[0] ) ) ) . '</a></li>';
+		$out .= '<section class="kit-profile-more" aria-labelledby="kit-profile-help-h"><h2 id="kit-profile-help-h">' . esc_html( sprintf( __( 'Help in %s', 'kits-by-wugweb' ), $city ) ) . '</h2><p><a href="' . esc_url( $help ) . '">' . esc_html( sprintf( __( 'See animal rescue and care in %s', 'kits-by-wugweb' ), $city ) ) . '</a></p></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 	if ( $f['campaign'] && 'publish' === get_post_status( $f['campaign'] ) ) {
-		$more .= '<li><a href="' . esc_url( get_permalink( $f['campaign'] ) ) . '">' . esc_html( get_the_title( $f['campaign'] ) ) . '</a></li>';
-	}
-	if ( '' !== $more ) {
-		$out .= '<section class="kit-profile-more" aria-labelledby="kit-profile-more-h"><h2 id="kit-profile-more-h">' . esc_html__( 'Go further', 'kits-by-wugweb' ) . '</h2><ul>' . $more . '</ul></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$out .= '<section class="kit-profile-more" aria-labelledby="kit-profile-camp-h"><h2 id="kit-profile-camp-h">' . esc_html__( 'Part of a campaign', 'kits-by-wugweb' ) . '</h2><p><a href="' . esc_url( get_permalink( $f['campaign'] ) ) . '">' . esc_html( get_the_title( $f['campaign'] ) ) . '</a></p></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 	return $out;
 }
