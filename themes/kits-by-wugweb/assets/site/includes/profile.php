@@ -36,10 +36,11 @@ function kits_is_profile( $id ) {
  * A profile's person fields.
  *
  * @param int $id Post ID.
- * @return array{name:string,role:string,place:string,org:int,campaign:int,credit:string,approval:string,approved_on:string}
+ * @return array{prefix:string,name:string,role:string,place:string,org:int,campaign:int,credit:string,approval:string,approved_on:string}
  */
 function kits_profile_fields( $id ) {
 	return array(
+		'prefix'      => (string) get_post_meta( $id, 'kits_profile_prefix', true ),
 		'name'        => (string) get_post_meta( $id, 'kits_profile_name', true ),
 		'role'        => (string) get_post_meta( $id, 'kits_profile_role', true ),
 		'place'       => (string) get_post_meta( $id, 'kits_profile_place', true ),

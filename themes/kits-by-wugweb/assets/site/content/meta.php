@@ -72,6 +72,7 @@ function aw_meta_schema() {
 
 		// Profiles (a Resource tagged "profile": a person, their organisation and the evidence behind each claim).
 		'kits_profile_name'    => array( 'string', array( 'post' ), 'Profile: the person\'s name (as in the schema and the cards)' ),
+		'kits_profile_prefix'  => array( 'string', array( 'post' ), 'Profile: title before the name (e.g. Dr.)' ),
 		'kits_profile_role'    => array( 'string', array( 'post' ), 'Profile: role (e.g. Doctor and founder)' ),
 		'kits_profile_place'   => array( 'string', array( 'post' ), 'Profile: city and state only (never an address)' ),
 		'kits_profile_org'     => array( 'string', array( 'post' ), 'Profile: their organisation (Directory listing ID)' ),

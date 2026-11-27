@@ -590,6 +590,7 @@ function aw_article_nodes( $id ) {
 				$person = array(
 					'@type'    => 'Person',
 					'name'     => $pname,
+					'honorificPrefix' => trim( (string) get_post_meta( $id, 'kits_profile_prefix', true ) ) ?: null,
 					'jobTitle' => trim( (string) get_post_meta( $id, 'kits_profile_role', true ) ) ?: null,
 					'address'  => '' !== $place[0] ? array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $place[0], 'addressRegion' => $place[1] ?? null, 'addressCountry' => 'IN' ) ) : null, // city and state only
 					'worksFor' => $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'Organization', 'name' => rankweb_plain_text( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : null,

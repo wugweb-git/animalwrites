@@ -21,6 +21,21 @@
             "selected": 0
         },
         {
+            "key": "field_aw_profile_prefix",
+            "label": "Title before the name",
+            "name": "kits_profile_prefix",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "For example Dr. Shown with the name in the page data.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
             "key": "field_aw_profile_name",
             "label": "Name",
             "name": "kits_profile_name",
