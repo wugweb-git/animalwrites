@@ -212,12 +212,10 @@ function kits_profile_hero_html( $id, $f ) {
 	$initials = kits_profile_initials( $f['name'] );
 	$out      = '<section class="kit-profile-hero">';
 	$out     .= '' !== $initials ? '<span class="kit-profile-monogram" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '';
-	$out     .= '<div class="kit-profile-who">';
-	$out     .= '' !== $initials ? '<span class="kit-profile-initials" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '';
-	$out     .= '<p class="kit-profile-role">';
-	$out     .= '' !== $f['role'] ? '<strong>' . esc_html( $f['role'] ) . '</strong>' : '';
-	$out     .= '' !== $f['place'] ? '<span>' . esc_html( $f['place'] ) . '</span>' : '';
-	$out     .= '</p></div>';
+	$out     .= '<p class="kit-profile-tags">';
+	$out     .= '' !== $f['role'] ? '<span class="kit-profile-tag">' . esc_html( $f['role'] ) . '</span>' : '';
+	$out     .= '' !== $f['place'] ? '<span class="kit-profile-tag is-solid">' . esc_html( $f['place'] ) . '</span>' : '';
+	$out     .= '</p>';
 
 	$figs = '';
 	foreach ( kits_profile_sources( $id ) as $g ) {
@@ -230,7 +228,13 @@ function kits_profile_hero_html( $id, $f ) {
 		}
 		if ( '' !== $h ) {
 			$line  = $g['source'] . ( '' !== $g['source'] && '' !== $g['date'] ? ', ' : '' ) . ( '' !== $g['date'] ? wp_date( 'M Y', strtotime( $g['date'] ) ) : '' );
-			$figs .= '<li><a href="#' . esc_attr( $g['id'] ) . '"><strong class="kit-profile-figure">' . esc_html( $h ) . '</strong><span class="screen-reader-text">' . esc_html( $line ) . '</span></a></li>';
+			$num   = $h;
+			$label = '';
+			if ( preg_match( '/^((?:about\s+)?[\d][\d,.]*\+?)\s+(.+)$/iu', $h, $mm ) ) {
+				$num   = $mm[1];
+				$label = $mm[2];
+			}
+			$figs .= '<li><a href="#' . esc_attr( $g['id'] ) . '"><strong class="kit-profile-figure">' . esc_html( $num ) . '</strong>' . ( '' !== $label ? '<span class="kit-profile-line">' . esc_html( $label ) . '</span>' : '' ) . '<span class="screen-reader-text"> (' . esc_html( $line ) . ')</span></a></li>';
 		}
 	}
 	$out .= '' !== $figs ? '<ul class="kit-profile-figures">' . $figs . '</ul>' : '';
@@ -335,6 +339,25 @@ function kits_profile_tail_html( $id ) {
 	/* translators: %s: first name. */
 	$h = '' !== $first ? sprintf( __( '%s’s links', 'kits-by-wugweb' ), $first ) : __( 'Links', 'kits-by-wugweb' );
 	return '<section class="kit-profile-mosaic" aria-labelledby="kit-profile-mosaic-h"><h2 id="kit-profile-mosaic-h">' . esc_html( $h ) . '</h2><ul class="kit-profile-mt-grid">' . implode( '', $t ) . '</ul></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every tile is escaped in kits_profile_mosaic_tile().
+}
+
+/**
+ * The profile's sources as the list inside the site's Sources block (item-head.php): the page, its date, the link and the
+ * archive copy. Newest first.
+ *
+ * @param int $id Post ID.
+ * @return string
+ */
+function kits_profile_sources_html( $id ) {
+	$items = '';
+	foreach ( kits_profile_sources( $id ) as $g ) {
+		$name = '' !== $g['source'] ? '<strong>' . esc_html( $g['source'] ) . '</strong>' : '';
+		$date = '' !== $g['date'] ? ( '' !== $name ? ', ' : '' ) . kits_date( $g['date'] ) : '';
+		$read = '' !== $g['url'] ? ' ' . kits_profile_ext_link( $g['url'], __( 'Read it', 'kits-by-wugweb' ) ) : '';
+		$arch = '' !== $g['archive'] ? ' ' . kits_profile_ext_link( $g['archive'], __( 'Archive copy', 'kits-by-wugweb' ) ) : '';
+		$items .= '<li>' . $name . $date . '.' . $read . $arch . '</li>';
+	}
+	return '' !== $items ? '<ol>' . $items . '</ol>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above; kits_date() returns escaped markup.
 }
 
 /** The approval line for the Sources block: who checked it, or that it rests on public reporting. */
