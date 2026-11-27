@@ -114,3 +114,57 @@ From the web (Lab campaign, not Vishakha): Google News results for the draft Lab
 1. ~~Contact her first, or public reporting only?~~ **Settled:** Vishakha is in touch and gave the owner the links herself. The profile is made with her, so the draft still goes to her for approval before it goes live (section 9).
 2. Photo: use a photo she supplies, with her permission and credit. None until she sends one.
 3. Menu entry: none for now; the Resources list with the Profile tag is enough.
+
+## 12. Mobile UX (v2, 27 Nov 2026; skills: persona-builder, ux-discover, web-review, frontend-design, landing-page, draft-content)
+The page is judged as a phone page first (owner rule: mobile PWA/native first). Evidence base: a live render of a Resource page at 375px (no horizontal scroll; body 15px/24px; buttons 44px tall; chips only 28px tall; page height 8,099px, about 10 screens) plus Search Console (Lucknow queries around position 10). Everything below marked "assumption" needs the owner's check.
+
+### 12.1 Personas (behaviour first; max 3)
+| | Primary: "Shared-link checker" | Secondary: "Lucknow helper-seeker" | Tertiary: "Feeder who wants the law" |
+|---|---|---|---|
+| Who and context | Opens a WhatsApp or Instagram link to Vishakha's profile, often inside the app's browser, one hand, on mobile data; may be a journalist, partner or supporter checking who she is | In Lucknow with a stray or injured animal, or looking for a rescue group; arrives from search ("animal rescue lucknow") | A feeder or RWA member worried about the Supreme Court orders; arrives from the explainers |
+| Wants | Know who she is and trust it within 10 seconds; see the proof; share it | A listing or number now | Her position, the law, what to do |
+| Fears | Hype, no sources, a slow page | Wasted time, wrong or old contact | Being told off, legal jargon |
+| Best path on the page | Header, summary, evidence, share | Action row, Help in Lucknow | Her words, The law linked |
+| Evidence | Assumption (her name has no search impressions yet, so first visits come from shares) | Search Console: small Lucknow demand, position about 10 | Existing Resource traffic (guides carry it) |
+Priority: the checker is primary for the page; the helper-seeker is primary for the goal (listing and Lucknow help).
+
+### 12.2 Phone journey (shared link, 375px)
+1. Lands: sees name, role, city and one-line summary without scrolling past the first screen. 2. Wants proof: the evidence is the first thing after the story, as cards, not a table. 3. Taps a source: opens in a new tab with the outlet and date visible before the tap; archive copy beside it. 4. Acts: "See the organisation's listing" and "Find help in Lucknow" are reachable without hunting. 5. Shares: native share sheet (owner rule, 13 Nov). Pain points to design out: horizontal tables, long page, tiny chips, hidden proof, any need to log in.
+
+### 12.3 Mobile section order and rules (changes section 3 order for phones; desktop keeps one column too)
+1. Breadcrumb (one line, truncates, not wrapped).
+2. Header: photo or initials tile first (fixed aspect ratio, no layout shift), then H1, then role and city, then one meta row (date first) with at most two chips (Profile, city).
+3. Summary (2 to 3 sentences, 40 to 50 words).
+4. **Action row** straight after the summary: two full-width buttons, 44px tall (existing button size): "See the organisation's listing", "Find help in Lucknow". This puts the primary goal on the first screen or the second, with no sticky bar (no new behaviour invented).
+5. At a glance: a key/value list (label above value, one column; no table).
+6. What she does; 7. In her words.
+8. **Evidence as cards**, not a table: each card = claim line, then source and date, a label chip (Reported by / In her own words), then two links "Read" and "Archive copy". Cards stack full width; claim text 15/24 like body. This also serves as the Sources list (the separate Sources section is dropped to avoid saying everything twice; the page gets shorter).
+9. In the news (hidden until there is coverage); 10. The law, linked (links, not cards); 11. Part of a campaign (one card); 12. Help in Lucknow (repeat of the action row's second button plus the list link); 13. FAQ (open, 3 to 4 items); 14. Approval and corrections (one short block); 15. Share, tags, related.
+- Target page height: 5 to 6 screens (about 4,500px), against 8,099px for the Supreme Court guide.
+- Tap targets: every link, chip and button at least 44px by 44px including padding; the site's chips are 28px, so on this page chips are limited to two and given the 44px target (documented exception to fix in CSS, not a new size).
+- Type from tokens only: body 15/24 on phones; H1 from the heading token; lines stay under 75 characters (720px column, 16px gutters).
+- No fold, no accordion, no horizontal scroll at 320 to 767px; breakpoints 767/768 and 1199/1200 only.
+- Links: descriptive text ("Read the NDTV India report, 22 Aug 2025"), external links open in a new tab with "(opens in a new tab)" for screen readers; archive link text says "Archive copy".
+- Keyboard and screen reader: headings in order (H1, then H2 per section, H3 per evidence card); the evidence list is an ordered list; visible focus ring from the theme tokens; whole-card links on Home have one link per card, arrows `aria-hidden`.
+- Motion: none beyond the theme's existing hover and press states; reduced motion respected.
+- Speed: one photo only, `loading` set correctly (the header photo is above the fold so it is not lazy), width and height set, thumb_check passes; no new scripts.
+- Dark mode: the site has no dark theme in the theme files (only a colour named primary-dark), so nothing to check; keep the page free of hard-coded colours so one is possible later.
+- In-app browsers (WhatsApp, Instagram): share preview image is the logo or Home image until her photo is approved (owner rule: no pictures on policy pages does not apply; share image = brand until a permitted photo exists).
+
+### 12.4 Home on phones (correction to section 5)
+The Home row stacks: **profile card first, then the 2 by 2 grid block**. `docs/card-sizes.md` sets the card minimum width at 17rem (272px, `--kit-card-min`), so a true 2-column grid does not fit at 375px. Correction: **below 768px the 2 by 2 block becomes one column of four compact stacked cards** (icon tile left, title and one-line sum, arrow right: the existing `kit-card--stacked-*` state), and returns to 2 by 2 from 768px. About us on phones: one profile card; the row of cards becomes a single column with a "See all profiles" button.
+
+### 12.5 Visual direction (frontend-design, inside the existing system)
+No new aesthetic: black, white and grey cards, Inter, the reference card (icon tile, arrow, title, one line). The one memorable element is the **evidence card**: a quiet "receipt" with the source, date and archive link, so the proof is the design. No gradients, no decorative numbering, no stock photo, no all-caps eyebrow labels. Initials tile in a grey icon-tile style until a photo is approved.
+
+### 12.6 Copy for phones (draft, owner's yes needed)
+- H1 (SEO) stays option A; the card title on Home and About is just "Vishakha Shukla", role line "Doctor and founder, Nawabi Tails Rescue Foundation", sum "Cares for about 400 dogs in Lucknow, as NDTV reported".
+- Buttons say what happens: "See the organisation's listing", "Find help in Lucknow", "Read the NDTV India report", "Archive copy", "Share this profile".
+- Evidence claims are one sentence each, past tense, with the outlet named ("NDTV India reported ...").
+- Empty states: "In the news" is hidden until it has items; no "coming soon".
+
+### 12.7 Success measures (no new tracking without the owner's OK)
+Read from what we already have: Search Console for her name, Nawabi Tails Rescue and Lucknow queries; existing GA4 events for outbound link clicks and share taps; Resources page depth. Targets to judge after 28 days: evidence and listing links are tapped; the page is not abandoned before the evidence; share taps occur. No GA4 test events on the live property (standing rule).
+
+### 12.8 Mobile review checklist for the build (web-review)
+Phone 375 and 320, tablet 768, desktop 1440; no horizontal scroll; tap targets 44px; contrast 4.5:1 (`contrast_check`); headings in order; alt text on the photo (or none for the initials tile); focus visible; keyboard-only pass through the action row, evidence links and share; layout shift (photo aspect ratio reserved); meta title, description and share image present; no dead links; no address, phone or location anywhere.
