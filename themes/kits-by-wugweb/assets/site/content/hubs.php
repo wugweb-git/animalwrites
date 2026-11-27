@@ -410,6 +410,35 @@ function aw_card_item( $type, $state = '', $level = 2 ) {
 <!-- /wp:group -->';
 }
 
+/**
+ * A guide whose card in the Home Guides row (pattern learn.php, query 44) opens a campaign page instead of the guide
+ * (owner, 27 Nov 2026: the rabies guide card opens the rabies campaign page). Only that card changes: the guide keeps its own
+ * link in Resources, search and everywhere else. Keys are guide slugs, values the path to open.
+ */
+const AW_HOME_GUIDE_LINKS = array( 'rabies-after-a-bite-india' => '/campaigns/rabies-awareness-india/' );
+
+/**
+ * Point the picture and title links of a Home Guides card to its campaign page (AW_HOME_GUIDE_LINKS).
+ *
+ * @param string   $html     Rendered block.
+ * @param array    $block    Parsed block (unused).
+ * @param WP_Block $instance Block instance (query context).
+ * @return string The block, with its link changed for a listed guide on the Home Guides row.
+ */
+function aw_home_guide_link( $html, $block, $instance ) {
+	unset( $block );
+	if ( 44 !== (int) ( $instance->context['queryId'] ?? 0 ) || empty( $instance->context['postId'] ) ) {
+		return $html;
+	}
+	$slug = get_post_field( 'post_name', (int) $instance->context['postId'] );
+	if ( ! isset( AW_HOME_GUIDE_LINKS[ $slug ] ) ) {
+		return $html;
+	}
+	return str_replace( esc_url( get_permalink( (int) $instance->context['postId'] ) ), esc_url( home_url( AW_HOME_GUIDE_LINKS[ $slug ] ) ), $html );
+}
+add_filter( 'render_block_core/post-title', 'aw_home_guide_link', 10, 3 );
+add_filter( 'render_block_core/post-featured-image', 'aw_home_guide_link', 10, 3 );
+
 /** One Post Template item per hub. */
 function aw_hub_item( $type ) {
 	switch ( $type ) {
