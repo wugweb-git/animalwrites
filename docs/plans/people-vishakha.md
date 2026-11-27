@@ -129,13 +129,13 @@ The page is judged as a phone page first (owner rule: mobile PWA/native first). 
 Priority: the checker is primary for the page; the helper-seeker is primary for the goal (listing and Lucknow help).
 
 ### 12.2 Phone journey (shared link, 375px)
-1. Lands: sees name, role, city and one-line summary without scrolling past the first screen. 2. Wants proof: the evidence is the first thing after the story, as cards, not a table. 3. Taps a source: opens in a new tab with the outlet and date visible before the tap; archive copy beside it. 4. Acts: "See the organisation's listing" and "Find help in Lucknow" are reachable without hunting. 5. Shares: native share sheet (owner rule, 13 Nov). Pain points to design out: horizontal tables, long page, tiny chips, hidden proof, any need to log in.
+1. Lands: sees name, role, city and one-line summary without scrolling past the first screen. 2. Wants proof: the evidence is the first thing after the story, as cards, not a table. 3. Taps a source: opens in a new tab with the outlet and date visible before the tap; archive copy beside it. 4. Acts: "Know more about {organisation}" and "Find help in Lucknow" are reachable without hunting. 5. Shares: native share sheet (owner rule, 13 Nov). Pain points to design out: horizontal tables, long page, tiny chips, hidden proof, any need to log in.
 
 ### 12.3 Mobile section order and rules (changes section 3 order for phones; desktop keeps one column too)
 1. Breadcrumb (one line, truncates, not wrapped).
 2. Header: photo or initials tile first (fixed aspect ratio, no layout shift), then H1, then role and city, then one meta row (date first) with at most two chips (Profile, city).
 3. Summary (2 to 3 sentences, 40 to 50 words).
-4. **Action row** straight after the summary: two full-width buttons, 44px tall (existing button size): "See the organisation's listing", "Find help in Lucknow". This puts the primary goal on the first screen or the second, with no sticky bar (no new behaviour invented).
+4. **Action row** straight after the summary: two full-width buttons, 44px tall (existing button size): "Know more about {organisation}", "Find help in Lucknow". This puts the primary goal on the first screen or the second, with no sticky bar (no new behaviour invented).
 5. At a glance: a key/value list (label above value, one column; no table).
 6. What she does; 7. In her words.
 8. **Evidence as cards**, not a table: each card = claim line, then source and date, a label chip (Reported by / In her own words), then two links "Read" and "Archive copy". Cards stack full width; claim text 15/24 like body. This also serves as the Sources list (the separate Sources section is dropped to avoid saying everything twice; the page gets shorter).
@@ -159,7 +159,7 @@ No new aesthetic: black, white and grey cards, Inter, the reference card (icon t
 
 ### 12.6 Copy for phones (draft, owner's yes needed)
 - H1 (SEO) stays option A; the card title on Home and About is just "Vishakha Shukla", role line "Doctor and founder, Nawabi Tails Rescue Foundation", sum "Cares for about 400 dogs in Lucknow, as NDTV reported".
-- Buttons say what happens: "See the organisation's listing", "Find help in Lucknow", "Read the NDTV India report", "Archive copy", "Share this profile".
+- Buttons say what happens: "Know more about {organisation}", "Find help in Lucknow", "Read the NDTV India report", "Archive copy", "Share this profile".
 - Evidence claims are one sentence each, past tense, with the outlet named ("NDTV India reported ...").
 - Empty states: "In the news" is hidden until it has items; no "coming soon".
 
@@ -215,6 +215,6 @@ These are the organisation's own pages (Facebook page "Nawabi Tails Rescue", Luc
 | 12 Oct 2026 | "Lucknow Flood Response: Animal Rescue and Feeding" | facebook.com/reel/1090971913549280 | Flood rescue, Lucknow |
 | 19 Oct 2026 | "Last Date: 5 Nov. Act Now. Save Them. Stop it from becoming a law." (matches our Laboratory Animals Rules campaign, objection deadline 5 Nov) | facebook.com/reel/30240516858881686 | Lab rules campaign |
 | 22 Oct 2026 | "Sterilisation = low population = fewer dog bites = better life for all" | facebook.com/reel/1157765563602773 | Sterilisation |
-The page posts almost daily (rescue stories, adoption, medicines, a fostering series). Its own description reads that all rescues, treatment and foster are done by the team, that it is "not an NGO" and does not ask for donations; her website, in contrast, has a Donate appeal, and our Directory listing carries a donate link. Shown as they are; reconcile before the page says anything about donations (owner's call).
+The page posts almost daily (rescue stories, adoption, medicines, a fostering series). Donations are out of scope for the profile (owner, 27 Nov 2026: skip).
 **YouTube (@nawabitailsrescue, search 27 Nov):** two channel videos about five years old ("We don't just foster, we care", "Lost Labrador finds his way back home", about 2021); a third-party video "Pet Adoption Camp by One Awadh Centre Mall and Nawabi Tails for Street Dogs and Cats" (National Watch, about 2022, matches the 9 Apr 2022 camp); "Episode 2: Vishakha Shukla, Lucknow's Most Favourite, with Picker At Pace" (Shubhi Garg, about 2019, 278 views; same person not confirmed). A different YouTube creator called Vishakha Shukla posts self-improvement videos; not her, not used.
 **Still to read:** Instagram (needs the owner to open it, or the links sent), the Facebook feed before Jan 2026 (the 2025 stray-dogs campaign), her LinkedIn, the 2023 HT and 2024 News18 pieces, the Knocksense and Humane World pieces in full.

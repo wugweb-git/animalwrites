@@ -125,7 +125,8 @@ function kits_profile_head_html( $id ) {
 
 	$acts = '';
 	if ( $org ) {
-		$acts .= '<a class="wp-element-button kit-btn" href="' . esc_url( get_permalink( $org ) ) . '">' . esc_html__( "See the organisation's listing", 'kits-by-wugweb' ) . '</a>';
+		/* translators: %s: the organisation's name. */
+		$acts .= '<a class="wp-element-button kit-btn" href="' . esc_url( get_permalink( $org ) ) . '">' . esc_html( sprintf( __( 'Know more about %s', 'kits-by-wugweb' ), get_the_title( $org ) ) ) . '</a>';
 	}
 	$help = kits_profile_help_url( $f['place'] );
 	if ( '' !== $help ) {
