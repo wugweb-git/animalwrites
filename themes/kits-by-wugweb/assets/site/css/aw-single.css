@@ -287,8 +287,7 @@
 .has-photo .kit-profile-herotext { align-content: center; padding: var(--kit-space-5); }
 .kit-profile-tags { display: grid; justify-items: start; gap: var(--kit-space-3); margin: 0; }
 .kit-profile-role { font-size: var(--kit-type-lead); font-weight: var(--kit-weight-medium); line-height: 1.3; }
-.kit-profile-tag { display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding-inline: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-on-ink); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); white-space: nowrap; font-weight: var(--kit-weight-medium); }
-.kit-profile-tag.is-solid { background: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+.kit-profile-place { display: inline-flex; align-items: center; gap: var(--kit-space-2); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); }
 .kit-profile-figures { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
 .kit-profile-figures a { display: grid; gap: var(--kit-space-1); color: inherit; text-decoration: none; }
 .kit-profile-figure { margin: 0; font-size: var(--kit-type-display); font-weight: var(--kit-weight-display); line-height: 1; letter-spacing: -.03em; }

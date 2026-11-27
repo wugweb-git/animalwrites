@@ -215,7 +215,7 @@ function kits_profile_hero_html( $id, $f ) {
 	$out     .= '' !== $photo ? '<figure class="kit-profile-media">' . $photo . '</figure>' : ( '' !== $initials ? '<span class="kit-profile-monogram" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup for the featured image.
 	$out     .= '<div class="kit-profile-herotext"><p class="kit-profile-tags">';
 	$out     .= '' !== $f['role'] ? '<span class="kit-profile-role">' . esc_html( $f['role'] ) . '</span>' : '';
-	$out     .= '' !== $f['place'] ? '<span class="kit-profile-tag is-solid">' . esc_html( $f['place'] ) . '</span>' : '';
+	$out     .= '' !== $f['place'] ? '<span class="kit-profile-place"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $f['place'] ) . '</span>' : '';
 	$out     .= '</p>';
 
 	$figs = '';
