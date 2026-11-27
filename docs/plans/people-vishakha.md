@@ -168,3 +168,12 @@ Read from what we already have: Search Console for her name, Nawabi Tails Rescue
 
 ### 12.8 Mobile review checklist for the build (web-review)
 Phone 375 and 320, tablet 768, desktop 1440; no horizontal scroll; tap targets 44px; contrast 4.5:1 (`contrast_check`); headings in order; alt text on the photo (or none for the initials tile); focus visible; keyboard-only pass through the action row, evidence links and share; layout shift (photo aspect ratio reserved); meta title, description and share image present; no dead links; no address, phone or location anywhere.
+
+## 13. Owner answers, 27 Nov 2026 (settle section 11 / 12)
+| Question | Answer | What it changes |
+|---|---|---|
+| Directory address | No address anywhere. Her organisation is Nawabi Tails Rescue Foundation. **City and state only** (Lucknow, Uttar Pradesh) | Profile shows city and state only. The listing's street address is to be removed from the listing page and its JSON-LD: the old value is kept outside the repo before the change, done through the admin REST in the built-in browser with the owner logged in, listing 43 only, after the build ships (not before) |
+| Her photo | "Use from the sourced web?" | **No.** Photos in NDTV, HT and other outlets belong to them and to the photographers; copying one needs their licence. Allowed sources: a photo she sends (permission and credit), or one on her organisation's own site and socials that she says we may use. Until then the initials tile. The owner can ask her for one while she is in touch |
+| Copy yes | The owner will review the finished page by link | The page is built as a **draft** (not public) and the link is sent for the yes; Home and About stay hidden until publish |
+| Home row position | 4th from the top | Counting the hero as the first block: Hero, Need help now, Find help, **this row**, then the campaign cards row. (If the owner meant after the campaign row, the pattern line moves one place) |
+| 2 by 2 grid use case | The **current four small blocks** (Acts and Rules, Court orders and judgments, Circulars and notices, Letters and templates, from "The law, in plain words", `patterns/animal-law.php`) move into the grid | The right column of the new row = those four tiles (same links to `/library/?tag=...`). They are removed from the "The law, in plain words" section, which keeps its heading, its three Library cards and "Browse the Library". Below 768px: one column; from 768px: 2 by 2 |
