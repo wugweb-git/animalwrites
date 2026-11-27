@@ -130,6 +130,126 @@
             }
         },
         {
+            "key": "field_aw_profile_tab_links",
+            "label": "Links",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_profile_instagram",
+            "label": "Instagram",
+            "name": "kits_profile_instagram",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_linkedin",
+            "label": "LinkedIn",
+            "name": "kits_profile_linkedin",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_facebook",
+            "label": "Facebook",
+            "name": "kits_profile_facebook",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_youtube",
+            "label": "YouTube",
+            "name": "kits_profile_youtube",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_x",
+            "label": "X",
+            "name": "kits_profile_x",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_profile_whatsapp",
+            "label": "WhatsApp link",
+            "name": "kits_profile_whatsapp",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Only a wa.me or WhatsApp link they allow. Never a phone number.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
             "key": "field_aw_profile_tab_approval",
             "label": "Approval",
             "name": "",
@@ -194,7 +314,7 @@
         },
         {
             "key": "field_aw_profile_tab_evidence",
-            "label": "Evidence",
+            "label": "Sources",
             "name": "",
             "aria-label": "",
             "type": "tab",
@@ -212,7 +332,7 @@
         },
         {
             "key": "field_aw_profile_evidence",
-            "label": "Evidence rows",
+            "label": "Sources (one row per claim)",
             "name": "kits_profile_evidence",
             "aria-label": "",
             "type": "repeater",
@@ -298,8 +418,9 @@
                         "id": ""
                     },
                     "choices": {
-                        "reported": "Reported by",
-                        "own-words": "In their own words"
+                        "reported": "Reported by (an outlet)",
+                        "own-words": "In their own words",
+                        "org-words": "The organisation's own site"
                     },
                     "default_value": "reported",
                     "return_format": "value",

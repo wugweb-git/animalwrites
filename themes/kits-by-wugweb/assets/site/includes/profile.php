@@ -36,7 +36,7 @@ function kits_is_profile( $id ) {
  * A profile's person fields.
  *
  * @param int $id Post ID.
- * @return array{prefix:string,name:string,role:string,place:string,org:int,campaign:int,credit:string,approval:string,approved_on:string}
+ * @return array{links:array<string,string>,prefix:string,name:string,role:string,place:string,org:int,campaign:int,credit:string,approval:string,approved_on:string}
  */
 function kits_profile_fields( $id ) {
 	return array(
@@ -49,6 +49,16 @@ function kits_profile_fields( $id ) {
 		'credit'      => (string) get_post_meta( $id, 'kits_profile_photo_credit', true ),
 		'approval'    => (string) get_post_meta( $id, 'kits_profile_approval', true ),
 		'approved_on' => (string) get_post_meta( $id, 'kits_profile_approved_on', true ),
+		'links'       => array_filter(
+			array(
+				'Instagram' => (string) get_post_meta( $id, 'kits_profile_instagram', true ),
+				'LinkedIn'  => (string) get_post_meta( $id, 'kits_profile_linkedin', true ),
+				'Facebook'  => (string) get_post_meta( $id, 'kits_profile_facebook', true ),
+				'YouTube'   => (string) get_post_meta( $id, 'kits_profile_youtube', true ),
+				'X'         => (string) get_post_meta( $id, 'kits_profile_x', true ),
+				'WhatsApp'  => (string) get_post_meta( $id, 'kits_profile_whatsapp', true ),
+			)
+		),
 	);
 }
 
@@ -74,7 +84,7 @@ function kits_profile_evidence( $id ) {
 			'highlight' => trim( (string) get_post_meta( $id, $p . 'highlight', true ) ),
 			'claim'   => $claim,
 			'source'  => trim( (string) get_post_meta( $id, $p . 'source', true ) ),
-			'label'   => 'own-words' === get_post_meta( $id, $p . 'label', true ) ? 'own-words' : 'reported',
+			'label'   => in_array( get_post_meta( $id, $p . 'label', true ), array( 'own-words', 'org-words' ), true ) ? get_post_meta( $id, $p . 'label', true ) : 'reported',
 			'url'     => esc_url_raw( (string) get_post_meta( $id, $p . 'url', true ) ),
 			'archive' => esc_url_raw( (string) get_post_meta( $id, $p . 'archive_url', true ) ),
 			'date'    => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ? $date : '',
@@ -121,38 +131,137 @@ function kits_profile_ext_link( $url, $text, $class = '' ) {
 	return '<a' . ( '' !== $class ? ' class="' . esc_attr( $class ) . '"' : '' ) . ' href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . esc_html( $text ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a>';
 }
 
-/**
- * Who this is, first on the page: a dark card with a plain initials tile (no photo until they send one and allow it), their
- * role and city. The tile is decoration, so it is hidden from screen readers; the name is already the page heading.
- *
- * @param array $f Fields from kits_profile_fields().
- * @return string
- */
-function kits_profile_identity_html( $f ) {
-	if ( '' === $f['role'] && '' === $f['place'] ) {
-		return '';
+/** Two capital letters from a name, for the plain tile used until there is a permitted photo. */
+function kits_profile_initials( $name ) {
+	$out = '';
+	foreach ( array_slice( preg_split( '/\s+/', trim( $name ) ), 0, 2 ) as $word ) {
+		$out .= '' !== $word ? mb_strtoupper( mb_substr( $word, 0, 1 ) ) : '';
 	}
-	$initials = '';
-	foreach ( array_slice( preg_split( '/\s+/', trim( $f['name'] ) ), 0, 2 ) as $word ) {
-		$initials .= '' !== $word ? mb_strtoupper( mb_substr( $word, 0, 1 ) ) : '';
-	}
-	$out  = '<div class="kit-profile-who">';
-	$out .= '' !== $initials ? '<span class="kit-profile-initials" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '';
-	$out .= '<p class="kit-profile-role">';
-	$out .= '' !== $f['role'] ? '<strong>' . esc_html( $f['role'] ) . '</strong>' : '';
-	$out .= '' !== $f['place'] ? '<span>' . esc_html( $f['place'] ) . '</span>' : '';
-	$out .= '</p></div>';
 	return $out;
 }
 
-/** One bento tile: a big figure, a small line under it, optionally the whole tile a link. */
-function kits_profile_tile( $shade, $figure, $line, $href = '' ) {
-	$in = '<strong class="kit-profile-figure">' . esc_html( $figure ) . '</strong><span class="kit-profile-line">' . esc_html( $line ) . '</span>';
-	return '<li class="kit-profile-tile is-' . esc_attr( $shade ) . '">' . ( '' !== $href ? '<a href="' . esc_url( $href ) . '">' . $in . '</a>' : $in ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
+/**
+ * Sources grouped by page: one group per link (or per outlet when there is no link), newest first, each with every claim
+ * that page backs. The highlight figures point at their group.
+ *
+ * @param int $id Post ID.
+ * @return array<int,array{id:string,source:string,url:string,archive:string,date:string,label:string,claims:string[]}>
+ */
+function kits_profile_sources( $id ) {
+	$groups = array();
+	foreach ( kits_profile_evidence( $id ) as $r ) {
+		$k = '' !== $r['url'] ? $r['url'] : 'n-' . $r['source'] . '-' . $r['i'];
+		if ( ! isset( $groups[ $k ] ) ) {
+			$groups[ $k ] = array(
+				'id'      => 'kit-profile-src-' . $r['i'],
+				'source'  => $r['source'],
+				'url'     => $r['url'],
+				'archive' => $r['archive'],
+				'date'    => $r['date'],
+				'label'   => $r['label'],
+				'claims'  => array(),
+				'first'   => $r['i'],
+			);
+		}
+		$groups[ $k ]['claims'][] = $r['claim'];
+		if ( '' === $groups[ $k ]['archive'] ) {
+			$groups[ $k ]['archive'] = $r['archive'];
+		}
+	}
+	$groups = array_values( $groups );
+	usort(
+		$groups,
+		function ( $a, $b ) { // newest first; undated last; typed order breaks ties
+			$da = '' === $a['date'] ? '0000-00-00' : $a['date'];
+			$db = '' === $b['date'] ? '0000-00-00' : $b['date'];
+			return $da === $db ? $a['first'] <=> $b['first'] : strcmp( $db, $da );
+		}
+	);
+	return $groups;
+}
+
+/** "Follow {first name}": their own pages, each a 44px link that opens in a new tab. */
+function kits_profile_follow_html( $f ) {
+	if ( ! $f['links'] ) {
+		return '';
+	}
+	$first = kits_profile_first( $f );
+	/* translators: %s: first name. */
+	$label = '' !== $first ? sprintf( __( '%s online', 'kits-by-wugweb' ), $first ) : __( 'Online', 'kits-by-wugweb' );
+	$out   = '<nav class="kit-profile-follow" aria-label="' . esc_attr( $label ) . '"><ul>';
+	foreach ( $f['links'] as $name => $url ) {
+		$out .= '<li><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me">' . esc_html( $name ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
+	}
+	return $out . '</ul></nav>';
 }
 
 /**
- * The identity card, the action row and the highlight tiles, printed before the person's text.
+ * The hero banner: a dark block with a ghost monogram behind a plain initials tile (no photo until they send one and allow it),
+ * their role and city, the figures worth seeing at once (each linking to the page that backs it) and where to follow them.
+ * The tile and the monogram are decoration and hidden from screen readers; the name is already the page heading.
+ *
+ * @param int   $id Post ID.
+ * @param array $f  Fields from kits_profile_fields().
+ * @return string
+ */
+function kits_profile_hero_html( $id, $f ) {
+	if ( '' === $f['role'] && '' === $f['place'] ) {
+		return '';
+	}
+	$initials = kits_profile_initials( $f['name'] );
+	$out      = '<section class="kit-profile-hero">';
+	$out     .= '' !== $initials ? '<span class="kit-profile-monogram" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '';
+	$out     .= '<div class="kit-profile-who">';
+	$out     .= '' !== $initials ? '<span class="kit-profile-initials" aria-hidden="true">' . esc_html( $initials ) . '</span>' : '';
+	$out     .= '<p class="kit-profile-role">';
+	$out     .= '' !== $f['role'] ? '<strong>' . esc_html( $f['role'] ) . '</strong>' : '';
+	$out     .= '' !== $f['place'] ? '<span>' . esc_html( $f['place'] ) . '</span>' : '';
+	$out     .= '</p></div>';
+
+	$figs = '';
+	foreach ( kits_profile_sources( $id ) as $g ) {
+		$h = '';
+		foreach ( kits_profile_evidence( $id ) as $r ) {
+			if ( '' !== $r['highlight'] && ( ( '' !== $g['url'] && $r['url'] === $g['url'] ) || ( '' === $g['url'] && $r['i'] === $g['first'] ) ) ) {
+				$h = $r['highlight'];
+				break;
+			}
+		}
+		if ( '' !== $h ) {
+			$line  = $g['source'] . ( '' !== $g['source'] && '' !== $g['date'] ? ', ' : '' ) . ( '' !== $g['date'] ? wp_date( 'M Y', strtotime( $g['date'] ) ) : '' );
+			$figs .= '<li><a href="#' . esc_attr( $g['id'] ) . '"><strong class="kit-profile-figure">' . esc_html( $h ) . '</strong><span class="kit-profile-line">' . esc_html( $line ) . '</span></a></li>';
+		}
+	}
+	$out .= '' !== $figs ? '<ul class="kit-profile-figures">' . $figs . '</ul>' : '';
+	$out .= kits_profile_follow_html( $f );
+	return $out . '</section>';
+}
+
+/** Their organisation as a card: the Directory listing, with what the listing says about it. */
+function kits_profile_org_card( $org, $f ) {
+	$first = kits_profile_first( $f );
+	$name  = get_the_title( $org );
+	$bits  = array();
+	$year  = (string) get_post_meta( $org, 'aw_founded', true );
+	if ( preg_match( '/^\d{4}$/', $year ) ) {
+		/* translators: %s: year. */
+		$bits[] = sprintf( __( 'Since %s', 'kits-by-wugweb' ), $year );
+	}
+	$animals = (string) get_post_meta( $org, 'aw_animals', true );
+	if ( '' !== $animals ) {
+		$bits[] = $animals;
+	}
+	/* translators: %s: first name. */
+	$h   = '' !== $first ? sprintf( __( '%s’s organisation', 'kits-by-wugweb' ), $first ) : __( 'Their organisation', 'kits-by-wugweb' );
+	$out = '<section class="kit-profile-org" aria-labelledby="kit-profile-org-h"><h2 id="kit-profile-org-h">' . esc_html( $h ) . '</h2>';
+	$out .= '<a class="kit-profile-orgcard" href="' . esc_url( get_permalink( $org ) ) . '"><span class="kit-profile-initials" aria-hidden="true">' . esc_html( kits_profile_initials( $name ) ) . '</span><span class="kit-profile-orgtext"><strong>' . esc_html( $name ) . '</strong>';
+	$out .= $bits ? '<span>' . esc_html( implode( ' · ', $bits ) ) . '</span>' : '';
+	$out .= '<span class="kit-profile-orgmore">' . esc_html__( 'See the listing', 'kits-by-wugweb' ) . ' <span aria-hidden="true">→</span></span></span></a></section>';
+	return $out;
+}
+
+/**
+ * The hero banner, the action row and the organisation card, printed before the person's text.
  *
  * @param int $id Post ID.
  * @return string
@@ -160,7 +269,7 @@ function kits_profile_tile( $shade, $figure, $line, $href = '' ) {
 function kits_profile_head_html( $id ) {
 	$f   = kits_profile_fields( $id );
 	$org = $f['org'] && 'publish' === get_post_status( $f['org'] ) ? $f['org'] : 0;
-	$out = kits_profile_identity_html( $f );
+	$out = kits_profile_hero_html( $id, $f );
 
 	$acts = '';
 	if ( $org ) {
@@ -173,71 +282,66 @@ function kits_profile_head_html( $id ) {
 		$acts .= '<a class="wp-element-button kit-btn is-style-kits-ghost" href="' . esc_url( $help ) . '">' . esc_html( sprintf( __( 'Find help in %s', 'kits-by-wugweb' ), trim( explode( ',', $f['place'] )[0] ) ) ) . '</a>';
 	}
 	$out .= '' !== $acts ? '<p class="kit-profile-actions">' . $acts . '</p>' : '';
-
-	// Highlights: the figures worth seeing at once. Each links down to the dated entry that backs it.
-	$shades = array( 'soft', 'plain', 'soft' ); // the dark tiles are the identity card above and "Help" below
-	$tiles  = array();
-	foreach ( kits_profile_evidence( $id ) as $r ) {
-		if ( '' !== $r['highlight'] ) {
-			$line    = $r['source'] . ( '' !== $r['source'] && '' !== $r['date'] ? ', ' : '' ) . ( '' !== $r['date'] ? wp_date( 'M Y', strtotime( $r['date'] ) ) : '' );
-			$tiles[] = array( $r['highlight'], $line, '#kit-profile-story-' . $r['i'] );
-		}
-	}
-	if ( $org ) {
-		$founded = (string) get_post_meta( $org, 'aw_founded', true );
-		if ( preg_match( '/^\d{4}$/', $founded ) ) {
-			$tiles[] = array( __( 'Since', 'kits-by-wugweb' ) . ' ' . $founded, get_the_title( $org ), get_permalink( $org ) );
-		}
-	}
-	if ( $tiles ) {
-		$out .= '<ul class="kit-profile-bento">';
-		foreach ( $tiles as $n => $t ) {
-			$out .= kits_profile_tile( $shades[ $n % 3 ], $t[0], $t[1], $t[2] );
-		}
-		$out .= '</ul>';
-	}
+	$out .= $org ? kits_profile_org_card( $org, $f ) : '';
 	return $out;
 }
 
+/** One source tile: the page's name, its date and kind, what it backs, and the links. */
+function kits_profile_source_tile( $g, $f, $shade ) {
+	$first = kits_profile_first( $f );
+	if ( 'own-words' === $g['label'] ) {
+		$chip = '' !== $first ? sprintf( /* translators: %s: first name. */ __( '%s’s own words', 'kits-by-wugweb' ), $first ) : __( 'In their own words', 'kits-by-wugweb' );
+	} elseif ( 'org-words' === $g['label'] ) {
+		$chip = __( 'The organisation’s own site', 'kits-by-wugweb' );
+	} else {
+		$chip = __( 'Reported', 'kits-by-wugweb' );
+	}
+	$points = '';
+	foreach ( $g['claims'] as $c ) {
+		$points .= '<li>' . esc_html( $c ) . '</li>';
+	}
+	$links = '';
+	if ( '' !== $g['url'] ) {
+		/* translators: %s: outlet. */
+		$links .= kits_profile_ext_link( $g['url'], '' !== $g['source'] ? sprintf( __( 'Read it on %s', 'kits-by-wugweb' ), $g['source'] ) : __( 'Read the source', 'kits-by-wugweb' ) );
+	}
+	if ( '' !== $g['archive'] ) {
+		$links .= kits_profile_ext_link( $g['archive'], __( 'Archive copy', 'kits-by-wugweb' ) );
+	}
+	return '<li class="kit-profile-tile is-' . esc_attr( $shade ) . '" id="' . esc_attr( $g['id'] ) . '"><div class="kit-profile-src"><h3 class="kit-profile-outlet">' . esc_html( $g['source'] ) . '</h3><p class="kit-profile-meta"><span class="kit-chip">' . esc_html( $chip ) . '</span>' . ( '' !== $g['date'] ? ' ' . kits_date( $g['date'] ) : '' ) . '</p><ul class="kit-profile-points">' . $points . '</ul>' . ( '' !== $links ? '<p class="kit-profile-links">' . $links . '</p>' : '' ) . '</div></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above; kits_date() returns escaped markup.
+}
+
 /**
- * Her story with sources (a dated timeline, one entry per claim: date, the claim, who said it, links), then the two ways on:
- * help in their city and the related campaign. Printed after the person's text.
+ * Where it all comes from, in three short groups of source tiles (news, their own words, the organisation's own site),
+ * then the two ways on: help in their city and the related campaign. Printed after the person's text.
  *
  * @param int $id Post ID.
  * @return string
  */
 function kits_profile_tail_html( $id ) {
-	$f    = kits_profile_fields( $id );
-	$out  = '';
-	$name = kits_profile_first( $f );
-
-	$rows = kits_profile_evidence( $id );
-	usort(
-		$rows,
-		function ( $a, $b ) { // oldest first; undated last; the order they were typed breaks ties
-			$da = '' === $a['date'] ? '9999-99-99' : $a['date'];
-			$db = '' === $b['date'] ? '9999-99-99' : $b['date'];
-			return $da === $db ? $a['i'] <=> $b['i'] : strcmp( $da, $db );
-		}
-	);
-	$items = '';
-	foreach ( $rows as $r ) {
-		$meta  = '<span class="kit-chip">' . esc_html( 'own-words' === $r['label'] ? ( '' !== $name ? sprintf( /* translators: %s: first name. */ __( '%s’s own words', 'kits-by-wugweb' ), $name ) : __( 'In their own words', 'kits-by-wugweb' ) ) : __( 'Reported by', 'kits-by-wugweb' ) ) . '</span>';
-		$meta .= ' <span class="kit-profile-source">' . esc_html( $r['source'] ) . '</span>';
-		$links = '';
-		if ( '' !== $r['url'] ) {
-			/* translators: %s: outlet. */
-			$links .= kits_profile_ext_link( $r['url'], '' !== $r['source'] ? sprintf( __( 'Read it on %s', 'kits-by-wugweb' ), $r['source'] ) : __( 'Read the source', 'kits-by-wugweb' ) );
-		}
-		if ( '' !== $r['archive'] ) {
-			$links .= kits_profile_ext_link( $r['archive'], __( 'Archive copy', 'kits-by-wugweb' ) );
-		}
-		$items .= '<li class="kit-profile-entry" id="kit-profile-story-' . (int) $r['i'] . '">' . ( '' !== $r['date'] ? '<span class="kit-profile-when">' . kits_date( $r['date'] ) . '</span>' : '' ) . '<p class="kit-profile-claim">' . esc_html( $r['claim'] ) . '</p><p class="kit-profile-meta">' . $meta . '</p>' . ( '' !== $links ? '<p class="kit-profile-links">' . $links . '</p>' : '' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above; kits_date() returns escaped markup.
+	$f     = kits_profile_fields( $id );
+	$out   = '';
+	$first = kits_profile_first( $f );
+	$by    = array( 'reported' => array(), 'own-words' => array(), 'org-words' => array() );
+	foreach ( kits_profile_sources( $id ) as $g ) {
+		$by[ $g['label'] ][] = $g;
 	}
-	if ( '' !== $items ) {
-		/* translators: %s: first name. */
-		$h    = '' !== $name ? sprintf( __( '%s’s story, with sources', 'kits-by-wugweb' ), $name ) : __( 'The story, with sources', 'kits-by-wugweb' );
-		$out .= '<section class="kit-profile-story" aria-labelledby="kit-profile-story-h"><h2 id="kit-profile-story-h">' . esc_html( $h ) . '</h2><ol class="kit-profile-timeline">' . $items . '</ol></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	/* translators: %s: first name. */
+	$words = '' !== $first ? sprintf( __( 'In %s’s own words', 'kits-by-wugweb' ), $first ) : __( 'In their own words', 'kits-by-wugweb' );
+	$heads = array(
+		'reported'  => array( 'kit-profile-news-h', __( 'In the news', 'kits-by-wugweb' ) ),
+		'own-words' => array( 'kit-profile-words-h', $words ),
+		'org-words' => array( 'kit-profile-site-h', __( 'From the organisation’s own site', 'kits-by-wugweb' ) ),
+	);
+	foreach ( $heads as $label => $h ) {
+		if ( ! $by[ $label ] ) {
+			continue;
+		}
+		$tiles = '';
+		foreach ( $by[ $label ] as $n => $g ) {
+			$tiles .= kits_profile_source_tile( $g, $f, 0 === $n % 2 ? 'plain' : 'soft' );
+		}
+		$out .= '<section class="kit-profile-sources" aria-labelledby="' . esc_attr( $h[0] ) . '"><h2 id="' . esc_attr( $h[0] ) . '">' . esc_html( $h[1] ) . '</h2><ul class="kit-profile-bento">' . $tiles . '</ul></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	$next = '';
@@ -245,7 +349,7 @@ function kits_profile_tail_html( $id ) {
 	if ( '' !== $help ) {
 		$city = trim( explode( ',', $f['place'] )[0] );
 		/* translators: %s: city. */
-		$next .= '<li class="kit-profile-tile is-ink"><a href="' . esc_url( $help ) . '"><h2 class="kit-profile-figure">' . esc_html( sprintf( __( 'Help in %s', 'kits-by-wugweb' ), $city ) ) . '</h2><span class="kit-profile-line">' . esc_html( sprintf( __( 'Animal rescue and care near you', 'kits-by-wugweb' ) ) ) . ' <span aria-hidden="true">→</span></span></a></li>';
+		$next .= '<li class="kit-profile-tile is-ink"><a href="' . esc_url( $help ) . '"><h2 class="kit-profile-figure">' . esc_html( sprintf( __( 'Help in %s', 'kits-by-wugweb' ), $city ) ) . '</h2><span class="kit-profile-line">' . esc_html__( 'Animal rescue and care near you', 'kits-by-wugweb' ) . ' <span aria-hidden="true">→</span></span></a></li>';
 	}
 	if ( $f['campaign'] && 'publish' === get_post_status( $f['campaign'] ) ) {
 		$next .= '<li class="kit-profile-tile is-soft"><a href="' . esc_url( get_permalink( $f['campaign'] ) ) . '"><h2 class="kit-profile-figure">' . esc_html__( 'Part of a campaign', 'kits-by-wugweb' ) . '</h2><span class="kit-profile-line">' . esc_html( get_the_title( $f['campaign'] ) ) . ' <span aria-hidden="true">→</span></span></a></li>';
