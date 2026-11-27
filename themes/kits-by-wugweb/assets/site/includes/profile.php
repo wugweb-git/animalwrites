@@ -288,8 +288,8 @@ function kits_profile_mosaic_tile( $shade, $icon, $title, $line, $href, $ext = t
 }
 
 /**
- * Every link in one mosaic: their organisation, their own pages, the pages that wrote about them, help in their city and
- * the related campaign. Tiles come in two widths and three shades (ink, soft, plain). Printed after the person's text.
+ * Their own links in one mosaic: their organisation, their own pages and website, help in their city and the related
+ * campaign. The pages that wrote about them are in the Sources block, so they are not repeated here (section height rule). Tiles come in two widths and three shades (ink, soft, plain). Printed after the person's text.
  *
  * @param int $id Post ID.
  * @return string
@@ -311,20 +311,6 @@ function kits_profile_tail_html( $id ) {
 	$site = $org ? (string) get_post_meta( $org, 'aw_website', true ) : '';
 	if ( '' !== $site ) {
 		$t[] = kits_profile_mosaic_tile( 'soft', 'link', __( 'Website', 'kits-by-wugweb' ), preg_replace( '#^https?://(www\.)?#', '', untrailingslashit( $site ) ), $site, true, true );
-	}
-	$kind = array(
-		'reported'  => __( 'In the news', 'kits-by-wugweb' ),
-		'own-words' => '' !== $first ? sprintf( /* translators: %s: first name. */ __( '%s’s own article', 'kits-by-wugweb' ), $first ) : __( 'Their own article', 'kits-by-wugweb' ),
-		'org-words' => __( 'Organisation’s site', 'kits-by-wugweb' ),
-	);
-	$i = 0;
-	foreach ( kits_profile_sources( $id ) as $g ) {
-		if ( '' === $g['url'] ) {
-			continue;
-		}
-		$line = $kind[ $g['label'] ] . ( '' !== $g['date'] ? ', ' . wp_date( 'j M Y', strtotime( $g['date'] ) ) : '' );
-		$t[]  = kits_profile_mosaic_tile( 0 === $i % 3 ? 'plain' : ( 1 === $i % 3 ? 'soft' : 'plain' ), 'file', $g['source'], $line, $g['url'], true, 0 === $i );
-		++$i;
 	}
 	$help = kits_profile_help_url( $f['place'] );
 	if ( '' !== $help ) {
