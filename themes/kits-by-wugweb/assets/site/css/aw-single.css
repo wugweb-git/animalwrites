@@ -295,6 +295,7 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 .kit-profile-line { font-size: var(--kit-type-lead); }
 .kit-profile-follow ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .kit-profile-follow a { display: inline-grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-on-ink); border-radius: var(--kit-radius-pill); color: var(--kit-color-on-ink); --kit-ico-size: 1.25rem; }
+.kit-profile-follow a::after { content: none; }
 .kit-profile-org { margin: var(--kit-space-6) 0; }
 .kit-profile-org h2 { margin: 0 0 var(--kit-space-3); }
 .kit-profile-orgcard { display: flex; align-items: center; gap: var(--kit-space-4); padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); color: inherit; text-decoration: none; }
