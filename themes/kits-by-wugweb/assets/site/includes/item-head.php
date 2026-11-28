@@ -146,6 +146,10 @@ function aw_block_item_meta( $a, $id ) {
 		}
 	}
 	$types = aw_item_type_terms( $id );
+	if ( 'profile' === $kind ) { // the Profile chip beside the date (owner, 28 Nov 2026); the tag is the marker, so the type list leaves it out
+		$pt    = get_term_by( 'slug', 'profile', 'post_tag' );
+		$types = $pt ? array( $pt ) : array();
+	}
 	foreach ( 'listing' === $kind ? array_slice( $types, 0, 3 ) : $types as $t ) { // a listing: at most 3 types, primary first
 		$row .= aw_item_chip( $t );
 	}
