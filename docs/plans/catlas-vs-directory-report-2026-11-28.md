@@ -167,6 +167,44 @@ Short answer: **names as leads, yes; their field values, no.**
 | Their 25-odd names that we already hold | Same orgs | Nothing to add by ingestion; our records are richer. |
 | Their roughly 30 names with no match in our Directory (section 7.3) | Name and city | **Yes, as a lead list.** Run each through our own enrichment: own website, Darpan, AWBI, social, claim. Create a listing only when a verified source confirms the organisation exists, then store our own sourced values with the source URL and date. Ratings and review text are never copied. |
 | Their ratings, review excerpts, opening hours | Google-derived | No. |
-| Their 1,614 vet clinics | Clinics, not NGOs | Out of scope for the NGO directory unless the owner opens a vets type; same rule applies (leads only, verified sources). |
+| Their 1,614 vet clinics (private clinics, Google-listed) | Name, city, phone, geo, hours, rating | **Correction (owner, 28 Nov):** the Directory does hold vets. It has five veterinary types (`veterinary-hospital` 236, `veterinary-dispensary` 798, `veterinary-office` 197, `mobile-veterinary-unit` 29, plus `veterinary-clinic` 0) and 9 bird hospitals: 1,260 veterinary-type listings, almost all government institutions from the animal husbandry departments. The `veterinary-clinic` type exists but is empty, so private clinics like theirs have an empty slot to land in. A name match of their 1,614 against our 7,564 listings gave 98 exact and 15 near hits, nearly all false (generic names such as Happy Paws or Vet House); the two sets barely overlap because ours is government, theirs private. Same rule applies: leads only, verified sources (own site, Darpan not applicable, social, claim), no Google values or review text. |
 
 **How, if the owner says yes:** (a) save the unmatched names and cities as a lead file in `docs/plans/`; (b) check each against our Directory by name, phone and place (a second pass, since spelling can hide a match); (c) push confirmed new ones through the SourceWeb directory enrichment with the own-site, Darpan and AWBI sources first, parked unless verified; (d) IndexNow after publishing. Free quotas only; no Google spend.
+
+## 9. Schema import: their structured data, ours, and the target (documentation only; no code, no PR)
+
+Read from their live pages on 28 Nov 2026 (JSON-LD). Structure only; example values are shortened.
+
+### 9.1 Their schema by page type
+| Page | Types | Properties carried |
+|---|---|---|
+| Every page | `Organization` and `WebSite` | name, alternateName, url, logo, description; `WebSite` has a `SearchAction` (`/search?q={search_term_string}`). |
+| `/vets/<city>/` and `/vets/<city>/<locality>/` | `BreadcrumbList`, `ItemList` | Breadcrumb 2 to 3 levels (TrustedVets, city, locality). `ItemList` is a flat list of `ListItem` (position, url, name), about 30 per page. |
+| `/emergency/<city>/` | `BreadcrumbList`, `ItemList` | Same pattern, breadcrumb TrustedVets, Emergency care, city. |
+| `/clinic/<slug>/` | `VeterinaryCare`, `BreadcrumbList` | name, url, `PostalAddress` (street, locality, region, postalCode, country IN), `GeoCoordinates`, telephone, image, a one-sentence generated description (what it offers, pets treated, "open 24 hours"), `aggregateRating` (ratingValue, reviewCount, from Google), `openingHoursSpecification`. |
+| `/rescue-orgs/` | `BreadcrumbList`, `ItemList` (55 orgs) | As the city lists. |
+| `/rescue-orgs/<slug>/` | `NGO`, `BreadcrumbList` | name, url, `PostalAddress`, `GeoCoordinates`, telephone, `sameAs` (the org's website or Instagram), `aggregateRating`. |
+| Not used | | `FAQPage`, `Review`, `areaServed`, `identifier`/registration, `foundingDate`, `knowsAbout`, `hasOfferCatalog`, `makesOffer`, `donate`. |
+
+### 9.2 Ours today (same pages)
+| Page | Types we output | Missing against theirs |
+|---|---|---|
+| `/directory/` and state or district pages | `WebPage`, `BreadcrumbList`, `Organization`, `WebSite`, `ImageObject` (+ `FAQPage` on the hub) | **`ItemList`** of the organisations shown. |
+| `/directory/org/<slug>/` | `NGO`, `VeterinaryCare`, `AnimalShelter` (one node, `tel`, `sameAs`), `FAQPage`, `WebPage`, `BreadcrumbList` | **`PostalAddress`, `GeoCoordinates`, `openingHoursSpecification`, `aggregateRating`, `image`, description sentence**; and one multi-type node rather than the type that fits the listing. |
+
+What we carry that they do not: `FAQPage`, three organisation types, and (in the page, not yet in schema) registration numbers, services, verified dates and sources.
+
+### 9.3 Target schema for our pages (to adopt; each item needs an owner decision to build)
+1. **List pages (state, district, type, vets):** add `ItemList` with `ListItem` position, url, name for the organisations shown, in the order shown, capped at the page size. Keep the existing `BreadcrumbList`.
+2. **Listing page, address:** add `address` as `PostalAddress` (streetAddress, addressLocality, addressRegion, postalCode, addressCountry `IN`) from `aw_address` and the place fields. We hold addresses on most listings; this is the cheapest gain.
+3. **Listing page, geo:** add `GeoCoordinates` only when `aw_lat` and `aw_lng` are filled (they were empty on every sampled listing); do not add approximate pins.
+4. **Listing page, type:** emit the one schema type that fits the Directory type: veterinary types give `VeterinaryCare`; shelter gives `AnimalShelter`; rescue, NGO and trust give `NGO`. Drop the habit of stacking three types on every listing.
+5. **Listing page, identity and trust (ours, not theirs):** add `identifier` for AWBI and Darpan ids, `sameAs` for the verified social profiles, `foundingDate` where held, `areaServed` from the district or state, `knowsAbout` or a services list from the service tags, and `dateModified` from the "Verified on" date. These are what separate us from a Google-rating directory.
+6. **Opening hours:** add `openingHoursSpecification` only for listings where a verified source gives hours (own site or claimed). Never copy hours from Google.
+7. **Ratings:** do not add `aggregateRating`. Theirs is Google data; ours would have to be our own, and we have no reviews. Skip.
+8. **Site-wide:** keep `Organization`, `WebSite` with the same `SearchAction` pattern (our site search URL), and `BreadcrumbList` everywhere.
+9. **FAQPage:** keep, visible FAQ only (the existing rule).
+10. **Vets (new `veterinary-clinic` type, empty today):** if private clinics are ever added, use `VeterinaryCare` with address, geo, telephone, `openingHoursSpecification` and `medicalSpecialty` or `knowsAbout` from services and pet types; no Google rating.
+
+### 9.4 Checks when it is built (not started)
+Validate with the Rich Results Test and the Schema Markup Validator; run the Directory page types through Rank Math's schema so RankWeb and Rank Math do not output two graphs; keep Search Console free of new structured-data warnings. Code change would go on its own branch under the owner's two-route rule; the owner said no PR for this step, so this section is the record only.
