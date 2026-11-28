@@ -84,8 +84,8 @@ function aw_si_reset_sql( $keep ) {
 	return implode( ', ', $out );
 }
 
-// Brand searches: Animal Writes in any spelling, and the old animalrights.in name.
-const AW_SI_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
+// Brand searches: Animal Writes in any spelling, the old animalrights.in name, and its "... in website" forms (owner, 28 Nov 2026). The bare concept "animal rights" is not a brand search.
+const AW_SI_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|animal\s*-?\s*rights?\s+in\s+website|india\s*writes/i';
 
 // Words ending in s that are not plurals: never folded ("news" must not become "new").
 const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
