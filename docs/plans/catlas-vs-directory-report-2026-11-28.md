@@ -208,3 +208,92 @@ What we carry that they do not: `FAQPage`, three organisation types, and (in the
 
 ### 9.4 Checks when it is built (not started)
 Validate with the Rich Results Test and the Schema Markup Validator; run the Directory page types through Rank Math's schema so RankWeb and Rank Math do not output two graphs; keep Search Console free of new structured-data warnings. Code change would go on its own branch under the owner's two-route rule; the owner said no PR for this step, so this section is the record only.
+
+## 10. Their structure (information architecture), saved for reference
+
+Read 28 Nov 2026 from the sitemap (2,120 URLs) and the live pages.
+
+| Level | URL pattern | What it is |
+|---|---|---|
+| Home | `/` | Finder; city picker; links to the five main areas. |
+| Vets | `/search/` (all 1,614, filters), `/vets/<city>/` (10 cities, about 30 top-rated cards, then every clinic by locality), `/vets/<city>/<locality>/` (about 666 localities), `/clinic/<slug>/` (1,614 records) | Geography first (city, then locality), a flat clinic record at the bottom. |
+| Emergency | `/emergency/`, `/emergency/<city>/` | A filtered cut of the same clinics: lists emergency care or open 24 hours; city counts (Jaipur 94, Delhi 82, Pune 48, Bangalore 43, Gurugram 40, Noida 23, Ghaziabad 21, Mumbai 20, Faridabad 7, Greater Noida 5). |
+| Rescue and NGOs | `/rescue-orgs/`, `/rescue-orgs/<slug>/` (55) | One flat list, type chips, no city pages. |
+| Shop | `/shop/`, `/shop/<category>/` (6), `/shop/<product>/` (76), `/shop/guides/<guide>/` | Categories: Food 15, Treats 14, Health & Wellness 15, Grooming & Monsoon 9, Toys 12, Beds & Comfort 6. |
+| Blog | `/blog/` (18 posts) | City how-to-find-a-vet posts, emergency coverage by city, fees, government care, seasonal safety, buying guides, methodology. |
+| Trust pages | `/about/`, `/our-story/`, `/contact/` (claim, update, takedown), `/privacy/`, `/terms/`, `/saved/` | |
+| Grouping logic | City, then locality; type chips; services; pet type; open status | Same record shown through several cuts (city, locality, emergency, search) rather than separate content. |
+| Navigation | Desktop header: Find a vet, Emergency, Rescue & NGOs, Shop, Blog, Our Story, Saved, city picker. Phone: five-tab bottom bar (Find a vet, Emergency, Rescue, Shop, Saved). Footer: browse by city with counts, three short disclaimer lines, Privacy, Terms. |
+| Search page filters | Pet type icon chips (Dog, Cat, Bird, Other) under the search box, "Use my location", distance (1 to 10 km), open now or 24 hours, services (10), clinic type (5), area (about 666), home visits; sort: Recommended, Nearest, Open now, Most relevant, Highest rated; "1614 vets found". |
+| Owner note | The row of animal icons (Dog, Cat, Bird, Other) at the top of the search page is the part the owner likes. |
+| Schema | See sections 7.2 and 9 (ItemList on every list, VeterinaryCare and NGO on records, Product on shop items, FAQPage on the shop, BlogPosting on posts). |
+
+## 11. How they mention disclaimers (quietly), saved for reuse
+
+The pattern: short, plain, one sentence, placed where the doubt arises, in a small grey line, never a banner, modal, checkbox or long legal block. Each says what may be wrong and what to do about it.
+
+| Where | What it says (paraphrased) |
+|---|---|
+| Clinic record, under the hours | Details may change; confirm with the clinic before visiting. Next to it: "Last verified <month year>". |
+| Reviews block | These reviews are from Google, not independently verified by us. |
+| Rescue record and list | Details can change; confirm with the organisation before visiting or donating. This directory is informational only and is not affiliated with any organisation listed. |
+| City page | Opening hours come from public listings and go out of date; call before travelling. Services are listed only where the clinic's own information states them, so a clinic showing none may still offer more. |
+| Emergency page | Call before travelling; hours come from public listings and can be out of date. |
+| Footer, every page | Clinic details can change, so confirm with the clinic; some listings include OpenStreetMap data under the ODbL. |
+| Shop product | Last verified <date>; prices and availability change, confirm on the retailer's page; not veterinary advice, consult a vet. And on the buy button: opens the retailer in a new tab; we may earn a commission, never at extra cost to you. |
+| Blog data post | A caveat sentence inside the text (the fee data is from verified sources in the directory, not every clinic; treat it as a benchmark, not a quote). |
+| Blog byline | "Written by a human, with AI assistance." |
+| About and Terms | Discovery tool, not medical advice; not a booking platform; "as is". |
+
+Why it works: the warning sits beside the value it qualifies (hours, fees, reviews, price), so it reads as honesty rather than legal cover, and a "Last verified" date shows the information is maintained. Adopting this for us (idea, owner decides, copy goes through the owner's yes): a one-line "confirm before you go" note under contact and hours, "Verified on <date>" beside it, a source-labelled line on any third-party figure, and one footer line. We already have the verified date and the sources; the quiet sentences are what is missing.
+
+## 12. Shop audit (/shop/) and notes for our own shop later
+
+**What it is.** "Vetted Picks": 76 products in 6 categories, no checkout. Every product links out to a retailer (Amazon India affiliate tag in the URL). Stated claims: independently evaluated, no paid placement, methodology published, "we may earn a commission but never at extra cost to you".
+
+**Structure.**
+| Part | What it does |
+|---|---|
+| Shop home | H1 "Vetted Picks", one line of promise, two trust chips ("Independently evaluated", "No paid placement" + Methodology link), category tiles with pick counts, filters (pet: all, dogs, cats; category; show: all, top picks only, budget picks only; sort: recommended, price low to high, price high to low), then picks grouped by category with "See all 15". 9-question FAQ. |
+| Category page | A plain-language standard for the category (e.g. food judged on WSAVA manufacturer-trust guidance, not on "natural" or "premium"), the same filters, sub-groups (Cat Food, Dry Food, Premium Dry Food), the product list. |
+| Product card | Role tag (Top Pick, Runner-Up, Budget Pick), brand, name, a one-line "who it suits", "Best for" line, price with pack size, "Full breakdown". |
+| Product page | Role tag, price, buy button, **Best for, Skip if, Why we picked it, What we like, What we don't like, a standards line, Alternatives worth considering**, then "Last verified <date>", price caveat, not-veterinary-advice line. Same six elements on every product, by design, so products compare fairly. |
+| Methodology (blog) | Real, in stock and fairly priced: checks a working Add to Cart on the live page, rejects implausible grey-market prices, re-checks periodically, records last-verified. Removes products that fail. |
+| Schema | `ItemList` of all 76 on the shop home, `Product` (name, brand, url, image, `offers` with price in INR) on each product, `FAQPage` on the shop. No `Review` or `aggregateRating` on products. |
+| Voice | Plain and sceptical ("words like natural and premium have no regulated meaning in India"), every pick has a "skip if". |
+
+**Audit.**
+- **Strong:** one fixed template; honest "skip if" and "what we don't like"; role tags; published method; price and date on each pick; trust chips under the H1; category pages that teach the buyer first; FAQ answers real questions (flea and tick, grain-free, dental chews, joint supplements, treats per day).
+- **Weak:** affiliate revenue sits behind "independent" (they disclose it, but only on the product page); it is all Amazon; prices drift (they keep a date); the shop home prints "Showing 71 of 76" (a count mismatch); the product schema has no `Review`; brands are mostly big foreign names, little for stray-animal care, rescues or Indian low-cost basics.
+- **For Animal Writes (a future shop; none started):**
+  1. Do not copy their picks or text; build our own from vets and rescuers, for our audience (street and rescue dogs and cats, first aid, feeding, rabies-safe handling, travel crates for transport).
+  2. Reuse the template shape: Best for, Skip if, Why we picked it, What we like and don't, Alternatives, Last verified, price caveat, not-advice line.
+  3. State the commission or any sponsorship on the shop home and on every buy button, and keep "no paid placement" true.
+  4. Tie each product to a guide or listing (a first-aid kit to the rabies page, carriers to rescue transport, humane traps to the sterilisation guide), so the shop supports the Directory instead of standing alone.
+  5. Add `Product` and `ItemList` schema, no ratings unless we collect our own.
+  6. Hold money items back per the owner's standing rule (12 Nov: no money items on the site until told) and the brand rules (black, white and grey, Inter).
+
+## 13. Their blog (18 posts): what it can give us
+
+**Format.** Short title, date, "Written by a human, with AI assistance" byline, plain intro, claim-style headings, specific numbers, a "where to actually start" close. Posts are built on their own directory data (fee data, city counts, emergency coverage) and one public investigation, so each is hard to copy.
+
+| Their post type | Examples | Idea for us (ideas only; copy gate and fact checks apply) |
+|---|---|---|
+| City "how to find a trustworthy vet" | Delhi NCR, Mumbai, Bangalore | "Where to get animal help in <city>": helplines, government veterinary care, rescue and sterilisation contacts, built from our Directory and the district helpline pages we already have. |
+| Emergency coverage by area | Delhi NCR, Mumbai, Bangalore | "24x7 animal care in <state or city>" from our veterinary and helpline data, with a visible "call first, hours change" line. |
+| Government care explainer | Free and low-cost government veterinary care in Delhi | Our strongest fit: we hold 1,260 veterinary-type listings, mostly government. Write the state-by-state "what government animal care really offers" using our own data and named sources. |
+| Fee data | What a vet visit costs in Delhi NCR | Only if we hold real fee figures; otherwise skip. |
+| Rabies and seasonal | World Rabies Day, Diwali safety, monsoon safety | Rabies is already a campaign page; add festival and monsoon safety posts in the same plain style (Diwali is already a campaign). |
+| Definitions | Vet vs animal hospital vs pet clinic | "Shelter vs rescue vs sanctuary vs NGO vs gaushala vs panjrapole": what each is, what it can legally do, and how to pick one; ties to our listing types. |
+| Method and trust | How we evaluate Vetted Picks | A public "How we verify listings" page: sources, the trust order, "Verified on" dates, what "claimed" and "verified" mean. We hold all of this; a page makes it visible. |
+| Buying guides | Food, toys, health, beds | Only if a shop is opened (section 12). |
+
+**Worth borrowing:** posts anchored in our own data, plain caveat sentences inside the text, a byline that states how it was written, and one "where to start" action at the end.
+
+## 14. Owner note, 28 Nov: merge the veterinary types and filter by animal
+
+The owner suggests merging Veterinary care into one type and using animal-type filters. Recorded as a direction, not built.
+- **Today:** five veterinary types (hospital 236, dispensary 798, office 197, mobile unit 29, clinic 0) plus Bird Hospital (9); the Directory already presents them as one "Veterinary" filter (`AW_VET_TYPES`), while the listings keep the separate types.
+- **Direction:** one public type, **Veterinary care**, with a kind field behind it (hospital, dispensary, clinic, mobile unit, office, 24 hours, home visit) shown as a chip, and **animal-type filters** (Dog, Cat, Bird, Livestock, Wildlife, Other) as icon chips like trustedvets, on every list page and the search. Bird Hospital folds in under Bird.
+- **Why it fits:** it matches what a person asks ("a vet for my cat"), removes four near-empty or confusing type pages, makes room for private clinics, and uses one schema type (`VeterinaryCare`).
+- **What it needs:** an `animals` field on listings (the enrichment schema already has `animals` and `services`, so the data path exists), a redirect plan for the old type URLs, and the icon set (outline icons, black on white, to match the brand). Not started.
