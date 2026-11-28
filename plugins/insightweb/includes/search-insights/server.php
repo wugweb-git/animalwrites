@@ -150,9 +150,10 @@ add_action( 'shutdown', 'aw_si_srv_count', 0 );
  */
 function aw_si_srv_php_errors( string $ymd ): array {
 	$out = array(
-		'status' => 'not_found',
-		'kinds'  => array(),
-		'top'    => array(),
+		'status'  => 'not_found',
+		'kinds'   => array(),
+		'top'     => array(),
+		'callers' => array(),
 	);
 	if ( ! function_exists( 'kits_error_count_resolve' ) ) {
 		return $out;
@@ -165,15 +166,16 @@ function aw_si_srv_php_errors( string $ymd ): array {
 		$out['status'] = $res['unreadable'] ? 'unreadable' : 'not_found';
 		return $out;
 	}
-	$kinds = array();
-	$top   = array();
+	$kinds   = array();
+	$top     = array();
+	$callers = array();
 	foreach ( $res['files'] as $f ) {
 		if ( (int) filemtime( $f ) < $start ) {
 			continue;
 		}
 		kits_error_count_each_line(
 			$f,
-			function ( $line ) use ( $start, $end, &$kinds, &$top ) {
+			function ( $line ) use ( $start, $end, &$kinds, &$top, &$callers ) {
 				if ( '[' !== substr( $line, 0, 1 ) || ! preg_match( '/^\[([^\]]+)\]\s*(.*)$/', $line, $m ) ) {
 					return;
 				}
@@ -187,7 +189,11 @@ function aw_si_srv_php_errors( string $ymd ): array {
 					$msg  = $k[2];
 				} elseif ( 0 === strpos( $msg, 'WordPress database error' ) ) {
 					$kind = 'Database error';
-					$msg  = preg_replace( '/^WordPress database error\s*| made by .*$/', '', $msg ); // drop the label and the call stack.
+					$by   = aw_si_srv_db_caller( $msg ); // the call stack names who ran the query: kept apart from the message.
+					if ( '' !== $by ) {
+						kits_error_count_tally( $callers, $by );
+					}
+					$msg = preg_replace( '/^WordPress database error\s*| made by (?:(?! made by ).)*$/', '', $msg ); // drop the label and the call stack from the message itself.
 				} else {
 					$kind = 'Other';
 				}
@@ -196,10 +202,25 @@ function aw_si_srv_php_errors( string $ymd ): array {
 			}
 		);
 	}
-	$out['status'] = 'ok';
-	$out['kinds']  = $kinds;
-	$out['top']    = kits_error_count_top( $top );
+	$out['status']  = 'ok';
+	$out['kinds']   = $kinds;
+	$out['top']     = kits_error_count_top( $top );
+	$out['callers'] = kits_error_count_top( $callers );
 	return $out;
+}
+
+/**
+ * Who ran a failed query: the last three calls of the "made by ..." stack WordPress writes after a database error
+ * (the innermost calls ran the query). Empty when the line has no stack.
+ *
+ * @param string $msg Log message starting "WordPress database error".
+ */
+function aw_si_srv_db_caller( string $msg ): string {
+	if ( ! preg_match( '/ made by ((?:(?! made by ).)+)$/', $msg, $m ) ) { // the last "made by": a query's own text may contain the words.
+		return '';
+	}
+	$calls = array_filter( array_map( 'trim', explode( ', ', $m[1] ) ) );
+	return mb_substr( implode( ' > ', array_slice( $calls, -3 ) ), 0, 240 );
 }
 
 /**
