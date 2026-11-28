@@ -297,7 +297,7 @@ function aw_block_item_sources( $a, $id ) {
 	if ( 'listing' === $kind ) { // the listing's data sources with their "as on" dates, and when it was last updated
 		$list = function_exists( 'aw_listing_sources_html' ) ? aw_listing_sources_html( $id ) : '';
 		$last = function_exists( 'aw_listing_last_updated' ) ? aw_listing_last_updated( $id ) : '';
-		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'kits-by-wugweb' ) . '</h2>'
+		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head' . ( 'profile' === $kind ? '' : ' has-x-large-font-size' ) . '" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'kits-by-wugweb' ) . '</h2>'
 			. ( '' !== $list ? '<div class="aw-sources-list">' . $list . '</div>' : '' )
 			. ( '' !== $last ? '<p class="aw-sources-updated">' . esc_html__( 'Last updated:', 'kits-by-wugweb' ) . ' ' . kits_date( $last ) . '</p>' : '' )
 			. $links . '</section>';

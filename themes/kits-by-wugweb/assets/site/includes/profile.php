@@ -331,19 +331,38 @@ function kits_profile_tail_html( $id ) {
 }
 
 /**
- * An outlet's mark for a source row: its cached logo (the Press list's, from aw_press_logos; nothing is fetched here),
- * else the first letter of its name in a small ink tile.
+ * An outlet's mark for a source row. In order: the site's publisher icon (the News publishers list, which also matches a
+ * sister site of the same name, ndtv.in for ndtv.com), the Press list's cached logo, the organisation's own logo for its
+ * own site, else the first letter of the name in a small ink tile. Nothing is fetched while the page is drawn.
  *
  * @param string $url  The source's address.
  * @param string $name The source's name.
+ * @param int    $org  The person's organisation listing (0 if none).
  * @return string
  */
-function kits_profile_source_mark( $url, $name ) {
-	$host  = preg_replace( '/^www\./', '', (string) wp_parse_url( $url, PHP_URL_HOST ) );
+function kits_profile_source_mark( $url, $name, $org = 0 ) {
+	$host = preg_replace( '/^www\./', '', (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	$img  = static function ( $aid ) {
+		return $aid && wp_attachment_is_image( $aid ) ? wp_get_attachment_image( $aid, 'thumbnail', false, array( 'class' => 'aw-sources-logo', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	};
+	if ( '' !== $host && function_exists( 'aw_publishers' ) ) {
+		$base = strtok( $host, '.' ) === 'm' ? '' : preg_replace( '/\.(co\.in|com|in|org|net|gov\.in)$/', '', $host );
+		foreach ( (array) aw_publishers() as $h => $pub ) {
+			if ( ! empty( $pub['icon'] ) && ( $h === $host || ( '' !== $base && preg_replace( '/\.(co\.in|com|in|org|net|gov\.in)$/', '', $h ) === $base ) ) ) {
+				$out = $img( (int) $pub['icon'] );
+				if ( '' !== $out ) {
+					return $out; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup for an attachment image.
+				}
+			}
+		}
+	}
 	$cache = (array) get_option( 'aw_press_logos', array() );
-	$logo  = isset( $cache[ $host ] ) ? (int) $cache[ $host ] : 0;
-	if ( $logo && wp_attachment_is_image( $logo ) ) {
-		return wp_get_attachment_image( $logo, 'thumbnail', false, array( 'class' => 'aw-sources-logo', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) );
+	$out   = $img( isset( $cache[ $host ] ) ? (int) $cache[ $host ] : 0 );
+	if ( '' === $out && $org && '' !== $name && false !== stripos( $name, (string) get_the_title( $org ) ) ) {
+		$out = $img( (int) get_post_thumbnail_id( $org ) );
+	}
+	if ( '' !== $out ) {
+		return $out; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup for an attachment image.
 	}
 	$first = '' !== $name ? mb_strtoupper( mb_substr( $name, 0, 1 ) ) : '';
 	return '' !== $first ? '<span class="aw-sources-mark" aria-hidden="true">' . esc_html( $first ) . '</span>' : '';
@@ -358,12 +377,13 @@ function kits_profile_source_mark( $url, $name ) {
  */
 function kits_profile_sources_html( $id ) {
 	$items = '';
+	$org   = (int) kits_profile_fields( $id )['org'];
 	foreach ( kits_profile_sources( $id ) as $g ) {
 		$name = '' !== $g['source'] ? '<strong>' . esc_html( $g['source'] ) . '</strong>' : '';
 		$date = '' !== $g['date'] ? ( '' !== $name ? ', ' : '' ) . kits_date( $g['date'] ) : '';
 		$read = '' !== $g['url'] ? ' ' . kits_profile_ext_link( $g['url'], __( 'Read it', 'kits-by-wugweb' ) ) : '';
 		$arch = '' !== $g['archive'] ? ' ' . kits_profile_ext_link( $g['archive'], __( 'Archive copy', 'kits-by-wugweb' ) ) : '';
-		$items .= '<li>' . kits_profile_source_mark( $g['url'], $g['source'] ) . $name . $date . '.' . $read . $arch . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the mark is escaped in kits_profile_source_mark().
+		$items .= '<li>' . kits_profile_source_mark( $g['url'], $g['source'], $org ) . $name . $date . '.' . $read . $arch . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the mark is escaped in kits_profile_source_mark().
 	}
 	return '' !== $items ? '<ol>' . $items . '</ol>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above; kits_date() returns escaped markup.
 }
