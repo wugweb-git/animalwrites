@@ -910,9 +910,11 @@ function aw_directory_intro() {
 	}
 	if ( $city->parent ) {
 		$state = aw_place_parent_state( $city );
-		return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %1$s, %2$s, with phone numbers where they have one.', $city->name, $state->name );
+		$line  = sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %1$s, %2$s, with phone numbers where they have one.', $city->name, $state->name );
+	} else {
+		$line = sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %s, with phone numbers where they have one.', $city->name );
 	}
-	return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %s, with phone numbers where they have one.', $city->name );
+	return (string) apply_filters( 'directoryweb_directory_intro', $line, $city ); // a single page can word its own opening (RankWeb's place overrides).
 }
 
 // A–Z with names that start with a digit last (owner, 12 Oct 2026: the 1962 units were filling the top of the Directory).
