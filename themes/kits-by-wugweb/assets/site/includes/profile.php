@@ -762,3 +762,37 @@ function kits_people_profile_block( $heading, $lead, $per_page, $qid ) {
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->';
 }
+
+/**
+ * The About band (owner, 28 Nov 2026): a heading, then four profile slots. Published profiles come first (newest first);
+ * the rest are grey placeholders until there are more people. Phones show only the first; two across from 768; four from 1200.
+ *
+ * @param string $heading Section heading.
+ * @param string $lead    One line under it.
+ * @return string Block markup ('' when no profile is published).
+ */
+function kits_people_about_block( $heading, $lead ) {
+	$ids = get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'tag' => 'profile', 'posts_per_page' => 4, 'fields' => 'ids', 'no_found_rows' => true ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters
+	if ( ! $ids ) {
+		return '';
+	}
+	if ( function_exists( 'aw_use_component_style' ) ) {
+		aw_use_component_style( 'aw-home' ); // The band can sit on any page.
+	}
+	$li = '';
+	foreach ( $ids as $id ) {
+		$f     = kits_profile_fields( $id );
+		$name  = trim( $f['prefix'] . ' ' . $f['name'] );
+		$thumb = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'large', array( 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+		$li   .= '<li class="kit-pa-item"><a class="kit-pa-card" href="' . esc_url( get_permalink( $id ) ) . '"><span class="kit-pa-media">' . $thumb . '</span><span class="kit-pa-body"><strong>' . esc_html( $name ) . '</strong>';
+		$li   .= '' !== $f['role'] ? '<span>' . esc_html( $f['role'] ) . '</span>' : '';
+		$li   .= '' !== $f['place'] ? '<span class="kit-profile-place"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $f['place'] ) . '</span>' : '';
+		$li   .= '</span></a></li>';
+	}
+	for ( $i = count( $ids ); $i < 4; $i++ ) { // an empty slot: a grey picture box and two grey lines, not a link, hidden on phones
+		$li .= '<li class="kit-pa-item kit-pa-item--empty" aria-hidden="true"><span class="kit-pa-card"><span class="kit-pa-media"></span><span class="kit-pa-body"><span class="kit-pa-bar"></span><span class="kit-pa-bar kit-pa-bar--short"></span></span></span></li>';
+	}
+	$html = '<section class="kit-pa" aria-labelledby="kit-pa-h"><div class="kit-sec-head"><div><h2 id="kit-pa-h">' . esc_html( $heading ) . '</h2><p>' . esc_html( $lead ) . '</p></div></div><ul class="kit-pa-grid">' . $li . '</ul>'
+		. '<p class="kit-pa-more"><a class="wp-block-button__link wp-element-button is-style-kits-ghost kit-btn--sm" href="' . esc_url( home_url( '/resources/?tag=profile' ) ) . '">' . esc_html__( 'See all profiles', 'kits-by-wugweb' ) . '</a></p></section>';
+	return '<!-- wp:html -->' . "\n" . $html . "\n" . '<!-- /wp:html -->';
+}

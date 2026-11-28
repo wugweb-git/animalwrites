@@ -19,6 +19,6 @@ if ( ! function_exists( 'kits_profiles_exist' ) || ! kits_profiles_exist() ) {
 ?>
 <!-- wp:group {"metadata":{"name":"People"},"align":"full","className":"aw-about-band kit-about-people aw-about-band--canvas","layout":{"type":"default"}} -->
 <div class="wp-block-group alignfull aw-about-band kit-about-people aw-about-band--canvas"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-about-inner"><?php echo kits_people_profile_block( __( 'The people behind the work we cover', 'kits-by-wugweb' ), __( 'Real work, with the sources shown.', 'kits-by-wugweb' ), 3, 46 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- block markup, text escaped inside (includes/profile.php) ?></div>
+<div class="wp-block-group aw-about-inner"><?php echo kits_people_about_block( __( 'The people behind the work we cover', 'kits-by-wugweb' ), __( 'Real work, with the sources shown.', 'kits-by-wugweb' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- block markup, text escaped inside (includes/profile.php) ?></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

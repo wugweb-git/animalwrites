@@ -300,3 +300,21 @@
 	.kit-pb--photo { aspect-ratio: auto; min-block-size: 100%; }
 }
 
+/* About band, people (owner, 28 Nov 2026): four slots. A profile is a portrait picture over its words; an empty slot is a grey box
+   and two grey bars. Phones show the first slot only; two across from 768; four across from 1200. */
+.kit-pa-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
+.kit-pa-grid > li { margin: 0; max-inline-size: none; min-inline-size: 0; }
+.kit-pa-card { display: grid; gap: var(--kit-space-3); color: inherit; text-decoration: none; }
+.kit-pa-media { display: block; overflow: hidden; aspect-ratio: var(--kit-media-ratio-portrait); border-radius: var(--kit-radius-card); background: var(--kit-surface-section-alt); border: var(--kit-border-width) solid var(--kit-color-line); }
+.kit-pa-media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.kit-pa-body { display: grid; gap: var(--kit-space-1); }
+.kit-pa-body strong { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: 1.2; }
+.kit-pa-body > span { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.kit-pa-bar { display: block; block-size: 1rem; border-radius: var(--kit-radius-pill); background: var(--kit-surface-section-alt); }
+.kit-pa-bar--short { inline-size: 60%; }
+.kit-pa-item--empty { display: none; }
+.kit-pa-more { margin: var(--kit-space-5) 0 0; }
+a.kit-pa-card:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-lg); }
+@media (hover:hover) { a.kit-pa-card:hover strong { text-decoration: none; } a.kit-pa-card:hover .kit-pa-media { border-color: var(--kit-color-ink); } }
+@media (min-width: 768px) { .kit-pa-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kit-pa-item--empty { display: block; } }
+@media (min-width: 1200px) { .kit-pa-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
