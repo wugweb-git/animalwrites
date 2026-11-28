@@ -295,12 +295,18 @@ function kits_profile_org_card( $org, $f ) {
 	}
 	/* translators: %s: first name. */
 	$h   = '' !== $first ? sprintf( __( 'Where %s works', 'kits-by-wugweb' ), $first ) : __( 'Where they work', 'kits-by-wugweb' );
-	$logo = has_post_thumbnail( $org ) ? get_the_post_thumbnail( $org, 'thumbnail', array( 'class' => 'kit-profile-orglogo', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ) : ''; // The listing's own logo (its featured image); initials only when it has none.
-	$mark = '' !== $logo ? $logo : '<span class="kit-profile-initials" aria-hidden="true">' . esc_html( kits_profile_initials( $name ) ) . '</span>';
-	$out = '<section class="kit-profile-org" aria-labelledby="kit-profile-org-h"><h2 id="kit-profile-org-h">' . esc_html( $h ) . '</h2>';
-	$out .= '<a class="kit-profile-orgcard" href="' . esc_url( get_permalink( $org ) ) . '">' . $mark . '<span class="kit-profile-orgtext"><strong>' . esc_html( $name ) . '</strong>';
-	$out .= $bits ? '<span>' . esc_html( implode( ' · ', $bits ) ) . '</span>' : '';
-	$out .= '<span class="kit-profile-orgmore">' . esc_html__( 'See the listing', 'kits-by-wugweb' ) . ' <span aria-hidden="true">↗</span></span></span></a></section>';
+	// The theme's own organisation card (the same markup as a listing in "More", includes/item-head.php): logo whole in the picture box, meta row, linked title.
+	$logo  = get_the_post_thumbnail( $org, 'medium', array( 'alt' => '', 'loading' => 'lazy' ) );
+	$mark  = '' !== $logo ? $logo : '<span class="kit-minicard-initials aw-more-initials" aria-hidden="true">' . esc_html( kits_profile_initials( $name ) ) . '</span>';
+	$place = function_exists( 'aw_item_place' ) ? aw_item_place( $org ) : null;
+	$meta  = ( preg_match( '/^\d{4}$/', $year ) ? '<span class="kit-meta-item">' . kits_icon( 'calendar' ) . esc_html( sprintf( /* translators: %s: year. */ __( 'Since %s', 'kits-by-wugweb' ), $year ) ) . '</span>' : '' )
+		. ( $place ? '<span class="kit-meta-item">' . kits_icon( 'map-pin' ) . esc_html( $place->name ) . '</span>' : '' )
+		. ( '' !== $animals ? '<span class="kit-meta-item">' . esc_html( ucfirst( $animals ) ) . '</span>' : '' );
+	$out   = '<section class="kit-profile-org" aria-labelledby="kit-profile-org-h"><h2 id="kit-profile-org-h">' . esc_html( $h ) . '</h2>';
+	$out  .= '<article class="kit-card kit-card--stacked-md kit-minicard aw-more-card aw-more-card--org aw-card-profile"><div class="kit-card-media kit-minicard-media kit-minicard-logo aw-more-media aw-more-logo">' . $mark . '</div><div class="kit-card-body kit-minicard-body aw-more-body">'
+		. ( '' !== $meta ? '<p class="kit-card-metarow kit-card-meta kit-minicard-meta aw-more-meta kit-meta-row">' . $meta . '</p>' : '' )
+		. '<h3 class="kit-card-title kit-minicard-title aw-more-title"><a href="' . esc_url( get_permalink( $org ) ) . '">' . esc_html( $name ) . '</a></h3>'
+		. '</div></article></section>';
 	return $out;
 }
 
