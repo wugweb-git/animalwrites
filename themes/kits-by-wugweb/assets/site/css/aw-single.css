@@ -38,6 +38,10 @@
 .aw-sources-credit > .aw-src { margin: 0 !important; }
 .aw-sources-by, .aw-posted-by { display: inline-flex; align-items: center; gap: var(--kit-space-2); font-weight: var(--kit-weight-medium); }
 .aw-sources-logo { width: 1.25rem; height: 1.25rem; border-radius: var(--kit-radius-mark); }
+/* A quotation in an item's text (owner, 28 Nov 2026): an ink bar at the start, the words at the lead size, the speaker and source small and muted below. */
+.kit-item .wp-block-post-content .wp-block-quote { margin-block: var(--kit-space-6); padding-inline-start: var(--kit-space-5); border-inline-start: var(--kit-space-1) solid var(--kit-color-ink); }
+.kit-item .wp-block-post-content .wp-block-quote p { font-size: var(--kit-type-lead); line-height: 1.4; font-weight: var(--kit-weight-medium); color: var(--kit-color-ink); margin: 0; }
+.kit-item .wp-block-post-content .wp-block-quote cite { display: block; margin-top: var(--kit-space-3); font-style: normal; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-sources--profile { padding-top: var(--kit-space-6); border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-sources--profile .aw-sources-head { font-size: var(--kit-type-h4); }
 .aw-sources--profile ~ :is(.aw-item-tags, .aw-item-share) { margin-top: var(--kit-space-5); padding-top: var(--kit-space-5); border-top: var(--kit-border-width) solid var(--kit-color-line); }
