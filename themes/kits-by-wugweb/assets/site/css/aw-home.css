@@ -273,6 +273,6 @@
 .kit-people-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-7); }
 .kit-people-row .kit-people-tiles.kit-stack { grid-template-columns: minmax(0, 1fr); margin-top: 0; }
 @media (min-width: 768px) {
-	.kit-people-row { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+	.kit-people-row { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: stretch; }
 	.kit-people-row .kit-people-tiles.kit-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
 }

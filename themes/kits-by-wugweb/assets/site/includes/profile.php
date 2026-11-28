@@ -404,18 +404,38 @@ add_filter(
 	2
 );
 
-// /about/{slug}/ is read by WordPress as a page path. When no page lives there and a published profile has the slug, show the profile;
-// a real page under About always wins, and anything else stays a 404.
+// /about/{slug}/ has its own rewrite rule (like /resources/{slug}/), ahead of the page rule. A real page under About always wins:
+// when no published profile has the slug, the path goes on as a page path (and is a 404 if there is none).
+add_action(
+	'init',
+	function () {
+		add_rewrite_rule( '^about/([^/]+)/?$', 'index.php?kits_about_slug=$matches[1]', 'top' );
+		if ( '2' !== get_option( 'kits_profile_rules' ) ) { // the new rule is saved once
+			flush_rewrite_rules( false );
+			update_option( 'kits_profile_rules', '2', false );
+		}
+	},
+	20
+);
+
+add_filter(
+	'query_vars',
+	function ( $vars ) {
+		$vars[] = 'kits_about_slug';
+		return $vars;
+	}
+);
+
 add_filter(
 	'request',
 	function ( $vars ) {
-		$path = isset( $vars['pagename'] ) ? (string) $vars['pagename'] : '';
-		if ( 0 !== strpos( $path, 'about/' ) || false !== strpos( substr( $path, 6 ), '/' ) || get_page_by_path( $path ) ) {
+		if ( empty( $vars['kits_about_slug'] ) ) {
 			return $vars;
 		}
+		$slug  = sanitize_title( (string) $vars['kits_about_slug'] );
 		$found = get_posts(
 			array(
-				'name'           => substr( $path, 6 ),
+				'name'           => $slug,
 				'post_type'      => 'post',
 				'post_status'    => 'publish',
 				'tag'            => 'profile',
@@ -423,13 +443,29 @@ add_filter(
 				'fields'         => 'ids',
 			)
 		);
-		if ( ! $found ) {
-			return $vars;
+		unset( $vars['kits_about_slug'] );
+		if ( $found ) {
+			return array(
+				'name'      => $slug,
+				'post_type' => 'post',
+			);
 		}
-		unset( $vars['pagename'] );
-		$vars['name']      = substr( $path, 6 );
-		$vars['post_type'] = 'post';
-		return $vars;
+		return array( 'pagename' => 'about/' . $slug ); // a page under About, or a 404
+	}
+);
+
+// The old address (/resources/{slug}/) goes to the new one once the profile is published.
+add_action(
+	'template_redirect',
+	function () {
+		if ( ! is_singular( 'post' ) || is_preview() || ! kits_is_profile( get_queried_object_id() ) || 'publish' !== get_post_status( get_queried_object_id() ) ) {
+			return;
+		}
+		$to = get_permalink( get_queried_object_id() );
+		if ( $to && 0 === strpos( (string) wp_parse_url( $to, PHP_URL_PATH ), '/about/' ) && 0 !== strpos( (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ), '/about/' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- only its path is compared
+			wp_safe_redirect( $to, 301 );
+			exit;
+		}
 	}
 );
 
