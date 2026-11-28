@@ -513,6 +513,11 @@ add_filter(
 			return $vars;
 		}
 		$slug  = sanitize_title( (string) $vars['kits_about_slug'] );
+		$page  = get_page_by_path( 'about/' . $slug ); // an existing page under About keeps its address when a profile has the same slug (Codex review point, PR 180)
+		if ( $page && 'publish' === $page->post_status ) {
+			unset( $vars['kits_about_slug'] );
+			return array( 'pagename' => 'about/' . $slug );
+		}
 		$found = get_posts(
 			array(
 				'name'           => $slug,
@@ -661,66 +666,6 @@ function kits_people_bento_html() {
 		$out .= '<a class="kit-pb kit-pb--' . esc_attr( $t[0] ) . '" href="' . esc_url( home_url( $t[2] ) ) . '"><span class="kit-ico kit-ico--' . esc_attr( $t[1] ) . '" aria-hidden="true"></span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span><span class="kit-pb-body"><strong>' . esc_html( $t[3] ) . '</strong><span>' . esc_html( $t[4] ) . '</span></span></a>';
 	}
 	return $out . '</div></section>';
-}
-
-/**
- * The four law tiles (Acts and Rules, Court orders and judgments, Circulars and notices, Letters and templates): a 2 by 2
- * grid beside the profile on Home when a profile exists (owner, 27 Nov 2026), else the row under "The law, in plain words"
- * (patterns/animal-law.php), as before.
- *
- * @param string $class Extra class on the grid.
- * @param string $space Top margin preset ('' for none).
- * @return string Block markup.
- */
-function kits_law_tiles_block( $class = '', $space = 'var:preset|spacing|50' ) {
-	$tiles = <<<'TILES'
-<!-- wp:group {"className":"kit-stack","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
-<div class="wp-block-group kit-stack" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"kit-tile kit-ico--legal","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--legal"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=act,rule">Acts and Rules</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>The law in full, from the official text.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--research","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--research"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=judgment">Court orders and judgments</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>What the courts have ordered, summarised.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--file","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--file"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=circular">Circulars and notices</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>From the Animal Welfare Board and government departments.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--mail","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--mail"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=template">Letters and templates</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Letters you can send today.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group -->
-TILES;
-	if ( '' === $space ) {
-		$tiles = str_replace( ',"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}', '', $tiles );
-		$tiles = str_replace( ' style="margin-top:var(--wp--preset--spacing--50)"', '', $tiles );
-	}
-	return '' !== $class ? str_replace( '"className":"kit-stack"', '"className":"kit-stack ' . $class . '"', str_replace( 'class="wp-block-group kit-stack"', 'class="wp-block-group kit-stack ' . $class . '"', $tiles ) ) : $tiles;
 }
 
 /**
