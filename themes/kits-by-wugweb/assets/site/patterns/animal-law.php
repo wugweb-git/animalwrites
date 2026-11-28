@@ -40,6 +40,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 
-<?php echo ! function_exists( 'kits_profiles_exist' ) || ! kits_profiles_exist() ? kits_law_tiles_block() : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static block markup (includes/profile.php); with a profile published the four tiles sit beside it in patterns/people-row.php ?>
+<?php echo function_exists( 'kits_law_tiles_block' ) && ( ! function_exists( 'kits_profiles_exist' ) || ! kits_profiles_exist() ) ? kits_law_tiles_block() : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static block markup (includes/profile.php); with a profile published the four tiles sit beside it in patterns/people-row.php ?>
 </section>
 <!-- /wp:group -->
