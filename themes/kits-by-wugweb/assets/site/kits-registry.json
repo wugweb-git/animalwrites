@@ -1511,11 +1511,15 @@
       "status": "live",
       "classes": [
         "kit-ed-people",
-        "kit-people-law",
-        "kit-people-list",
-        "kit-people-profile",
-        "kit-people-row",
-        "kit-people-tiles"
+        "kit-pb",
+        "kit-pb-body",
+        "kit-pb-cta",
+        "kit-pb-label",
+        "kit-pb-name",
+        "kit-pb-photo",
+        "kit-pb-role",
+        "kit-pb-tiles",
+        "kit-people-bento"
       ],
       "states": [
         "prints nothing until a profile is published; phones: the profile card, then the four law tiles one under another; from 768 two columns of equal height, the tiles 2 by 2"

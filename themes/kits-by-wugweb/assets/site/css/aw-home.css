@@ -268,15 +268,37 @@
 /* Home News, Learn and Library (owner, 13 Nov 2026: "Fix the lone card"): each Query Loop gives four items, two full rows
    of two from 1200; below 1200 (one column) the fourth is hidden, so phones and tablets keep three. */
 @media (max-width: 1199px) { :is(.aw-ed-news, .aw-ed-learn, .aw-ed-law) .wp-block-post-template > li:nth-child(n+4) { display: none; } }
-/* People and the law row (owner, 27 Nov 2026): one column on phones (the profile card, then the four law tiles one under another);
-   from 768 the tiles go 2 by 2; from 1200 (sidebar width) the card and tiles sit side by side. The row prints nothing until a profile is published. */
-.kit-people-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-7); }
-.kit-people-row .kit-people-tiles.kit-stack { grid-template-columns: minmax(0, 1fr); margin-top: 0; }
-@media (min-width: 768px) {
-	.kit-people-row .kit-people-tiles.kit-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+/* People and the law (owner, 28 Nov 2026): one bento block. The newest profile is a photo tile under a dark shade; the four
+   law tiles sit 2 by 2 beside it in three shades (ink, white, grey) with no heading of their own. One column on phones
+   (profile first); side by side from 1200 (sidebar width). Prints nothing until a profile is published. */
+.kit-people-bento { display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
+.kit-pb-tiles { display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
+.kit-pb { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--kit-space-6); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); text-decoration: none; overflow: hidden; color: var(--kit-color-ink); background: var(--kit-color-raised); }
+.kit-pb > .kit-ico:first-child { --kit-ico-size: 1.75rem; }
+.kit-pb > .kit-ico--arrow-right { position: absolute; top: var(--kit-space-5); right: var(--kit-space-5); --kit-ico-size: 1.25rem; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
+.kit-pb-body { display: flex; flex-direction: column; gap: var(--kit-space-2); }
+.kit-pb-body strong { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); letter-spacing: var(--kit-tracking-heading); line-height: 1.2; }
+.kit-pb-body span { font-size: var(--kit-type-base); max-width: 32ch; }
+.kit-pb--ink { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.kit-pb--grey { background: color-mix(in srgb, var(--kit-color-ink) 8%, var(--kit-color-raised)); }
+.kit-pb--white .kit-pb-body span, .kit-pb--grey .kit-pb-body span { color: var(--kit-color-muted); }
+.kit-pb--ink .kit-pb-body span { opacity: .85; }
+.kit-pb:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-lg); }
+@media (hover:hover) { .kit-pb:hover > .kit-ico--arrow-right { transform: translateX(3px); } .kit-pb--white:hover, .kit-pb--grey:hover { border-color: var(--kit-color-ink); } }
+/* The profile tile: her photo fills it, a shade rises from the bottom, the words sit on the shade. */
+.kit-pb--photo { aspect-ratio: var(--kit-card-featured-media-ratio); justify-content: space-between; background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); isolation: isolate; }
+.kit-pb-photo { position: absolute; inset: 0; z-index: -2; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.kit-pb--photo::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, color-mix(in srgb, var(--kit-color-ink) 92%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 55%, transparent) 45%, transparent 75%); }
+.kit-pb-label { align-self: flex-start; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); background: color-mix(in srgb, var(--kit-color-ink) 70%, transparent); color: var(--kit-color-on-ink); }
+.kit-pb--photo .kit-pb-name { font-size: var(--kit-type-h2); font-weight: var(--kit-weight-strong); letter-spacing: var(--kit-tracking-heading); line-height: 1.1; }
+.kit-pb--photo .kit-pb-role { max-width: 36ch; }
+.kit-pb--photo .kit-profile-place { color: var(--kit-color-on-ink); }
+.kit-pb-cta { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); margin-top: var(--kit-space-3); padding-inline: var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-sm); }
+.kit-pb--photo .kit-pb-body .kit-pb-cta .kit-ico { --kit-ico-size: 1.125rem; position: static; }
+@media (min-width: 768px) { .kit-pb-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1200px) {
-	.kit-people-row { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: stretch; }
-	.kit-people-row .kit-people-tiles.kit-stack { grid-auto-rows: 1fr; }
+	.kit-people-bento { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+	.kit-pb-tiles { grid-auto-rows: 1fr; }
+	.kit-pb--photo { aspect-ratio: auto; min-block-size: 100%; }
 }
 

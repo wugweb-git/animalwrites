@@ -537,6 +537,56 @@ add_filter(
 );
 
 /**
+ * The newest published profile's ID (0 when there is none), for the Home bento.
+ *
+ * @return int
+ */
+function kits_profile_newest_id() {
+	static $id = null;
+	if ( null === $id ) {
+		$found = get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'tag' => 'profile', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => true ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters
+		$id    = $found ? (int) $found[0] : 0;
+	}
+	return $id;
+}
+
+/**
+ * The Home bento (owner, 28 Nov 2026): one block. Left, the newest profile as a photo tile under a dark shade (name, role,
+ * place, one button); right, the four law tiles 2 by 2 in three shades, with no heading of their own. Each tile is one link.
+ *
+ * @return string HTML ('' when no profile is published).
+ */
+function kits_people_bento_html() {
+	$id = kits_profile_newest_id();
+	if ( ! $id ) {
+		return '';
+	}
+	$f     = kits_profile_fields( $id );
+	$name  = trim( $f['prefix'] . ' ' . $f['name'] );
+	$first = kits_profile_first( $f );
+	$photo = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'large', array( 'class' => 'kit-pb-photo', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	/* translators: %s: first name. */
+	$cta = '' !== $first ? sprintf( __( 'Read %s’s story', 'kits-by-wugweb' ), $first ) : __( 'Read the story', 'kits-by-wugweb' );
+	$out = '<section class="kit-people-bento" aria-labelledby="kit-pb-h"><h2 id="kit-pb-h" class="screen-reader-text">' . esc_html__( 'People who make a difference, and the law', 'kits-by-wugweb' ) . '</h2>';
+	$out .= '<a class="kit-pb kit-pb--photo' . ( '' === $photo ? ' kit-pb--nophoto' : '' ) . '" href="' . esc_url( get_permalink( $id ) ) . '">' . $photo; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup for the featured image.
+	$out .= '<span class="kit-pb-label">' . esc_html__( 'People who make a difference', 'kits-by-wugweb' ) . '</span><span class="kit-pb-body"><strong class="kit-pb-name">' . esc_html( $name ) . '</strong>';
+	$out .= '' !== $f['role'] ? '<span class="kit-pb-role">' . esc_html( $f['role'] ) . '</span>' : '';
+	$out .= '' !== $f['place'] ? '<span class="kit-profile-place"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $f['place'] ) . '</span>' : '';
+	$out .= '<span class="kit-pb-cta">' . esc_html( $cta ) . ' <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></span></span></a>';
+	$tiles = array(
+		array( 'ink', 'legal', '/library/?tag=act,rule', __( 'Acts and Rules', 'kits-by-wugweb' ), __( 'The law in full, from the official text.', 'kits-by-wugweb' ) ),
+		array( 'white', 'research', '/library/?tag=judgment', __( 'Court orders and judgments', 'kits-by-wugweb' ), __( 'What the courts have ordered, summarised.', 'kits-by-wugweb' ) ),
+		array( 'white', 'file', '/library/?tag=circular', __( 'Circulars and notices', 'kits-by-wugweb' ), __( 'From the Animal Welfare Board and government departments.', 'kits-by-wugweb' ) ),
+		array( 'grey', 'mail', '/library/?tag=template', __( 'Letters and templates', 'kits-by-wugweb' ), __( 'Letters you can send today.', 'kits-by-wugweb' ) ),
+	);
+	$out .= '<div class="kit-pb-tiles">';
+	foreach ( $tiles as $t ) {
+		$out .= '<a class="kit-pb kit-pb--' . esc_attr( $t[0] ) . '" href="' . esc_url( home_url( $t[2] ) ) . '"><span class="kit-ico kit-ico--' . esc_attr( $t[1] ) . '" aria-hidden="true"></span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span><span class="kit-pb-body"><strong>' . esc_html( $t[3] ) . '</strong><span>' . esc_html( $t[4] ) . '</span></span></a>';
+	}
+	return $out . '</div></section>';
+}
+
+/**
  * The four law tiles (Acts and Rules, Court orders and judgments, Circulars and notices, Letters and templates): a 2 by 2
  * grid beside the profile on Home when a profile exists (owner, 27 Nov 2026), else the row under "The law, in plain words"
  * (patterns/animal-law.php), as before.
