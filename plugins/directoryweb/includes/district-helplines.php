@@ -113,14 +113,39 @@ function aw_district_helplines_place() {
 }
 
 /**
+ * The call-1962 row above the Directory toolbar on a state page (page 1, no type filter), or ''. One answer-first line
+ * and a tap-to-call button (tel:1962 fires the call_click event). Shown only for a state with a published "1962 Mobile
+ * Veterinary Unit" listing, so no state without the service is told to call it (owner, 28 Nov 2026: helpline pages
+ * convert to calls, not only clicks; "animal helpline number {state}" ranks on these pages).
+ */
+function directoryweb_state_helplines_row() {
+	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || (int) get_query_var( 'paged' ) > 1 ) {
+		return '';
+	}
+	$s = aw_current_place();
+	if ( ! $s || 'state' !== $s->kind ) {
+		return '';
+	}
+	$mvu = get_page_by_path( '1962-mobile-veterinary-unit-' . $s->slug, OBJECT, 'aw_listing' );
+	if ( ! $mvu || 'publish' !== $mvu->post_status ) {
+		return '';
+	}
+	/* translators: %s: state. */
+	$label = sprintf( __( 'Animal helpline numbers in %s', 'directoryweb' ), $s->name );
+	return '<section class="directoryweb-state-call" aria-label="' . esc_attr( $label ) . '"><p><strong>' . esc_html( $label ) . ':</strong> '
+		. esc_html__( 'call 1962 for a sick or injured animal, or contact a local shelter or rescue group below.', 'directoryweb' ) . '</p>'
+		. '<a class="kit-btn" href="tel:1962">' . esc_html__( 'Call 1962', 'directoryweb' ) . '</a></section>';
+}
+
+/**
  * The helplines row above the Directory toolbar on a district page, or ''. Three tap-to-call chips (1962 when the
  * state runs it, then the district's own numbers) and a link to the full block under the list. Shown only when the
- * block is (the district has a number of its own).
+ * block is (the district has a number of its own). On a state page: the call-1962 row (directoryweb_state_helplines_row()).
  */
 function aw_district_helplines_row() {
 	$d = aw_district_helplines_place();
 	if ( ! $d ) {
-		return '';
+		return directoryweb_state_helplines_row();
 	}
 	$own = array();
 	foreach ( aw_district_official_numbers( $d->code ) as $o ) {

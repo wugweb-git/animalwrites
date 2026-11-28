@@ -299,6 +299,54 @@ function aw_seo_view_info( $n, $phones ) {
 /* ---------- Directory: titles and descriptions ---------- */
 
 /**
+ * Hand-written title, description and opening line for single Directory pages that the place templates cannot word
+ * well (owner, 28 Nov 2026: "animal aid mumbai"). Key: "state-slug/district-slug/type-slug". Tokens: {n} the number of
+ * listings on the page, {phones} how many of them have a phone number. Add more through the `rankweb_place_overrides`
+ * filter or here; a title or description typed in Rank Math for the page still wins elsewhere, as before.
+ */
+const RANKWEB_PLACE_OVERRIDES = array(
+	'maharashtra/mumbai/animal-shelter' => array(
+		'title'       => 'Animal aid in Mumbai: shelters, NGOs, rescue',
+		'description' => 'Animal aid in Mumbai: {n} shelters, NGOs and rescue groups with addresses and services, {phones} with a phone number. Find help for a sick or stray animal.',
+		'intro'       => 'Animal aid in Mumbai: {n} shelters, NGOs, Gaushalas and government vets, with phone numbers where they have one. For a sick or injured animal, call 1962 first; the numbers below are for rescue, shelter and treatment.',
+	),
+);
+
+/**
+ * One override field for a Directory view, tokens filled in; '' when the page has none.
+ *
+ * @param array|null $v     aw_seo_dir_view().
+ * @param string     $field title, description or intro.
+ */
+function rankweb_place_override( $v, $field ) {
+	if ( ! is_array( $v ) || empty( $v['place'] ) || empty( $v['state'] ) || '' === (string) $v['type'] || 'district' !== $v['kind'] ) {
+		return '';
+	}
+	$all  = (array) apply_filters( 'rankweb_place_overrides', RANKWEB_PLACE_OVERRIDES );
+	$key  = $v['state']->slug . '/' . $v['place']->slug . '/' . $v['type'];
+	$text = isset( $all[ $key ][ $field ] ) ? (string) $all[ $key ][ $field ] : '';
+	if ( '' === $text ) {
+		return '';
+	}
+	return strtr(
+		$text,
+		array(
+			'{n}'      => number_format_i18n( (int) $v['n'] ),
+			'{phones}' => number_format_i18n( (int) aw_seo_dir_view_phones( $v ) ),
+		)
+	);
+}
+
+// The Directory's opening line (DirectoryWeb's aw_directory_intro) for a page with an override.
+add_filter(
+	'directoryweb_directory_intro',
+	function ( $text ) {
+		$o = rankweb_place_override( aw_seo_dir_view(), 'intro' );
+		return '' !== $o ? $o : $text;
+	}
+);
+
+/**
  * Search title of a district × type page or a filtered list by type (state or all India); '' for other views.
  * "Gaushalas in Pune, Maharashtra – Animal Writes", "Vets in Karnataka – Animal Writes".
  */
@@ -306,6 +354,10 @@ function aw_seo_dir_title() {
 	$v = aw_seo_dir_view();
 	if ( ! $v || '' === $v['type'] || $v['other'] ) {
 		return '';
+	}
+	$hand = rankweb_place_override( $v, 'title' );
+	if ( '' !== $hand ) {
+		return aw_seo_fit( array( aw_seo_branded( $hand ), $hand ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 	}
 	$what = aw_seo_title_case( aw_seo_view_type_words( $v, max( 1, $v['n'] ) ) );
 	$ph   = aw_seo_dir_view_phones( $v );
@@ -383,6 +435,10 @@ function aw_seo_dir_description() {
 	$v = aw_seo_dir_view();
 	if ( ! $v || $v['other'] || ( 'india' === $v['kind'] && '' === $v['type'] ) || ! $v['n'] ) {
 		return '';
+	}
+	$hand = rankweb_place_override( $v, 'description' );
+	if ( '' !== $hand ) {
+		return $hand;
 	}
 	$n     = $v['n'];
 	$place = $v['place'];
