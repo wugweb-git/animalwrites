@@ -26,9 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( function_exists( 'rankweb_breadcrumbs' ) || function_exists( 'aw_breadcrumbs' ) ) {
-	return; // Loaded already (by RankWeb, or by Animal Writes Core from another path), or an older Core still shows its own trail: one trail per page.
+if ( defined( 'RANKWEB_BREADCRUMBS_RENDER_LOADED' ) ) {
+	return; // Loaded already: one trail per page. (This was a function_exists() test on functions this same file declares at its top level, so it was always true and the Breadcrumbs block never registered, 28 Nov 2026.)
 }
+define( 'RANKWEB_BREADCRUMBS_RENDER_LOADED', true );
 
 /**
  * The trail for the current page: list of [name, url]; the last entry is the page itself. Empty when there is none.
