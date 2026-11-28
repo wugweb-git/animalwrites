@@ -118,7 +118,7 @@ function aw_district_helplines_place() {
  * Veterinary Unit" listing, so no state without the service is told to call it (owner, 28 Nov 2026: helpline pages
  * convert to calls, not only clicks; "animal helpline number {state}" ranks on these pages).
  */
-function aw_state_helplines_row() {
+function directoryweb_state_helplines_row() {
 	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || (int) get_query_var( 'paged' ) > 1 ) {
 		return '';
 	}
@@ -132,7 +132,7 @@ function aw_state_helplines_row() {
 	}
 	/* translators: %s: state. */
 	$label = sprintf( __( 'Animal helpline numbers in %s', 'directoryweb' ), $s->name );
-	return '<section class="aw-state-call" aria-label="' . esc_attr( $label ) . '"><p><strong>' . esc_html( $label ) . ':</strong> '
+	return '<section class="directoryweb-state-call" aria-label="' . esc_attr( $label ) . '"><p><strong>' . esc_html( $label ) . ':</strong> '
 		. esc_html__( 'call 1962 for a sick or injured animal, or contact a local shelter or rescue group below.', 'directoryweb' ) . '</p>'
 		. '<a class="kit-btn" href="tel:1962">' . esc_html__( 'Call 1962', 'directoryweb' ) . '</a></section>';
 }
@@ -140,12 +140,12 @@ function aw_state_helplines_row() {
 /**
  * The helplines row above the Directory toolbar on a district page, or ''. Three tap-to-call chips (1962 when the
  * state runs it, then the district's own numbers) and a link to the full block under the list. Shown only when the
- * block is (the district has a number of its own). On a state page: the call-1962 row (aw_state_helplines_row()).
+ * block is (the district has a number of its own). On a state page: the call-1962 row (directoryweb_state_helplines_row()).
  */
 function aw_district_helplines_row() {
 	$d = aw_district_helplines_place();
 	if ( ! $d ) {
-		return aw_state_helplines_row();
+		return directoryweb_state_helplines_row();
 	}
 	$own = array();
 	foreach ( aw_district_official_numbers( $d->code ) as $o ) {
