@@ -322,6 +322,7 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 .kit-profile-mosaic { margin: var(--kit-space-6) 0; }
 .kit-profile-mosaic h2 { margin: 0 0 var(--kit-space-4); }
 .kit-profile-mt-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
+.kit-profile-mt, .kit-profile-social > li { max-inline-size: none; } /* the item text's 72ch line cap does not apply to these rows */
 .kit-profile-mt { display: grid; border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); overflow: hidden; }
 /* One slim row per tile: icon, title over one line, arrow (owner, 28 Nov 2026: the stacked tiles were too big). */
 .kit-profile-mt > a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ico title go" "ico line go"; align-items: center; column-gap: var(--kit-space-4); row-gap: 0; padding: var(--kit-space-5); color: inherit; text-decoration: none; }
