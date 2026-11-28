@@ -441,7 +441,7 @@ add_filter(
 			return $crumbs;
 		}
 		$about = get_page_by_path( 'about' );
-		if ( ! $about ) {
+		if ( ! $about || 'publish' !== $about->post_status ) {
 			return $crumbs;
 		}
 		$id = get_queried_object_id();
