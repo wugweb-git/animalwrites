@@ -520,12 +520,13 @@ function kits_profiles_exist() {
 	return $has;
 }
 
-// The profile query blocks (namespace animal-writes/profiles) list Resources tagged "profile", newest first. The tag is
+// The profile query blocks (queryId 45 and 46, namespace animal-writes/profiles) list Resources tagged "profile", newest first. The tag is
 // found by its slug, so no tag ID is written into a pattern.
 add_filter(
 	'query_loop_block_query_vars',
 	function ( $query, $block ) {
-		if ( 'animal-writes/profiles' === ( $block->parsed_block['attrs']['namespace'] ?? '' ) ) {
+		// The filter gets the inner post-template block, which carries the query's context (queryId) but not its namespace: the Home row is query 45 and the About band 46.
+		if ( in_array( (int) ( $block->context['queryId'] ?? 0 ), array( 45, 46 ), true ) ) {
 			$query['post_type'] = 'post';
 			$query['tag']       = 'profile';
 		}
