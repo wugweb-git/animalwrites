@@ -355,8 +355,8 @@ function aw_block_item_sources( $a, $id ) {
 			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
 			$read   = '';
 			break;
-		case 'profile': // who checked it; the evidence and each claim's source are in the page itself
-			$credit = $ours . esc_html__( 'By Animal Writes', 'kits-by-wugweb' ) . '</span>';
+		case 'profile': // who checked it, then the sources with each outlet's mark; no "By Animal Writes" (owner, 28 Nov 2026)
+			$credit = '';
 			$note   = function_exists( 'kits_profile_approval_line' ) ? kits_profile_approval_line( $id ) : '';
 			$plist  = function_exists( 'kits_profile_sources_html' ) ? kits_profile_sources_html( $id ) : '';
 			$links  = str_replace( esc_html__( 'Report a mistake', 'kits-by-wugweb' ), esc_html__( 'Suggest an update', 'kits-by-wugweb' ), $links );
@@ -369,7 +369,7 @@ function aw_block_item_sources( $a, $id ) {
 			break;
 	}
 	$refs = 'guide' === $kind ? (string) aw_item_state( 'refs' ) : $plist;
-	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'kits-by-wugweb' ) . '</h2>';
+	$out  = '<section class="aw-sources' . ( 'profile' === $kind ? ' aw-sources--profile' : '' ) . '" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'kits-by-wugweb' ) . '</h2>';
 	$out .= '' !== $credit ? '<div class="aw-sources-credit">' . $credit . '</div>' : '';
 	$out .= '' !== $read . $note ? '<p class="aw-sources-note">' . $read . $note . '</p>' : '';
 	$out .= '' !== $refs ? '<div class="aw-sources-refs">' . do_blocks( $refs ) . '</div>' : '';

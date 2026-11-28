@@ -38,6 +38,9 @@
 .aw-sources-credit > .aw-src { margin: 0 !important; }
 .aw-sources-by, .aw-posted-by { display: inline-flex; align-items: center; gap: var(--kit-space-2); font-weight: var(--kit-weight-medium); }
 .aw-sources-logo { width: 1.25rem; height: 1.25rem; border-radius: var(--kit-radius-mark); }
+.aw-sources--profile { padding-top: var(--kit-space-6); border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-sources--profile :is(.aw-sources-logo, .aw-sources-mark) { inline-size: 1.5rem; block-size: 1.5rem; margin-inline-end: var(--kit-space-2); vertical-align: middle; object-fit: contain; }
+.aw-sources-mark { display: inline-grid; place-items: center; border-radius: var(--kit-radius-mark); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); line-height: 1; }
 .aw-sources-note, .aw-sources-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-1) var(--kit-space-3); margin: 0 0 var(--kit-space-2); max-width: none; }
 .aw-sources-read { font-weight: var(--kit-weight-strong); }
 .aw-sources-read::after { content: none !important; }

@@ -331,6 +331,25 @@ function kits_profile_tail_html( $id ) {
 }
 
 /**
+ * An outlet's mark for a source row: its cached logo (the Press list's, from aw_press_logos; nothing is fetched here),
+ * else the first letter of its name in a small ink tile.
+ *
+ * @param string $url  The source's address.
+ * @param string $name The source's name.
+ * @return string
+ */
+function kits_profile_source_mark( $url, $name ) {
+	$host  = preg_replace( '/^www\./', '', (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	$cache = (array) get_option( 'aw_press_logos', array() );
+	$logo  = isset( $cache[ $host ] ) ? (int) $cache[ $host ] : 0;
+	if ( $logo && wp_attachment_is_image( $logo ) ) {
+		return wp_get_attachment_image( $logo, 'thumbnail', false, array( 'class' => 'aw-sources-logo', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) );
+	}
+	$first = '' !== $name ? mb_strtoupper( mb_substr( $name, 0, 1 ) ) : '';
+	return '' !== $first ? '<span class="aw-sources-mark" aria-hidden="true">' . esc_html( $first ) . '</span>' : '';
+}
+
+/**
  * The profile's sources as the list inside the site's Sources block (item-head.php): the page, its date, the link and the
  * archive copy. Newest first.
  *
@@ -344,7 +363,7 @@ function kits_profile_sources_html( $id ) {
 		$date = '' !== $g['date'] ? ( '' !== $name ? ', ' : '' ) . kits_date( $g['date'] ) : '';
 		$read = '' !== $g['url'] ? ' ' . kits_profile_ext_link( $g['url'], __( 'Read it', 'kits-by-wugweb' ) ) : '';
 		$arch = '' !== $g['archive'] ? ' ' . kits_profile_ext_link( $g['archive'], __( 'Archive copy', 'kits-by-wugweb' ) ) : '';
-		$items .= '<li>' . $name . $date . '.' . $read . $arch . '</li>';
+		$items .= '<li>' . kits_profile_source_mark( $g['url'], $g['source'] ) . $name . $date . '.' . $read . $arch . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the mark is escaped in kits_profile_source_mark().
 	}
 	return '' !== $items ? '<ol>' . $items . '</ol>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above; kits_date() returns escaped markup.
 }
