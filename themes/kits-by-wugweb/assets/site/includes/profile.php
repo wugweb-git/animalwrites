@@ -793,6 +793,6 @@ function kits_people_about_block( $heading, $lead ) {
 		$li .= '<li class="kit-pa-item kit-pa-item--empty" aria-hidden="true"><span class="kit-pa-card"><span class="kit-pa-media"></span><span class="kit-pa-body"><span class="kit-pa-bar"></span><span class="kit-pa-bar kit-pa-bar--short"></span></span></span></li>';
 	}
 	$html = '<section class="kit-pa" aria-labelledby="kit-pa-h"><div class="kit-sec-head"><div><h2 id="kit-pa-h">' . esc_html( $heading ) . '</h2><p>' . esc_html( $lead ) . '</p></div></div><ul class="kit-pa-grid">' . $li . '</ul>'
-		. '<p class="kit-pa-more"><a class="wp-block-button__link wp-element-button is-style-kits-ghost kit-btn--sm" href="' . esc_url( home_url( '/resources/?tag=profile' ) ) . '">' . esc_html__( 'See all profiles', 'kits-by-wugweb' ) . '</a></p></section>';
+		. '<div class="wp-block-buttons kit-pa-more"><div class="wp-block-button is-style-kits-ghost kit-btn--sm"><a class="wp-block-button__link wp-element-button" href="' . esc_url( home_url( '/resources/?tag=profile' ) ) . '">' . esc_html__( 'See all profiles', 'kits-by-wugweb' ) . '</a></div></div></section>';
 	return '<!-- wp:html -->' . "\n" . $html . "\n" . '<!-- /wp:html -->';
 }
