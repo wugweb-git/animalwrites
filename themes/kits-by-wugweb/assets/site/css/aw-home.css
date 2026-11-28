@@ -306,7 +306,7 @@
 .kit-pa-grid > li { margin: 0; max-inline-size: none; min-inline-size: 0; }
 .kit-pa-card { display: grid; gap: var(--kit-space-3); color: inherit; text-decoration: none; }
 .kit-pa-media { display: block; overflow: hidden; aspect-ratio: var(--kit-media-ratio-standard); border-radius: var(--kit-radius-card); background: var(--kit-surface-section-alt); border: var(--kit-border-width) solid var(--kit-color-line); }
-.kit-pa-media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.kit-pa-media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 8%; } /* the 4:3 crop of a portrait keeps the face */
 .kit-pa-body { display: grid; gap: var(--kit-space-1); }
 .kit-pa-body strong { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: 1.2; }
 .kit-pa-body > span { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
