@@ -339,7 +339,7 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 .kit-profile-mt.is-ink .kit-profile-mt-line { color: var(--kit-color-on-ink); }
 .kit-profile-mt.is-photo .kit-profile-mt-line { color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
 /* The social tiles: the same card, stacked (icon and arrow on top, name and "Follow" under). */
-.kit-profile-st { position: relative; display: grid; gap: var(--kit-space-1); block-size: 100%; padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
+.kit-profile-st { box-sizing: border-box; position: relative; display: grid; gap: var(--kit-space-1); block-size: 100%; padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
 .kit-profile-st::after, .kit-profile-mt > a::after { content: none; }
 .kit-profile-st-top { display: flex; align-items: flex-start; justify-content: space-between; margin-block-end: var(--kit-space-2); }
 .kit-profile-st strong { font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.25; }
