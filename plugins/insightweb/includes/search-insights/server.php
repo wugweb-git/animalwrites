@@ -193,7 +193,7 @@ function aw_si_srv_php_errors( string $ymd ): array {
 					if ( '' !== $by ) {
 						kits_error_count_tally( $callers, $by );
 					}
-					$msg = preg_replace( '/^WordPress database error\s*| made by .*$/', '', $msg ); // drop the label and the call stack from the message itself.
+					$msg = preg_replace( '/^WordPress database error\s*| made by (?:(?! made by ).)*$/', '', $msg ); // drop the label and the call stack from the message itself.
 				} else {
 					$kind = 'Other';
 				}
@@ -216,7 +216,7 @@ function aw_si_srv_php_errors( string $ymd ): array {
  * @param string $msg Log message starting "WordPress database error".
  */
 function aw_si_srv_db_caller( string $msg ): string {
-	if ( ! preg_match( '/ made by (.+)$/', $msg, $m ) ) {
+	if ( ! preg_match( '/ made by ((?:(?! made by ).)+)$/', $msg, $m ) ) { // the last "made by": a query's own text may contain the words.
 		return '';
 	}
 	$calls = array_filter( array_map( 'trim', explode( ', ', $m[1] ) ) );
