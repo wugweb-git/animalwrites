@@ -180,18 +180,49 @@ function kits_profile_sources( $id ) {
 	return $groups;
 }
 
-/** "Follow {first name}": their own pages, each a 44px link that opens in a new tab. */
-function kits_profile_follow_html( $f ) {
-	if ( ! $f['links'] ) {
-		return '';
+/**
+ * The organisation's public contact for the hero (owner, 28 Nov 2026: phone and email as icons on top instead of the four
+ * social icons): the call and email buttons from its Directory listing (the numbers it already publishes, never one on the
+ * never-publish list). Their own social pages stay in the links mosaic. Without a contact the social icons show as before.
+ *
+ * @param array $f   Profile fields.
+ * @param int   $org The organisation's listing ID (0 if none).
+ * @return string
+ */
+function kits_profile_follow_html( $f, $org = 0 ) {
+	$items = array();
+	if ( $org ) {
+		$org_name = get_the_title( $org );
+		$phones   = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $org ) : array();
+		$digits   = $phones ? preg_replace( '/\D+/', '', (string) $phones[0]['number'] ) : '';
+		if ( 10 === strlen( $digits ) ) {
+			$digits = '91' . $digits;
+		}
+		if ( '' !== $digits ) {
+			/* translators: %s: organisation name. */
+			$items[] = array( 'tel:+' . $digits, 'phone', sprintf( __( 'Call %s', 'kits-by-wugweb' ), $org_name ), false );
+		}
+		$mail = sanitize_email( (string) get_post_meta( $org, 'aw_email', true ) );
+		if ( '' !== $mail ) {
+			/* translators: %s: organisation name. */
+			$items[] = array( 'mailto:' . $mail, 'mail', sprintf( __( 'Email %s', 'kits-by-wugweb' ), $org_name ), false );
+		}
 	}
 	$first = kits_profile_first( $f );
+	if ( ! $items ) {
+		$icons = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
+		foreach ( $f['links'] as $name => $url ) {
+			$items[] = array( $url, $icons[ $name ] ?? 'link', $name . ' ' . __( '(opens in a new tab)', 'kits-by-wugweb' ), true );
+		}
+	}
+	if ( ! $items ) {
+		return '';
+	}
 	/* translators: %s: first name. */
-	$label = '' !== $first ? sprintf( __( '%s online', 'kits-by-wugweb' ), $first ) : __( 'Online', 'kits-by-wugweb' );
+	$label = '' !== $first ? sprintf( __( 'Contact %s’s organisation', 'kits-by-wugweb' ), $first ) : __( 'Contact', 'kits-by-wugweb' );
 	$out   = '<nav class="kit-profile-follow" aria-label="' . esc_attr( $label ) . '"><ul>';
-	$icons = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
-	foreach ( $f['links'] as $name => $url ) {
-		$out .= '<li><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me"><span class="kit-ico kit-ico--' . esc_attr( $icons[ $name ] ?? 'link' ) . '" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( $name ) . ' ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
+	foreach ( $items as $it ) {
+		$out .= '<li><a href="' . esc_url( $it[0], array( 'http', 'https', 'tel', 'mailto' ) ) . '"' . ( $it[3] ? ' target="_blank" rel="noopener nofollow me"' : '' ) . '><span class="kit-ico kit-ico--' . esc_attr( $it[1] ) . '" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( $it[2] ) . '</span></a></li>';
 	}
 	return $out . '</ul></nav>';
 }
@@ -239,7 +270,7 @@ function kits_profile_hero_html( $id, $f ) {
 		}
 	}
 	$out .= '' !== $figs ? '<ul class="kit-profile-figures">' . $figs . '</ul>' : '';
-	$out .= kits_profile_follow_html( $f );
+	$out .= kits_profile_follow_html( $f, (int) $f['org'] );
 	return $out . '</div></section>';
 }
 
