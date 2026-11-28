@@ -315,8 +315,8 @@ function kits_profile_head_html( $id ) {
 }
 
 /** One mosaic tile: an icon, an arrow, a title and one short line; the whole tile is the link. */
-function kits_profile_mosaic_tile( $shade, $icon, $title, $line, $href, $ext = true, $wide = false ) {
-	return '<li class="kit-profile-mt is-' . esc_attr( $shade ) . ( $wide ? ' is-wide' : '' ) . '"><a href="' . esc_url( $href ) . '"' . ( $ext ? ' target="_blank" rel="noopener nofollow me"' : '' ) . '><span class="kit-profile-mt-top"><span class="kit-profile-mt-ico" aria-hidden="true"><span class="kit-ico kit-ico--' . esc_attr( $icon ) . '"></span></span><span class="kit-profile-mt-go" aria-hidden="true">' . ( $ext ? '↗' : '→' ) . '</span></span><strong class="kit-profile-mt-title">' . esc_html( $title ) . '</strong><span class="kit-profile-mt-line">' . esc_html( $line ) . '</span>' . ( $ext ? '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span>' : '' ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
+function kits_profile_mosaic_tile( $shade, $icon, $title, $line, $href, $ext = true, $wide = false, $img = '' ) {
+	return '<li class="kit-profile-mt is-' . esc_attr( $shade ) . ( $wide ? ' is-wide' : '' ) . '"' . ( '' !== $img ? ' style="--kit-pmt-img:url(\'' . esc_url( $img ) . '\')"' : '' ) . '><a href="' . esc_url( $href ) . '"' . ( $ext ? ' target="_blank" rel="noopener nofollow me"' : '' ) . '><span class="kit-profile-mt-top"><span class="kit-profile-mt-ico" aria-hidden="true"><span class="kit-ico kit-ico--' . esc_attr( $icon ) . '"></span></span><span class="kit-profile-mt-go" aria-hidden="true">' . ( $ext ? '↗' : '→' ) . '</span></span><strong class="kit-profile-mt-title">' . esc_html( $title ) . '</strong><span class="kit-profile-mt-line">' . esc_html( $line ) . '</span>' . ( $ext ? '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span>' : '' ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
 }
 
 /**
@@ -351,7 +351,8 @@ function kits_profile_tail_html( $id ) {
 		$t[]  = kits_profile_mosaic_tile( 'ink', 'map-pin', sprintf( __( 'Help in %s', 'kits-by-wugweb' ), $city ), __( 'Rescue and care near you', 'kits-by-wugweb' ), $help, false, true );
 	}
 	if ( $f['campaign'] && 'publish' === get_post_status( $f['campaign'] ) ) {
-		$t[] = kits_profile_mosaic_tile( 'soft', 'megaphone', get_the_title( $f['campaign'] ), __( 'Part of this campaign', 'kits-by-wugweb' ), get_permalink( $f['campaign'] ), false, true );
+		$pic = (string) get_the_post_thumbnail_url( $f['campaign'], 'large' ); // the campaign's own picture under a dark shade (owner, 28 Nov 2026), the soft tile when it has none.
+		$t[] = kits_profile_mosaic_tile( '' !== $pic ? 'photo' : 'soft', 'megaphone', get_the_title( $f['campaign'] ), __( 'Part of this campaign', 'kits-by-wugweb' ), get_permalink( $f['campaign'] ), false, true, $pic );
 	}
 	if ( ! $t ) {
 		return '';
