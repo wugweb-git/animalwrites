@@ -1539,6 +1539,36 @@
       "block": "animal-writes/people-row"
     },
     {
+      "name": "People (About)",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "kit-about-people",
+        "kit-people-list",
+        "kit-people-profile"
+      ],
+      "states": [
+        "prints nothing until a profile is published; the newest profile as a card (up to three in a row once there are more) and a See all profiles link"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (Editor \u2192 Patterns, \"Animal Writes\")",
+        "aria": "section with an H2; list of cards",
+        "keyboard": "links and buttons",
+        "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+        "target": "44px controls, link and chips",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/people-about"
+    },
+    {
       "name": "AW Content",
       "type": "pattern",
       "status": "live",
