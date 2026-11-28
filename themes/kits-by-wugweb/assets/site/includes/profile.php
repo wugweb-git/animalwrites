@@ -387,3 +387,69 @@ add_filter(
 	30,
 	2
 );
+
+/* ---------- Where a profile lives: under About, not in Resources (owner, 28 Nov 2026) ---------- */
+
+// A published profile is at /about/{slug}/. The post is still a Resource (a Post tagged "profile"); only its address and trail change.
+// Drafts keep WordPress's ?p= preview address.
+add_filter(
+	'post_link',
+	function ( $url, $post ) {
+		if ( ! $post instanceof WP_Post || 'publish' !== $post->post_status || '' === $post->post_name || ! kits_is_profile( $post->ID ) ) {
+			return $url;
+		}
+		return home_url( '/about/' . $post->post_name . '/' );
+	},
+	10,
+	2
+);
+
+// /about/{slug}/ is read by WordPress as a page path. When no page lives there and a published profile has the slug, show the profile;
+// a real page under About always wins, and anything else stays a 404.
+add_filter(
+	'request',
+	function ( $vars ) {
+		$path = isset( $vars['pagename'] ) ? (string) $vars['pagename'] : '';
+		if ( 0 !== strpos( $path, 'about/' ) || false !== strpos( substr( $path, 6 ), '/' ) || get_page_by_path( $path ) ) {
+			return $vars;
+		}
+		$found = get_posts(
+			array(
+				'name'           => substr( $path, 6 ),
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'tag'            => 'profile',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+			)
+		);
+		if ( ! $found ) {
+			return $vars;
+		}
+		unset( $vars['pagename'] );
+		$vars['name']      = substr( $path, 6 );
+		$vars['post_type'] = 'post';
+		return $vars;
+	}
+);
+
+// The trail reads Home > About > the person, not Home > Resources.
+add_filter(
+	'rank_math/frontend/breadcrumb/items',
+	function ( $crumbs ) {
+		if ( is_admin() || ! is_singular( 'post' ) || ! kits_is_profile( get_queried_object_id() ) ) {
+			return $crumbs;
+		}
+		$about = get_page_by_path( 'about' );
+		if ( ! $about ) {
+			return $crumbs;
+		}
+		$id = get_queried_object_id();
+		return array(
+			array( 'Home', home_url( '/' ) ),
+			array( get_the_title( $about ), get_permalink( $about ) ),
+			array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) ),
+		);
+	},
+	30
+);
