@@ -787,12 +787,16 @@ function kits_people_about_block( $heading, $lead ) {
 		$li   .= '<li class="kit-pa-item"><a class="kit-pa-card" href="' . esc_url( get_permalink( $id ) ) . '"><span class="kit-pa-media">' . $thumb . '</span><span class="kit-pa-body"><strong>' . esc_html( $name ) . '</strong>';
 		$li   .= '' !== $f['role'] ? '<span>' . esc_html( $f['role'] ) . '</span>' : '';
 		$li   .= '' !== $f['place'] ? '<span class="kit-profile-place"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $f['place'] ) . '</span>' : '';
+		$first = kits_profile_first( $f );
+		/* translators: %s: first name. */
+		$cta   = '' !== $first ? sprintf( __( 'Read %s’s story', 'kits-by-wugweb' ), $first ) : __( 'Read the story', 'kits-by-wugweb' );
+		$li   .= '<span class="kit-pa-cta">' . esc_html( $cta ) . ' <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></span>';
 		$li   .= '</span></a></li>';
 	}
 	for ( $i = count( $ids ); $i < 4; $i++ ) { // an empty slot: a grey picture box and two grey lines, not a link, hidden on phones
-		$li .= '<li class="kit-pa-item kit-pa-item--empty" aria-hidden="true"><span class="kit-pa-card"><span class="kit-pa-media"></span><span class="kit-pa-body"><span class="kit-pa-bar"></span><span class="kit-pa-bar kit-pa-bar--short"></span></span></span></li>';
+		$li .= '<li class="kit-pa-item kit-pa-item--empty" aria-hidden="true"><span class="kit-pa-card"><span class="kit-pa-media"></span><span class="kit-pa-body"><span class="kit-pa-bar"></span><span class="kit-pa-bar kit-pa-bar--short"></span><span class="kit-pa-bar kit-pa-bar--cta"></span></span></span></li>';
 	}
 	$html = '<section class="kit-pa" aria-labelledby="kit-pa-h"><div class="kit-sec-head"><div><h2 id="kit-pa-h">' . esc_html( $heading ) . '</h2><p>' . esc_html( $lead ) . '</p></div></div><ul class="kit-pa-grid">' . $li . '</ul>'
-		. '<div class="wp-block-buttons kit-pa-more"><div class="wp-block-button is-style-kits-ghost kit-btn--sm"><a class="wp-block-button__link wp-element-button" href="' . esc_url( home_url( '/resources/?tag=profile' ) ) . '">' . esc_html__( 'See all profiles', 'kits-by-wugweb' ) . '</a></div></div></section>';
+		. '</section>';
 	return '<!-- wp:html -->' . "\n" . $html . "\n" . '<!-- /wp:html -->';
 }

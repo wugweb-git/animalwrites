@@ -199,6 +199,8 @@
 .aw-about-inner > p.has-large-font-size { margin-block-start: var(--kit-space-6); font-weight: var(--kit-weight-strong); }
 .aw-about-band--raised { background: var(--kit-color-raised); }
 .aw-about-band--canvas { background: var(--kit-color-canvas); }
+/* The people band is white with a hairline above and below, so it reads apart from How you can help (grey) and the Q&A (owner, 28 Nov 2026). */
+.wp-block-post-content > .kit-about-people { border-block: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-about-band--ink { background: var(--kit-color-ink); color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
 .aw-about-band--ink :is(h2, h3, .aw-about-pivot) { color: var(--kit-color-on-ink) !important; }
 .aw-about-band--ink .is-style-kits-label { color: color-mix(in srgb, var(--kit-color-on-ink) 70%, transparent); }

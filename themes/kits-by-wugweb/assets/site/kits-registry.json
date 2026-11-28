@@ -1556,12 +1556,13 @@
         "kit-pa-body",
         "kit-pa-bar",
         "kit-pa-bar--short",
-        "kit-pa-more",
+        "kit-pa-cta",
+        "kit-pa-bar--cta",
         "kit-people-list",
         "kit-people-profile"
       ],
       "states": [
-        "prints nothing until a profile is published; four slots: published profiles newest first, the rest grey placeholders; phones show the first slot only; a See all profiles link"
+        "prints nothing until a profile is published; four slots: published profiles newest first, the rest grey placeholders; phones show the first slot only; a button on each profile"
       ],
       "tokens": [],
       "a11y": {

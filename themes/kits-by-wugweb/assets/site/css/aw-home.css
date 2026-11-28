@@ -309,11 +309,14 @@
 .kit-pa-media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 8%; } /* the 4:3 crop of a portrait keeps the face */
 .kit-pa-body { display: grid; gap: var(--kit-space-1); }
 .kit-pa-body strong { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: 1.2; }
-.kit-pa-body > span { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.kit-pa-body > span:not(.kit-pa-cta) { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .kit-pa-bar { display: block; block-size: 1rem; border-radius: var(--kit-radius-pill); background: var(--kit-surface-section-alt); }
 .kit-pa-bar--short { inline-size: 60%; }
 .kit-pa-item--empty { display: none; }
-.kit-pa-more { margin: var(--kit-space-5) 0 0; }
+.kit-pa-cta { justify-self: start; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-block-size: var(--kit-size-target); margin-top: var(--kit-space-2); padding-inline: var(--kit-space-5); border-radius: var(--kit-radius-pill); border: var(--kit-border-width) solid var(--kit-color-ink); color: var(--kit-color-ink); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.kit-pa-cta .kit-ico { --kit-ico-size: 1.125rem; }
+.kit-pa-bar--cta { inline-size: 7rem; block-size: var(--kit-size-target); margin-top: var(--kit-space-2); }
+@media (hover:hover) { a.kit-pa-card:hover .kit-pa-cta { background: var(--kit-color-ink); color: var(--kit-color-on-ink); } }
 a.kit-pa-card:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-lg); }
 @media (hover:hover) { a.kit-pa-card:hover strong { text-decoration: none; } a.kit-pa-card:hover .kit-pa-media { border-color: var(--kit-color-ink); } }
 @media (min-width: 768px) { .kit-pa-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kit-pa-item--empty { display: block; } }
