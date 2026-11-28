@@ -321,24 +321,25 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 	}
 .kit-profile-mosaic { margin: var(--kit-space-6) 0; }
 .kit-profile-mosaic h2 { margin: 0 0 var(--kit-space-4); }
-.kit-profile-mt-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; gap: var(--kit-space-3); }
+.kit-profile-mt-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
 .kit-profile-mt { display: grid; border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); overflow: hidden; }
-.kit-profile-mt.is-wide { grid-column: span 2; }
-.kit-profile-mt > a { display: grid; align-content: space-between; gap: var(--kit-space-1); padding: var(--kit-space-5); color: inherit; text-decoration: none; }
+/* One slim row per tile: icon, title over one line, arrow (owner, 28 Nov 2026: the stacked tiles were too big). */
+.kit-profile-mt > a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ico title go" "ico line go"; align-items: center; column-gap: var(--kit-space-4); row-gap: 0; padding: var(--kit-space-5); color: inherit; text-decoration: none; }
+.kit-profile-mt-top { display: contents; }
+.kit-profile-mt-ico { grid-area: ico; }
+.kit-profile-mt-go { grid-area: go; font-size: var(--kit-type-lead); line-height: 1; }
+.kit-profile-mt-title { grid-area: title; font-size: var(--kit-type-card-title); line-height: 1.25; overflow-wrap: anywhere; }
+.kit-profile-mt-line { grid-area: line; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .kit-profile-mt.is-ink { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
 .kit-profile-mt.is-soft { background: var(--kit-color-surface-soft); }
-.kit-profile-mt.is-photo { background: linear-gradient(to top, color-mix(in srgb, var(--kit-color-ink) 92%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 70%, transparent) 100%), var(--kit-pmt-img) center / cover; color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
-.kit-profile-mt.is-photo .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
-.kit-profile-mt.is-photo .kit-profile-mt-line { color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
 .kit-profile-mt.is-plain { background: var(--kit-color-raised); }
-.kit-profile-mt-top { display: flex; align-items: flex-start; justify-content: space-between; margin-block-end: var(--kit-space-3); }
-.kit-profile-mt-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); background: var(--kit-color-surface-soft); color: var(--kit-color-ink); --kit-ico-size: 1.375rem; }
-.kit-profile-mt.is-soft .kit-profile-mt-ico { background: var(--kit-color-raised); }
-.kit-profile-mt.is-ink .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); }
-.kit-profile-mt-go { font-size: var(--kit-type-lead); line-height: 1; }
-.kit-profile-mt-title { font-size: var(--kit-type-card-title); line-height: 1.25; overflow-wrap: anywhere; }
-.kit-profile-mt-line { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.kit-profile-mt.is-photo { background: linear-gradient(to top, color-mix(in srgb, var(--kit-color-ink) 92%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 70%, transparent) 100%), var(--kit-pmt-img) center / cover; color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
+.kit-profile-mt-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); background: var(--kit-color-raised); }
+.kit-profile-mt.is-ink .kit-profile-mt-ico, .kit-profile-mt.is-photo .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 .kit-profile-mt.is-ink .kit-profile-mt-line { color: var(--kit-color-on-ink); }
-@media (min-width: 768px) {
-	.kit-profile-mt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
+.kit-profile-mt.is-photo .kit-profile-mt-line { color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
+/* Their own pages: small pills, a row that wraps. */
+.kit-profile-social { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
+.kit-profile-social a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-block-size: var(--kit-size-target); padding-inline: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-pill); background: var(--kit-color-raised); color: var(--kit-color-ink); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); text-decoration: none; }
+.kit-profile-social a::after { content: none; }
+@media (hover:hover) { .kit-profile-social a:hover { border-color: var(--kit-color-ink); } }

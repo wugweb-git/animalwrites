@@ -208,6 +208,11 @@ function kits_profile_follow_html( $f, $org = 0 ) {
 			$items[] = array( 'mailto:' . $mail, 'mail', sprintf( __( 'Email %s', 'kits-by-wugweb' ), $org_name ), false );
 		}
 	}
+	$site = $org ? esc_url_raw( (string) get_post_meta( $org, 'aw_website', true ) ) : '';
+	if ( '' !== $site && $items ) { // the organisation's website goes on top beside the phone and email (owner, 28 Nov 2026)
+		/* translators: %s: organisation name. */
+		array_unshift( $items, array( $site, 'world', sprintf( __( '%s website (opens in a new tab)', 'kits-by-wugweb' ), get_the_title( $org ) ), true ) );
+	}
 	$first = kits_profile_first( $f );
 	if ( ! $items ) {
 		$icons = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
@@ -335,15 +340,6 @@ function kits_profile_tail_html( $id ) {
 	if ( $org ) {
 		$t[] = kits_profile_mosaic_tile( 'ink', 'home', get_the_title( $org ), __( 'Directory listing', 'kits-by-wugweb' ), get_permalink( $org ), false, true );
 	}
-	$icons = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
-	$n     = 0;
-	foreach ( $f['links'] as $name => $url ) {
-		$t[] = kits_profile_mosaic_tile( 0 === $n++ % 2 ? 'plain' : 'soft', $icons[ $name ] ?? 'link', $name, __( 'Follow', 'kits-by-wugweb' ), $url );
-	}
-	$site = $org ? (string) get_post_meta( $org, 'aw_website', true ) : '';
-	if ( '' !== $site ) {
-		$t[] = kits_profile_mosaic_tile( 'soft', 'link', __( 'Website', 'kits-by-wugweb' ), preg_replace( '#^https?://(www\.)?#', '', untrailingslashit( $site ) ), $site, true, true );
-	}
 	$help = kits_profile_help_url( $f['place'] );
 	if ( '' !== $help ) {
 		$city = trim( explode( ',', $f['place'] )[0] );
@@ -354,12 +350,18 @@ function kits_profile_tail_html( $id ) {
 		$pic = (string) get_the_post_thumbnail_url( $f['campaign'], 'large' ); // the campaign's own picture under a dark shade (owner, 28 Nov 2026), the soft tile when it has none.
 		$t[] = kits_profile_mosaic_tile( '' !== $pic ? 'photo' : 'soft', 'megaphone', get_the_title( $f['campaign'] ), __( 'Part of this campaign', 'kits-by-wugweb' ), get_permalink( $f['campaign'] ), false, true, $pic );
 	}
-	if ( ! $t ) {
+	if ( ! $t && ! $f['links'] ) {
 		return '';
 	}
 	/* translators: %s: first name. */
 	$h = '' !== $first ? sprintf( __( '%s’s links', 'kits-by-wugweb' ), $first ) : __( 'Links', 'kits-by-wugweb' );
-	return '<section class="kit-profile-mosaic" aria-labelledby="kit-profile-mosaic-h"><h2 id="kit-profile-mosaic-h">' . esc_html( $h ) . '</h2><ul class="kit-profile-mt-grid">' . implode( '', $t ) . '</ul></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every tile is escaped in kits_profile_mosaic_tile().
+	$icons  = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
+	$social = '';
+	foreach ( $f['links'] as $name => $url ) { // their own pages: small pills, not tiles (owner, 28 Nov 2026: too big)
+		$social .= '<li><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me"><span class="kit-ico kit-ico--' . esc_attr( $icons[ $name ] ?? 'link' ) . '" aria-hidden="true"></span>' . esc_html( $name ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
+	}
+	$social = '' !== $social ? '<ul class="kit-profile-social">' . $social . '</ul>' : '';
+	return '<section class="kit-profile-mosaic" aria-labelledby="kit-profile-mosaic-h"><h2 id="kit-profile-mosaic-h">' . esc_html( $h ) . '</h2><ul class="kit-profile-mt-grid">' . implode( '', $t ) . '</ul>' . $social . '</section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every tile is escaped in kits_profile_mosaic_tile().
 }
 
 /**
