@@ -220,3 +220,20 @@ The page posts almost daily (rescue stories, adoption, medicines, a fostering se
 **Still to read:** Instagram (needs the owner to open it, or the links sent), the Facebook feed before Jan 2026 (the 2025 stray-dogs campaign), her LinkedIn, the 2023 HT and 2024 News18 pieces, the Knocksense and Humane World pieces in full.
 
 **Name (owner, 27 Nov 2026):** her title is Dr. The page shows "Dr. Vishakha Shukla"; the field `kits_profile_prefix` holds "Dr." (page data: honorificPrefix), the name field holds "Vishakha Shukla".
+
+## 16. Built and decided, 28 Nov 2026 (PR 180, merged to wordpress-dev as 120b2561)
+
+**Profile page (`/about/{slug}/`, trail Home > About > name):** photo hero with the contact icons (website, phone, email), the two numbers, a Profile chip beside the date (the tag is the marker, so the item meta row prints it as the type chip), the written text with one pulled quote, the links grid (the organisation, help in her city, the campaign, then the social tiles), Sources with each outlet's mark and a divider before the tags and share. **No organisation card at the top** (owner, 28 Nov: the organisation is linked by its tile in the links grid; the card was tried and removed). The links block is titled "More on {first name}'s work".
+
+**Links grid (aw-single.css):** wide rows 94px, social tiles 96px in one row; on phones the social tiles are icon-only (name for screen readers) so the four stay in one row; from 768 the name and the arrow show. Edges line up with the rows above.
+
+**Home (patterns/people-row.php, `kits_people_bento_html()`):** one bento block. Left, the newest profile as a grey tile (an empty grey box until the owner sends her photo), right the four law tiles 2 by 2 with no heading; one column on phones, side by side from 1200.
+
+**About (patterns/people-about.php, `kits_people_about_block()`):** four slots: published profiles newest first, the rest grey placeholders (a grey 4:3 box and grey lines, not links, aria-hidden). Phones show the first slot only; two across from 768; four across from 1200. Each profile has its own "Read {first name}'s story" button; **no "See all profiles" button** (owner, 28 Nov). White band with a hairline above and below, **placed last, above the Q&A** (the Q&A prints from the page's `aw_faq` field after the content). The picture is 4:3, cropped from the top (`object-position: 50% 8%`) so a portrait keeps the face.
+
+**Other:** button width tokens (`--kit-btn-min-w` 9rem, `--kit-btn-max-w` 24rem; design-system.md "Button width"); the law tiles helper `kits_law_tiles_block()` is in its own always-loaded file (includes/law-tiles.php) so the Animal law pattern keeps its tiles without Kits Core; an existing About child page keeps its address over a profile with the same slug; an `/about/{slug}/` rewrite rule is saved once (option `kits_profile_rules` = 2), so **live needs the first page load after the deploy to save it**.
+
+**Breadcrumb finding:** RankWeb's `breadcrumbs-render.php` began with `if ( function_exists( 'rankweb_breadcrumbs' ) ... ) return;` on functions the same file declares at its top level, so it always returned and the `rankweb/breadcrumbs` block never registered: no visible trail on any item page on live (only the schema trail). Fixed in cae72c98 (constant guard); the profile trail filter (Home > About > name) is in includes/profile.php.
+
+**Still open:** the photo for the Home tile and her identity and permission; owner's yes on the copy; live page 58 (About) has the people band in the old place until it is moved above the Q&A; the live draft 32022 lacks the staging-only pulled quote; Knocksense has no logo (a letter tile shows); `[aw_newsletter]` shows raw on staging only (MailWeb is off there by design).
+
