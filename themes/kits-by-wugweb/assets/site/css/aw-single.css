@@ -339,14 +339,20 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 .kit-profile-mt.is-ink .kit-profile-mt-line { color: var(--kit-color-on-ink); }
 .kit-profile-mt.is-photo .kit-profile-mt-line { color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
 /* The social tiles: the same card, stacked (icon and arrow on top, name and "Follow" under). */
-.kit-profile-st { display: grid; gap: var(--kit-space-1); block-size: 100%; padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
+.kit-profile-st { position: relative; display: grid; gap: var(--kit-space-1); block-size: 100%; padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
 .kit-profile-st::after, .kit-profile-mt > a::after { content: none; }
 .kit-profile-st-top { display: flex; align-items: flex-start; justify-content: space-between; margin-block-end: var(--kit-space-2); }
 .kit-profile-st strong { font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.25; }
-.kit-profile-st > span:not(.kit-profile-st-top):not(.screen-reader-text) { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 /* Shared by every tile: the icon square and the arrow. */
 .kit-profile-mt-ico, .kit-profile-st-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); background: var(--kit-color-raised); }
 .kit-profile-mt.is-ink .kit-profile-mt-ico, .kit-profile-mt.is-photo .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 .kit-profile-mt-go, .kit-profile-st-go { font-size: var(--kit-type-lead); line-height: 1; }
 @media (hover:hover) { .kit-profile-st:hover { border-color: var(--kit-color-ink); } }
-@media (min-width: 768px) { .kit-profile-mt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* From 768 the social tiles are as tall as the wide rows: the icon square and the name side by side, the arrow in the corner. */
+@media (min-width: 768px) {
+	.kit-profile-mt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	.kit-profile-st { display: flex; align-items: center; gap: var(--kit-space-2); }
+	.kit-profile-st-top { display: contents; }
+	.kit-profile-st-go { position: absolute; inset-block-start: var(--kit-space-2); inset-inline-end: var(--kit-space-3); font-size: var(--kit-type-sm); }
+	.kit-profile-st strong { font-size: var(--kit-type-sm); }
+}
