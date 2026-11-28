@@ -551,7 +551,7 @@ function kits_profile_newest_id() {
 }
 
 /**
- * The Home bento (owner, 28 Nov 2026): one block. Left, the newest profile as a photo tile under a dark shade (name, role,
+ * The Home bento (owner, 28 Nov 2026): one block. Left, the newest profile as a grey tile, empty where her photo will go (name, role,
  * place, one button); right, the four law tiles 2 by 2 in three shades, with no heading of their own. Each tile is one link.
  *
  * @return string HTML ('' when no profile is published).
@@ -564,11 +564,10 @@ function kits_people_bento_html() {
 	$f     = kits_profile_fields( $id );
 	$name  = trim( $f['prefix'] . ' ' . $f['name'] );
 	$first = kits_profile_first( $f );
-	$photo = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'large', array( 'class' => 'kit-pb-photo', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
 	/* translators: %s: first name. */
 	$cta = '' !== $first ? sprintf( __( 'Read %s’s story', 'kits-by-wugweb' ), $first ) : __( 'Read the story', 'kits-by-wugweb' );
 	$out = '<section class="kit-people-bento" aria-labelledby="kit-pb-h"><h2 id="kit-pb-h" class="screen-reader-text">' . esc_html__( 'People who make a difference, and the law', 'kits-by-wugweb' ) . '</h2>';
-	$out .= '<a class="kit-pb kit-pb--photo' . ( '' === $photo ? ' kit-pb--nophoto' : '' ) . '" href="' . esc_url( get_permalink( $id ) ) . '">' . $photo; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup for the featured image.
+	$out .= '<a class="kit-pb kit-pb--photo" href="' . esc_url( get_permalink( $id ) ) . '">'; // The photo comes later (owner, 28 Nov 2026): an empty grey box until then.
 	$out .= '<span class="kit-pb-label">' . esc_html__( 'People who make a difference', 'kits-by-wugweb' ) . '</span><span class="kit-pb-body"><strong class="kit-pb-name">' . esc_html( $name ) . '</strong>';
 	$out .= '' !== $f['role'] ? '<span class="kit-pb-role">' . esc_html( $f['role'] ) . '</span>' : '';
 	$out .= '' !== $f['place'] ? '<span class="kit-profile-place"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $f['place'] ) . '</span>' : '';
