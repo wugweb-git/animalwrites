@@ -244,6 +244,8 @@
   --kit-btn-ico-size-only: var(--kit-icon-md);
   --kit-btn-press: 1px;
   --kit-btn-nudge: 3px;
+  --kit-btn-min-w: 9rem; /* a stacked action button is never narrower... */
+  --kit-btn-max-w: 24rem; /* ...or wider than this (owner, 28 Nov 2026: no full-width stretch on wide screens) */
   --kit-btn-spinner-width: 2px;
   --kit-btn-primary-bg: var(--kit-color-ink);
   --kit-btn-primary-fg: var(--kit-color-on-ink);
