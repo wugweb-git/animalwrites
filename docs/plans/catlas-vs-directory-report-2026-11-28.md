@@ -58,3 +58,33 @@
 5. **Hide empty fields on thin listings**: one "Suggest an update" link instead of "Data not yet available" per field.
 6. **Map honesty:** a legend with "Approximate location" for pins from a PIN code or district, not an address.
 7. **Do not copy:** their palette (violet and cream) and serif headings; our black, white and grey with Inter is the owner's rule (10 Nov) and fits a civic record.
+
+## 6. Addendum: communikitty.com/learn (the Learn side of the same product)
+
+Read on 28 Nov 2026 for structure and topics only; no text copied (their terms forbid scraping). Catlas is the directory half of CommuniKitty. Learn is the content half, and the bottom tab bar on phones (Nearby, Catlas, Learn) puts the two side by side.
+
+**What Learn holds**
+- **Guides**, grouped by stage (Transition, Care, Feeding, Emergency): first days home, litter box set-up, weaning, found kittens, foster, meeting resident pets, litter-box problems.
+- **Articles**, grouped by subject (Health, Welfare, Enrichment, Breeds, Science, culture). The Health set covers single conditions (FeLV, FIV, giardia, IBD and more).
+- **Glossary**: short term pages tagged by subject, one source each, a "more in this subject" list.
+- **Tools**: symptom checker (emergency screen first, then 43 conditions), kitten age by weight, body condition score (1 to 9), calorie calculator, name generator, age converter, breed finder.
+- **Supplies** pages (product lists).
+
+**How a guide page is built:** category tags, a one-line intro, a "short version" box, jump links, numbered steps with Do and Don't lists, red-flag rows ("vet now", "call the vet", "normal"), 4 FAQs, 7 sources named by institution, 8 related cards, a not-medical-advice footer. Articles add Key Takeaways, a Bottom Line box, numbered citations with DOIs and a comparison table.
+
+**Their weak spots (our openings)**
+- Review labels are inconsistent. Some guides say "vet review pending", the FeLV article says it was AI-drafted and not yet reviewed by a vet, while the footer claims review by vet technicians.
+- The kitten age page contradicts itself on birth and week-1 weights.
+- Written for the US and UK (supplier links, units, vet access). Nothing on India: Indian law, street cats, ABC for cats, municipal bodies, cost of care.
+
+**What we have today:** no care guides at all. Searching our site for kitten, litter, foster, feeding, spay, vaccination and rabies returns News items, listings and one rabies campaign. The Library and Resources hold law and policy, not how-to care.
+
+**What we could add** (ideas only; nothing drafted or started; copy goes through the owner's yes, fact-bearing health pages stay draft until a vet or the owner signs off):
+1. **India-specific stray-cat guides**: found kittens, what to do now; feeding strays on a budget; an injured stray, first steps; trap-neuter-return and sterilisation for cats; living with community cats (housing society rights).
+2. **Glossary** of terms Indian readers meet: ABC, TNR, ARV, AWBI, the PCA Act, Darpan. They have terms only; we can tie each term to a law page and a directory type.
+3. **Tools** (each needs vet sign-off): a body-condition guide and a "when to call a vet or helpline" checklist built on our helpline blocks.
+4. **Existing pages**: add a visible FAQ, a sources list and a "when to call a vet" box to the rabies page; link guides to Directory pages (rescue, vet, sterilisation) the way they link Learn to Catlas.
+5. **Structure to borrow, not wording**: short-version box first, red-flag rows, named institutional sources, related cards. This matches our answer-first and claim-heading rules and our no-folds rule (FAQs stay open).
+6. **Label review honestly** on every health page ("reviewed by ... on ..." or "not yet reviewed"), which they do not do consistently.
+
+**Do not copy:** their text, their product links, their app promo blocks.
