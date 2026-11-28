@@ -88,3 +88,49 @@ Read on 28 Nov 2026 for structure and topics only; no text copied (their terms f
 6. **Label review honestly** on every health page ("reviewed by ... on ..." or "not yet reviewed"), which they do not do consistently.
 
 **Do not copy:** their text, their product links, their app promo blocks.
+
+## 7. Addendum: trustedvets.in (vet clinics plus a Shelters, Rescues & NGOs section)
+
+Read 28 Nov 2026: /search/, /vets/delhi/, /about/, a clinic page, /rescue-orgs/ and one rescue record, in the browser at 375 and 1280 px. Who runs it is not stated anywhere I read. Facts only; nothing copied.
+
+### 7.1 What it is
+An Indian vet-clinic finder (about 1,614 clinics in 10 cities: Delhi 366, Mumbai 298, Bangalore 247, Pune 205, Jaipur 191, Gurugram 101, Ghaziabad 82, Noida 51, Faridabad 45, Greater Noida 28) with a side section of 55 shelters, rescues and NGOs in Delhi NCR, Mumbai, Bangalore and Jaipur. The About page says "Delhi NCR, Mumbai, Bangalore and 2 more cities", which does not match its own 10-city list. Header nav: Find a vet, Emergency, Rescue & NGOs, Shop, Blog, Our Story, Saved. Phones get a five-tab bottom bar (Find a vet, Emergency, Rescue, Shop, Saved).
+
+### 7.2 /rescue-orgs/ audit
+| Area | What it does |
+|---|---|
+| Structure | One H1 ("Animal Shelters, Rescues & NGOs"), a two-line intro that says it is not a vet directory and links to Find a vet, one row of filter chips, then a single list of 55 cards. No H2 sections, no map, no search box, no sort, no city or locality filter on this page (a city selector sits in the header). |
+| Grouping | By type chips only: All, Shelter, Rescue, NGO, Adoption Center. Cards are ordered by Google rating, then city blocks run together (Jaipur, Delhi, Mumbai, Bangalore interleaved by rating, not grouped). |
+| Card | Name, locality and city, star rating with review count, type chips, an open-now line ("Open now · Closes 5:00 PM", "Closed today"), then three buttons: Call, Directions, Website (Call is the only filled/tinted one). A card is 848 px wide on desktop and about 309 px on a phone. |
+| Layout | Cream page (rgb 250,248,245), Inter 16 px, H1 24 px at every width, single column. 375 px: cards fill the width, page about 14,100 px for 55 cards. 1280 px: one 848 px column, page about 13,400 px, so no gain from the wider screen. Buttons are 30 px tall (below the 44 px touch minimum). |
+| Mobile | Bottom tab bar; sticky 61 px header; city picker in the header. |
+| Record page (/rescue-orgs/<slug>/) | H1, locality, type chips, Call / Directions / Website, weekly opening hours, address, a Google reviews block with excerpts and a View on Google link. Only 3 headings (name, Location, Google Reviews). No about text, no services, no registration, no sources, no FAQ, no related list. |
+| Schema | List page: Organization, WebSite with SearchAction, BreadcrumbList and an **ItemList of the 55 orgs**. Record page: **NGO** with address, **geo**, telephone, sameAs and **aggregateRating** (ratings come from Google reviews), plus BreadcrumbList. No FAQPage, no opening hours in schema. |
+| Data source | Everything on the record looks like Google Places data (rating, hours, geo, phone, address, review excerpts) plus the org's own website or Instagram link as sameAs. Several have no phone (14 of 55 here) or only an Instagram link as website. All 55 carry the single type NGO in schema whatever the chip says. |
+| Features | Type filter, open-now status, call/directions/website, Save, "Is this your clinic?" claim link, suggest-an-edit link. No donate, volunteer, adopt or services info, no verification badge, no registration number. |
+
+### 7.3 Data check against our Directory
+Method: took the 55 names, phones, addresses and coordinates from their record pages and searched our listings (REST) by name. Name matching only, so a different spelling can hide a match; phone and address were not compared one by one.
+- **Already in our Directory (about 25 of 55):** e.g. Pashu Anuhar, Go Nirvana Foundation, Raksha Jaipur, Chardikala Animal Shelter, Save A Stray (Noida), Wings and Tails Foundation, Friendicoes SECA, SNEHA Foundation, Animal Matter To Me, Helping Hands Animal Welfare Foundation, Sherry and Diya Foundation, YODA, Apna Home Animal Shelter, Freedom Farm, Rroaming Paws, Raksha Animal Welfare Center, Sarvoham Animal Foundation, Mylos Rescue, Karuna Animal Welfare Association of Karnataka, Second Chance Sanctuary, ALAI Rescues, CUPA Trauma, Sanjay Gandhi Animal Care Centre.
+- **No name match found (about 30 of 55), to check one by one:** Youth Jeevseva Charitable Foundation (Jaipur), Gargi Animal Care Society, PAWS Adoption Hostel, Eco Rescuers Foundation, Animal Rain Bashera, PAWS (Vasant Kunj), Priti Love Rescue Foundation, Red Paws Rescue, Animal Care India (Badarpur), SPCA Delhi, Save Life Save Animals, HOPE Foundation (Mulund), Animal Shelter and Hospital (Mandvi), Gully Stray Care, Paws and Purpose, SARC Animal Rescue Shelter, Charlie's Animal Rescue Centre (CARE), Dogs Our Best Friends (Maruthy), Friend For Animal Trust, The Welfare of Stray Dogs, IDA India (Deonar), OM Animal Welfare Foundation (Bird Rescue), Voice of Animals Trust, Help for Animals, Animal Rescue and Care NGO, Animal Rescue & Shelter Foundation and a few more. These are candidates, not facts: each needs a real check (own website, Darpan, AWBI) before anything is added, and Google-sourced values are the weakest tier in our trust order (claim, own site, social, Darpan, OSM, Wikidata, AWBI, listing, India Post, Google).
+- **Coordinates:** on the matched listings our `aw_lat`/`aw_lng` fields were empty in every case I sampled, while their records all carry geo. Worth a look before any map idea.
+- **What they have that we lack:** Google rating and review count, opening hours and "open now" on every card, geo in schema. **What we have that they lack:** registration data (AWBI, Darpan, 80G), "Verified on" dates, services, sources, FAQ, claim flow, press and campaign links, 7,565 listings against their 55.
+- Nothing was imported or changed; this is read-only.
+
+### 7.4 Our pages for comparison (live, 28 Nov)
+| | trustedvets /rescue-orgs/ | Animal Writes |
+|---|---|---|
+| List page | 1 H1, 1 chip row, 55 flat cards | /directory/: H1, Organisations, Browse by state, FAQ; /directory/delhi/: H1, Organisations, Districts, newsletter. State and district pages are grouped by place. |
+| Record headings | 3 | 18 on a full listing (Contact, Online profiles, Location, Registrations, Services, Organisation, Support, Photos, FAQ, Sources, claim, press, campaign, Volunteer, newsletter, nearby) |
+| Schema (list) | ItemList of the 55 | None on /directory/ or /directory/delhi/ beyond WebPage and BreadcrumbList (no ItemList) |
+| Schema (record) | NGO + geo + aggregateRating + sameAs + tel | NGO, VeterinaryCare, AnimalShelter + tel + sameAs, plus FAQPage; no geo, no hours, no rating |
+| Text and layout | cream page, 848 px single column, 24 px H1, 30 px buttons | black, white and grey, 720 px column, fluid H1 32 to 48 px, 44 px call pill |
+
+### 7.5 Ideas, none started (owner decides)
+1. **ItemList schema** on state and district list pages (theirs has it; ours does not).
+2. **Geo in listing schema** once coordinates are filled (needs the lat/lng gap looked at first).
+3. **Opening hours and an open-now line** on the list row, only where a verified source gives hours; do not copy Google's.
+4. **Type chips** (Shelter, Rescue, NGO, Adoption) on district lists as a quick filter. We already hold the services and type data.
+5. **Bigger touch targets**: theirs are 30 px; ours are 44 px or more, so keep ours.
+6. **Do not copy** their reliance on Google ratings as the lead signal, or their single-type NGO schema; ours is richer and sourced.
+7. **Candidates to research** (the unmatched list in 7.3), only through the normal enrichment route with verified sources.
