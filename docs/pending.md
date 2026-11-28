@@ -45,6 +45,9 @@ Pending tasks are strictly partitioned by domain:
 - **Search Console, Lab page:** position steady (3-5), demand fell after 5 Nov; "animal lab testing bill" ranks 5.4. Copy for title/description/NMC update awaits owner's yes. Diwali page 0.9% CTR and the old `/campaigns/diwali/` URL need a look; Kukur Tihar news item has 17k impressions, 7 clicks.
 - **Hub list swap:** seven hub patterns are on the server; the 11 page references to blocks 8934-8946, 12749, 12750 are not swapped yet (owner reply "ND" unclear).
 
+### InsightWeb keyword plan (28 Nov 2026)
+- **Plan:** [`docs/plans/insightweb-keyword-plan-2026-11-28.md`](plans/insightweb-keyword-plan-2026-11-28.md): resolve the 10 keyword conflicts (8 do-now via `seo-focus`, 2 lab items owner-gated), harvest the 811 Quick wins (1962 / helpline / ambulance cluster first), P1 CTR polish, read-only research pull. Numbers are from 27 Nov and must be re-read live before acting. Nothing live changed yet; copy needs the owner's yes.
+
 ### Plan files (`docs/plans/`, checked 24 Nov 2026)
 Eight open plans remain in [`docs/plans/`](plans/) (index: [`docs/plans/README.md`](plans/README.md)):
 - **Help-now keyword & content strategy** (`concurrent-orbiting-taco`): `help-now-keywords-2026-11-01.csv` exists; content-strategy file & per-page briefs open.
