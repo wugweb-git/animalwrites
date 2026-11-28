@@ -453,3 +453,146 @@ add_filter(
 	},
 	30
 );
+
+
+
+/* ---------- Home and About sections ---------- */
+
+/**
+ * Is any profile published? The Home row and the About section show only then; until then the site is as it was
+ * (the four law tiles stay in "The law, in plain words").
+ *
+ * @return bool
+ */
+function kits_profiles_exist() {
+	static $has = null;
+	if ( null === $has ) {
+		$has = (bool) get_posts(
+			array(
+				'post_type'        => 'post',
+				'post_status'      => 'publish',
+				'tag'              => 'profile',
+				'numberposts'      => 1,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+			)
+		);
+	}
+	return $has;
+}
+
+// The profile query blocks (namespace animal-writes/profiles) list Resources tagged "profile", newest first. The tag is
+// found by its slug, so no tag ID is written into a pattern.
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $query, $block ) {
+		if ( 'animal-writes/profiles' === ( $block->parsed_block['attrs']['namespace'] ?? '' ) ) {
+			$query['post_type'] = 'post';
+			$query['tag']       = 'profile';
+		}
+		return $query;
+	},
+	10,
+	2
+);
+
+/**
+ * The four law tiles (Acts and Rules, Court orders and judgments, Circulars and notices, Letters and templates): a 2 by 2
+ * grid beside the profile on Home when a profile exists (owner, 27 Nov 2026), else the row under "The law, in plain words"
+ * (patterns/animal-law.php), as before.
+ *
+ * @param string $class Extra class on the grid.
+ * @param string $space Top margin preset ('' for none).
+ * @return string Block markup.
+ */
+function kits_law_tiles_block( $class = '', $space = 'var:preset|spacing|50' ) {
+	$tiles = <<<'TILES'
+<!-- wp:group {"className":"kit-stack","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
+<div class="wp-block-group kit-stack" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"kit-tile kit-ico--legal","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--legal"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/library/?tag=act,rule">Acts and Rules</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The law in full, from the official text.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"kit-tile kit-ico--research","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--research"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/library/?tag=judgment">Court orders and judgments</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>What the courts have ordered, summarised.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"kit-tile kit-ico--file","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--file"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/library/?tag=circular">Circulars and notices</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>From the Animal Welfare Board and government departments.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"kit-tile kit-ico--mail","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--mail"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/library/?tag=template">Letters and templates</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Letters you can send today.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+TILES;
+	if ( '' === $space ) {
+		$tiles = str_replace( ',"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}', '', $tiles );
+		$tiles = str_replace( ' style="margin-top:var(--wp--preset--spacing--50)"', '', $tiles );
+	}
+	return '' !== $class ? str_replace( '"className":"kit-stack"', '"className":"kit-stack ' . $class . '"', str_replace( 'class="wp-block-group kit-stack"', 'class="wp-block-group kit-stack ' . $class . '"', $tiles ) ) : $tiles;
+}
+
+/**
+ * The profile section: heading, one line, the newest profile as a card, and a link to all profiles.
+ *
+ * @param string $heading  Section heading.
+ * @param string $lead     One line under it.
+ * @param int    $per_page Cards shown (1 on Home, up to 3 on About).
+ * @param int    $qid      Query ID (unique per pattern).
+ * @return string Block markup.
+ */
+function kits_people_profile_block( $heading, $lead, $per_page, $qid ) {
+	if ( ! function_exists( 'aw_card_item' ) ) {
+		return '';
+	}
+	return '<!-- wp:group {"className":"kit-people-profile","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-people-profile"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:heading -->
+<h2 class="wp-block-heading">' . esc_html( $heading ) . '</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>' . esc_html( $lead ) . '</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:query {"queryId":' . (int) $qid . ',"query":{"perPage":' . (int) $per_page . ',"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false},"namespace":"animal-writes/profiles","className":"aw-hub-list kit-people-list","layout":{"type":"default"}} -->
+<div class="wp-block-query aw-hub-list kit-people-list"><!-- wp:post-template {"className":"aw-tasks","layout":{"type":"default"}} -->
+' . aw_card_item( 'post', 'stacked-lg', 3 ) . '
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost kit-btn--sm"} -->
+<div class="wp-block-button is-style-kits-ghost kit-btn--sm"><a class="wp-block-button__link wp-element-button" href="/resources/?tag=profile">' . esc_html__( 'See all profiles', 'kits-by-wugweb' ) . '</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:group -->';
+}

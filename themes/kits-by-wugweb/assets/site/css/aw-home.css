@@ -268,3 +268,11 @@
 /* Home News, Learn and Library (owner, 13 Nov 2026: "Fix the lone card"): each Query Loop gives four items, two full rows
    of two from 1200; below 1200 (one column) the fourth is hidden, so phones and tablets keep three. */
 @media (max-width: 1199px) { :is(.aw-ed-news, .aw-ed-learn, .aw-ed-law) .wp-block-post-template > li:nth-child(n+4) { display: none; } }
+/* People and the law row (owner, 27 Nov 2026): one column on phones (the profile card, then the four law tiles one under another);
+   from 768 two columns of equal height, the tiles 2 by 2. The row prints nothing until a profile is published. */
+.kit-people-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-7); }
+.kit-people-row .kit-people-tiles.kit-stack { grid-template-columns: minmax(0, 1fr); margin-top: 0; }
+@media (min-width: 768px) {
+	.kit-people-row { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+	.kit-people-row .kit-people-tiles.kit-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+}
