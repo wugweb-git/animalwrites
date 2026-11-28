@@ -297,3 +297,14 @@ The owner suggests merging Veterinary care into one type and using animal-type f
 - **Direction:** one public type, **Veterinary care**, with a kind field behind it (hospital, dispensary, clinic, mobile unit, office, 24 hours, home visit) shown as a chip, and **animal-type filters** (Dog, Cat, Bird, Livestock, Wildlife, Other) as icon chips like trustedvets, on every list page and the search. Bird Hospital folds in under Bird.
 - **Why it fits:** it matches what a person asks ("a vet for my cat"), removes four near-empty or confusing type pages, makes room for private clinics, and uses one schema type (`VeterinaryCare`).
 - **What it needs:** an `animals` field on listings (the enrichment schema already has `animals` and `services`, so the data path exists), a redirect plan for the old type URLs, and the icon set (outline icons, black on white, to match the brand). Not started.
+
+## 15. Import log, 28 Nov 2026 (trustedvets.in: /rescue-orgs/, /emergency/, /search/)
+
+Owner: "import it. If we have them in our DB we will enrich them." Done as **drafts only**, nothing published.
+- **Rescue and NGOs (55 on /rescue-orgs/):** about 25 were already in the Directory. 23 new drafts created (IDs 32291 to 32313).
+- **Vet clinics (1,614 on /search/ and /emergency/, which is a filtered cut of the same set):** 113 matched or nearly matched our listings by name (98 exact, 15 near; mostly generic-name false positives) and were not imported. 1,447 new drafts created (IDs 32315 to 33761), tagged `veterinary-clinic`, 530 with the clinic's own website, the rest name and city only. Every draft carries a note that it is an unverified lead.
+- **Not copied:** phone numbers, addresses, coordinates, hours, ratings, review excerpts, descriptions or images. Those are Google-derived.
+- **Check:** 1,447 drafts tagged `veterinary-clinic` live; 7,565 published listings unchanged.
+- **Enrichment:** the SourceWeb queue only takes published, unchecked listings, so these drafts are not queued yet. Queuing named IDs, drafts included, is a small code change (own branch, owner's two-route rule); not started. Until then they stay as a lead list.
+- **Undo:** they are all drafts in a known ID range; trash by ID if the owner says delete.
+- **Merging veterinary types:** see section 14. The drafts sit under `veterinary-clinic` and would be re-tagged if the types are merged.

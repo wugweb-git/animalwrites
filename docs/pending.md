@@ -2,6 +2,8 @@
 
 Check this list against git and the live site before acting on it. Refer to items by their bold title (owner, 24 Oct 2026). Failing AI keys are the owner's own job: never list them. Finished work is archived in [`docs/archive/pending-done-2026-11.md`](archive/pending-done-2026-11.md).
 
+- **28 Nov, trustedvets.in import (drafts only):** 23 NGO drafts (IDs 32291 to 32313) and 1,447 private vet-clinic drafts (IDs 32315 to 33761, tag `veterinary-clinic`) created from trustedvets.in as unverified leads, no Google-derived values copied. Not queued for enrichment (queue takes published, unchecked listings only): needs a small code change to queue named IDs. Owner's idea to merge the veterinary types into one with animal-type filters is recorded, not built. Audit, schema, structure, disclaimers, shop and blog notes in `docs/plans/catlas-vs-directory-report-2026-11-28.md` sections 7 to 15.
+
 ## Repository & Architectural Partitioning (22 Nov 2026)
 Pending tasks are strictly partitioned by domain:
 1. **Kits Platform & Component Roadmaps**:
