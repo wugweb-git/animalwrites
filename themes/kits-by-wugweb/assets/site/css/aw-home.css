@@ -218,8 +218,8 @@
 .aw-findhelp-filters { margin-bottom: var(--kit-space-6); }
 .aw-findhelp-label { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-muted); }
 .aw-findhelp-types { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); list-style: none; margin: 0; padding: 0; }
-.aw-findhelp-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); }
-.aw-findhelp-actions .kit-btn { min-height: var(--kit-size-control); justify-content: center; }
+.aw-findhelp-actions { display: flex; flex-direction: column; align-items: flex-start; gap: var(--kit-space-3); }
+.aw-findhelp-actions .kit-btn { min-height: var(--kit-size-control); justify-content: center; inline-size: 100%; min-inline-size: var(--kit-btn-min-w); max-inline-size: var(--kit-btn-max-w); }
 .aw-findhelp-browse { order: 1; }
 .aw-findhelp-claim { order: 2; }
 @media (min-width: 768px) {
@@ -227,6 +227,7 @@
 	.aw-findhelp-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); }
 	.aw-findhelp-label { margin: 0; }
 	.aw-findhelp-actions { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
+	.aw-findhelp-actions .kit-btn { inline-size: auto; }
 }
 @media (min-width: 1200px) {
 	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem) auto auto; grid-template-areas: "q state go near"; }

@@ -214,6 +214,9 @@ Every interactive component implements the states that apply to it, with the sam
 | Active / pressed | Buttons move down 1px and scale 0.99, shadow removed |
 | Disabled | 55% opacity, `not-allowed` cursor, no hover |
 | Loading | `.is-loading`: label hidden, spinner (`aw-spin`), `aria-busy="true"`, second click ignored |
+
+### Button width (owner, 28 Nov 2026)
+Height is the token `--kit-btn-height` (44px). Width: a button stacked in an action group (Find help: Browse all states, Claim or update your listing) is **full width up to a maximum, never wider**: `--kit-btn-max-w` 24rem (384px), and never narrower than `--kit-btn-min-w` 9rem (144px). Below 768 the group is one column, so phones (343px of content) get full-width buttons and anything wider (a tablet at 752px) gets 384px buttons aligned left; from 768 the buttons sit side by side at their natural width. Other buttons keep their natural width. Extend a group to the same rule by using these two tokens; do not set a new width.
 | Selected / current | Nav: `aria-current="page"` with permanent underline |
 | Empty | Query blocks: h2 "Nothing here yet", one sentence, and search |
 | Error | Field: danger border + soft danger fill + message below (`.aw-field-error`, linked by `aria-describedby`); form: `.aw-form-summary` (`role="alert"`, focused, links to each field) |
