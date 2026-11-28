@@ -572,11 +572,13 @@ add_shortcode(
 		$close = aw_camp_close_ts( $id );
 		if ( '' !== $a['after_label'] && $close && time() >= $close ) { // after the close day: the owner's wording, e.g. "Closed 5 Nov · decision awaited"
 			$note = $a['after_label'];
+		} elseif ( $close && time() >= $close ) { // past its last day and no wording of its own: no day note (it used to say "Last day today" for ever)
+			$note = '';
 		} else {
 			/* translators: %d: the number of days left before the campaign closes. */
 			$note = $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'kits-by-wugweb' ), $d ) : __( 'Last day today', 'kits-by-wugweb' );
 		}
-		$days = '0' === (string) $a['days'] ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $note ) . '</span>';
+		$days = '0' === (string) $a['days'] || '' === $note ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $note ) . '</span>';
 		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a>' . $days . '</div>';
 	}
 );

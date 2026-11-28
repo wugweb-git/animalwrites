@@ -248,12 +248,13 @@ function aw_block_home_sc() {
 	// The campaign's portrait photograph (the one its hero shows on phones): the card's background at every width.
 	$img  = '<img class="aw-content-bg" src="' . esc_url( aw_theme_file_uri( 'assets/img/campaigns/supreme-court-stray-dog-phone.webp' ) ) . '" width="1122" height="1402" alt="" loading="lazy" decoding="async">';
 	$pre  = function_exists( 'aw_camp_shown_state' ) && 'pre' === aw_camp_shown_state( $id ); // Pre: no countdown to close, no action button (Content Standard E)
-	$cd   = $day && ! $pre ? do_shortcode( '[aw_countdown date="' . $day . '" label="Compliance reports due"]' ) : ''; // $day is Y-m-d (checked above)
+	$past = function_exists( 'aw_camp_close_ts' ) && aw_camp_close_ts( $id ) && time() >= aw_camp_close_ts( $id ); // past its last day: no countdown, no date in the heading
+	$cd   = $day && ! $pre && ! $past ? do_shortcode( '[aw_countdown date="' . $day . '" label="Compliance reports due"]' ) : ''; // $day is Y-m-d (checked above)
 	$cd   = preg_replace( '#\s*<span class="aw-cd-when">[^<]*</span>#', '', $cd ); // the day count only: the heading gives the date
 	// Card text as approved by the owner (2 Nov 2026).
 	$out  = '<section class="aw-content aw-sc" aria-labelledby="aw-sc-t">' . $img . '<div class="aw-content-body">';
 	$out .= '<p class="aw-sc-status">SMWP (C) 5/2025</p>';
-	$out .= '<h2 id="aw-sc-t">Supreme Court stray dogs case: first reports due 17 Nov 2026</h2>';
+	$out .= '<h2 id="aw-sc-t">' . ( $past ? 'Supreme Court stray dogs case: where it stands' : 'Supreme Court stray dogs case: first reports due 17 Nov 2026' ) . '</h2>';
 	$out .= '<p class="aw-sc-line">Every High Court must tell the Supreme Court what its state has done about stray dogs.</p>';
 	$out .= $cd ? '<div class="aw-sc-poster">' . $cd . '</div>' : '';
 	$out .= $pre ? '' : '<p class="aw-content-actions"><a class="kit-btn kit-btn--brand" href="' . esc_url( $url . '#tracker' ) . '">Check your state</a></p>'; // one button (owner, 2 Nov 2026)
