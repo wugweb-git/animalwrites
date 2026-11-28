@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/includes/law-tiles.php'; // static markup, no Kits Core calls: the Animal law pattern keeps its tiles without Kits Core
+
 // This site's campaign pages, Home sections and item heads (moved from Animal Writes Core, 19 Nov 2026; function, block,
 // shortcode, post-type and option names unchanged). The campaign link engine and the letter statistics are Kits Core's; the campaign stylesheets and scripts are in campaign/.
 if ( defined( 'KITS_CORE_LOADED' ) ) { // these files call Kits Core's functions at load: without Kits Core (deactivated, or not yet active) the site loads without them, and does not fatal

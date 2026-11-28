@@ -2,7 +2,7 @@
 
 Owner direction (26 Nov 2026): a section on the home page and detailed profiles of people who make a difference, with evidence.
 Focus on **Vishakha alone** first. Not on the Home page beyond one short block; each profile is a full page.
-Nothing here is published. Copy goes live only with the owner's explicit yes. No address, phone or exact shelter location is ever shown.
+Nothing here is published. Copy goes live only with the owner's explicit yes. No home address or exact shelter location is ever shown; the hero's phone and email are the organisation's public contact from its listing (owner, 28 Nov 2026).
 
 ## 1. Decisions taken (owner, 26 Nov 2026)
 
@@ -93,7 +93,7 @@ From the web (Lab campaign, not Vishakha): Google News results for the draft Lab
 
 - No profile goes live without the person's agreement, or, if the owner decides on public reporting only, a written note of that decision here.
 - Private link to the draft for the person: approve, change or remove. No login (the claim flow, B5 and B6, is on hold; profiles move onto it later).
-- No home address, phone number or exact farmhouse location. Photo only with permission and credit.
+- No home address or exact farmhouse location. Phone and email: owner, 28 Nov 2026, asked for them in the hero as icons; they are the **organisation's** public contact from its Directory listing (the numbers it already publishes; never a number on the never-publish list), not a personal number. Photo only with permission and credit.
 - Claims stated as reported ("about 400 dogs, as NDTV reported").
 
 ## 10. Steps

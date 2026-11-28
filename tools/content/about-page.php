@@ -375,6 +375,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
+
+<!-- wp:pattern {"slug":"animal-writes/people-about"} /-->
 HTML;
 
 // Card and principle pictures (owner uploads, 18 Oct 2026): {{IMG:id|alt}} becomes a 4:3 cover image block with the

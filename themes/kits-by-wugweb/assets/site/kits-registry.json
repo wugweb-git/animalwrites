@@ -1506,6 +1506,83 @@
       "block": "animal-writes/find-help"
     },
     {
+      "name": "People and the law row",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "kit-ed-people",
+        "kit-pb",
+        "kit-pb-body",
+        "kit-pb-cta",
+        "kit-pb-label",
+        "kit-pb-name",
+        "kit-pb-role",
+        "kit-pb-tiles",
+        "kit-people-bento"
+      ],
+      "states": [
+        "prints nothing until a profile is published; phones: the profile card, then the four law tiles one under another; from 768 two columns of equal height, the tiles 2 by 2"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (Editor \u2192 Patterns, \"Animal Writes\")",
+        "aria": "section with two H2s; list of cards and links",
+        "keyboard": "links and buttons",
+        "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+        "target": "44px controls, link and chips",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/people-row"
+    },
+    {
+      "name": "People (About)",
+      "type": "pattern",
+      "status": "live",
+      "classes": [
+        "kit-about-people",
+        "kit-pa",
+        "kit-pa-grid",
+        "kit-pa-item",
+        "kit-pa-item--empty",
+        "kit-pa-card",
+        "kit-pa-media",
+        "kit-pa-body",
+        "kit-pa-bar",
+        "kit-pa-bar--short",
+        "kit-pa-cta",
+        "kit-pa-bar--cta",
+        "kit-people-list",
+        "kit-people-profile"
+      ],
+      "states": [
+        "prints nothing until a profile is published; four slots: published profiles newest first, the rest grey placeholders; phones show the first slot only; a button on each profile"
+      ],
+      "tokens": [],
+      "a11y": {
+        "element": "pattern (Editor \u2192 Patterns, \"Animal Writes\")",
+        "aria": "section with an H2; list of cards",
+        "keyboard": "links and buttons",
+        "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+        "target": "44px controls, link and chips",
+        "motion": "none",
+        "sr": "visible text"
+      },
+      "seo": {
+        "heading": "H2 per section (H1 only in the hero)",
+        "link": "descriptive",
+        "alt": "photos described or empty",
+        "schema": "none"
+      },
+      "block": "animal-writes/people-about"
+    },
+    {
       "name": "AW Content",
       "type": "pattern",
       "status": "live",

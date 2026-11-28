@@ -269,3 +269,55 @@
 /* Home News, Learn and Library (owner, 13 Nov 2026: "Fix the lone card"): each Query Loop gives four items, two full rows
    of two from 1200; below 1200 (one column) the fourth is hidden, so phones and tablets keep three. */
 @media (max-width: 1199px) { :is(.aw-ed-news, .aw-ed-learn, .aw-ed-law) .wp-block-post-template > li:nth-child(n+4) { display: none; } }
+/* People and the law (owner, 28 Nov 2026): one bento block. The newest profile is a photo tile under a dark shade; the four
+   law tiles sit 2 by 2 beside it in three shades (ink, white, grey) with no heading of their own. One column on phones
+   (profile first); side by side from 1200 (sidebar width). Prints nothing until a profile is published. */
+.kit-people-bento { display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
+.kit-pb-tiles { display: grid; gap: var(--kit-space-3); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.kit-pb { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--kit-space-6); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); text-decoration: none; overflow: hidden; color: var(--kit-color-ink); background: var(--kit-color-raised); }
+.kit-pb > .kit-ico:first-child { --kit-ico-size: 1.75rem; }
+.kit-pb > .kit-ico--arrow-right { position: absolute; top: var(--kit-space-5); right: var(--kit-space-5); --kit-ico-size: 1.25rem; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
+.kit-pb-body { display: flex; flex-direction: column; gap: var(--kit-space-2); }
+.kit-pb-body strong { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); letter-spacing: var(--kit-tracking-heading); line-height: 1.2; }
+.kit-pb-body span { font-size: var(--kit-type-base); max-width: 32ch; }
+.kit-pb--ink { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.kit-pb--grey { background: color-mix(in srgb, var(--kit-color-ink) 8%, var(--kit-color-raised)); }
+.kit-pb--white .kit-pb-body span, .kit-pb--grey .kit-pb-body span { color: var(--kit-color-muted); }
+.kit-pb--ink .kit-pb-body span { opacity: .85; }
+.kit-pb:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-lg); }
+@media (hover:hover) { .kit-pb:hover > .kit-ico--arrow-right { transform: translateX(3px); } .kit-pb--white:hover, .kit-pb--grey:hover { border-color: var(--kit-color-ink); } }
+/* The profile tile: an empty grey box where her photo will go (owner, 28 Nov 2026), the words at the bottom. */
+.kit-pb--photo { aspect-ratio: var(--kit-card-featured-media-ratio); background: var(--kit-surface-section-alt); border-color: var(--kit-color-line); }
+.kit-pb-label { align-self: flex-start; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); background: var(--kit-color-raised); color: var(--kit-color-ink); }
+.kit-pb--photo .kit-pb-name { font-size: var(--kit-type-h2); font-weight: var(--kit-weight-strong); letter-spacing: var(--kit-tracking-heading); line-height: 1.1; }
+.kit-pb--photo .kit-pb-role { max-width: 36ch; color: var(--kit-color-muted); }
+.kit-pb-cta { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); margin-top: var(--kit-space-3); padding-inline: var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-sm); }
+.kit-pb-body .kit-pb-cta .kit-ico { --kit-ico-size: 1.125rem; position: static; }
+@media (max-width: 767px) { .kit-pb-tiles .kit-pb { gap: var(--kit-space-4); } .kit-pb-tiles .kit-pb-body strong { font-size: var(--kit-type-h4); } .kit-pb-tiles .kit-pb-body span { font-size: var(--kit-type-sm); } }
+@media (min-width: 1200px) {
+	.kit-people-bento { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+	.kit-pb-tiles { grid-auto-rows: 1fr; }
+	.kit-pb--photo { aspect-ratio: auto; min-block-size: 100%; }
+}
+
+/* About band, people (owner, 28 Nov 2026): four slots. A profile is a 4:3 picture over its words; an empty slot is a grey box
+   and two grey bars. Phones show the first slot only; two across from 768; four across from 1200. */
+.kit-pa-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
+.kit-pa-grid > li { margin: 0; max-inline-size: none; min-inline-size: 0; }
+.kit-pa-card { display: grid; gap: var(--kit-space-3); color: inherit; text-decoration: none; }
+.kit-pa-media { display: block; overflow: hidden; aspect-ratio: var(--kit-media-ratio-standard); border-radius: var(--kit-radius-card); background: var(--kit-surface-section-alt); border: var(--kit-border-width) solid var(--kit-color-line); }
+.kit-pa-media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 8%; } /* the 4:3 crop of a portrait keeps the face */
+.kit-pa-body { display: grid; gap: var(--kit-space-1); }
+.kit-pa-body strong { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: 1.2; }
+.kit-pa-body > span:not(.kit-pa-cta) { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.kit-pa-bar { display: block; block-size: 1rem; border-radius: var(--kit-radius-pill); background: var(--kit-surface-section-alt); }
+.kit-pa-bar--short { inline-size: 60%; }
+.kit-pa-item--empty { display: none; }
+.kit-pa-cta { justify-self: start; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-block-size: var(--kit-size-target); margin-top: var(--kit-space-2); padding-inline: var(--kit-space-5); border-radius: var(--kit-radius-pill); border: var(--kit-border-width) solid var(--kit-color-ink); color: var(--kit-color-ink); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.kit-pa-cta .kit-ico { --kit-ico-size: 1.125rem; }
+.kit-pa-bar--cta { inline-size: 7rem; block-size: var(--kit-size-target); margin-top: var(--kit-space-2); }
+@media (hover:hover) { a.kit-pa-card:hover .kit-pa-cta { background: var(--kit-color-ink); color: var(--kit-color-on-ink); } }
+a.kit-pa-card:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-lg); }
+@media (hover:hover) { a.kit-pa-card:hover strong { text-decoration: none; } a.kit-pa-card:hover .kit-pa-media { border-color: var(--kit-color-ink); } }
+@media (min-width: 768px) { .kit-pa-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kit-pa-item--empty { display: block; } }
+@media (min-width: 1200px) { .kit-pa-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

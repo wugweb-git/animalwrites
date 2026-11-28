@@ -38,6 +38,15 @@
 .aw-sources-credit > .aw-src { margin: 0 !important; }
 .aw-sources-by, .aw-posted-by { display: inline-flex; align-items: center; gap: var(--kit-space-2); font-weight: var(--kit-weight-medium); }
 .aw-sources-logo { width: 1.25rem; height: 1.25rem; border-radius: var(--kit-radius-mark); }
+/* A quotation in an item's text (owner, 28 Nov 2026): an ink bar at the start, the words at the lead size, the speaker and source small and muted below. */
+.kit-item .wp-block-post-content .wp-block-quote { margin-block: var(--kit-space-6); padding-inline-start: var(--kit-space-5); border-inline-start: var(--kit-space-1) solid var(--kit-color-ink); }
+.kit-item .wp-block-post-content .wp-block-quote p { font-size: var(--kit-type-lead); line-height: 1.4; font-weight: var(--kit-weight-medium); color: var(--kit-color-ink); margin: 0; }
+.kit-item .wp-block-post-content .wp-block-quote cite { display: block; margin-top: var(--kit-space-3); font-style: normal; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-sources--profile { padding-top: var(--kit-space-6); border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-sources--profile .aw-sources-head { font-size: var(--kit-type-h4); }
+.aw-sources--profile ~ :is(.aw-item-tags, .aw-item-share) { margin-top: var(--kit-space-5); padding-top: var(--kit-space-5); border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-sources--profile :is(.aw-sources-logo, .aw-sources-mark) { inline-size: 1.5rem; block-size: 1.5rem; margin-inline-end: var(--kit-space-2); vertical-align: middle; object-fit: contain; }
+.aw-sources-mark { display: inline-grid; place-items: center; border-radius: var(--kit-radius-mark); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); line-height: 1; }
 .aw-sources-note, .aw-sources-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-1) var(--kit-space-3); margin: 0 0 var(--kit-space-2); max-width: none; }
 .aw-sources-read { font-weight: var(--kit-weight-strong); }
 .aw-sources-read::after { content: none !important; }
@@ -298,11 +307,6 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 .kit-profile-follow a::after { content: none; }
 .kit-profile-org { margin: var(--kit-space-6) 0; }
 .kit-profile-org h2 { margin: 0 0 var(--kit-space-3); }
-.kit-profile-orgcard { display: flex; align-items: center; gap: var(--kit-space-4); padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); color: inherit; text-decoration: none; }
-.kit-profile-orgcard .kit-profile-initials { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.kit-profile-orgtext { display: grid; gap: var(--kit-space-1); min-width: 0; }
-.kit-profile-orgtext > span { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
-.kit-profile-orgtext .kit-profile-orgmore { color: var(--kit-color-ink); font-weight: var(--kit-weight-medium); }
 @media (min-width: 768px) {
 	.kit-profile-hero { padding: var(--kit-space-7) var(--kit-space-6); }
 	.kit-profile-hero.has-photo { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); padding: 0; }
@@ -311,21 +315,37 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 	}
 .kit-profile-mosaic { margin: var(--kit-space-6) 0; }
 .kit-profile-mosaic h2 { margin: 0 0 var(--kit-space-4); }
-.kit-profile-mt-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; gap: var(--kit-space-3); }
-.kit-profile-mt { display: grid; border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); overflow: hidden; }
-.kit-profile-mt.is-wide { grid-column: span 2; }
-.kit-profile-mt > a { display: grid; align-content: space-between; gap: var(--kit-space-1); padding: var(--kit-space-5); color: inherit; text-decoration: none; }
+/* The links: seven tiles in ONE grid, so every edge lines up (owner, 28 Nov 2026). The three wide rows span the whole row;
+   the four social pages take one column each (two a row on phones, four from 768). One radius, one icon square, one arrow. */
+.kit-profile-mt-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--kit-space-3); }
+.kit-profile-mt-grid > li { max-inline-size: none; margin: 0; min-inline-size: 0; }
+.kit-profile-mt { grid-column: 1 / -1; display: grid; border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); overflow: hidden; }
+.kit-profile-mt > a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ico title go" "ico line go"; align-items: center; column-gap: var(--kit-space-4); row-gap: 0; padding: var(--kit-space-5); color: inherit; text-decoration: none; }
+.kit-profile-mt-top { display: contents; }
+.kit-profile-mt-ico { grid-area: ico; }
+.kit-profile-mt-go { grid-area: go; }
+.kit-profile-mt-title { grid-area: title; font-size: var(--kit-type-card-title); line-height: 1.25; overflow-wrap: anywhere; }
+.kit-profile-mt-line { grid-area: line; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .kit-profile-mt.is-ink { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
 .kit-profile-mt.is-soft { background: var(--kit-color-surface-soft); }
 .kit-profile-mt.is-plain { background: var(--kit-color-raised); }
-.kit-profile-mt-top { display: flex; align-items: flex-start; justify-content: space-between; margin-block-end: var(--kit-space-3); }
-.kit-profile-mt-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); background: var(--kit-color-surface-soft); color: var(--kit-color-ink); --kit-ico-size: 1.375rem; }
-.kit-profile-mt.is-soft .kit-profile-mt-ico { background: var(--kit-color-raised); }
-.kit-profile-mt.is-ink .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); }
-.kit-profile-mt-go { font-size: var(--kit-type-lead); line-height: 1; }
-.kit-profile-mt-title { font-size: var(--kit-type-card-title); line-height: 1.25; overflow-wrap: anywhere; }
-.kit-profile-mt-line { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.kit-profile-mt.is-photo { background: linear-gradient(to top, color-mix(in srgb, var(--kit-color-ink) 92%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 70%, transparent) 100%), var(--kit-pmt-img) center / cover; color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
 .kit-profile-mt.is-ink .kit-profile-mt-line { color: var(--kit-color-on-ink); }
+.kit-profile-mt.is-photo .kit-profile-mt-line { color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
+/* The social tiles: the same card, stacked (icon and arrow on top, name and "Follow" under). */
+.kit-profile-st { box-sizing: border-box; position: relative; display: grid; place-items: center; block-size: 100%; padding: var(--kit-space-5) var(--kit-space-2); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
+.kit-profile-st::after, .kit-profile-mt > a::after { content: none; }
+.kit-profile-st-top { display: contents; }
+.kit-profile-st-go { display: none; }
+.kit-profile-st strong { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* phones: the icon alone, the name for screen readers only */
+/* Shared by every tile: the icon square and the arrow. */
+.kit-profile-mt-ico, .kit-profile-st-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); background: var(--kit-color-raised); }
+.kit-profile-mt.is-ink .kit-profile-mt-ico, .kit-profile-mt.is-photo .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+.kit-profile-mt-go, .kit-profile-st-go { font-size: var(--kit-type-lead); line-height: 1; }
+@media (hover:hover) { .kit-profile-st:hover { border-color: var(--kit-color-ink); } }
+/* From 768 the social tiles are as tall as the wide rows: the icon square and the name side by side, the arrow in the corner. */
 @media (min-width: 768px) {
-	.kit-profile-mt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	.kit-profile-st { display: flex; align-items: center; justify-content: flex-start; gap: var(--kit-space-2); padding: var(--kit-space-5); }
+	.kit-profile-st-go { display: block; position: absolute; inset-block-start: var(--kit-space-2); inset-inline-end: var(--kit-space-3); font-size: var(--kit-type-sm); }
+	.kit-profile-st strong { position: static; inline-size: auto; block-size: auto; overflow: visible; clip-path: none; white-space: normal; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); line-height: 1.25; }
 }

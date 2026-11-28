@@ -40,45 +40,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 
-<!-- wp:group {"className":"kit-stack","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
-<div class="wp-block-group kit-stack" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"kit-tile kit-ico--legal","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--legal"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=act,rule">Acts and Rules</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>The law in full, from the official text.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--research","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--research"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=judgment">Court orders and judgments</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>What the courts have ordered, summarised.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--file","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--file"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=circular">Circulars and notices</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>From the Animal Welfare Board and government departments.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--mail","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--mail"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=template">Letters and templates</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Letters you can send today.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group --></section>
+<?php echo function_exists( 'kits_law_tiles_block' ) && ( ! function_exists( 'kits_profiles_exist' ) || ! kits_profiles_exist() ) ? kits_law_tiles_block() : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static block markup (includes/profile.php); with a profile published the four tiles sit beside it in patterns/people-row.php ?>
+</section>
 <!-- /wp:group -->
