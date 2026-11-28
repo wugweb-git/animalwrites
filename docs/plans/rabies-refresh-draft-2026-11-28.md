@@ -28,3 +28,19 @@ Source: NCDC, National Guidelines on Rabies Prophylaxis (RIG for all category II
 
 ## Placement
 Add 1, 2 and 4 as short sections (H2 claim + 2 to 3 sentences) under "The kind of contact decides the injections", then add the three sources to the existing Sources list. Keep one H1. Rank Math keyphrases on the page: not changed here.
+
+---
+
+# Campaign page FAQ: two additions (owner, 28 Nov 2026) — `/campaigns/rabies-awareness-india/` (31896)
+
+**Status: DRAFT, HELD for clinician sign-off. Not on the page.** Keep the page title and description. The FAQ is a Rank Math FAQ block (`wp:rank-math/faq-block`, questions visible), so each addition is one more entry in its `questions` list plus the matching HTML item; no rewrite.
+
+**Already on the page (so not repeated):** category III with RIG ("Ask for RIG into the wound for every bleeding bite or deep scratch"; category III defined; "India is stricter than WHO on RIG: NCDC 2019 requires RIG"). The owner's conditional third line (RIG for category III) is therefore **not needed**.
+
+## Q1. How soon do rabies symptoms appear after a bite?
+Owner's answer: usually 1–3 months, range a few days to more than a year, by bite site and severity; start the vaccine immediately; once symptoms start it is almost always fatal.
+**Conflict to settle before this goes in:** the page's own FAQ ("What if it happened days, weeks, or months ago?") says the incubation period is typically 2–3 months, ranging from 1 week to 1 year, which is the WHO rabies fact sheet. "1–3 months" is from a different WHO guide, and "a few days" has no source found. Suggested wording that matches the page and WHO: "Usually 2 to 3 months, but it can be as short as a week or as long as a year, depending on where the bite is and how severe it is. Start the vaccine at once; do not wait for symptoms. Once symptoms start, rabies is almost always fatal." Source: https://www.who.int/news-room/fact-sheets/detail/rabies `[verify]`
+
+## Q2. How long does the rabies vaccine protect you?
+Owner's answer: a full post-exposure course covers that bite; protection fades over time, so a later bite may need booster doses (fewer doses and no RIG if fully vaccinated before); tell the doctor about earlier vaccination.
+**No source found** for the duration or for the "fewer doses, no RIG if previously fully vaccinated" rule in the WHO and NCDC pages searched. The NCDC text found says RIG is not given to someone who already completed pre- or post-exposure prophylaxis, which supports the "no RIG" part only. Needs the full NCDC National Guidelines on Rabies Prophylaxis (the page already cites the 2019 revision) and the clinician. Hold the whole entry until then.
