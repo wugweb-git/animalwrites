@@ -321,32 +321,32 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 	}
 .kit-profile-mosaic { margin: var(--kit-space-6) 0; }
 .kit-profile-mosaic h2 { margin: 0 0 var(--kit-space-4); }
-.kit-profile-mt-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
-.kit-profile-mt, .kit-profile-social > li { max-inline-size: none; } /* the item text's 72ch line cap does not apply to these rows */
-.kit-profile-mt { display: grid; border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); overflow: hidden; }
-/* One slim row per tile: icon, title over one line, arrow (owner, 28 Nov 2026: the stacked tiles were too big). */
+/* The links: seven tiles in ONE grid, so every edge lines up (owner, 28 Nov 2026). The three wide rows span the whole row;
+   the four social pages take one column each (two a row on phones, four from 768). One radius, one icon square, one arrow. */
+.kit-profile-mt-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); }
+.kit-profile-mt-grid > li { max-inline-size: none; margin: 0; min-inline-size: 0; }
+.kit-profile-mt { grid-column: 1 / -1; display: grid; border-radius: var(--kit-radius-card); border: var(--kit-border-width) solid var(--kit-color-line); overflow: hidden; }
 .kit-profile-mt > a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ico title go" "ico line go"; align-items: center; column-gap: var(--kit-space-4); row-gap: 0; padding: var(--kit-space-5); color: inherit; text-decoration: none; }
 .kit-profile-mt-top { display: contents; }
 .kit-profile-mt-ico { grid-area: ico; }
-.kit-profile-mt-go { grid-area: go; font-size: var(--kit-type-lead); line-height: 1; }
+.kit-profile-mt-go { grid-area: go; }
 .kit-profile-mt-title { grid-area: title; font-size: var(--kit-type-card-title); line-height: 1.25; overflow-wrap: anywhere; }
 .kit-profile-mt-line { grid-area: line; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .kit-profile-mt.is-ink { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
 .kit-profile-mt.is-soft { background: var(--kit-color-surface-soft); }
 .kit-profile-mt.is-plain { background: var(--kit-color-raised); }
 .kit-profile-mt.is-photo { background: linear-gradient(to top, color-mix(in srgb, var(--kit-color-ink) 92%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 70%, transparent) 100%), var(--kit-pmt-img) center / cover; color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
-.kit-profile-mt-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); background: var(--kit-color-raised); }
-.kit-profile-mt.is-ink .kit-profile-mt-ico, .kit-profile-mt.is-photo .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 .kit-profile-mt.is-ink .kit-profile-mt-line { color: var(--kit-color-on-ink); }
 .kit-profile-mt.is-photo .kit-profile-mt-line { color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
-/* Their own pages: the tile layout, small, side by side (two a row on phones, four from 768). */
-.kit-profile-social { list-style: none; margin: var(--kit-space-3) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); }
-.kit-profile-st { display: grid; gap: var(--kit-space-1); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
-.kit-profile-st::after { content: none; }
+/* The social tiles: the same card, stacked (icon and arrow on top, name and "Follow" under). */
+.kit-profile-st { display: grid; gap: var(--kit-space-1); block-size: 100%; padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
+.kit-profile-st::after, .kit-profile-mt > a::after { content: none; }
 .kit-profile-st-top { display: flex; align-items: flex-start; justify-content: space-between; margin-block-end: var(--kit-space-2); }
-.kit-profile-st-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); }
-.kit-profile-st-go { font-size: var(--kit-type-base); line-height: 1; }
 .kit-profile-st strong { font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.25; }
 .kit-profile-st > span:not(.kit-profile-st-top):not(.screen-reader-text) { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+/* Shared by every tile: the icon square and the arrow. */
+.kit-profile-mt-ico, .kit-profile-st-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); background: var(--kit-color-raised); }
+.kit-profile-mt.is-ink .kit-profile-mt-ico, .kit-profile-mt.is-photo .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+.kit-profile-mt-go, .kit-profile-st-go { font-size: var(--kit-type-lead); line-height: 1; }
 @media (hover:hover) { .kit-profile-st:hover { border-color: var(--kit-color-ink); } }
-@media (min-width: 768px) { .kit-profile-social { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .kit-profile-mt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

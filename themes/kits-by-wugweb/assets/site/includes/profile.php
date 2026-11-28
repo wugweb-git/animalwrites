@@ -321,7 +321,7 @@ function kits_profile_head_html( $id ) {
 
 /** One mosaic tile: an icon, an arrow, a title and one short line; the whole tile is the link. */
 function kits_profile_mosaic_tile( $shade, $icon, $title, $line, $href, $ext = true, $wide = false, $img = '' ) {
-	return '<li class="kit-profile-mt is-' . esc_attr( $shade ) . ( $wide ? ' is-wide' : '' ) . '"' . ( '' !== $img ? ' style="--kit-pmt-img:url(\'' . esc_url( $img ) . '\')"' : '' ) . '><a href="' . esc_url( $href ) . '"' . ( $ext ? ' target="_blank" rel="noopener nofollow me"' : '' ) . '><span class="kit-profile-mt-top"><span class="kit-profile-mt-ico" aria-hidden="true"><span class="kit-ico kit-ico--' . esc_attr( $icon ) . '"></span></span><span class="kit-profile-mt-go" aria-hidden="true">' . ( $ext ? '↗' : '→' ) . '</span></span><strong class="kit-profile-mt-title">' . esc_html( $title ) . '</strong><span class="kit-profile-mt-line">' . esc_html( $line ) . '</span>' . ( $ext ? '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span>' : '' ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
+	return '<li class="kit-profile-mt is-' . esc_attr( $shade ) . ( $wide ? ' is-wide' : '' ) . '"' . ( '' !== $img ? ' style="--kit-pmt-img:url(\'' . esc_url( $img ) . '\')"' : '' ) . '><a href="' . esc_url( $href ) . '"' . ( $ext ? ' target="_blank" rel="noopener nofollow me"' : '' ) . '><span class="kit-profile-mt-top"><span class="kit-profile-mt-ico" aria-hidden="true"><span class="kit-ico kit-ico--' . esc_attr( $icon ) . '"></span></span><span class="kit-profile-mt-go" aria-hidden="true">' . '↗' . '</span></span><strong class="kit-profile-mt-title">' . esc_html( $title ) . '</strong><span class="kit-profile-mt-line">' . esc_html( $line ) . '</span>' . ( $ext ? '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span>' : '' ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part is escaped above.
 }
 
 /**
@@ -360,8 +360,7 @@ function kits_profile_tail_html( $id ) {
 	foreach ( $f['links'] as $name => $url ) { // their own pages: small tiles in one row (owner, 28 Nov 2026: the old layout, smaller, side by side)
 		$social .= '<li><a class="kit-profile-st" href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me"><span class="kit-profile-st-top"><span class="kit-profile-st-ico" aria-hidden="true"><span class="kit-ico kit-ico--' . esc_attr( $icons[ $name ] ?? 'link' ) . '"></span></span><span class="kit-profile-st-go" aria-hidden="true">↗</span></span><strong>' . esc_html( $name ) . '</strong><span>' . esc_html__( 'Follow', 'kits-by-wugweb' ) . '</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
 	}
-	$social = '' !== $social ? '<ul class="kit-profile-social">' . $social . '</ul>' : '';
-	return '<section class="kit-profile-mosaic" aria-labelledby="kit-profile-mosaic-h"><h2 id="kit-profile-mosaic-h">' . esc_html( $h ) . '</h2><ul class="kit-profile-mt-grid">' . implode( '', $t ) . '</ul>' . $social . '</section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every tile is escaped in kits_profile_mosaic_tile().
+	return '<section class="kit-profile-mosaic" aria-labelledby="kit-profile-mosaic-h"><h2 id="kit-profile-mosaic-h">' . esc_html( $h ) . '</h2><ul class="kit-profile-mt-grid">' . implode( '', $t ) . $social . '</ul></section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every tile is escaped above.
 }
 
 /**
