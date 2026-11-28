@@ -150,7 +150,7 @@ add_action( 'shutdown', 'aw_si_srv_count', 0 );
  */
 function aw_si_srv_php_errors( string $ymd ): array {
 	$out = array(
-		'status' => 'not_found',
+		'status'  => 'not_found',
 		'kinds'   => array(),
 		'top'     => array(),
 		'callers' => array(),
@@ -202,8 +202,8 @@ function aw_si_srv_php_errors( string $ymd ): array {
 			}
 		);
 	}
-	$out['status'] = 'ok';
-	$out['kinds']  = $kinds;
+	$out['status']  = 'ok';
+	$out['kinds']   = $kinds;
 	$out['top']     = kits_error_count_top( $top );
 	$out['callers'] = kits_error_count_top( $callers );
 	return $out;
