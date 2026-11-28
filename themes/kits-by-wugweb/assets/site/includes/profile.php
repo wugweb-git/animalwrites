@@ -354,7 +354,7 @@ function kits_profile_tail_html( $id ) {
 		return '';
 	}
 	/* translators: %s: first name. */
-	$h = '' !== $first ? sprintf( __( '%s’s links', 'kits-by-wugweb' ), $first ) : __( 'Links', 'kits-by-wugweb' );
+	$h = '' !== $first ? sprintf( __( 'More on %s’s work', 'kits-by-wugweb' ), $first ) : __( 'More on their work', 'kits-by-wugweb' );
 	$icons  = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
 	$social = '';
 	foreach ( $f['links'] as $name => $url ) { // their own pages: small pills, not tiles (owner, 28 Nov 2026: too big)
