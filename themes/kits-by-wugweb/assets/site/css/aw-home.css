@@ -300,12 +300,12 @@
 	.kit-pb--photo { aspect-ratio: auto; min-block-size: 100%; }
 }
 
-/* About band, people (owner, 28 Nov 2026): four slots. A profile is a portrait picture over its words; an empty slot is a grey box
+/* About band, people (owner, 28 Nov 2026): four slots. A profile is a 4:3 picture over its words; an empty slot is a grey box
    and two grey bars. Phones show the first slot only; two across from 768; four across from 1200. */
 .kit-pa-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
 .kit-pa-grid > li { margin: 0; max-inline-size: none; min-inline-size: 0; }
 .kit-pa-card { display: grid; gap: var(--kit-space-3); color: inherit; text-decoration: none; }
-.kit-pa-media { display: block; overflow: hidden; aspect-ratio: var(--kit-media-ratio-portrait); border-radius: var(--kit-radius-card); background: var(--kit-surface-section-alt); border: var(--kit-border-width) solid var(--kit-color-line); }
+.kit-pa-media { display: block; overflow: hidden; aspect-ratio: var(--kit-media-ratio-standard); border-radius: var(--kit-radius-card); background: var(--kit-surface-section-alt); border: var(--kit-border-width) solid var(--kit-color-line); }
 .kit-pa-media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
 .kit-pa-body { display: grid; gap: var(--kit-space-1); }
 .kit-pa-body strong { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: 1.2; }
