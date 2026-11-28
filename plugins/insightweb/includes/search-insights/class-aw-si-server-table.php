@@ -110,6 +110,9 @@ class AW_SI_Server_Table extends WP_List_Table {
 				foreach ( array_slice( (array) ( $php['top'] ?? array() ), 0, 3, true ) as $msg => $n ) {
 					$out .= '<br><span class="description">' . esc_html( number_format_i18n( (int) $n ) . ' × ' ) . aw_si_srv_msg_html( (string) $msg ) . '</span>'; // escaped inside.
 				}
+				foreach ( array_slice( (array) ( $php['callers'] ?? array() ), 0, 2, true ) as $by => $n ) {
+					$out .= '<br><span class="description">' . esc_html( sprintf( /* translators: 1: number of database errors, 2: the calls that ran the query */ __( 'Database error ×%1$s from %2$s', 'insightweb' ), number_format_i18n( (int) $n ), (string) $by ) ) . '</span>';
+				}
 				return $out;
 		}
 		return '';
