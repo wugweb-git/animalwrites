@@ -220,8 +220,6 @@ $content = <<<'HTML'
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:pattern {"slug":"animal-writes/people-about"} /-->
-
 <!-- wp:group {"metadata":{"name":"Why we do it"},"align":"full","className":"aw-about-band aw-about-why kit-dark aw-about-band--ink","layout":{"type":"default"}} -->
 <div class="wp-block-group alignfull aw-about-band aw-about-why kit-dark aw-about-band--ink"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-about-inner"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
