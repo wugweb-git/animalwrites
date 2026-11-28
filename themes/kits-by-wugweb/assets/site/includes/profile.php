@@ -357,8 +357,8 @@ function kits_profile_tail_html( $id ) {
 	$h = '' !== $first ? sprintf( __( 'More on %s’s work', 'kits-by-wugweb' ), $first ) : __( 'More on their work', 'kits-by-wugweb' );
 	$icons  = array( 'Instagram' => 'instagram', 'LinkedIn' => 'linkedin', 'Facebook' => 'facebook', 'YouTube' => 'youtube', 'X' => 'x-brand', 'WhatsApp' => 'brand-whatsapp' );
 	$social = '';
-	foreach ( $f['links'] as $name => $url ) { // their own pages: small pills, not tiles (owner, 28 Nov 2026: too big)
-		$social .= '<li><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me"><span class="kit-ico kit-ico--' . esc_attr( $icons[ $name ] ?? 'link' ) . '" aria-hidden="true"></span>' . esc_html( $name ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
+	foreach ( $f['links'] as $name => $url ) { // their own pages: small tiles in one row (owner, 28 Nov 2026: the old layout, smaller, side by side)
+		$social .= '<li><a class="kit-profile-st" href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow me"><span class="kit-profile-st-top"><span class="kit-profile-st-ico" aria-hidden="true"><span class="kit-ico kit-ico--' . esc_attr( $icons[ $name ] ?? 'link' ) . '"></span></span><span class="kit-profile-st-go" aria-hidden="true">↗</span></span><strong>' . esc_html( $name ) . '</strong><span>' . esc_html__( 'Follow', 'kits-by-wugweb' ) . '</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'kits-by-wugweb' ) . '</span></a></li>';
 	}
 	$social = '' !== $social ? '<ul class="kit-profile-social">' . $social . '</ul>' : '';
 	return '<section class="kit-profile-mosaic" aria-labelledby="kit-profile-mosaic-h"><h2 id="kit-profile-mosaic-h">' . esc_html( $h ) . '</h2><ul class="kit-profile-mt-grid">' . implode( '', $t ) . '</ul>' . $social . '</section>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every tile is escaped in kits_profile_mosaic_tile().

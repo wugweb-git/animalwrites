@@ -338,8 +338,14 @@ h2.kit-profile-figure { font-size: var(--kit-type-h3); }
 .kit-profile-mt.is-ink .kit-profile-mt-ico, .kit-profile-mt.is-photo .kit-profile-mt-ico { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 .kit-profile-mt.is-ink .kit-profile-mt-line { color: var(--kit-color-on-ink); }
 .kit-profile-mt.is-photo .kit-profile-mt-line { color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
-/* Their own pages: small pills, a row that wraps. */
-.kit-profile-social { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
-.kit-profile-social a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-block-size: var(--kit-size-target); padding-inline: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-pill); background: var(--kit-color-raised); color: var(--kit-color-ink); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); text-decoration: none; }
-.kit-profile-social a::after { content: none; }
-@media (hover:hover) { .kit-profile-social a:hover { border-color: var(--kit-color-ink); } }
+/* Their own pages: the tile layout, small, side by side (two a row on phones, four from 768). */
+.kit-profile-social { list-style: none; margin: var(--kit-space-3) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); }
+.kit-profile-st { display: grid; gap: var(--kit-space-1); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; }
+.kit-profile-st::after { content: none; }
+.kit-profile-st-top { display: flex; align-items: flex-start; justify-content: space-between; margin-block-end: var(--kit-space-2); }
+.kit-profile-st-ico { display: grid; place-items: center; inline-size: var(--kit-size-target); block-size: var(--kit-size-target); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-media); }
+.kit-profile-st-go { font-size: var(--kit-type-base); line-height: 1; }
+.kit-profile-st strong { font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.25; }
+.kit-profile-st > span:not(.kit-profile-st-top):not(.screen-reader-text) { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+@media (hover:hover) { .kit-profile-st:hover { border-color: var(--kit-color-ink); } }
+@media (min-width: 768px) { .kit-profile-social { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
