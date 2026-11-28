@@ -343,7 +343,9 @@ function kits_profile_tail_html( $id ) {
 	$first = kits_profile_first( $f );
 	$t     = array();
 
-	// The organisation has its own card above (kits_profile_org_card); no second link to it here (owner, 28 Nov 2026).
+	if ( $org ) {
+		$t[] = kits_profile_mosaic_tile( 'ink', 'home', get_the_title( $org ), __( 'Directory listing', 'kits-by-wugweb' ), get_permalink( $org ), false, true );
+	}
 	$help = kits_profile_help_url( $f['place'] );
 	if ( '' !== $help ) {
 		$city = trim( explode( ',', $f['place'] )[0] );
