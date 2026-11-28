@@ -259,8 +259,10 @@ function kits_profile_org_card( $org, $f ) {
 	}
 	/* translators: %s: first name. */
 	$h   = '' !== $first ? sprintf( __( '%s’s organisation', 'kits-by-wugweb' ), $first ) : __( 'Their organisation', 'kits-by-wugweb' );
+	$logo = has_post_thumbnail( $org ) ? get_the_post_thumbnail( $org, 'thumbnail', array( 'class' => 'kit-profile-orglogo', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ) : ''; // The listing's own logo (its featured image); initials only when it has none.
+	$mark = '' !== $logo ? $logo : '<span class="kit-profile-initials" aria-hidden="true">' . esc_html( kits_profile_initials( $name ) ) . '</span>';
 	$out = '<section class="kit-profile-org" aria-labelledby="kit-profile-org-h"><h2 id="kit-profile-org-h">' . esc_html( $h ) . '</h2>';
-	$out .= '<a class="kit-profile-orgcard" href="' . esc_url( get_permalink( $org ) ) . '"><span class="kit-profile-initials" aria-hidden="true">' . esc_html( kits_profile_initials( $name ) ) . '</span><span class="kit-profile-orgtext"><strong>' . esc_html( $name ) . '</strong>';
+	$out .= '<a class="kit-profile-orgcard" href="' . esc_url( get_permalink( $org ) ) . '">' . $mark . '<span class="kit-profile-orgtext"><strong>' . esc_html( $name ) . '</strong>';
 	$out .= $bits ? '<span>' . esc_html( implode( ' · ', $bits ) ) . '</span>' : '';
 	$out .= '<span class="kit-profile-orgmore">' . esc_html__( 'See the listing', 'kits-by-wugweb' ) . ' <span aria-hidden="true">→</span></span></span></a></section>';
 	return $out;
