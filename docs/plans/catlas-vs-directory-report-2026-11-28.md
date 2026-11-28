@@ -134,3 +134,39 @@ Method: took the 55 names, phones, addresses and coordinates from their record p
 5. **Bigger touch targets**: theirs are 30 px; ours are 44 px or more, so keep ours.
 6. **Do not copy** their reliance on Google ratings as the lead signal, or their single-type NGO schema; ours is richer and sourced.
 7. **Candidates to research** (the unmatched list in 7.3), only through the normal enrichment route with verified sources.
+
+## 8. Combined suggestions (Catlas, Learn, trustedvets) and what can be ingested
+
+### 8.1 Suggestions, ranked (ideas only; nothing started; owner decides)
+**Directory UX and layout**
+1. Compact list row (64 to 80 px) with Call, WhatsApp and Directions on the row (sections 5.1 and 7.5).
+2. Type chips (Shelter, Rescue, NGO, Adoption) as a quick filter on district lists, from the type and services data we already hold.
+3. Filled primary Call button and a short top card on listings; hide empty fields on thin listings behind one "Suggest an update" link.
+4. Split list-and-map view from 1024 px, with an "approximate location" legend for pins from a PIN or district.
+5. Keep our 44 px touch targets and our black, white and grey look; do not copy violet/cream (Catlas) or cream/green (trustedvets), or Google-rating-led cards.
+
+**Schema and data**
+6. `ItemList` schema on state and district list pages (trustedvets has it; we do not).
+7. Fill latitude and longitude on listings (sampled matches were empty), then add `geo` to listing schema.
+8. Opening hours and an open-now line only where a verified source gives hours; show "Last verified" on every listing.
+9. Claim, update and takedown link on every listing (we have a claim flow; make it one visible link).
+
+**Content (Learn side)**
+10. India-specific stray-cat and kitten guides, glossary (ABC, TNR, ARV, AWBI, PCA Act), "when to call a vet or helpline" boxes, honest review labels on every health page (section 6). Draft only; the copy gate and a vet or owner sign-off apply.
+
+**Process**
+11. Candidate organisations go through the normal enrichment route with verified sources only (8.2).
+
+### 8.2 Is there data that can be ingested?
+Short answer: **names as leads, yes; their field values, no.**
+
+| Source | What it has | Can we ingest it? |
+|---|---|---|
+| Catlas (52 entries) | Rescue names, places, descriptions | Use names and places only as leads. Their terms forbid scraping (read earlier), so do not copy records or text. Value is small next to our 7,565 listings. |
+| trustedvets.in `/rescue-orgs/` (55 orgs) | Name, address, phone, geo, hours, Google rating and review excerpts, sameAs link | Their terms and privacy pages say nothing on copying or reuse, and robots.txt allows `/rescue-orgs/` and `/clinic/`. But the values look like Google Places data (rating, hours, geo, reviews), which we must not store beyond our own licensed use, and Google is the weakest tier in our trust order. The only licence they name is OpenStreetMap (ODbL). So: **do not bulk-import their records.** |
+| Their 25-odd names that we already hold | Same orgs | Nothing to add by ingestion; our records are richer. |
+| Their roughly 30 names with no match in our Directory (section 7.3) | Name and city | **Yes, as a lead list.** Run each through our own enrichment: own website, Darpan, AWBI, social, claim. Create a listing only when a verified source confirms the organisation exists, then store our own sourced values with the source URL and date. Ratings and review text are never copied. |
+| Their ratings, review excerpts, opening hours | Google-derived | No. |
+| Their 1,614 vet clinics | Clinics, not NGOs | Out of scope for the NGO directory unless the owner opens a vets type; same rule applies (leads only, verified sources). |
+
+**How, if the owner says yes:** (a) save the unmatched names and cities as a lead file in `docs/plans/`; (b) check each against our Directory by name, phone and place (a second pass, since spelling can hide a match); (c) push confirmed new ones through the SourceWeb directory enrichment with the own-site, Darpan and AWBI sources first, parked unless verified; (d) IndexNow after publishing. Free quotas only; no Google spend.
