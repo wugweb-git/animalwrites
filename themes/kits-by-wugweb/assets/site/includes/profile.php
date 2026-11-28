@@ -321,7 +321,7 @@ function kits_profile_head_html( $id ) {
 	$org = $f['org'] && 'publish' === get_post_status( $f['org'] ) ? $f['org'] : 0;
 	$out = kits_profile_hero_html( $id, $f );
 
-	$out .= $org ? kits_profile_org_card( $org, $f ) : '';
+	// No organisation card here (owner, 28 Nov 2026): the organisation is linked by the tile in the links grid below.
 	return $out;
 }
 
